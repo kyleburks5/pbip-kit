@@ -1,0 +1,157 @@
+table DataTable
+	lineageTag: e8b2112a-a4de-40b4-bc87-000034062981
+
+	/// Employee key. Hidden: no employee IDs on any visual (aggregates only).
+	column EmployeeID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d3c82123-b5da-4587-9a3e-c81e3581cef4
+		summarizeBy: none
+		sourceColumn: EmployeeID
+
+		annotation SummarizationSetBy = Automatic
+
+	column EmploymentType
+		dataType: string
+		lineageTag: a6a05dea-94f1-4f1f-962c-10e03cac8cbb
+		summarizeBy: none
+		sourceColumn: EmploymentType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Department
+		dataType: string
+		lineageTag: 8979c69c-e834-4d02-898f-b708d4620110
+		summarizeBy: none
+		sourceColumn: Department
+
+		annotation SummarizationSetBy = Automatic
+
+	column Gender
+		dataType: string
+		lineageTag: 9c55d8ed-a87c-4b92-b735-1af781092e9d
+		summarizeBy: none
+		sourceColumn: Gender
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgeGroup
+		dataType: string
+		lineageTag: 2986b2f8-62ed-4683-b150-5bb71d767ba0
+		summarizeBy: none
+		sourceColumn: AgeGroup
+
+		annotation SummarizationSetBy = Automatic
+
+	column Education
+		dataType: string
+		lineageTag: 0dde9a86-8fe6-4891-8612-1ee60fd66d81
+		summarizeBy: none
+		sourceColumn: Education
+
+		annotation SummarizationSetBy = Automatic
+
+	column JobRole
+		dataType: string
+		lineageTag: ade2d9fe-fab1-4655-95ea-83732c201693
+		summarizeBy: none
+		sourceColumn: JobRole
+
+		annotation SummarizationSetBy = Automatic
+
+	column JobSatisfaction
+		dataType: string
+		lineageTag: a32291c4-4275-4c8c-8d36-a2d080710686
+		summarizeBy: none
+		sourceColumn: JobSatisfaction
+
+		annotation SummarizationSetBy = Automatic
+
+	column Performance
+		dataType: string
+		lineageTag: 8fdb791c-b3dd-4c57-9612-606dd8f27324
+		summarizeBy: none
+		sourceColumn: Performance
+
+		annotation SummarizationSetBy = Automatic
+
+	column WorkLifeBalance
+		dataType: string
+		lineageTag: b2b06a45-e77d-4152-bede-0f9254d0d4ab
+		summarizeBy: none
+		sourceColumn: WorkLifeBalance
+
+		annotation SummarizationSetBy = Automatic
+
+	column HireDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 16c8d4a2-0183-40a2-87e4-efd25f4ea37b
+		summarizeBy: none
+		sourceColumn: HireDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column TerminationDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 2eab5d09-ce73-4583-bc80-7f49cd44ddb5
+		summarizeBy: none
+		sourceColumn: TerminationDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Annual salary. Hidden: not shown on visuals in this rep.
+	column Salary
+		dataType: double
+		isHidden
+		lineageTag: b51d0fd4-172f-4ee9-9ede-62d877e2d7b1
+		summarizeBy: none
+		sourceColumn: Salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Years from hire to termination, or to the 2024-12-31 snapshot for active employees.
+	column 'Tenure Years' = ( COALESCE ( 'DataTable'[TerminationDate], DATE ( 2024, 12, 31 ) ) - 'DataTable'[HireDate] ) / 365.25
+		dataType: double
+		isHidden
+		formatString: 0.0
+		lineageTag: bb4dac13-40b5-4065-9233-e5daa22f013c
+		summarizeBy: none
+
+	/// Sort order for Tenure Band (built from the source dates, not from Tenure Band, to avoid a circular sort).
+	column 'Tenure Band Sort' = VAR y = ( COALESCE ( 'DataTable'[TerminationDate], DATE ( 2024, 12, 31 ) ) - 'DataTable'[HireDate] ) / 365.25 RETURN SWITCH ( TRUE (), y < 1, 1, y < 2, 2, y < 3, 3, 4 )
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7976b13e-fdfb-437d-99f1-595deedab4dd
+		summarizeBy: none
+
+	/// Tenure at leaving, or at the 2024-12-31 snapshot for active employees: Under 1, 1–2, 2–3, 3–5 years.
+	column 'Tenure Band' = VAR y = ( COALESCE ( 'DataTable'[TerminationDate], DATE ( 2024, 12, 31 ) ) - 'DataTable'[HireDate] ) / 365.25 RETURN SWITCH ( TRUE (), y < 1, "Under 1 year", y < 2, "1–2 years", y < 3, "2–3 years", "3–5 years" )
+		dataType: string
+		lineageTag: c8438d24-195e-42fb-8a66-81994c2977b7
+		summarizeBy: none
+		sortByColumn: 'Tenure Band Sort'
+
+	partition DataTable = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\pbip-data\HR practice\Adjusted_HR_Dataset.csv"),[Delimiter=",", Columns=13, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"EmployeeID", Int64.Type}, {"EmploymentType", type text}, {"Department", type text}, {"Gender", type text}, {"AgeGroup", type text}, {"Education", type text}, {"JobRole", type text}, {"JobSatisfaction", type text}, {"Performance", type text}, {"WorkLifeBalance", type text}, {"HireDate", type date}, {"TerminationDate", type date}, {"Salary", type number}})
+				in
+				    #"Changed Type"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

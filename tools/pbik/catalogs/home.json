@@ -1,0 +1,4435 @@
+{
+  "_note": "Settings Power BI Desktop saved, by visual type / container / page, object and property: value types and selector shapes. Written by `pbik catalog refresh` (pbikit/catalog.py); don't edit.",
+  "visuals": {
+    "actionButton": {
+      "fill": {
+        "fillColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "icon": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "outline": {
+        "lineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "weight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "shape": {
+        "rectangleRoundedCurve": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default",
+            "none"
+          ]
+        },
+        "roundEdge": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "tileShape": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default",
+            "none"
+          ]
+        }
+      },
+      "text": {
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "horizontalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "text": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      }
+    },
+    "advancedSlicerVisual": {
+      "fillCustom": {
+        "fillColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:<other>",
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:<other>",
+            "id:default"
+          ]
+        }
+      },
+      "general": {
+        "_entry": {
+          "types": [],
+          "selectors": [
+            "none"
+          ]
+        },
+        "filter": {
+          "types": [
+            "filter"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "label": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "layout": {
+        "columnCount": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "columnPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "rowCount": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "rowPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "outline": {
+        "lineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:<other>",
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:<other>",
+            "id:default"
+          ]
+        }
+      },
+      "padding": {
+        "bottomMargin": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "leftMargin": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "paddingSelection": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "rightMargin": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "topMargin": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "selection": {
+        "selectAllCheckboxEnabled": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "singleSelect": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "strictSingleSelect": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "shapeCustomRectangle": {
+        "rectangleRoundedCurve": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "tileShape": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "value": {
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:<other>",
+            "id:default"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<other>",
+            "id:default"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "horizontalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      }
+    },
+    "barChart": {
+      "categoryAxis": {
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "labels": {
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "enableBackground": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "legend": {
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "valueAxis": {
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "cardVisual": {
+      "accentBar": {
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "width": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "cardCalloutArea": {
+        "backgroundTransparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "divider": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "fillCustom": {
+        "fillColor": {
+          "types": [
+            "color:literal",
+            "color:measure"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default",
+            "none"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "glowCustom": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "image": {
+        "imageType": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "imageUrl": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "size": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "label": {
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "horizontalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "layout": {
+        "alignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "backgroundShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "backgroundTransparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "calloutSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "columnCount": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "outline": {
+        "lineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "weight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "padding": {
+        "bottomMargin": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "leftMargin": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "paddingIndividual": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "paddingSelection": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "rightMargin": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "topMargin": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "referenceLabel": {
+        "paddingIndividual": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata+order"
+          ]
+        },
+        "paddingTop": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata+order"
+          ]
+        },
+        "value": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata+order"
+          ]
+        }
+      },
+      "referenceLabelDetail": {
+        "detailBackgroundColor": {
+          "types": [
+            "color:measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata",
+            "metadata"
+          ]
+        },
+        "detailFontColor": {
+          "types": [
+            "color:measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata"
+          ]
+        },
+        "detailFontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata"
+          ]
+        },
+        "detailFontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata"
+          ]
+        },
+        "detailValue": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+id:field-*+metadata",
+            "id:field-*+metadata"
+          ]
+        }
+      },
+      "referenceLabelLayout": {
+        "arrangement": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "horizontalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "style": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "valueArea": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "verticalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "referenceLabelTitle": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:field-*+metadata"
+          ]
+        }
+      },
+      "referenceLabelValue": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:field-*+metadata"
+          ]
+        },
+        "showBlankAs": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:field-*+metadata"
+          ]
+        },
+        "valueFontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:field-*+metadata",
+            "metadata"
+          ]
+        },
+        "valueFontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:field-*+metadata"
+          ]
+        },
+        "valueFontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:field-*+metadata",
+            "metadata"
+          ]
+        }
+      },
+      "shadowCustom": {
+        "angle": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "shadowBlur": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "shadowDistance": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "shadowPositionPreset": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "shapeCustomRectangle": {
+        "rectangleRoundedCurve": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "tileShape": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "value": {
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "horizontalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "labelDisplayUnits": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default",
+            "metadata"
+          ]
+        },
+        "labelPrecision": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default",
+            "metadata"
+          ]
+        },
+        "showBlankAs": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      }
+    },
+    "clusteredBarChart": {
+      "categoryAxis": {
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "innerPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "maxMarginFactor": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal",
+            "color:measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard",
+            "metadata",
+            "none"
+          ]
+        }
+      },
+      "labels": {
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "detailColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "detailFontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "detailFontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "dynamicLabelDetail": {
+          "types": [
+            "aggregation",
+            "measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+highlightMatching+metadata",
+            "metadata"
+          ]
+        },
+        "enableBackground": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "enableDetailDataLabel": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "enableTitleDataLabel": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "enableValueDataLabel": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "horizontalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "labelDisplayUnits": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelOverflow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "labelPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "metadata",
+            "none"
+          ]
+        },
+        "labelPrecision": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showSeries": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "layout": {
+        "clusteredGapSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "legend": {
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "valueAxis": {
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "start": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "y1AxisReferenceLine": {
+        "dataLabelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelHorizontalPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelText": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelVerticalPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "displayName": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "lineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "style": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "value": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "width": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        }
+      }
+    },
+    "clusteredColumnChart": {
+      "categoryAxis": {
+        "axisType": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "innerPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "titleColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "titleFontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "titleText": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal",
+            "color:measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard",
+            "metadata",
+            "none"
+          ]
+        }
+      },
+      "labels": {
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "enableBackground": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelDisplayUnits": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPrecision": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "layout": {
+        "clusteredGapSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "legend": {
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "valueAxis": {
+        "end": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineThickness": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelDisplayUnits": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPrecision": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "start": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "xAxisReferenceLine": {
+        "dataLabelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelDecimalPoints": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelHorizontalPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelText": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "dataLabelVerticalPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "displayName": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "lineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "style": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "value": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        },
+        "width": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:<n>"
+          ]
+        }
+      }
+    },
+    "columnChart": {
+      "categoryAxis": {
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "innerPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "labels": {
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "enableBackground": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showSeries": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "legend": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "valueAxis": {
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "deneb7E15AEF80B9E4D4F8E12924291ECE89A": {
+      "stateManagement": {
+        "consolidateFieldParameters": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "denebMetaVersion": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "supportFieldConfiguration": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "viewportHeight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "viewportWidth": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "vega": {
+        "jsonSpec": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "donutChart": {
+      "dataPoint": {
+        "borderColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "borderShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "borderSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fill": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "data:scopeId"
+          ]
+        }
+      },
+      "labels": {
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelStyle": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "percentageLabelPrecision": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "legend": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "slices": {
+        "innerRadiusRatio": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "gauge": {
+      "axis": {
+        "min": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "calloutValue": {
+        "bold": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "color": {
+          "types": [
+            "color:measure"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelDisplayUnits": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPrecision": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "target": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "labels": {
+        "color": {
+          "types": [
+            "color:measure"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPrecision": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "target": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "hundredPercentStackedBarChart": {
+      "categoryAxis": {
+        "innerPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "labels": {
+        "labelPrecision": {
+          "types": [
+            "int"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "legend": {
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "valueAxis": {
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "image": {
+      "general": {
+        "imageUrl": {
+          "types": [
+            "resource"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "imageScaling": {
+        "imageScalingType": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "lineChart": {
+      "categoryAxis": {
+        "axisType": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "labels": {
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "legend": {
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "lineStyles": {
+        "lineChartType": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "markerSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showMarker": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata",
+            "none"
+          ]
+        },
+        "strokeWidth": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "metadata",
+            "none"
+          ]
+        }
+      },
+      "valueAxis": {
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineStyle": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "start": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "lineStackedColumnComboChart": {
+      "categoryAxis": {
+        "axisType": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "dataPoint": {
+        "fill": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "labels": {
+        "color": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "enableBackground": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelPosition": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showSeries": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "legend": {
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "labelColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "position": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "lineStyles": {
+        "lineStyle": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "markerSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showMarker": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata",
+            "none"
+          ]
+        },
+        "strokeWidth": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "metadata",
+            "none"
+          ]
+        }
+      },
+      "valueAxis": {
+        "end": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridlineShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "secEnd": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "secShow": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "secShowAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "secStart": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showAxisTitle": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "start": {
+          "types": [
+            "measure"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "pageNavigator": {
+      "fill": {
+        "fillColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default",
+            "id:hover",
+            "id:selected"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default",
+            "none"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default",
+            "id:hover",
+            "id:selected"
+          ]
+        }
+      },
+      "layout": {
+        "cellPadding": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "columnCount": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "orientation": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "rowCount": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "outline": {
+        "lineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default",
+            "id:hover",
+            "id:selected"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default",
+            "none"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default",
+            "id:hover",
+            "id:selected"
+          ]
+        },
+        "weight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default",
+            "id:hover",
+            "id:selected"
+          ]
+        }
+      },
+      "pages": {
+        "showHiddenPages": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "showTooltipPages": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "shape": {
+        "rectangleRoundedCurve": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "tileShape": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "text": {
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default",
+            "id:hover",
+            "id:selected"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default",
+            "id:selected"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "horizontalAlignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      }
+    },
+    "pivotTable": {
+      "columnFormatting": {
+        "alignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "styleHeader": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "columnHeaders": {
+        "_entry": {
+          "types": [],
+          "selectors": [
+            "none"
+          ]
+        },
+        "alignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "backColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "outlineStyle": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "wordWrap": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "columnWidth": {
+        "value": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "grid": {
+        "gridHorizontal": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridHorizontalColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridHorizontalWeight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridVertical": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridVerticalColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridVerticalWeight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "imageHeight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "imageWidth": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "rowPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "rowHeaders": {
+        "backColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "outlineStyle": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "wordWrap": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "subTotals": {
+        "columnSubtotals": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "rowSubtotals": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "values": {
+        "backColor": {
+          "types": [
+            "color:fillRule"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+metadata"
+          ]
+        },
+        "backColorPrimary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "backColorSecondary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+metadata"
+          ]
+        },
+        "fontColorPrimary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColorSecondary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "wordWrap": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "shape": {
+      "fill": {
+        "fillColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "outline": {
+        "lineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "transparency": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        },
+        "weight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "id:default"
+          ]
+        }
+      },
+      "rotation": {
+        "shapeAngle": {
+          "types": [
+            "int"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "shape": {
+        "rectangleRoundedCurve": {
+          "types": [
+            "int",
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "tileShape": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "slicer": {
+      "data": {
+        "mode": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "general": {
+        "filter": {
+          "types": [
+            "filter"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "outlineColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "outlineWeight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "header": {
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "show": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "text": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "textSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "items": {
+        "background": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "outlineStyle": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "textSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "selection": {
+        "selectAllCheckboxEnabled": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "singleSelect": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "strictSingleSelect": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "tableEx": {
+      "columnFormatting": {
+        "_entry": {
+          "types": [],
+          "selectors": [
+            "none"
+          ]
+        },
+        "alignment": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "dataBars": {
+          "types": [
+            "object:positiveColor"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "labelDisplayUnits": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "labelPrecision": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "styleHeader": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "styleTotal": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        },
+        "styleValues": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "columnHeaders": {
+        "_entry": {
+          "types": [],
+          "selectors": [
+            "none"
+          ]
+        },
+        "backColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "outlineStyle": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "wordWrap": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "columnWidth": {
+        "value": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "metadata"
+          ]
+        }
+      },
+      "grid": {
+        "gridHorizontal": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridHorizontalColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "gridVertical": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "imageHeight": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "imageWidth": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "rowPadding": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "total": {
+        "backColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "totals": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      },
+      "values": {
+        "backColor": {
+          "types": [
+            "color:fillRule",
+            "color:measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+metadata"
+          ]
+        },
+        "backColorPrimary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "backColorSecondary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColor": {
+          "types": [
+            "color:measure"
+          ],
+          "selectors": [
+            "data:dataViewWildcard+metadata"
+          ]
+        },
+        "fontColorPrimary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontColorSecondary": {
+          "types": [
+            "color:literal"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontFamily": {
+          "types": [
+            "text"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "fontSize": {
+          "types": [
+            "number"
+          ],
+          "selectors": [
+            "none"
+          ]
+        },
+        "wordWrap": {
+          "types": [
+            "bool"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    },
+    "textbox": {
+      "general": {
+        "paragraphs": {
+          "types": [
+            "paragraphs"
+          ],
+          "selectors": [
+            "none"
+          ]
+        }
+      }
+    }
+  },
+  "container": {
+    "background": {
+      "color": {
+        "types": [
+          "color:literal"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "transparency": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "border": {
+      "color": {
+        "types": [
+          "color:literal"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "radius": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "width": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "divider": {
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "dropShadow": {
+      "angle": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "color": {
+        "types": [
+          "color:literal"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "position": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "preset": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "shadowBlur": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "shadowDistance": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "shadowSpread": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "transparency": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "general": {
+      "altText": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "padding": {
+      "bottom": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "left": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "right": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "top": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "subTitle": {
+      "alignment": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "fontColor": {
+        "types": [
+          "color:literal"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "fontFamily": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "fontSize": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "text": {
+        "types": [
+          "measure",
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "title": {
+      "alignment": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "fontColor": {
+        "types": [
+          "color:literal"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "fontFamily": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "fontSize": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "text": {
+        "types": [
+          "measure",
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "visualHeader": {
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    },
+    "visualLink": {
+      "bookmark": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "navigationSection": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "show": {
+        "types": [
+          "bool"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "type": {
+        "types": [
+          "text"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    }
+  },
+  "page": {
+    "background": {
+      "color": {
+        "types": [
+          "color:literal"
+        ],
+        "selectors": [
+          "none"
+        ]
+      },
+      "transparency": {
+        "types": [
+          "number"
+        ],
+        "selectors": [
+          "none"
+        ]
+      }
+    }
+  },
+  "sources": [
+    {
+      "folder": "../pbip-patterns/HR Overview.Report",
+      "files": 100
+    },
+    {
+      "folder": "../pbip-rep6/IT Service Ticket Overview.Report",
+      "files": 46
+    },
+    {
+      "folder": "../pbip-rep9/It Service Ticket Overview.Report",
+      "files": 46
+    },
+    {
+      "folder": "pbik-parity-rep5/HR OVERVIEW.Report",
+      "files": 62
+    },
+    {
+      "folder": "pbik-parity/Toy Sales.Report",
+      "files": 42
+    },
+    {
+      "folder": "pbip-patterns/HR Overview.Report",
+      "files": 99
+    },
+    {
+      "folder": "pbip-rep4/Toy Sales.Report",
+      "files": 42
+    },
+    {
+      "folder": "pbip-rep5/HR OVERVIEW.Report",
+      "files": 62
+    },
+    {
+      "folder": "pbip-rep8/HR Overview.Report",
+      "files": 71
+    }
+  ]
+}

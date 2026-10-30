@@ -1,0 +1,9 @@
+{
+  "_note": "Golden builds (tools/regression/regress.py). source: the folder the inputs were copied from (--update only; relative to the kit root); layout and tokens: paths inside it.",
+  "cases": [
+    {"name": "rep4-parity", "source": "../pbik-parity", "layout": "design/specs/rep4-parity-layout.json", "tokens": "design/tokens.json"},
+    {"name": "rep5-parity-overview", "project": "rep5-parity", "source": "../pbik-parity-rep5", "layout": "design/parity/p1-overview-layout.json", "tokens": "design/tokens.json"},
+    {"name": "rep5-parity-workforce-mix", "project": "rep5-parity", "source": "../pbik-parity-rep5", "layout": "design/parity/p2-workforce-mix-layout.json", "tokens": "design/tokens.json"},
+    {"name": "rep8", "source": "../pbip-rep8", "layout": "design/specs/layout.json", "tokens": "design/tokens.json"}
+  ]
+}

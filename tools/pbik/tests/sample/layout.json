@@ -1,0 +1,527 @@
+{
+  "_note": "pbik test layout: two pages on the Rep 4 Toy Sales model (an SVG extension measure, a Top N filter, conditional formatting, navigation buttons).",
+  "measureTable": "_Measures",
+  "pages": {
+    "P1": {
+      "displayName": "pbik sales",
+      "background": "background",
+      "filters": [
+        {
+          "field": "products[Product_Category]",
+          "values": [
+            "Toys",
+            "Games",
+            "Art & Crafts",
+            "Electronics",
+            "Sports & Outdoors"
+          ]
+        }
+      ],
+      "interactions": [
+        {
+          "source": "P1-V08",
+          "targets": [
+            "P1-V04"
+          ],
+          "type": "NoFilter"
+        }
+      ]
+    },
+    "P2": {
+      "displayName": "pbik stock",
+      "background": {
+        "color": "background",
+        "transparency": 0.0
+      }
+    }
+  },
+  "retired": [],
+  "visuals": [
+    {
+      "id": "P1-V01",
+      "name": "band",
+      "page": "P1",
+      "type": "shape",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 140,
+      "z": 0,
+      "style": {
+        "fill": "primary",
+        "radius": 0
+      },
+      "container": "off",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V02",
+      "name": "title",
+      "page": "P1",
+      "type": "textbox",
+      "x": 32,
+      "y": 32,
+      "w": 900,
+      "h": 48,
+      "z": 1,
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Sales overview",
+              "font": "semibold",
+              "size": "title",
+              "color": "card"
+            }
+          ]
+        }
+      ],
+      "container": "off",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V03",
+      "name": "kpi-revenue",
+      "page": "P1",
+      "type": "cardVisual",
+      "x": 32,
+      "y": 172,
+      "w": 438,
+      "h": 160,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          "[Revenue]"
+        ]
+      },
+      "cf": [
+        {
+          "type": "image",
+          "measure": "[img Revenue bar]"
+        }
+      ],
+      "props": {
+        "value.fontSize@default": "kpi",
+        "label.position@default": "aboveValue",
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        }
+      },
+      "container": {
+        "background": false,
+        "border": false,
+        "shadow": false
+      },
+      "build": {
+        "method": "native"
+      },
+      "referenceLabels": {
+        "titleOff": true,
+        "valueColor": "textMuted",
+        "valueSize": "label",
+        "labels": [
+          {
+            "value": "[KPI Revenue PY text]",
+            "detail": "[KPI Revenue delta text]",
+            "detailColor": "[KPI Revenue delta font]",
+            "detailBackground": "[KPI Revenue delta background]"
+          }
+        ]
+      }
+    },
+    {
+      "id": "P1-V04",
+      "name": "top-cities",
+      "page": "P1",
+      "type": "clusteredBarChart",
+      "x": 494,
+      "y": 172,
+      "w": 900,
+      "h": 420,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "stores[City]"
+        ],
+        "Y": [
+          "[Revenue]"
+        ]
+      },
+      "sort": {
+        "field": "[Revenue]",
+        "direction": "Descending"
+      },
+      "filters": [
+        {
+          "type": "TopN",
+          "field": "stores[City]",
+          "by": "[Revenue]",
+          "n": 5
+        }
+      ],
+      "referenceLines": [
+        {
+          "axis": "value",
+          "value": 498000,
+          "label": "City average",
+          "color": "text"
+        }
+      ],
+      "cf": [
+        {
+          "type": "rules",
+          "object": "dataPoint",
+          "property": "fill",
+          "field": "[Revenue vs PY %]",
+          "target": "[Revenue]",
+          "rules": [
+            {
+              "op": ">=",
+              "value": 0,
+              "color": "good"
+            },
+            {
+              "op": "<",
+              "value": 0,
+              "color": "bad"
+            }
+          ],
+          "else": "slate"
+        }
+      ],
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Top 5 cities by revenue",
+        "subtitle": "Bars: green = up on last year"
+      },
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V05",
+      "name": "stores",
+      "page": "P1",
+      "type": "tableEx",
+      "x": 32,
+      "y": 616,
+      "w": 1362,
+      "h": 432,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          {
+            "field": "stores[Store]",
+            "displayName": "Store"
+          },
+          {
+            "field": "[Revenue bar]",
+            "displayName": " "
+          },
+          "[Revenue]",
+          "[Revenue vs PY %]",
+          "[Margin %]"
+        ]
+      },
+      "sort": {
+        "field": "[Revenue]",
+        "direction": "Descending"
+      },
+      "cf": [
+        {
+          "type": "dataBars",
+          "field": "[Revenue bar]",
+          "positive": "teal",
+          "negative": "red",
+          "axis": "card",
+          "hideText": true
+        },
+        {
+          "type": "measure",
+          "object": "values",
+          "property": "fontColor",
+          "measure": "[vs PY colour]",
+          "target": "[Revenue vs PY %]"
+        },
+        {
+          "type": "gradient",
+          "field": "[Margin %]",
+          "min": "card",
+          "max": "tealLight"
+        }
+      ],
+      "props": {
+        "values.wordWrap": false,
+        "columnHeaders.wordWrap": false,
+        "total.totals": false
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Stores"
+      },
+      "build": {
+        "method": "native"
+      },
+      "columnWidths": {
+        "stores[Store]": 360,
+        "[Revenue bar]": 300,
+        "[Revenue]": 200,
+        "[Revenue vs PY %]": 200,
+        "[Margin %]": 200
+      }
+    },
+    {
+      "id": "P1-V06",
+      "name": "go-stock",
+      "page": "P1",
+      "type": "actionButton",
+      "x": 1418,
+      "y": 48,
+      "w": 220,
+      "h": 44,
+      "z": 2,
+      "action": {
+        "type": "PageNavigation",
+        "page": "P2"
+      },
+      "props": {
+        "text.show": true,
+        "text.text": "Stock page",
+        "text.fontColor": "card"
+      },
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V07",
+      "name": "reset",
+      "page": "P1",
+      "type": "actionButton",
+      "x": 1662,
+      "y": 48,
+      "w": 220,
+      "h": 44,
+      "z": 2,
+      "action": {
+        "type": "ClearAllSlicers"
+      },
+      "props": {
+        "text.show": true,
+        "text.text": "Reset filters",
+        "text.fontColor": "card"
+      },
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V08",
+      "name": "year",
+      "page": "P1",
+      "type": "advancedSlicerVisual",
+      "x": 1418,
+      "y": 172,
+      "w": 470,
+      "h": 44,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          "Date[Year]"
+        ]
+      },
+      "selection": {
+        "field": "Date[Year]",
+        "values": [
+          "2023"
+        ]
+      },
+      "props": {
+        "padding.paddingSelection@default": "Custom",
+        "padding.topMargin@default": {
+          "int": 0
+        },
+        "padding.bottomMargin@default": {
+          "int": 0
+        }
+      },
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V09",
+      "name": "category",
+      "page": "P1",
+      "type": "slicer",
+      "x": 1418,
+      "y": 240,
+      "w": 470,
+      "h": 220,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          "products[Product_Category]"
+        ]
+      },
+      "filters": [
+        {
+          "field": "products[Product_ID]",
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35
+          ],
+          "hidden": true
+        }
+      ],
+      "build": {
+        "method": "native"
+      },
+      "slicerMode": "list",
+      "notes": "Classic slicer as a list (the theme sets Dropdown)."
+    },
+    {
+      "id": "P2-V01",
+      "name": "title",
+      "page": "P2",
+      "type": "textbox",
+      "x": 32,
+      "y": 32,
+      "w": 900,
+      "h": 48,
+      "z": 1,
+      "text": "Stock on hand",
+      "container": "off",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V02",
+      "name": "back",
+      "page": "P2",
+      "type": "actionButton",
+      "x": 1662,
+      "y": 32,
+      "w": 220,
+      "h": 44,
+      "z": 2,
+      "action": {
+        "type": "PageNavigation",
+        "page": "pbik sales"
+      },
+      "props": {
+        "text.show": true,
+        "text.text": "Back to sales"
+      },
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V03",
+      "name": "trend",
+      "page": "P2",
+      "type": "lineChart",
+      "x": 32,
+      "y": 120,
+      "w": 1856,
+      "h": 500,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "Date[Year Month]"
+        ],
+        "Y": [
+          "[Units Sold]",
+          "[Units Sold PY]"
+        ]
+      },
+      "sort": {
+        "field": "Date[Year Month]",
+        "direction": "Ascending",
+        "default": true
+      },
+      "referenceLines": [
+        {
+          "axis": "y1",
+          "value": 0,
+          "label": "zero",
+          "color": "border",
+          "style": "solid"
+        }
+      ],
+      "props": {
+        "dataPoint.fill@[Units Sold]": "teal",
+        "dataPoint.fill@[Units Sold PY]": "slateLight"
+      },
+      "container": {
+        "title": {
+          "measure": "[Period Label]"
+        },
+        "background": {
+          "color": "card"
+        }
+      },
+      "build": {
+        "method": "native"
+      }
+    }
+  ]
+}

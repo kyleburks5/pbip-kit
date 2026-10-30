@@ -1,0 +1,378 @@
+table 'Metric Selection'
+	lineageTag: c8d9fb25-7ce6-4eae-9bfc-368a6e725f05
+
+	measure Current =
+			
+			
+			SWITCH(
+			    SELECTEDVALUE('Metric Selection'[Selected_KPI]),
+			    "Headcount",[1_Headcount],
+			    "Hires",[2_Hires],
+			    "Terminations",[4_Terminations],
+			    "Salary",[3_TotalSalary])
+		lineageTag: 6dee2bcc-ea79-4b6d-afa5-f45038871040
+
+		formatStringDefinition =
+				SWITCH(
+				    SELECTEDVALUE('Metric Selection'[Selected_KPI]),
+				    "Headcount","0",
+				    "Hires","#",
+				    "Terminations","#",
+				    "Salary","$ ###,###,###,###.00")
+
+	measure 'Past Year' =
+			
+			
+			SWITCH(
+			    SELECTEDVALUE('Metric Selection'[Selected_KPI]),
+			    "Headcount",[1_Headcount LY],
+			    "Hires",[2_Hires LY],
+			    "Terminations",[4_Terminations LY],
+			    "Salary",[3_TotalSalary LY])
+		lineageTag: 43083c83-7246-4f5a-b162-6b495d0c914b
+
+		formatStringDefinition =
+				SWITCH(
+				    SELECTEDVALUE('Metric Selection'[Selected_KPI]),
+				    "Headcount","0",
+				    "Hires","#",
+				    "Terminations","#",
+				    "Salary","$ ###,###,###,###.00")
+
+	measure 'DeltaPY% SVG' = ```
+			
+			//ΔPY% = (AC - PY) / PY (relative difference between AC and PY)
+			//Returns an SVG image code with ΔPY% pin charts (green - positive, red - negative, black pinheads)
+			//  and a vertical line for Axis Y (ΔPY% = 0)
+			VAR _ColorGrey = "#c6c6c6"
+			VAR _ColorRed = "#ff0000"
+			VAR _ColorGreen = "#008e96"
+			VAR _ColorBlack = "#404040"
+			VAR _Value =
+			        [DeltaPY%]
+			VAR _FontWeight =
+			    --'normal' font for sales persons, 'bold' font for total row (average)
+			        "normal"
+			VAR _maxValue =
+			    --max value to calcualte axis X scale
+			
+			SWITCH(TRUE(),
+			    ISINSCOPE('DataTable'[EmploymentType]),     
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[EmploymentType] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[EmploymentType] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[JobRole]),      
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[JobRole] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[JobRole] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[AgeGroup]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[AgeGroup] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[AgeGroup] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Department]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Department] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Department] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Education]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Education] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Education] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Gender]),      
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Gender] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Gender] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[JobSatisfaction]),      
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[JobSatisfaction] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[JobSatisfaction] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Performance]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Performance] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Performance] ), [DeltaPY%] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[WorkLifeBalance]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[WorkLifeBalance] ), [DeltaPY%] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[WorkLifeBalance] ), [DeltaPY%] ) )
+			    ))
+			VAR _WidthValue =
+			    --bar width (numeric value)
+			    ( DIVIDE ( ABS ( _Value ), _maxValue ) / 2 ) * 0.65
+			VAR _Width =
+			    --bar width - text for SVG
+			    FORMAT ( _WidthValue, "0.0%" )
+			VAR _barColor =
+			    --green or red
+			    IF ( _Value > 0, _ColorGreen, _ColorRed )
+			VAR _X =
+			    --x position of a bar (pin)
+			    SWITCH (
+			        TRUE (),
+			        _Value >= 0, "50%",
+			        _Value < 0, FORMAT ( 0.5 - _WidthValue, "0.0%" )
+			    )
+			VAR _XPinhead =
+			    --x position of a bar (pinhead)
+			    SWITCH (
+			        TRUE (),
+			        _Value >= 0,
+			            FORMAT ( 0.5 + _WidthValue - 3 / 200, "0.0%" ),
+			        _Value < 0,
+			            FORMAT ( 0.5 - _WidthValue - 3 / 200, "0.0%" )
+			    )
+			VAR _XText =
+			    --x position of a label
+			    SWITCH (
+			        TRUE (),
+			        _Value >= 0, FORMAT ( 0.5 + _WidthValue, "0%" ),
+			        _Value < 0, _X
+			    )
+			VAR _Anchor =
+			    --text anchor
+			    SWITCH ( TRUE (), _Value >= 0, "start", _Value < 0, "end" )
+			VAR _DX =
+			    --text offset along axis X
+			    SWITCH ( TRUE (), _Value >= 0, 10, _Value < 0, - 10 )
+			VAR _Rank =
+			    --row value rank to ensure correct column sorting
+			    10000
+			        + RANKX ( ALLSELECTED ( 'DataTable' ), [DeltaPY%],, ASC )
+			VAR _SVG =
+			    --SVG code
+			    --header
+			    --comment with Rank text for sorting
+			    --line (axis Y)
+			    --rectangle black pinhead
+			    --rectangle for DeltaPY%% (green or red)
+			    --text data label for DeltaPY%%
+			    --SVG style
+			    "data:image/svg+xml;utf8," & "<svg xmlns=""http://www.w3.org/2000/svg"">
+			    /*" & _Rank & "*/
+			    <line  x1=""50%"" x2=""50%"" y1=""0%"" y2=""100%"" stroke=""" & _ColorGrey & """ stroke-width=""1""></line >
+			    <rect y=""35%"" x=""" & _XPinhead & """ width=""" & "10" & """ height=""30%"" fill=""" & _ColorBlack & """></rect>   
+			    <rect y=""45%"" x=""" & _X & """ width="""
+			        & FORMAT ( _Width, "0.0%" ) & """ height=""10%"" fill=""" & _barColor & """></rect>
+			    
+			        <text text-anchor=""" & _Anchor & """ x=""" & _XText & """ dx=""" & _DX & """ y=""55%"" font-weight=""" & _FontWeight & """>"
+			        & FORMAT ( _Value, "#%" ) & "</text>    
+			" & [SVG Style] & "
+			</svg>"
+			RETURN
+			    _SVG
+			```
+		isHidden
+		lineageTag: 8b834314-fa35-400f-8248-623bde65c13b
+		dataCategory: ImageUrl
+
+	measure DeltaPY% = ```
+			
+			DIVIDE([Current]-[Past Year], [Past Year])
+			
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 5788e8df-2a8d-4136-87e8-daf47673c7e6
+
+	measure 'SVG Style' =
+			
+			//SVG <style></style> code
+			"<style>
+			    <![CDATA[
+			      text{
+			        font-family: Segoe UI;
+			        font-size: 12px;
+			        alignment-baseline: middle;
+			      }
+			    ]]>
+			  </style>"
+		isHidden
+		lineageTag: 02e70f0b-b8b8-45d8-8eff-845c3499777f
+
+	measure DeltaPY = [Current]-[Past Year]
+		lineageTag: f3f3967c-74d3-4a16-9e26-7e74ecc911e8
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'DeltaPY SVG' = ```
+			
+			//ΔPY = AC - PY (difference between AC and PY)
+			//Returns an SVG image code with ΔPY bars (green - positive, red - negative)
+			//  and a vertical line for Axis Y (ΔPY = 0)
+			VAR _ColorGrey = "#c6c6c6"
+			VAR _ColorRed = "#ff0000"
+			VAR _ColorGreen = "#008e96"
+			VAR _Value =
+			    --ΔPY 
+			    [DeltaPY]
+			VAR _FontWeight =
+			    --'normal' font for sales persons, 'bold' font for total row (average)
+			
+			        "normal"
+			VAR _maxValue =
+			    --max value to calcualte axis X scale
+			
+			SWITCH(TRUE(),
+			    ISINSCOPE('DataTable'[EmploymentType]),     
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[EmploymentType] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[EmploymentType] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[JobRole]),      
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[JobRole] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[JobRole] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[AgeGroup]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[AgeGroup] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[AgeGroup] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Department]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Department] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Department] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Education]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Education] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Education] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Gender]),      
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Gender] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Gender] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[JobSatisfaction]),      
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[JobSatisfaction] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[JobSatisfaction] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[Performance]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[Performance] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[Performance] ), [DeltaPY] ) )
+			    )
+			,
+			    ISINSCOPE('DataTable'[WorkLifeBalance]),       
+			    MAX (
+			        ABS ( MAXX ( ALLSELECTED ( 'DataTable'[WorkLifeBalance] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALLSELECTED ( 'DataTable'[WorkLifeBalance] ), [DeltaPY] ) )
+			    )
+			
+			    )
+			VAR _WidthValue =
+			    --bar width (numeric value)
+			    ( DIVIDE ( ABS ( _Value ), _maxValue ) / 2 ) * 0.6
+			VAR _Width =
+			    --bar width - text for SVG
+			    FORMAT ( _WidthValue, "0.0%" )
+			VAR _barColor =
+			    --green or red
+			    IF ( _Value > 0, _ColorGreen, _ColorRed )
+			VAR _X =
+			    --x position of a bar
+			    SWITCH (
+			        TRUE (),
+			        _Value >= 0, "50%",
+			        _Value < 0, FORMAT ( 0.5 - _WidthValue, "0%" )
+			    )
+			VAR _XText =
+			    --x position of a label
+			    SWITCH (
+			        TRUE (),
+			        _Value >= 0, FORMAT ( 0.5 + _WidthValue, "0%" ),
+			        _Value < 0, _X
+			    )
+			VAR _Anchor =
+			    --text anchor
+			    SWITCH ( TRUE (), _Value >= 0, "start", _Value < 0, "end" )
+			VAR _DX =
+			    --text offset along axis X
+			    SWITCH ( TRUE (), _Value >= 0, 5, _Value < 0, -5 )
+			VAR _Rank =
+			    --row value rank to ensure correct column sorting
+			    10000
+			        + RANKX ( ALLSELECTED ( 'DataTable' ), [DeltaPY],, ASC )
+			VAR _SVG =
+			    --SVG code
+			    --header
+			    --comment with Rank text for sorting
+			    --line (axis Y)
+			    --rectangle for DeltaPY (green or red)
+			    --text data label for DeltaPY
+			    --SVG style
+			    "data:image/svg+xml;utf8," & "<svg xmlns=""http://www.w3.org/2000/svg"">
+			    /*" & _Rank & "*/ 
+			    <line  x1=""50%"" x2=""50%"" y1=""0%"" y2=""100%"" stroke=""" & _ColorGrey & """ stroke-width=""1""></line >
+			    <rect y=""17%"" x=""" & _X & """ width=""" & _Width & """ height=""67%"" fill=""" & _barColor & """></rect>    
+			    <text text-anchor=""" & _Anchor & """ x=""" & _XText & """ dx=""" & _DX & """ y=""55%"" font-weight=""" & _FontWeight & """>"
+			        & FORMAT ( _Value, "+#,0;-#,0;#,0" ) & "</text>    
+			" & [SVG Style] & "
+			</svg>"
+			RETURN
+			    _SVG
+			```
+		isHidden
+		lineageTag: f2b2373a-1899-4067-819d-baec71a8a294
+		dataCategory: ImageUrl
+
+	measure _Test =
+			MAX (
+			        ABS ( MAXX ( ALL ( 'DataTable'[Education] ), [DeltaPY] ) ),
+			        ABS ( MINX ( ALL ( 'DataTable'[Education] ), [DeltaPY] ) )
+			    )
+		isHidden
+		lineageTag: 4767682a-adfb-47d8-967b-b0fdf02e3970
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Selected_KPI
+		dataType: string
+		lineageTag: 34ba00f2-b6a4-4491-b713-733aac7417b3
+		summarizeBy: none
+		sourceColumn: Selected_KPI
+
+		annotation SummarizationSetBy = Automatic
+
+	column Index
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6228dfbb-0366-4206-89db-7602c2f165f6
+		summarizeBy: sum
+		sourceColumn: Index
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Metric Selection' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45W8khNTEnOL80rUdJRMlSK1QGKZBalFgN5RmBeSGpRbmZeYklmfh5I0BgsGJyYk1hUCeSaKMXGAgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Selected_KPI = _t, Index = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Selected_KPI", type text}, {"Index", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

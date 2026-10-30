@@ -1,0 +1,36 @@
+{
+  "_note": "Corporate preset: navy and blue, square-ish corners, 1px borders instead of shadows.",
+  "name": "corporate",
+  "description": "Navy header, corporate blue, grey neutrals, 4px corners, 1px borders, no shadow.",
+  "mode": "light",
+  "brand": [
+    "primary=#1F3864",
+    "brand=#2E75B6",
+    "bad=#C00000",
+    "good=#2E7D32",
+    "second=#7F8C9A"
+  ],
+  "colors": {
+    "background": "#F2F4F7",
+    "card": "#FFFFFF",
+    "border": "#D0D5DD",
+    "text": "#1A2433",
+    "textMuted": "#556070"
+  },
+  "container": {
+    "radius": 4,
+    "borderWidth": 1,
+    "padding": 16,
+    "paddingTop": 12,
+    "shadow": "0 0 0 rgba(31,56,100,0)",
+    "pbiShadow": {
+      "_note": "No shadow: borders carry the card edge.",
+      "blur": 0,
+      "distance": 0,
+      "transparency": 100
+    }
+  },
+  "control": {
+    "radius": 4
+  }
+}

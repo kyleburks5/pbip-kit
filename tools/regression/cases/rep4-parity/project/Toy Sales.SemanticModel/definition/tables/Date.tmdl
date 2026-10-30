@@ -1,0 +1,64 @@
+table Date
+	lineageTag: 35bc7638-993d-4059-b2ca-3d3324161795
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isUnique
+		formatString: d mmm yyyy
+		lineageTag: 06bb4941-d0f4-4267-b2d7-653a688f9768
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year = FORMAT ( 'Date'[Date], "yyyy" )
+		dataType: string
+		lineageTag: 30d24e37-103b-4115-8d5a-c640a75da1be
+		summarizeBy: none
+
+	column Quarter = "Q" & QUARTER ( 'Date'[Date] )
+		dataType: string
+		lineageTag: 2250bb85-e8d4-428e-8249-5565858c021f
+		summarizeBy: none
+
+	column 'Month No' = MONTH ( 'Date'[Date] )
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 062c26da-33ed-4fec-836d-e871ec972f9c
+		summarizeBy: none
+
+	column Month = FORMAT ( 'Date'[Date], "MMM" )
+		dataType: string
+		lineageTag: f432b90d-55a3-4b97-a6e3-c573491e46d9
+		summarizeBy: none
+		sortByColumn: 'Month No'
+
+	column 'Year Month Key' = YEAR ( 'Date'[Date] ) * 100 + MONTH ( 'Date'[Date] )
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 71466e90-7b36-43e1-b709-d4c7b46d6fc7
+		summarizeBy: none
+
+	column 'Year Month' = FORMAT ( 'Date'[Date], "MMM yyyy" )
+		dataType: string
+		lineageTag: f0e11727-35ca-4360-aa6a-a65c0a8ba018
+		summarizeBy: none
+		sortByColumn: 'Year Month Key'
+
+	partition calendar = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\pbip-data\Maven Toys\calendar.csv"),[Delimiter=",", Columns=1, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Date", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,22 @@
+/// Age groups in order; filters DataTable[AgeGroup].
+table 'Age Group'
+	lineageTag: 695593ca-ae4b-4979-9a22-e565c36a2eca
+
+	column 'Age Group'
+		lineageTag: 2c4b9079-cd47-4722-a047-fb8b50097f65
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Age Group]
+		sortByColumn: 'Age Group Order'
+
+	column 'Age Group Order'
+		isHidden
+		lineageTag: d4228b48-6478-4b03-af26-ebe40ae56910
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Age Group Order]
+
+	partition 'Age Group' = calculated
+		mode: import
+		source = DATATABLE ( "Age Group", STRING, "Age Group Order", INTEGER, { { "Below 20", 1 }, { "20-30", 2 }, { "30-40", 3 }, { "40-50", 4 }, { "50-60", 5 }, { "60+", 6 } } )
+

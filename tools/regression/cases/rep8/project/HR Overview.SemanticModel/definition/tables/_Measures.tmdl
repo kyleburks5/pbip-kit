@@ -1,0 +1,762 @@
+table _Measures
+	lineageTag: ce14314c-7ff9-4c66-8002-07e2b8533c9b
+
+	measure _Blank = 0
+		formatString: 0
+		lineageTag: 4c28d31f-d60d-49ae-8bc7-202c736683e7
+
+	measure 1_Headcount =
+			
+			CALCULATE(
+			COUNTROWS('DataTable'),
+			'DataTable'[HireDate] <= MAX('Date'[Date]),
+			ISBLANK('DataTable'[TerminationDate]) ||
+			'DataTable'[TerminationDate] > MAX('Date'[Date])
+			)
+		formatString: 0
+		lineageTag: f8a8c8a3-7372-450c-ab9d-8c4af8537b05
+
+	measure 3_TotalSalary = ```
+			CALCULATE(
+			        SUM('DataTable'[Salary]),
+			        ISBLANK('DataTable'[TerminationDate]) || 
+			        'DataTable'[TerminationDate] > MAX('Date'[Date])
+			    )
+			
+			    
+			```
+		lineageTag: f5d10ac2-4e12-47a5-839a-5487f6ea7d51
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 2_Hires = ```
+			CALCULATE(
+			        COUNTROWS('DataTable'),
+			        'DataTable'[HireDate] >= MIN('Date'[Date]),
+			        'DataTable'[HireDate] <= MAX('Date'[Date])
+			    )
+			
+			    
+			```
+		formatString: 0
+		lineageTag: 62231096-1ba1-4714-835a-6638652dee96
+
+	measure 4_Terminations = ```
+			CALCULATE(
+			        COUNTROWS('DataTable'),
+			        NOT ISBLANK('DataTable'[TerminationDate]),
+			        'DataTable'[TerminationDate] >= MIN('Date'[Date]),
+			        'DataTable'[TerminationDate] <= MAX('Date'[Date])
+			    )
+			
+			    
+			```
+		formatString: 0
+		lineageTag: 69e1f685-9fd9-4863-85ce-fb3fdc148e98
+
+	measure 5_HireRate = ```
+			DIVIDE(
+			        '_Measures'[2_Hires], 
+			        '_Measures'[1_Headcount],
+			        0
+			    )
+			
+			    
+			```
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 26a2b413-21c0-488b-a86a-eb9a107f9521
+
+	measure 6_TerminationRate = ```
+			DIVIDE(
+			        '_Measures'[4_Terminations], 
+			        '_Measures'[1_Headcount],
+			        0
+			    )
+			
+			    
+			```
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: fdbac5a1-7a4c-4de0-a124-a81fb462b042
+
+	measure '1_Headcount LY' = ```
+			
+			 CALCULATE([1_Headcount],SAMEPERIODLASTYEAR('Date'[Date]))
+			
+			    
+			```
+		formatString: 0
+		lineageTag: 1fddac35-7b11-46cb-8e65-4e71b5f51d2a
+
+	measure '3_TotalSalary LY' = ```
+			
+			CALCULATE(
+			        [3_TotalSalary],
+			        SAMEPERIODLASTYEAR('Date'[Date])
+			    )
+			
+			    
+			```
+		lineageTag: e0e80b4a-cad9-4e1f-bf3f-01976a9c602e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '2_Hires LY' = ```
+			
+			CALCULATE(
+			        [2_Hires],
+			        SAMEPERIODLASTYEAR('Date'[Date])
+			    )
+			
+			    
+			```
+		formatString: 0
+		lineageTag: c35443db-8917-4e3d-8f11-67e31c83e599
+
+	measure '4_Terminations LY' = ```
+			
+			CALCULATE(
+			        [4_Terminations],
+			        SAMEPERIODLASTYEAR('Date'[Date]) 
+			    )
+			
+			    
+			```
+		formatString: 0
+		lineageTag: 77c34332-4a1e-4915-a12a-22b855b7a237
+
+	measure '5_HireRate LY' = ```
+			DIVIDE(
+			        '_Measures'[2_Hires LY], 
+			        '_Measures'[1_Headcount LY],
+			        0
+			    )
+			
+			    
+			```
+		lineageTag: 228d16b1-cee7-48bb-be7c-4269ca4be3f6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '6_TerminationRate LY' = ```
+			DIVIDE(
+			        '_Measures'[4_Terminations LY], 
+			        '_Measures'[1_Headcount LY],
+			        0
+			    )
+			
+			```
+		lineageTag: d468a03f-9158-4a14-af23-802ae18a55ee
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '1_Headcount BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[1_Headcount] - '_Measures'[1_Headcount LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			 
+			
+			```
+		lineageTag: a016b997-bf56-4208-8368-9403a617b117
+
+	measure '1_Headcount Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[1_Headcount] - '_Measures'[1_Headcount LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		lineageTag: a74bfaab-329e-4a5f-8be5-d140e60e3d7b
+
+	measure '1_Headcount Reference' = ```
+			
+			    VAR _Current = '_Measures'[1_Headcount]
+			    VAR _LY = '_Measures'[1_Headcount LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			
+			```
+		lineageTag: bbf13d1b-830d-4b8d-900f-31aa024142fa
+
+	measure '2_Hires BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[2_Hires] - '_Measures'[2_Hires LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		lineageTag: 20a35d08-27b5-47d3-b1c3-5caa715840d7
+
+	measure '2_Hires Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[2_Hires] - '_Measures'[2_Hires LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		lineageTag: d1332541-3cc1-467c-a520-e6643da01756
+
+	measure '2_Hires Reference' = ```
+			
+			    VAR _Current = '_Measures'[2_Hires]
+			    VAR _LY = '_Measures'[2_Hires LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			
+			```
+		lineageTag: a6a5e55a-7865-49c7-8372-03b6e0c48d8b
+
+	measure '3_TotalSalary BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[3_TotalSalary] - '_Measures'[3_TotalSalary LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		lineageTag: e28b1977-486e-4b33-82d5-47aeed2db28e
+
+	measure '3_TotalSalary Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[3_TotalSalary] - '_Measures'[3_TotalSalary LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		lineageTag: 940dd44d-5e7a-429f-8e2d-5a50d1f69677
+
+	measure '3_TotalSalary Reference' = ```
+			
+			    VAR _Current = '_Measures'[3_TotalSalary]
+			    VAR _LY = '_Measures'[3_TotalSalary LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			
+			```
+		lineageTag: 2640f68a-837a-4eaf-b8e3-2935c4e30bf4
+
+	measure '4_Terminations BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[4_Terminations] - '_Measures'[4_Terminations LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		lineageTag: 9e289ece-d5f2-4740-9efb-9f8bd971b8b1
+
+	measure '4_Terminations Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[4_Terminations] - '_Measures'[4_Terminations LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		lineageTag: dcdf2a9c-2c0e-4fb9-8a1b-400469005fbf
+
+	measure '4_Terminations Reference' = ```
+			
+			    VAR _Current = '_Measures'[4_Terminations]
+			    VAR _LY = '_Measures'[4_Terminations LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+					
+			
+			```
+		lineageTag: 34090d5f-9077-41f6-a477-4e8f40fb0ae1
+
+	measure '5_HireRate BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[5_HireRate] - '_Measures'[5_HireRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		lineageTag: 07672fbd-52fd-49b6-9944-c0ccb2af4dcc
+
+	measure '5_HireRate Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[5_HireRate] - '_Measures'[5_HireRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		lineageTag: b8f9cc17-1c1b-4b22-acbc-4bb0c21086ea
+
+	measure '5_HireRate Reference' = ```
+			
+			    VAR _Current = '_Measures'[5_HireRate]
+			    VAR _LY = '_Measures'[5_HireRate LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			```
+		lineageTag: 1a82cb5a-5461-4a28-9d02-fef0c85ccec4
+
+	measure '6_TerminationRate BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[6_TerminationRate] - '_Measures'[6_TerminationRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		lineageTag: 5dceca13-7ab0-463c-a764-27beb6ff6920
+
+	measure '6_TerminationRate Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[6_TerminationRate] - '_Measures'[6_TerminationRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		lineageTag: edf84bb7-a0b8-4834-aab1-173c61281fbc
+
+	measure '6_TerminationRate Reference' = ```
+			
+			    VAR _Current = '_Measures'[6_TerminationRate]
+			    VAR _LY = '_Measures'[6_TerminationRate LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			```
+		lineageTag: 120178e4-fd9f-44f3-8adf-90b641e2aba5
+
+	/// Employees active on the last date in the filter: hired on or before it, not terminated by it.
+	measure Headcount =
+			VAR d = MAX ( 'Date'[Date] )
+			RETURN
+			    CALCULATE (
+			        COUNTROWS ( 'DataTable' ),
+			        'DataTable'[HireDate] <= d,
+			        ISBLANK ( 'DataTable'[TerminationDate] ) || 'DataTable'[TerminationDate] > d
+			    )
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: 47d349b7-6836-4a6e-8864-40bc80d5624a
+
+	/// Employees active on the day before the first date in the filter.
+	measure 'Headcount Start' =
+			VAR d = MIN ( 'Date'[Date] )
+			RETURN
+			    CALCULATE (
+			        COUNTROWS ( 'DataTable' ),
+			        'DataTable'[HireDate] < d,
+			        ISBLANK ( 'DataTable'[TerminationDate] ) || 'DataTable'[TerminationDate] >= d
+			    )
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: c8b51b94-6600-445a-8d90-f26d262156ee
+
+	/// Average of start and end headcount for the period; the turnover and hire rate denominator.
+	measure 'Avg Headcount' = DIVIDE ( [Headcount Start] + [Headcount], 2 )
+		formatString: #,0.0
+		displayFolder: Model
+		lineageTag: 1279ee7d-875d-41ef-9cb2-84e9ee31ad62
+
+	/// Employees with a hire date in the period.
+	measure Hires =
+			CALCULATE (
+			    COUNTROWS ( 'DataTable' ),
+			    USERELATIONSHIP ( 'DataTable'[HireDate], 'Date'[Date] )
+			)
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: 828353d2-a597-4690-9020-9a1588cadef3
+
+	/// Employees with a termination date in the period (COUNT skips active employees).
+	measure Leavers =
+			CALCULATE (
+			    COUNT ( 'DataTable'[TerminationDate] ),
+			    USERELATIONSHIP ( 'DataTable'[TerminationDate], 'Date'[Date] )
+			)
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: 0c99437f-f532-4abd-8966-087b3ba1ee67
+
+	/// Hires minus leavers in the period (equals Headcount minus Headcount Start).
+	measure 'Net Change' = COALESCE ( [Hires], 0 ) - COALESCE ( [Leavers], 0 )
+		formatString: +#,0;-#,0;0
+		displayFolder: Model
+		lineageTag: fd365053-7b2d-43c8-b5ae-5ea76a3fbdcf
+
+	/// Leavers divided by average headcount; blank when average headcount is 0.
+	measure 'Turnover Rate' =
+			IF (
+			    [Avg Headcount] > 0,
+			    DIVIDE ( COALESCE ( [Leavers], 0 ), [Avg Headcount] )
+			)
+		formatString: 0.0%
+		displayFolder: Model
+		lineageTag: 6c002b89-8fe5-49ec-b4b9-090137201a4e
+
+	/// Hires divided by average headcount; blank when average headcount is 0.
+	measure 'Hire Rate' =
+			IF (
+			    [Avg Headcount] > 0,
+			    DIVIDE ( COALESCE ( [Hires], 0 ), [Avg Headcount] )
+			)
+		formatString: 0.0%
+		displayFolder: Model
+		lineageTag: a97a28eb-2480-45c4-8f96-a2e31d6c33e0
+
+	/// Headcount for the same period last year; blank before the first year.
+	measure 'Headcount LY' = CALCULATE ( [Headcount], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: 1d7afcf5-42b1-44de-a902-55edde7f8c9d
+
+	/// Hires for the same period last year; blank before the first year.
+	measure 'Hires LY' = CALCULATE ( [Hires], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: 6dec53a1-d1f1-44a7-8abc-f3573d7ffbab
+
+	/// Leavers for the same period last year; blank before the first year.
+	measure 'Leavers LY' = CALCULATE ( [Leavers], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: 3f2c1ff8-3253-4fd2-8748-873098ca7d7a
+
+	/// Turnover rate for the same period last year; blank before the first year.
+	measure 'Turnover Rate LY' = CALCULATE ( [Turnover Rate], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0.0%
+		displayFolder: Model
+		lineageTag: 3b4fe696-7702-4a9f-a2e4-111627ab8a58
+
+	/// Turnover rate in the same filters, ignoring the department filter.
+	measure 'Turnover Rate Company' = CALCULATE ( [Turnover Rate], REMOVEFILTERS ( 'DataTable'[Department] ) )
+		formatString: 0.0%
+		displayFolder: Model
+		lineageTag: 02154ce3-0370-40dd-812c-cc291883c0fc
+
+	/// Turnover rate minus the company turnover rate (percentage points); blank when the turnover rate is blank.
+	measure 'Turnover vs Company' =
+			IF (
+			    NOT ISBLANK ( [Turnover Rate] ),
+			    [Turnover Rate] - [Turnover Rate Company]
+			)
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Model
+		lineageTag: 5a5748b4-d62e-4496-a129-e26688c9b47d
+
+	/// Net change for the same period last year; blank before the first year.
+	measure 'Net Change LY' = CALCULATE ( [Net Change], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: +#,0;-#,0;0
+		displayFolder: Model
+		lineageTag: fffeaec7-39de-40de-8f72-19c3e1f2977c
+
+	/// Hire rate for the same period last year; blank before the first year.
+	measure 'Hire Rate LY' = CALCULATE ( [Hire Rate], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0.0%
+		displayFolder: Model
+		lineageTag: 06abebc9-9297-40b6-8eda-320e5ffd8268
+
+	/// Employees active at any point in the period, in the current filters; drives the small-group rule (under 5 = hidden).
+	measure 'Group Size' = VAR s = MIN ( 'Date'[Date] ) VAR e = MAX ( 'Date'[Date] ) RETURN CALCULATE ( COUNTROWS ( 'DataTable' ), 'DataTable'[HireDate] <= e, ISBLANK ( 'DataTable'[TerminationDate] ) || 'DataTable'[TerminationDate] >= s )
+		formatString: #,0
+		displayFolder: Display
+		lineageTag: a0bc5ef0-65ee-4b74-9b9b-aa561bd5b63f
+
+	/// Headcount when the group has 5 or more employees, else blank (small-group rule).
+	measure 'Headcount Shown' = IF ( [Group Size] >= 5, COALESCE ( [Headcount], 0 ) )
+		formatString: #,0
+		displayFolder: Display
+		lineageTag: 7e31b793-880c-45a5-9534-662893b024cf
+
+	/// Hires when the group has 5 or more employees, else blank (small-group rule).
+	measure 'Hires Shown' = IF ( [Group Size] >= 5, COALESCE ( [Hires], 0 ) )
+		formatString: #,0
+		displayFolder: Display
+		lineageTag: 471be15c-a204-49c9-9d7d-6f98f2f63ea5
+
+	/// Leavers when the group has 5 or more employees, else blank (small-group rule).
+	measure 'Leavers Shown' = IF ( [Group Size] >= 5, COALESCE ( [Leavers], 0 ) )
+		formatString: #,0
+		displayFolder: Display
+		lineageTag: 57da8243-9560-47ba-a9df-0565f8712f01
+
+	/// Net Change when the group has 5 or more employees, else blank (small-group rule).
+	measure 'Net Change Shown' = IF ( [Group Size] >= 5, [Net Change] )
+		formatString: +#,0;-#,0;0
+		displayFolder: Display
+		lineageTag: 60f205b8-7d3e-449a-9f32-9e9f30341a71
+
+	/// Turnover Rate when the group has 5 or more employees, else blank (small-group rule).
+	measure 'Turnover Rate Shown' = IF ( [Group Size] >= 5, [Turnover Rate] )
+		formatString: 0.0%
+		displayFolder: Display
+		lineageTag: 35e174f9-d6fe-4fdf-9473-41b056a164e1
+
+	/// Turnover vs Company when the group has 5 or more employees, else blank (small-group rule).
+	measure 'Turnover vs Company Shown' = IF ( [Group Size] >= 5, [Turnover vs Company] )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Display
+		lineageTag: 3ef98ed8-1c98-47b4-960e-67802cd3f281
+
+	/// Turnover Rate LY when the group has 5 or more employees, else blank (small-group rule).
+	measure 'Turnover Rate LY Shown' = IF ( CALCULATE ( [Group Size], SAMEPERIODLASTYEAR ( 'Date'[Date] ) ) >= 5, [Turnover Rate LY] )
+		formatString: 0.0%
+		displayFolder: Display
+		lineageTag: 4846a4b3-0d44-4d35-af96-7f7fb72d5c85
+
+	/// Share of the selection's leavers in this group (ALLSELECTED); blank for groups under 5.
+	measure 'Leaver Share' = IF ( [Group Size] >= 5, DIVIDE ( COALESCE ( [Leavers], 0 ), CALCULATE ( [Leavers], ALLSELECTED ( 'DataTable' ) ) ) )
+		formatString: 0%
+		displayFolder: Display
+		lineageTag: d27e58c3-0f7c-41d3-8912-d9f6077c426b
+
+	/// Share of the selection's active staff in this group (ALLSELECTED); blank for groups under 5.
+	measure 'Active Share' = IF ( [Group Size] >= 5, DIVIDE ( COALESCE ( [Headcount], 0 ), CALCULATE ( [Headcount], ALLSELECTED ( 'DataTable' ) ) ) )
+		formatString: 0%
+		displayFolder: Display
+		lineageTag: 86e1ec15-7386-48db-858b-102f2106efd0
+
+	/// Card reference label: last year's headcount, or 'LY –' in the first year.
+	measure 'Headcount LY Text' = IF ( ISBLANK ( [Headcount LY] ), "LY –", "LY " & FORMAT ( [Headcount LY], "#,0" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 894755ae-4e17-4eb2-b692-91888bf1bf48
+
+	/// Card reference detail: arrow and change in headcount vs last year.
+	measure 'Headcount Delta Text' = VAR c = COALESCE ( [Headcount], 0 ) VAR p = [Headcount LY] VAR d = c - p RETURN IF ( NOT ISBLANK ( p ) && NOT ISBLANK ( c ), IF ( d > 0, "▲ ", IF ( d < 0, "▼ ", "● " ) ) & FORMAT ( ABS ( d ), "#,0" ) & " (" & FORMAT ( DIVIDE ( d, p ), "+0.0%;-0.0%;0.0%" ) & ")" )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 2663b0d5-ba76-4951-a6bd-ed07fc8ea6fd
+
+	/// Hex colour for the headcount change, from tokens.polarity (neutral).
+	measure 'Headcount Delta Colour' = "#5A6577"
+		formatString: @
+		displayFolder: Display
+		lineageTag: 493f6c92-becd-4a48-a84d-f9307b641c6b
+
+	/// Card reference label: last year's hires, or 'LY –' in the first year.
+	measure 'Hires LY Text' = IF ( ISBLANK ( [Hires LY] ), "LY –", "LY " & FORMAT ( [Hires LY], "#,0" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 3c79e143-40eb-4695-9132-aeb86395e90f
+
+	/// Card reference detail: arrow and change in hires vs last year.
+	measure 'Hires Delta Text' = VAR c = COALESCE ( [Hires], 0 ) VAR p = [Hires LY] VAR d = c - p RETURN IF ( NOT ISBLANK ( p ) && NOT ISBLANK ( c ), IF ( d > 0, "▲ ", IF ( d < 0, "▼ ", "● " ) ) & FORMAT ( ABS ( d ), "#,0" ) & " (" & FORMAT ( DIVIDE ( d, p ), "+0.0%;-0.0%;0.0%" ) & ")" )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 2f12db83-623d-407f-8d6b-72aca80b056b
+
+	/// Hex colour for the hires change, from tokens.polarity.
+	measure 'Hires Delta Colour' = VAR d = [Hires] - [Hires LY] RETURN IF ( ISBLANK ( [Hires LY] ) || d = 0, "#5A6577", IF ( d > 0, "#026E75", "#A84545" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 8b17eefc-254f-45d7-990b-8f96256477c7
+
+	/// Card reference label: last year's leavers, or 'LY –' in the first year.
+	measure 'Leavers LY Text' = IF ( ISBLANK ( [Leavers LY] ), "LY –", "LY " & FORMAT ( [Leavers LY], "#,0" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 6eff4b88-4315-4ede-b265-34e687e48868
+
+	/// Card reference detail: arrow and change in leavers vs last year.
+	measure 'Leavers Delta Text' = VAR c = COALESCE ( [Leavers], 0 ) VAR p = [Leavers LY] VAR d = c - p RETURN IF ( NOT ISBLANK ( p ) && NOT ISBLANK ( c ), IF ( d > 0, "▲ ", IF ( d < 0, "▼ ", "● " ) ) & FORMAT ( ABS ( d ), "#,0" ) & " (" & FORMAT ( DIVIDE ( d, p ), "+0.0%;-0.0%;0.0%" ) & ")" )
+		formatString: @
+		displayFolder: Display
+		lineageTag: dae4bdb3-9dfa-49b7-ab6d-85c539580ffa
+
+	/// Hex colour for the leavers change, from tokens.polarity.
+	measure 'Leavers Delta Colour' = VAR d = [Leavers] - [Leavers LY] RETURN IF ( ISBLANK ( [Leavers LY] ) || d = 0, "#5A6577", IF ( d > 0, "#A84545", "#026E75" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 0f4dfe82-94af-40ae-95ad-08d693c486d0
+
+	/// Card reference label: last year's net change, or 'LY –' in the first year.
+	measure 'Net Change LY Text' = IF ( ISBLANK ( [Net Change LY] ), "LY –", "LY " & FORMAT ( [Net Change LY], "+#,0;-#,0;0" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: ebcb5121-21e7-4fa1-b194-422f241056f5
+
+	/// Card reference detail: arrow and change in net change vs last year.
+	measure 'Net Change Delta Text' = VAR c = COALESCE ( [Net Change], 0 ) VAR p = [Net Change LY] VAR d = c - p RETURN IF ( NOT ISBLANK ( p ) && NOT ISBLANK ( c ), IF ( d > 0, "▲ ", IF ( d < 0, "▼ ", "● " ) ) & FORMAT ( ABS ( d ), "#,0" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 7876681a-60a0-4d1a-a91f-98a6f4196fda
+
+	/// Hex colour for the net change, from tokens.polarity.
+	measure 'Net Change Delta Colour' = VAR d = [Net Change] - [Net Change LY] RETURN IF ( ISBLANK ( [Net Change LY] ) || d = 0, "#5A6577", IF ( d > 0, "#026E75", "#A84545" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 4bddcd2f-16a3-4332-9e6a-8a0aca3ee6c9
+
+	/// Card reference label: last year's turnover rate, or 'LY –' in the first year.
+	measure 'Turnover Rate LY Text' = IF ( ISBLANK ( [Turnover Rate LY] ), "LY –", "LY " & FORMAT ( [Turnover Rate LY], "0.0%" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 715fff3a-5375-4321-9670-57998952f09f
+
+	/// Card reference detail: arrow and change in turnover rate vs last year.
+	measure 'Turnover Rate Delta Text' = VAR c = [Turnover Rate] VAR p = [Turnover Rate LY] VAR d = c - p RETURN IF ( NOT ISBLANK ( p ) && NOT ISBLANK ( c ), IF ( d > 0, "▲ ", IF ( d < 0, "▼ ", "● " ) ) & FORMAT ( ABS ( d ) * 100, "0.0" ) & " pts" )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 8cacc57a-9724-4f45-8b7a-151d72546726
+
+	/// Hex colour for the turnover rate change, from tokens.polarity.
+	measure 'Turnover Rate Delta Colour' = VAR d = [Turnover Rate] - [Turnover Rate LY] RETURN IF ( ISBLANK ( [Turnover Rate LY] ) || d = 0, "#5A6577", IF ( d > 0, "#A84545", "#026E75" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 4b01cafa-23e8-4969-9d34-1db63e8b25e7
+
+	/// Card reference label: last year's hire rate, or 'LY –' in the first year.
+	measure 'Hire Rate LY Text' = IF ( ISBLANK ( [Hire Rate LY] ), "LY –", "LY " & FORMAT ( [Hire Rate LY], "0.0%" ) )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 8d49b8d4-ccd4-4783-9a74-36d146716d88
+
+	/// Card reference detail: arrow and change in hire rate vs last year.
+	measure 'Hire Rate Delta Text' = VAR c = [Hire Rate] VAR p = [Hire Rate LY] VAR d = c - p RETURN IF ( NOT ISBLANK ( p ) && NOT ISBLANK ( c ), IF ( d > 0, "▲ ", IF ( d < 0, "▼ ", "● " ) ) & FORMAT ( ABS ( d ) * 100, "0.0" ) & " pts" )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 930c55b8-397a-4586-8f16-71cbcf3b5e6b
+
+	/// Hex colour for the hire rate change, from tokens.polarity (neutral).
+	measure 'Hire Rate Delta Colour' = "#5A6577"
+		formatString: @
+		displayFolder: Display
+		lineageTag: cf9747ba-689e-4ade-9340-3a9e84592bed
+
+	/// Hex colour: bad above the company turnover rate, good below, muted when blank (tokens).
+	measure 'Turnover vs Company Colour' = VAR d = [Turnover vs Company] RETURN SWITCH ( TRUE (), ISBLANK ( d ), "#5A6577", d > 0, "#A84545", d < 0, "#026E75", "#5A6577" )
+		formatString: @
+		displayFolder: Display
+		lineageTag: aa2a434e-efdf-4272-83e3-6731865f5f76
+
+	/// Pane slicers filtering the page; Year counts only when it isn't the latest year.
+	measure 'Active Filter Count' = VAR latest = CALCULATE ( MAX ( 'Date'[Year] ), ALL ( 'Date' ) ) RETURN INT ( SELECTEDVALUE ( 'Date'[Year], 0 ) <> latest ) + INT ( ISFILTERED ( 'Date'[Month] ) ) + INT ( ISFILTERED ( 'DataTable'[Department] ) ) + INT ( ISFILTERED ( 'DataTable'[JobRole] ) ) + INT ( ISFILTERED ( 'DataTable'[Tenure Band] ) ) + INT ( ISFILTERED ( 'DataTable'[Gender] ) ) + INT ( ISFILTERED ( 'DataTable'[EmploymentType] ) ) + INT ( ISFILTERED ( 'Age Group'[Age Group] ) )
+		formatString: 0
+		displayFolder: Display
+		lineageTag: 2e291478-212d-47c3-b97f-094ce3ca0a0d
+
+	/// Filters button text: 'Filters' or 'Filters (n)'.
+	measure 'Filters Label' = VAR n = [Active Filter Count] RETURN "Filters" & IF ( n > 0, " (" & n & ")" )
+		formatString: @
+		displayFolder: Display
+		lineageTag: 4675fafd-f67b-4835-990e-8153db95f491
+
+	/// Value-axis end for the hires and leavers chart: the tallest month × 1.3.
+	measure 'Axis Max Hires Leavers' = MAXX ( VALUES ( 'Date'[Month] ), MAX ( [Hires], [Leavers] ) ) * 1.3
+		formatString: #,0
+		displayFolder: Display
+		lineageTag: a7072612-f3a1-444b-9af0-f88e54fdf504
+
+	column Value
+		formatString: 0
+		lineageTag: 940c28b6-e1e4-4a9a-8cc3-7a51fced2a13
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = calculated
+		mode: import
+		source = {1}
+
+	annotation PBI_Id = b1b1c136265b48b5937e8bf855eeb197
+

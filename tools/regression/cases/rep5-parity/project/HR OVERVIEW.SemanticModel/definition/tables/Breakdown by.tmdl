@@ -1,0 +1,46 @@
+table 'Breakdown by'
+	lineageTag: b168d267-0e35-444f-907b-c31f6be0cefe
+
+	column 'Breakdown by Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f8412bcc-542c-4a06-82e9-f0c6081072a0
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+	column 'Breakdown by Fields'
+		dataType: string
+		isHidden
+		lineageTag: 2354561c-0532-4052-a9c0-e577049a5cf5
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Breakdown by Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+	column 'Breakdown by'
+		dataType: string
+		lineageTag: 77d1f804-c06c-464a-9e96-6222ee0a8c9c
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Breakdown by Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Breakdown by Fields'
+
+	partition 'Breakdown by' = calculated
+		mode: import
+		source =
+				{
+				    ("Department", NAMEOF('DataTable'[Department]), 0),
+				    ("Education", NAMEOF('DataTable'[Education level]), 1),
+				    ("Age Group", NAMEOF('DataTable'[Age group]), 2),
+				    ("Employment", NAMEOF('DataTable'[EmploymentType]), 3),
+				    ("Gender", NAMEOF('DataTable'[Gender]), 4)
+				}
+

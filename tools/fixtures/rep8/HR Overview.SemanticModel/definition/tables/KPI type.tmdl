@@ -1,0 +1,48 @@
+table 'KPI type'
+	lineageTag: db7c5bb8-a2d0-4dcc-8cd2-951599e8f387
+
+	column 'KPI type'
+		lineageTag: 92d1acd3-d39f-481d-b30b-c19b4f28b90f
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'KPI type Order'
+
+		relatedColumnDetails
+			groupByColumn: 'KPI type Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'KPI type Fields'
+		isHidden
+		lineageTag: 59b62142-1dc4-4226-a94c-5347bd04fb54
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'KPI type Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'KPI type Order'
+		isHidden
+		formatString: 0
+		lineageTag: b28e654d-b015-4bbf-8483-39727b42d224
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'KPI type' = calculated
+		mode: import
+		source =
+				{
+				    ("Δ PY", NAMEOF('Metric Selection'[DeltaPY SVG]), 0),
+				    ("Δ PY%", NAMEOF('Metric Selection'[DeltaPY% SVG]), 1)
+				}
+
+	annotation PBI_Id = 458c6f860cf34df6aea297f38b309be5
+

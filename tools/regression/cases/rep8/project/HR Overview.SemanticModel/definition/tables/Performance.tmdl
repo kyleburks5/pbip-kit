@@ -1,0 +1,22 @@
+/// Performance ratings in order; filters DataTable[Performance].
+table Performance
+	lineageTag: 5c94ccdf-6121-4d2e-9eab-4c0761393c5e
+
+	column Performance
+		lineageTag: e10cc4ff-f55f-48b8-817c-808f0de3a31a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Performance]
+		sortByColumn: 'Performance Order'
+
+	column 'Performance Order'
+		isHidden
+		lineageTag: 9414bb2e-f177-472d-a556-94dcd0819ff0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Performance Order]
+
+	partition Performance = calculated
+		mode: import
+		source = DATATABLE ( "Performance", STRING, "Performance Order", INTEGER, { { "Low", 1 }, { "Good", 2 }, { "Excellent", 3 }, { "Outstanding", 4 } } )
+

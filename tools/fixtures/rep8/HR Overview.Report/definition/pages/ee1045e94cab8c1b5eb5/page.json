@@ -1,0 +1,51 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "ee1045e94cab8c1b5eb5",
+  "displayName": "Departments",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "P3-V07_department-table",
+      "target": "P3-V16_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P3-V08_turnover-vs-company",
+      "target": "P3-V16_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P3-V09_gender-mix",
+      "target": "P3-V16_filters-label",
+      "type": "NoFilter"
+    }
+  ]
+}

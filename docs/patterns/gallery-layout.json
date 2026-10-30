@@ -1,0 +1,597 @@
+{
+  "_note": "Pattern gallery: one visual per docs/patterns/ page and a Deneb visual, drawn with sample shapes by gen_wireframe_hf.py (python design/scripts/gen_wireframe_hf.py --layout docs/patterns/gallery-layout.json --data none --out docs/patterns/gallery.html). Not a report; the wireframe renderer tests use it.",
+  "grid": {
+    "width": 1920,
+    "height": 1080,
+    "margin": 32,
+    "columns": 12,
+    "gutter": 24
+  },
+  "pages": {
+    "P1": {
+      "displayName": "Patterns",
+      "background": "background"
+    },
+    "P2": {
+      "displayName": "Deneb",
+      "background": "background"
+    }
+  },
+  "retired": [],
+  "visuals": [
+    {
+      "id": "P1-V01",
+      "name": "freshness",
+      "page": "P1",
+      "type": "cardVisual",
+      "pattern": "freshness-line",
+      "x": 1306,
+      "y": 24,
+      "w": 582,
+      "h": 40,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          "[Freshness]"
+        ]
+      },
+      "container": {
+        "background": false,
+        "border": false,
+        "shadow": false,
+        "altText": "The date the data runs to"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Text measure in a new card"
+      }
+    },
+    {
+      "id": "P1-V02",
+      "name": "range-band",
+      "page": "P1",
+      "type": "lineChart",
+      "pattern": "range-band",
+      "x": 32,
+      "y": 80,
+      "w": 600,
+      "h": 300,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Date'[Month]"
+        ],
+        "Y": [
+          "[Band Low]",
+          "[Band High]",
+          "[Value]"
+        ]
+      },
+      "container": {
+        "title": "Range band with current-period dots",
+        "altText": "Value this year against the usual range"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Band edges and markers-only series"
+      }
+    },
+    {
+      "id": "P1-V03",
+      "name": "dumbbell",
+      "page": "P1",
+      "type": "tableEx",
+      "pattern": "dumbbell",
+      "x": 660,
+      "y": 80,
+      "w": 600,
+      "h": 300,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          "Region[Region]",
+          "[Dumbbell SVG]",
+          "[Change label]"
+        ]
+      },
+      "container": {
+        "title": "Dumbbell rows with change labels",
+        "altText": "Each region last year and this year"
+      },
+      "build": {
+        "method": "svg-measure",
+        "step": 2,
+        "nativeTried": "Two marker-only series",
+        "reason": "No connector natively"
+      }
+    },
+    {
+      "id": "P1-V04",
+      "name": "small-multiples",
+      "page": "P1",
+      "type": "lineChart",
+      "pattern": "small-multiples-expected",
+      "x": 1288,
+      "y": 80,
+      "w": 600,
+      "h": 300,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Date'[Month]"
+        ],
+        "Y": [
+          "[Actual]",
+          "[Expected]"
+        ],
+        "Rows": [
+          "Region[Region]"
+        ]
+      },
+      "container": {
+        "title": "Small multiples against an expected line",
+        "altText": "Actual against plan per region"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Native small multiples"
+      }
+    },
+    {
+      "id": "P1-V05",
+      "name": "date-range",
+      "page": "P1",
+      "type": "slicer",
+      "pattern": "brushed-range",
+      "slicerMode": "between",
+      "x": 32,
+      "y": 412,
+      "w": 600,
+      "h": 60,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          "'Date'[Date]"
+        ]
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Between slicer"
+      }
+    },
+    {
+      "id": "P1-V06",
+      "name": "overview",
+      "page": "P1",
+      "type": "lineChart",
+      "pattern": "brushed-range",
+      "x": 32,
+      "y": 472,
+      "w": 600,
+      "h": 220,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Date'[Date]"
+        ],
+        "Y": [
+          "[Value]"
+        ]
+      },
+      "container": {
+        "title": "Brushed range selection",
+        "altText": "Daily value over the whole period"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Overview strip for the slider"
+      }
+    },
+    {
+      "id": "P1-V07",
+      "name": "partial",
+      "page": "P1",
+      "type": "lineChart",
+      "pattern": "partial-period",
+      "x": 660,
+      "y": 412,
+      "w": 600,
+      "h": 280,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Date'[Month]"
+        ],
+        "Y": [
+          "[Value complete]",
+          "[Value partial]"
+        ]
+      },
+      "container": {
+        "title": "Partial-period marker",
+        "altText": "Monthly value; the current month is partial"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Two series"
+      }
+    },
+    {
+      "id": "P1-V08",
+      "name": "exceptions",
+      "page": "P1",
+      "type": "tableEx",
+      "pattern": "exception-list",
+      "x": 1288,
+      "y": 412,
+      "w": 600,
+      "h": 280,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          "Store[Store]",
+          "[Gap (exc)]",
+          "[Value (exc)]"
+        ]
+      },
+      "container": {
+        "title": "Exception list",
+        "altText": "Stores below target, largest gap first"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Blank-for-normal measures"
+      }
+    },
+    {
+      "id": "P1-V09",
+      "name": "direct-labels",
+      "page": "P1",
+      "type": "lineChart",
+      "pattern": "direct-labels",
+      "x": 32,
+      "y": 724,
+      "w": 900,
+      "h": 324,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Date'[Month]"
+        ],
+        "Y": [
+          "[Online]",
+          "[Stores]",
+          "[Wholesale]"
+        ]
+      },
+      "props": {
+        "legend.show": false
+      },
+      "container": {
+        "title": "Direct labels instead of a legend",
+        "altText": "Monthly sales by channel"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Legend off"
+      }
+    },
+    {
+      "id": "P1-V10",
+      "name": "freshness-chart",
+      "page": "P1",
+      "type": "clusteredColumnChart",
+      "pattern": "freshness-line",
+      "x": 960,
+      "y": 724,
+      "w": 928,
+      "h": 324,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Date'[Month]"
+        ],
+        "Y": [
+          "[Value]"
+        ]
+      },
+      "container": {
+        "title": "Data freshness line on a time chart",
+        "altText": "Monthly value with the last data date marked"
+      },
+      "build": {
+        "method": "native",
+        "step": 1,
+        "reason": "Category-axis reference line"
+      }
+    },
+    {
+      "id": "P2-V01",
+      "name": "deneb-range",
+      "page": "P2",
+      "type": "deneb",
+      "pattern": "range-band",
+      "x": 32,
+      "y": 80,
+      "w": 900,
+      "h": 420,
+      "z": 1,
+      "bindings": {
+        "dataset": [
+          "Region[Region]",
+          "[Band Low]",
+          "[Band High]",
+          "[Value]"
+        ]
+      },
+      "deneb": {
+        "provider": "vegaLite",
+        "spec": {
+          "data": {
+            "name": "dataset"
+          },
+          "encoding": {
+            "y": {
+              "field": "Region",
+              "type": "nominal",
+              "axis": {
+                "title": null
+              }
+            }
+          },
+          "layer": [
+            {
+              "mark": {
+                "type": "rule",
+                "strokeWidth": 10,
+                "color": {
+                  "expr": "pbiColor(5)"
+                }
+              },
+              "encoding": {
+                "x": {
+                  "field": "Band Low",
+                  "type": "quantitative"
+                },
+                "x2": {
+                  "field": "Band High"
+                }
+              }
+            },
+            {
+              "mark": {
+                "type": "point",
+                "filled": true,
+                "size": 90,
+                "color": {
+                  "expr": "pbiColor(0)"
+                }
+              },
+              "encoding": {
+                "x": {
+                  "field": "Value",
+                  "type": "quantitative"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "fallback": {
+        "type": "clusteredBarChart",
+        "bindings": {
+          "Category": [
+            "Region[Region]"
+          ],
+          "Y": [
+            "[Value]"
+          ]
+        },
+        "build": {
+          "method": "native",
+          "step": 1,
+          "reason": "Bars without the band"
+        },
+        "container": {
+          "title": "Value by region (bars)"
+        }
+      },
+      "container": {
+        "title": "Deneb: range per region with the current value",
+        "altText": "Each region's value against its usual range"
+      },
+      "build": {
+        "method": "deneb",
+        "step": 3,
+        "nativeTried": "Line chart with error bars",
+        "reason": "Band per category row"
+      }
+    },
+    {
+      "id": "P2-V02",
+      "name": "deneb-partial",
+      "page": "P2",
+      "type": "deneb",
+      "pattern": "partial-period",
+      "x": 960,
+      "y": 80,
+      "w": 928,
+      "h": 420,
+      "z": 1,
+      "bindings": {
+        "dataset": [
+          "'Date'[Month]",
+          "[Value]"
+        ]
+      },
+      "deneb": {
+        "provider": "vegaLite",
+        "spec": {
+          "data": {
+            "name": "dataset"
+          },
+          "encoding": {
+            "x": {
+              "field": "Month",
+              "type": "ordinal"
+            },
+            "y": {
+              "field": "Value",
+              "type": "quantitative"
+            }
+          },
+          "params": [
+            {
+              "name": "brush",
+              "select": {
+                "type": "interval",
+                "encodings": [
+                  "x"
+                ]
+              }
+            }
+          ],
+          "layer": [
+            {
+              "mark": {
+                "type": "line",
+                "color": {
+                  "expr": "pbiColor(0)"
+                }
+              }
+            },
+            {
+              "mark": {
+                "type": "point",
+                "filled": false,
+                "size": 80,
+                "color": {
+                  "expr": "pbiColor(0)"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "fallback": {
+        "type": "lineChart",
+        "bindings": {
+          "Category": [
+            "'Date'[Month]"
+          ],
+          "Y": [
+            "[Value]"
+          ]
+        },
+        "build": {
+          "method": "native",
+          "step": 1,
+          "reason": "Line without the hollow point"
+        },
+        "container": {
+          "title": "Monthly value"
+        }
+      },
+      "container": {
+        "title": "Deneb: hollow points and a brush",
+        "altText": "Monthly value as a line with hollow points"
+      },
+      "build": {
+        "method": "deneb",
+        "step": 3,
+        "nativeTried": "Line chart markers",
+        "reason": "Hollow points"
+      }
+    },
+    {
+      "id": "P2-V03",
+      "name": "deneb-brush",
+      "page": "P2",
+      "type": "deneb",
+      "pattern": "brushed-range",
+      "x": 32,
+      "y": 532,
+      "w": 1856,
+      "h": 300,
+      "z": 1,
+      "bindings": {
+        "dataset": [
+          "'Date'[Date]",
+          "[Value]"
+        ]
+      },
+      "deneb": {
+        "provider": "vegaLite",
+        "spec": {
+          "data": {
+            "name": "dataset"
+          },
+          "params": [
+            {
+              "name": "brush",
+              "select": {
+                "type": "interval",
+                "encodings": [
+                  "x"
+                ]
+              }
+            }
+          ],
+          "mark": {
+            "type": "line",
+            "color": {
+              "expr": "pbiColor(0)"
+            }
+          },
+          "encoding": {
+            "x": {
+              "field": "Date",
+              "type": "temporal",
+              "title": null
+            },
+            "y": {
+              "field": "Value",
+              "type": "quantitative",
+              "title": null
+            }
+          }
+        }
+      },
+      "fallback": {
+        "type": "slicer",
+        "slicerMode": "between",
+        "bindings": {
+          "Values": [
+            "'Date'[Date]"
+          ]
+        },
+        "container": {
+          "title": "Pick a date range"
+        },
+        "build": {
+          "method": "native",
+          "step": 1,
+          "reason": "Between slicer: filters the page, keyboard accessible"
+        }
+      },
+      "container": {
+        "title": "Deneb: drag on the chart to pick a range",
+        "altText": "Daily value; drag across the chart to select a date range"
+      },
+      "build": {
+        "method": "deneb",
+        "step": 3,
+        "nativeTried": "Between slicer",
+        "reason": "Brush directly on the chart"
+      }
+    }
+  ]
+}

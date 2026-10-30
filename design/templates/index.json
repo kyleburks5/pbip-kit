@@ -1,0 +1,227 @@
+{
+  "_note": "pbik templates harvest from HR Overview.Report, page 'Patterns'. <type>.json is the default (the largest visual of that type).",
+  "templates": {
+    "actionButton": {
+      "visualType": "actionButton",
+      "source": "P4-V24_clear-button",
+      "default": true,
+      "sameAs": "actionButton.clear-button"
+    },
+    "actionButton.clear-button": {
+      "visualType": "actionButton",
+      "source": "P4-V24_clear-button"
+    },
+    "actionButton.close-button": {
+      "visualType": "actionButton",
+      "source": "P4-V25_close-button"
+    },
+    "actionButton.pill-button": {
+      "visualType": "actionButton",
+      "source": "P4-V05_pill-button"
+    },
+    "advancedSlicerVisual": {
+      "visualType": "advancedSlicerVisual",
+      "source": "P4-V22_button-slicer",
+      "default": true,
+      "sameAs": "advancedSlicerVisual.button-slicer"
+    },
+    "advancedSlicerVisual.button-slicer": {
+      "visualType": "advancedSlicerVisual",
+      "source": "P4-V22_button-slicer"
+    },
+    "advancedSlicerVisual.button-slicer-single": {
+      "visualType": "advancedSlicerVisual",
+      "source": "P4-V27_button-slicer-single"
+    },
+    "barChart": {
+      "visualType": "barChart",
+      "source": "P4-V19_stacked-bar",
+      "default": true,
+      "sameAs": "barChart.stacked-bar"
+    },
+    "barChart.stacked-bar": {
+      "visualType": "barChart",
+      "source": "P4-V19_stacked-bar"
+    },
+    "cardVisual": {
+      "visualType": "cardVisual",
+      "source": "P4-V07_card-reference-labels",
+      "default": true,
+      "sameAs": "cardVisual.card-reference-labels"
+    },
+    "cardVisual.card-plain": {
+      "visualType": "cardVisual",
+      "source": "P4-V08_card-plain"
+    },
+    "cardVisual.card-reference-labels": {
+      "visualType": "cardVisual",
+      "source": "P4-V07_card-reference-labels"
+    },
+    "cardVisual.pill-label": {
+      "visualType": "cardVisual",
+      "source": "P4-V06_pill-label"
+    },
+    "clusteredBarChart": {
+      "visualType": "clusteredBarChart",
+      "source": "P4-V14_clustered-bar",
+      "default": true,
+      "sameAs": "clusteredBarChart.clustered-bar"
+    },
+    "clusteredBarChart.clustered-bar": {
+      "visualType": "clusteredBarChart",
+      "source": "P4-V14_clustered-bar"
+    },
+    "clusteredColumnChart": {
+      "visualType": "clusteredColumnChart",
+      "source": "P4-V15_clustered-column",
+      "default": true,
+      "sameAs": "clusteredColumnChart.clustered-column"
+    },
+    "clusteredColumnChart.clustered-column": {
+      "visualType": "clusteredColumnChart",
+      "source": "P4-V15_clustered-column"
+    },
+    "columnChart": {
+      "visualType": "columnChart",
+      "source": "P4-V21_stacked-column",
+      "default": true,
+      "sameAs": "columnChart.stacked-column"
+    },
+    "columnChart.stacked-column": {
+      "visualType": "columnChart",
+      "source": "P4-V21_stacked-column"
+    },
+    "donutChart": {
+      "visualType": "donutChart",
+      "source": "P4-V10_donut",
+      "default": true,
+      "sameAs": "donutChart.donut"
+    },
+    "donutChart.donut": {
+      "visualType": "donutChart",
+      "source": "P4-V10_donut"
+    },
+    "gauge": {
+      "visualType": "gauge",
+      "source": "P4-V09_gauge",
+      "default": true,
+      "sameAs": "gauge.gauge"
+    },
+    "gauge.gauge": {
+      "visualType": "gauge",
+      "source": "P4-V09_gauge"
+    },
+    "hundredPercentStackedBarChart": {
+      "visualType": "hundredPercentStackedBarChart",
+      "source": "P4-V20_stacked-bar-100",
+      "default": true,
+      "sameAs": "hundredPercentStackedBarChart.stacked-bar-100"
+    },
+    "hundredPercentStackedBarChart.stacked-bar-100": {
+      "visualType": "hundredPercentStackedBarChart",
+      "source": "P4-V20_stacked-bar-100"
+    },
+    "image": {
+      "visualType": "image",
+      "source": "P4-V26_image",
+      "default": true,
+      "sameAs": "image.image"
+    },
+    "image.image": {
+      "visualType": "image",
+      "source": "P4-V26_image"
+    },
+    "lineChart": {
+      "visualType": "lineChart",
+      "source": "P4-V13_line",
+      "default": true,
+      "sameAs": "lineChart.line"
+    },
+    "lineChart.line": {
+      "visualType": "lineChart",
+      "source": "P4-V13_line"
+    },
+    "lineStackedColumnComboChart": {
+      "visualType": "lineStackedColumnComboChart",
+      "source": "P4-V16_combo",
+      "default": true,
+      "sameAs": "lineStackedColumnComboChart.combo"
+    },
+    "lineStackedColumnComboChart.combo": {
+      "visualType": "lineStackedColumnComboChart",
+      "source": "P4-V16_combo"
+    },
+    "pageNavigator": {
+      "visualType": "pageNavigator",
+      "source": "P4-V04_page-navigator",
+      "default": true,
+      "sameAs": "pageNavigator.page-navigator"
+    },
+    "pageNavigator.page-navigator": {
+      "visualType": "pageNavigator",
+      "source": "P4-V04_page-navigator"
+    },
+    "pivotTable": {
+      "visualType": "pivotTable",
+      "source": "P4-V18_matrix",
+      "default": true,
+      "sameAs": "pivotTable.matrix"
+    },
+    "pivotTable.matrix": {
+      "visualType": "pivotTable",
+      "source": "P4-V18_matrix"
+    },
+    "shape": {
+      "visualType": "shape",
+      "source": "P4-V01_shape-band",
+      "default": true,
+      "sameAs": "shape.shape-band"
+    },
+    "shape.glass-panel": {
+      "visualType": "shape",
+      "source": "P4-V23_glass-panel"
+    },
+    "shape.shape-band": {
+      "visualType": "shape",
+      "source": "P4-V01_shape-band"
+    },
+    "slicer": {
+      "visualType": "slicer",
+      "source": "P4-V11_dropdown-slicer",
+      "default": true,
+      "sameAs": "slicer.dropdown-slicer"
+    },
+    "slicer.dropdown-slicer": {
+      "visualType": "slicer",
+      "source": "P4-V11_dropdown-slicer"
+    },
+    "tableEx": {
+      "visualType": "tableEx",
+      "source": "P4-V17_table",
+      "default": true,
+      "sameAs": "tableEx.table"
+    },
+    "tableEx.table": {
+      "visualType": "tableEx",
+      "source": "P4-V17_table"
+    },
+    "textbox": {
+      "visualType": "textbox",
+      "source": "P4-V02_textbox-title",
+      "default": true,
+      "sameAs": "textbox.textbox-title"
+    },
+    "textbox.textbox-note": {
+      "visualType": "textbox",
+      "source": "P4-V12_textbox-note"
+    },
+    "textbox.textbox-subtitle": {
+      "visualType": "textbox",
+      "source": "P4-V03_textbox-subtitle"
+    },
+    "textbox.textbox-title": {
+      "visualType": "textbox",
+      "source": "P4-V02_textbox-title"
+    }
+  }
+}

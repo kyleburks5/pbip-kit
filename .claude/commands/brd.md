@@ -1,0 +1,7 @@
+Write the requirements for this rep: $ARGUMENTS
+Read CLAUDE.md, design/reference/brd-template.md, docs/it-security.md, any images or notes in design/reference/, and the file names in data/ (names and sizes only; don't open the rows).
+Draft design/reference/brd.md from the template, filling every section from the brief and the references. Keep the template's headings and order.
+Mark anything you inferred rather than read with "confirm", and anything unknown as "open". Section 8 (data readiness) stays "complete after /model".
+Fill section 2's data volume line (rows and file size per source) from the file sizes, marked "confirm".
+Fill section 11 (IT and security) from docs/it-security.md; if the data isn't public, stop and say what needs clearing first.
+Change nothing else. Give me the open and confirm items in under 15 lines and wait for my review before /model.

@@ -1,0 +1,37 @@
+{
+  "_note": "Bento preset: tiles of mixed spans on a warm canvas, large corners, no borders, near-flat shadow. Layout: cards span 3/4/6/8 columns with rows of 2 or 3 heights (docs/patterns/README.md, bento).",
+  "name": "bento",
+  "description": "Warm off-white canvas, white tiles with 24px corners and no border, indigo brand with coral and mint.",
+  "mode": "light",
+  "brand": [
+    "primary=#1E1B4B",
+    "brand=#5B5BD6",
+    "bad=#E5484D",
+    "good=#1F8A5B",
+    "second=#8E8C99",
+    "#F5A524"
+  ],
+  "colors": {
+    "background": "#F3F2EE",
+    "card": "#FFFFFF",
+    "border": "#E7E5DF",
+    "text": "#1C1B22",
+    "textMuted": "#5F5D68"
+  },
+  "container": {
+    "radius": 24,
+    "borderWidth": 0,
+    "padding": 24,
+    "paddingTop": 18,
+    "shadow": "0 1px 2px rgba(30,27,75,0.04), 0 2px 6px rgba(30,27,75,0.04)",
+    "pbiShadow": {
+      "_note": "Near-flat: bento tiles separate by the canvas, not the shadow.",
+      "blur": 6,
+      "distance": 1,
+      "transparency": 96
+    }
+  },
+  "control": {
+    "radius": 12
+  }
+}

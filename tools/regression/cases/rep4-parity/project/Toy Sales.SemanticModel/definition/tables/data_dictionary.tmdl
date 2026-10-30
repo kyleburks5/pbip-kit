@@ -1,0 +1,39 @@
+table data_dictionary
+	isHidden
+	lineageTag: 35cb7f26-f4b0-4824-84f3-28716a09b8d0
+
+	column Column1
+		dataType: string
+		lineageTag: d5478d7b-234b-450f-959f-b8602362ae57
+		summarizeBy: none
+		sourceColumn: Column1
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column2
+		dataType: string
+		lineageTag: a9280c25-9361-401b-974f-9fee6de16ed6
+		summarizeBy: none
+		sourceColumn: Column2
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column3
+		dataType: string
+		lineageTag: 9a600c89-96b4-4052-8d5e-2e1d4a8799e5
+		summarizeBy: none
+		sourceColumn: Column3
+
+		annotation SummarizationSetBy = Automatic
+
+	partition data_dictionary = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\pbip-data\Maven Toys\data_dictionary.csv"),[Delimiter=",", Columns=3, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}, {"Column2", type text}, {"Column3", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

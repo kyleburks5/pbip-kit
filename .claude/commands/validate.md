@@ -1,0 +1,10 @@
+Numbers audit, look-only. Use the audit mode in design/reviews/model-check.md (docs/lessons/audit-modes.md).
+For each of the key values from design/reference/brd.md (KPIs and totals by the main dimensions, and YoY),
+recompute it from the raw columns and compare it with the model's measure and with what the report
+shows. Check that parts add up to totals, the first-year and blank prior-year behavior, the empty case, and
+divide-by-zero cases. Check the numbers drawn inside SVG measures too: they must match the measure they show.
+First run `python tools/pbik/pbik.py validate <Report> --layout design/specs/layout.json` and `pbik info <Report>` (which
+measure each visual shows), both read-only. Then run `python design/scripts/audit_numbers.py --port <port>` (values and
+SVG numbers from design/specs/audit.json) and `design/scripts/audit_svg.py` if there are SVG measures, and record the
+run times.
+Output one table: ID, value, expected, model, shown, status.

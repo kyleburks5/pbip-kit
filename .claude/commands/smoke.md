@@ -1,0 +1,7 @@
+Smoke test after a tool or plugin update: $ARGUMENTS
+1. Record the versions: pbik (`python tools/pbik/pbik.py --version`), Python and jsonschema (`powershell -File tools/doctor.ps1`), each plugin in ~/.claude/plugins/installed_plugins.json, Power BI Desktop (Help → About, or the Store package version), and the modeling MCP. Compare them with VERSIONS.md.
+2. Check Desktop has no unsaved changes (`python tools/pbik/pbik.py desktop state --fail-if-dirty`); stop if it does.
+3. Run `python design/scripts/smoke.py --measure "[Measure]" --column "Table[Column]" --table-columns "T[A],T[B]"` with fields from the open model (a base measure, a short text column, two table columns). It builds one card, one button slicer and one table on a `_smoke` page with pbik and runs `pbik validate`.
+4. Ask me to close Desktop without saving and reopen, then screenshot the `_smoke` page and check it against design/checks.md: card rounded with its label above and no "--", every slicer button showing its text, table without wrap, scrollbar or totals.
+5. Update VERSIONS.md: the tested versions, a changelog row (date, component, old, new, smoke result).
+6. Ask me before removing the page (`smoke.py --remove` deletes the `_smoke` page folder). Don't commit unless I say so.

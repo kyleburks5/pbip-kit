@@ -1,0 +1,49 @@
+{
+  "_note": "The Patterns page (tools/patterns/build_patterns.py): the best Desktop-saved example of each visual type used in Reps 4, 5 and 8, rebound to Rep 8's model and in Rep 8's final style. `source` is [rep, visual folder] as Desktop saved it; `bindings` / `sort` rebuild the query in layout notation (otherwise the source query is kept, valid only for Rep 8 sources); `restyle` copies the container (background, border, shadow, padding, title, subtitle) from a Rep 8 visual; `title` sets the container title text; `text` replaces a text box's text. Fields the Rep 8 model doesn't have are dropped from objects and filters. `grid` is [column, span] on the 12-column grid (32px margin, 24px gutter); `box` is an explicit [x, y, w, h].",
+  "page": {"displayName": "Patterns", "background": "#EEF1F6"},
+  "sources": {"rep4": "tools/fixtures/rep4", "rep5": "tools/fixtures/rep5", "rep8": "tools/fixtures/rep8"},
+  "patterns": [
+    {"id": "P4-V01", "name": "shape-band", "label": "Shape (header band)", "source": ["rep8", "P1-V01_band"], "box": [0, 0, 1920, 112], "z": 0},
+    {"id": "P4-V02", "name": "textbox-title", "label": "Text box (page title)", "source": ["rep8", "P1-V02_title"], "box": [32, 14, 916, 56], "text": "Patterns"},
+    {"id": "P4-V03", "name": "textbox-subtitle", "label": "Text box (subtitle)", "source": ["rep8", "P1-V03_subtitle"], "box": [32, 62, 916, 40], "text": "Template library: the best Desktop-saved example of each visual type in Reps 4, 5 and 8, in Rep 8's style"},
+    {"id": "P4-V04", "name": "page-navigator", "label": "Page navigator", "source": ["rep8", "P1-V04_nav"], "sourceBox": true},
+    {"id": "P4-V05", "name": "pill-button", "label": "Pill button", "source": ["rep8", "P1-V18_filters-button"], "sourceBox": true},
+    {"id": "P4-V06", "name": "pill-label", "label": "Card (new) as a button label", "source": ["rep8", "P1-V25_filters-label"], "sourceBox": true},
+
+    {"id": "P4-V07", "name": "card-reference-labels", "label": "Card (new) with reference labels", "source": ["rep8", "P1-V09_kpi-headcount"], "grid": [0, 2], "y": 136, "h": 148},
+    {"id": "P4-V08", "name": "card-plain", "label": "Card (new)", "source": ["rep8", "P2-V14_sel-headcount"], "grid": [2, 2], "y": 136, "h": 88},
+    {"id": "P4-V09", "name": "gauge", "label": "Gauge", "source": ["rep5", "overview-kpi-hirerate"], "grid": [4, 3], "y": 136, "h": 208,
+     "bindings": {"Y": ["[Hire Rate]"], "TargetValue": [{"field": "[Hire Rate LY]", "displayName": "Last year"}]},
+     "sort": {"field": "[Hire Rate]", "direction": "Descending", "default": true}, "restyle": "P1-V15_headcount-trend", "title": "Hire rate vs last year"},
+    {"id": "P4-V10", "name": "donut", "label": "Donut chart", "source": ["rep5", "mix-chart-gender"], "grid": [7, 3], "y": 136, "h": 208,
+     "bindings": {"Category": ["DataTable[Gender]"], "Y": [{"field": "[Headcount Shown]", "displayName": "Employees"}]},
+     "sort": {"field": "[Headcount Shown]", "direction": "Descending", "default": true}, "restyle": "P1-V15_headcount-trend", "title": "Employees by gender"},
+    {"id": "P4-V11", "name": "dropdown-slicer", "label": "Dropdown slicer", "source": ["rep8", "P2-V08_job-role"], "grid": [10, 2], "y": 136, "h": 76},
+    {"id": "P4-V12", "name": "textbox-note", "label": "Text box (note)", "source": ["rep8", "P1-V08_definitions"], "grid": [10, 2], "y": 236, "h": 108},
+
+    {"id": "P4-V13", "name": "line", "label": "Line chart", "source": ["rep8", "P1-V15_headcount-trend"], "grid": [0, 3], "y": 368, "h": 300, "title": "Line chart: headcount by month"},
+    {"id": "P4-V14", "name": "clustered-bar", "label": "Clustered bar chart", "source": ["rep8", "P1-V16_turnover-by-department"], "grid": [3, 3], "y": 368, "h": 300, "title": "Clustered bar: turnover by department"},
+    {"id": "P4-V15", "name": "clustered-column", "label": "Clustered column chart", "source": ["rep8", "P1-V17_hires-vs-leavers"], "grid": [6, 3], "y": 368, "h": 300, "title": "Clustered column: hires vs leavers"},
+    {"id": "P4-V16", "name": "combo", "label": "Line and stacked column chart", "source": ["rep5", "overview-flow"], "grid": [9, 3], "y": 368, "h": 300,
+     "bindings": {"Category": ["Date[Month]"], "Y": [{"field": "[Hires Shown]", "displayName": "Hires"}, {"field": "[Leavers Shown]", "displayName": "Leavers"}],
+                  "Y2": [{"field": "[Headcount Shown]", "displayName": "Headcount"}], "Tooltips": ["[Net Change Shown]"]},
+     "sort": {"field": "Date[Month]", "direction": "Ascending", "default": true}, "props": {"dataPoint.fill@[Hires Shown]": "teal", "dataPoint.fill@[Leavers Shown]": "red", "dataPoint.fill@[Headcount Shown]": "primary"}, "restyle": "P1-V15_headcount-trend", "title": "Combo: hires, leavers and headcount"},
+
+    {"id": "P4-V17", "name": "table", "label": "Table", "source": ["rep8", "P2-V18_table"], "grid": [0, 3], "y": 692, "h": 208},
+    {"id": "P4-V18", "name": "matrix", "label": "Matrix", "source": ["rep8", "P2-V17_matrix"], "grid": [3, 3], "y": 692, "h": 208},
+    {"id": "P4-V19", "name": "stacked-bar", "label": "Stacked bar chart", "source": ["rep4", "inventory-status-mix"], "grid": [6, 2], "y": 692, "h": 208,
+     "bindings": {"Category": ["DataTable[Department]"], "Y": [{"field": "[Hires Shown]", "displayName": "Hires"}, {"field": "[Leavers Shown]", "displayName": "Leavers"}]},
+     "props": {"dataPoint.fill@[Hires Shown]": "teal", "dataPoint.fill@[Leavers Shown]": "red"}, "restyle": "P1-V15_headcount-trend", "title": "Stacked bar"},
+    {"id": "P4-V20", "name": "stacked-bar-100", "label": "100% stacked bar chart", "source": ["rep8", "P3-V09_gender-mix"], "grid": [8, 2], "y": 692, "h": 208, "title": "100% stacked bar"},
+    {"id": "P4-V21", "name": "stacked-column", "label": "Stacked column chart", "source": ["rep5", "overview-bridge"], "grid": [10, 2], "y": 692, "h": 208,
+     "bindings": {"Category": ["Date[Month]"], "Y": [{"field": "[Hires Shown]", "displayName": "Hires"}, {"field": "[Leavers Shown]", "displayName": "Leavers"}]},
+     "sort": {"field": "Date[Month]", "direction": "Ascending", "default": true}, "props": {"dataPoint.fill@[Hires Shown]": "teal", "dataPoint.fill@[Leavers Shown]": "red"}, "restyle": "P1-V15_headcount-trend", "title": "Stacked column"},
+
+    {"id": "P4-V22", "name": "button-slicer", "label": "Button slicer (multi-select grid)", "source": ["rep8", "P1-V24_department-buttons"], "grid": [0, 4], "y": 924, "h": 124},
+    {"id": "P4-V23", "name": "glass-panel", "label": "Shape (glass panel)", "source": ["rep8", "P1-V19_pane-bg"], "grid": [4, 4], "y": 924, "h": 124, "z": 0},
+    {"id": "P4-V24", "name": "clear-button", "label": "Clear button", "source": ["rep8", "P1-V21_pane-clear"], "box": [675, 964, 277, 44]},
+    {"id": "P4-V25", "name": "close-button", "label": "Close button", "source": ["rep8", "P1-V22_pane-close"], "box": [976, 964, 277, 44]},
+    {"id": "P4-V26", "name": "image", "label": "Image (registered PNG)", "image": "patterns-icon", "grid": [8, 1], "y": 924, "h": 124},
+    {"id": "P4-V27", "name": "button-slicer-single", "label": "Button slicer (single select, header)", "source": ["rep8", "P1-V05_year"], "grid": [9, 3], "y": 924, "h": 76}
+  ]
+}

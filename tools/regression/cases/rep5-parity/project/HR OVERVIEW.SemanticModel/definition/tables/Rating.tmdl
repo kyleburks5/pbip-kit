@@ -1,0 +1,27 @@
+/// Rows of the How Leavers Rated Their Job table; [Likert SVG] reads the Order.
+table Rating
+	lineageTag: 6753600d-cd9c-4a6b-9945-643e129db407
+
+	column Rating
+		dataType: string
+		lineageTag: 9cff1844-60a8-434a-b1d1-0c5a19659462
+		summarizeBy: none
+		sourceColumn: [Rating]
+		sortByColumn: Order
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 62042c55-3b76-47ad-bac8-5a6cdc0c1c3b
+		summarizeBy: none
+		sourceColumn: [Order]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Rating = calculated
+		mode: import
+		source = DATATABLE ( "Rating", STRING, "Order", INTEGER, { { "Job Satisfaction", 1 }, { "Performance Rating", 2 }, { "Work-Life Balance", 3 } } )
+

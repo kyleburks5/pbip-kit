@@ -1,0 +1,20 @@
+relationship AutoDetected_1d05f921-c0ef-4690-8ebe-848fa33f7c00
+	fromColumn: inventory.Product_ID
+	toColumn: products.Product_ID
+
+relationship AutoDetected_91af76a0-2c44-48c5-883d-7c9ad15db827
+	fromColumn: sales.Product_ID
+	toColumn: products.Product_ID
+
+relationship AutoDetected_d9bedf27-e145-40c8-9896-26d6a9959b1c
+	fromColumn: inventory.Store_ID
+	toColumn: stores.Store_ID
+
+relationship AutoDetected_ef42888b-712f-4e56-b5c9-a41fa8b11ed9
+	fromColumn: sales.Store_ID
+	toColumn: stores.Store_ID
+
+relationship sales_Date_Date_Date
+	fromColumn: sales.Date
+	toColumn: Date.Date
+

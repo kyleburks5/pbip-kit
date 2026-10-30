@@ -1,0 +1,17 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "P3-V15_filter-pane",
+  "position": {
+    "x": 1285,
+    "y": 124,
+    "z": 10015,
+    "height": 328,
+    "width": 603,
+    "tabOrder": 1500
+  },
+  "isHidden": true,
+  "visualGroup": {
+    "displayName": "Filter pane",
+    "groupMode": "ScaleMode"
+  }
+}

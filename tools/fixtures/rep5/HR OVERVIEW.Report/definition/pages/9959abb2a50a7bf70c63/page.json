@@ -1,0 +1,411 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "9959abb2a50a7bf70c63",
+  "displayName": "Overview",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "overview-headline",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-nav",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-kpi-headcount",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-kpi-hires",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-kpi-terminations",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-kpi-hirerate",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-kpi-termrate",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-kpi-salary",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-bridge",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-departments",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-subtitle",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-pane-count",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-quarter",
+      "target": "overview-flow",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-month",
+      "target": "overview-flow",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-headline",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-nav",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-kpi-headcount",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-kpi-hires",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-kpi-terminations",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-kpi-hirerate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-kpi-termrate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-kpi-salary",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-bridge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-departments",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-change-subtitle",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-change-metric",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-change-by",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-pane-count",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-quarter",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-month",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-department",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-type",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-flow",
+      "target": "overview-gender",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-headline",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-nav",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-kpi-headcount",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-kpi-hires",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-kpi-terminations",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-kpi-hirerate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-kpi-termrate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-kpi-salary",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-flow",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-bridge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-departments",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-change-by",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-pane-count",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-quarter",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-month",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-department",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-type",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-metric",
+      "target": "overview-gender",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-headline",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-year",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-nav",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-kpi-headcount",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-kpi-hires",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-kpi-terminations",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-kpi-hirerate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-kpi-termrate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-kpi-salary",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-flow",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-bridge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-departments",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-change-metric",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-pane-count",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-quarter",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-month",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-department",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-type",
+      "type": "NoFilter"
+    },
+    {
+      "source": "overview-change-by",
+      "target": "overview-gender",
+      "type": "NoFilter"
+    }
+  ]
+}

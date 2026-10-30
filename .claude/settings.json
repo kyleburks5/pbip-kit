@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Skill(reports:create-pbi-report)",
+      "Skill(reports:modifying-theme-json)",
+      "Skill(reports:pbir-cli)"
+    ]
+  }
+}

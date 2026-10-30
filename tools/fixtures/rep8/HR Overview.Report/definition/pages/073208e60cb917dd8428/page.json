@@ -1,0 +1,81 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "073208e60cb917dd8428",
+  "displayName": "Summary",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "P1-V16_turnover-by-department",
+      "target": "P1-V09_kpi-headcount",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V16_turnover-by-department",
+      "target": "P1-V10_kpi-hires",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V16_turnover-by-department",
+      "target": "P1-V11_kpi-leavers",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V16_turnover-by-department",
+      "target": "P1-V12_kpi-net-change",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V16_turnover-by-department",
+      "target": "P1-V13_kpi-turnover-rate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V16_turnover-by-department",
+      "target": "P1-V14_kpi-hire-rate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V16_turnover-by-department",
+      "target": "P1-V25_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V15_headcount-trend",
+      "target": "P1-V25_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P1-V17_hires-vs-leavers",
+      "target": "P1-V25_filters-label",
+      "type": "NoFilter"
+    }
+  ]
+}

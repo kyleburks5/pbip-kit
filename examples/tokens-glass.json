@@ -1,0 +1,181 @@
+{
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "margin": 32,
+    "gutter": 24,
+    "columns": 12
+  },
+  "colors": {
+    "_note": "Rep 7 (Power BI Basketball Cards): dark glassmorphism. Near-black navy page with two soft glows (wallpaper PNG, gen_assets.py). Cards are white at 92% transparency (glass) over it, with a solid hairline border (Power BI borders take no alpha, so glassBorder is the blended colour) and a soft dark shadow. Text is light. Contrast is measured at two points: glass over the plain page (#1F2332) and glass over the teal glow centre (#20454D, the worst case); every text colour clears 4.5:1 at both (see contrast). Deltas are coloured text with a glyph, no pill: coloured text on its own tint only reached ~4.0:1. primary/accent/warning/good/bad/card/border are the names gen_theme.py reads.",
+    "primary": "#2DD4BF",
+    "accent": "#2DD4BF",
+    "warning": "#FACC15",
+    "background": "#0B1020",
+    "glowA": "#14B8A6",
+    "glowB": "#7C3AED",
+    "glowC": "#2563EB",
+    "card": "#FFFFFF",
+    "glassEffective": "#1F2332",
+    "glassWorst": "#20454D",
+    "border": "#2E3754",
+    "glassBorder": "#2E3754",
+    "selectedFill": "#FFFFFF",
+    "selectedBorder": "#2DD4BF",
+    "text": "#F1F5F9",
+    "textMuted": "#B4BED0",
+    "good": "#4ADE80",
+    "bad": "#FCA5A5",
+    "neutral": "#B4BED0",
+    "courtLine": "#FFFFFF",
+    "madeShot": "#2DD4BF",
+    "shot2": "#22D3EE",
+    "shot3": "#FACC15",
+    "onZone": "#0B1020",
+    "slate": "#B4BED0",
+    "slateTint": "#2E3754",
+    "tealDark": "#2DD4BF",
+    "tealTint": "#123B3C",
+    "html": "#C4B5FD",
+    "htmlTint": "#2E2A4F"
+  },
+  "glass": {
+    "_note": "Power BI transparency (0-100) for the glass layers. panel = shape fill (#FFFFFF), tile = new card tile fill, selected = picker button selected fill, hover = picker hover fill, playerTile = player picker tile at rest (fix 1: tiles need their own glass to read as cards). courtLineAlpha is the court PNG's line opacity.",
+    "panel": 92,
+    "tile": 92,
+    "selected": 82,
+    "hover": 88,
+    "playerTile": 95,
+    "detailPanel": 94,
+    "courtLineAlpha": 0.55,
+    "glowAlpha": 0.22
+  },
+  "zones": {
+    "_note": "Shots[New Shot Zone], in court order (left corner to right corner, then inside), for the zone cards, the zone scatter series and the [Zone colour] display measure. All 5.7:1 or better on glass; zone headers use onZone (dark) text, 7:1 or better.",
+    "Left Corner": "#A78BFA",
+    "Left Wing": "#F472B6",
+    "Top of the Key": "#FB923C",
+    "Right Wing": "#60A5FA",
+    "Right Corner": "#34D399",
+    "Mid Range": "#FACC15",
+    "Paint (Non-RA)": "#22D3EE",
+    "Restricted Area": "#E879F9",
+    "Backcourt": "#94A3B8"
+  },
+  "shotTypes": {
+    "_note": "Scatter series on the 2 Point vs. 3 Point tab: colour and marker shape (Power BI scatter marker shapes).",
+    "2PT Field Goal": {"color": "#22D3EE", "marker": "x", "label": "2-pointer"},
+    "3PT Field Goal": {"color": "#FACC15", "marker": "circle", "label": "3-pointer"}
+  },
+  "contrast": {
+    "_note": "WCAG ratios on glass over the plain page / over the teal glow centre (worst).",
+    "text": [14.25, 9.49],
+    "textMuted": [8.34, 5.55],
+    "good": [8.96, 5.97],
+    "bad": [8.23, 5.48],
+    "accent": [8.39, 5.59],
+    "zonesOnGlass": "5.74 (Left Corner) to 10.2 (Mid Range)",
+    "onZoneText": "6.96 (Left Corner) to 12.36 (Mid Range)"
+  },
+  "chart": {
+    "_note": "Series order for the theme after primary. Scatter markers: made shots only, size 3 (Power BI marker size), no outline.",
+    "series": ["shot2", "shot3", "good", "bad"],
+    "markerSize": 3,
+    "lineWidth": 2,
+    "barRadius": 3
+  },
+  "court": {
+    "_note": "Half court in shot coordinates (feet): x -25..25 (sideline to sideline), y 0..47 (baseline to half-court line). Rim centre (0, 5.25) (data: mean LOC_Y of 0 ft shots = 5.44). Scatter axes are fixed to this box with no padding, and the court PNG covers exactly the same box, so the dots land on the lines. 10 made shots beyond half court (y > 47) fall outside and are not drawn.",
+    "xMin": -25,
+    "xMax": 25,
+    "yMin": 0,
+    "yMax": 47,
+    "rimY": 5.25,
+    "threeRadius": 23.75,
+    "cornerX": 22,
+    "cornerY": 14,
+    "laneHalfWidth": 8,
+    "freeThrowY": 19,
+    "circleRadius": 6,
+    "restrictedRadius": 4,
+    "backboardY": 4,
+    "lineWidthFt": 0.17
+  },
+  "font": {
+    "_note": "px, for the HTML wireframe. Segoe UI for body, Segoe UI Semibold for titles and numbers, Segoe UI Light for the big KPI numbers: all ship with Power BI.",
+    "family": "Segoe UI",
+    "title": 26,
+    "subtitle": 13,
+    "section": 15,
+    "cardTitle": 20,
+    "playerName": 28,
+    "chartTitle": 15,
+    "label": 13,
+    "body": 14,
+    "kpi": 40,
+    "zoneKpi": 26,
+    "chip": 13,
+    "caption": 12,
+    "tab": 14
+  },
+  "fontPt": {
+    "_note": "Power BI sizes in points: font px x 0.75, halves round up; caption kept at 10pt minimum (Rep 1 lesson).",
+    "title": 20,
+    "subtitle": 10,
+    "section": 12,
+    "cardTitle": 15,
+    "playerName": 21,
+    "chartTitle": 12,
+    "label": 10,
+    "body": 11,
+    "kpi": 30,
+    "zoneKpi": 20,
+    "chip": 10,
+    "caption": 10,
+    "tab": 11
+  },
+  "container": {
+    "_note": "Glass cards: radius 16, 1px solid glassBorder, soft dark shadow (black, wide blur). Panels hold their visuals inset by padding (24); visuals inside a panel have no background, border or shadow of their own.",
+    "radius": 16,
+    "borderWidth": 1,
+    "padding": 24,
+    "paddingTop": 20,
+    "shadow": "0 8px 24px rgba(0,0,0,0.45)",
+    "pbiShadow": {
+      "_note": "Power BI draws shadows darker than CSS (Rep 3); on a dark page that matters less, so this is close to the CSS. Preset Custom on every shadow (known-gaps).",
+      "color": "#000000",
+      "blur": 20,
+      "distance": 6,
+      "angle": 90,
+      "transparency": 60
+    }
+  },
+  "tile": {
+    "_note": "Picker buttons. team: logo left, name right. player: headshot top, name and position below; 5 tiles visible with a 14px gap (fix 1: 6 tiles at 8px ran together).",
+    "teamHeight": 52,
+    "playerHeight": 128,
+    "playerVisible": 5,
+    "playerGap": 14,
+    "playerImagePad": 16,
+    "gap": 8,
+    "radius": 12,
+    "logoSize": 32
+  },
+  "tabs": {
+    "_note": "Bookmark navigator: pill tabs. Selected = selectedFill at 'selected' transparency with selectedBorder text; others textMuted on transparent.",
+    "height": 44,
+    "radius": 22
+  },
+  "tags": {
+    "_note": "Wireframe tags (press T): what each visual is built with. native = Power BI visual and settings; image = generated PNG in an image visual; svg / html = fallbacks (none used in Rep 7).",
+    "native": {"text": "slate", "fill": "slateTint"},
+    "image": {"text": "tealDark", "fill": "tealTint"},
+    "svg": {"text": "tealDark", "fill": "tealTint"},
+    "html": {"text": "html", "fill": "htmlTint"}
+  },
+  "badge": {
+    "_note": "Visual ID badges in the wireframe (press B): P1-V01 ...",
+    "fill": "accent",
+    "text": "onZone"
+  }
+}

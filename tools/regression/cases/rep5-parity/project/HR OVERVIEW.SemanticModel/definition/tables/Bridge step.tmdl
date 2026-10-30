@@ -1,0 +1,27 @@
+/// Categories of the headcount bridge (stacked column with a transparent base).
+table 'Bridge step'
+	lineageTag: 3c6d6845-943f-4e5d-a591-66b67c561395
+
+	column Step
+		dataType: string
+		lineageTag: 6ee88cff-2407-4bf2-9ba2-3a83121f4b5d
+		summarizeBy: none
+		sourceColumn: [Step]
+		sortByColumn: Order
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9f811ba4-a7f1-412a-86e7-02b969c9389d
+		summarizeBy: none
+		sourceColumn: [Order]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Bridge step' = calculated
+		mode: import
+		source = DATATABLE ( "Step", STRING, "Order", INTEGER, { { "Start", 1 }, { "Hires", 2 }, { "Terminations", 3 }, { "End", 4 } } )
+

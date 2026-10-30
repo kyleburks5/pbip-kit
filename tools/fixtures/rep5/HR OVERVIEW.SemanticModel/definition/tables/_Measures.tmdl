@@ -1,0 +1,1337 @@
+table _Measures
+	lineageTag: ce14314c-7ff9-4c66-8002-07e2b8533c9b
+
+	measure _Blank = 0
+		formatString: 0
+		isHidden
+		lineageTag: 4c28d31f-d60d-49ae-8bc7-202c736683e7
+
+	measure 1_Headcount =
+			
+			CALCULATE(
+			COUNTROWS('DataTable'),
+			'DataTable'[HireDate] <= MAX('Date'[Date]),
+			ISBLANK('DataTable'[TerminationDate]) ||
+			'DataTable'[TerminationDate] > MAX('Date'[Date])
+			)
+		formatString: 0
+		displayFolder: Model
+		lineageTag: f8a8c8a3-7372-450c-ab9d-8c4af8537b05
+
+	measure 3_TotalSalary =
+			CALCULATE(
+			    SUM('DataTable'[Salary]),
+			    'DataTable'[HireDate] <= MAX('Date'[Date]),
+			    ISBLANK('DataTable'[TerminationDate]) ||
+			    'DataTable'[TerminationDate] > MAX('Date'[Date])
+			)
+		formatString: \$#,0
+		displayFolder: Model
+		lineageTag: f5d10ac2-4e12-47a5-839a-5487f6ea7d51
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 2_Hires = ```
+			CALCULATE(
+			        COUNTROWS('DataTable'),
+			        'DataTable'[HireDate] >= MIN('Date'[Date]),
+			        'DataTable'[HireDate] <= MAX('Date'[Date])
+			    )
+			
+			    
+			```
+		formatString: 0
+		displayFolder: Model
+		lineageTag: 62231096-1ba1-4714-835a-6638652dee96
+
+	measure 4_Terminations =
+			VAR _t =
+			    CALCULATE (
+			        COUNTROWS ( 'DataTable' ),
+			        NOT ISBLANK ( 'DataTable'[TerminationDate] ),
+			        'DataTable'[TerminationDate] >= MIN ( 'Date'[Date] ),
+			        'DataTable'[TerminationDate] <= MAX ( 'Date'[Date] )
+			    )
+			RETURN
+			    -- 0 when there were employees in the period but nobody left; blank when the selection had no employees (fix round 1)
+			    IF ( ISBLANK ( _t ) && [Average Headcount] > 0, 0, _t )
+		formatString: 0
+		displayFolder: Model
+		lineageTag: 69e1f685-9fd9-4863-85ce-fb3fdc148e98
+
+	measure 5_HireRate =
+			DIVIDE(
+			    '_Measures'[2_Hires],
+			    '_Measures'[Average Headcount],
+			    0
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Model
+		lineageTag: 26a2b413-21c0-488b-a86a-eb9a107f9521
+
+	measure 6_TerminationRate =
+			DIVIDE(
+			    '_Measures'[4_Terminations],
+			    '_Measures'[Average Headcount],
+			    0
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Model
+		lineageTag: fdbac5a1-7a4c-4de0-a124-a81fb462b042
+
+	measure '1_Headcount LY' = ```
+			
+			 CALCULATE([1_Headcount],SAMEPERIODLASTYEAR('Date'[Date]))
+			
+			    
+			```
+		formatString: 0
+		displayFolder: Model
+		lineageTag: 1fddac35-7b11-46cb-8e65-4e71b5f51d2a
+
+	measure '3_TotalSalary LY' = ```
+			
+			CALCULATE(
+			        [3_TotalSalary],
+			        SAMEPERIODLASTYEAR('Date'[Date])
+			    )
+			
+			    
+			```
+		formatString: \$#,0
+		displayFolder: Model
+		lineageTag: e0e80b4a-cad9-4e1f-bf3f-01976a9c602e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '2_Hires LY' = ```
+			
+			CALCULATE(
+			        [2_Hires],
+			        SAMEPERIODLASTYEAR('Date'[Date])
+			    )
+			
+			    
+			```
+		formatString: 0
+		displayFolder: Model
+		lineageTag: c35443db-8917-4e3d-8f11-67e31c83e599
+
+	measure '4_Terminations LY' = ```
+			
+			CALCULATE(
+			        [4_Terminations],
+			        SAMEPERIODLASTYEAR('Date'[Date]) 
+			    )
+			
+			    
+			```
+		formatString: 0
+		displayFolder: Model
+		lineageTag: 77c34332-4a1e-4915-a12a-22b855b7a237
+
+	measure '5_HireRate LY' =
+			CALCULATE(
+			    '_Measures'[5_HireRate],
+			    SAMEPERIODLASTYEAR('Date'[Date])
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Model
+		lineageTag: 228d16b1-cee7-48bb-be7c-4269ca4be3f6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '6_TerminationRate LY' =
+			CALCULATE(
+			    '_Measures'[6_TerminationRate],
+			    SAMEPERIODLASTYEAR('Date'[Date])
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: Model
+		lineageTag: d468a03f-9158-4a14-af23-802ae18a55ee
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '1_Headcount BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[1_Headcount] - '_Measures'[1_Headcount LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			 
+			
+			```
+		isHidden
+		lineageTag: a016b997-bf56-4208-8368-9403a617b117
+
+	measure '1_Headcount Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[1_Headcount] - '_Measures'[1_Headcount LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: a74bfaab-329e-4a5f-8be5-d140e60e3d7b
+
+	measure '1_Headcount Reference' = ```
+			
+			    VAR _Current = '_Measures'[1_Headcount]
+			    VAR _LY = '_Measures'[1_Headcount LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			
+			```
+		isHidden
+		lineageTag: bbf13d1b-830d-4b8d-900f-31aa024142fa
+
+	measure '2_Hires BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[2_Hires] - '_Measures'[2_Hires LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: 20a35d08-27b5-47d3-b1c3-5caa715840d7
+
+	measure '2_Hires Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[2_Hires] - '_Measures'[2_Hires LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: d1332541-3cc1-467c-a520-e6643da01756
+
+	measure '2_Hires Reference' = ```
+			
+			    VAR _Current = '_Measures'[2_Hires]
+			    VAR _LY = '_Measures'[2_Hires LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			
+			```
+		isHidden
+		lineageTag: a6a5e55a-7865-49c7-8372-03b6e0c48d8b
+
+	measure '3_TotalSalary BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[3_TotalSalary] - '_Measures'[3_TotalSalary LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: e28b1977-486e-4b33-82d5-47aeed2db28e
+
+	measure '3_TotalSalary Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[3_TotalSalary] - '_Measures'[3_TotalSalary LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: 940dd44d-5e7a-429f-8e2d-5a50d1f69677
+
+	measure '3_TotalSalary Reference' = ```
+			
+			    VAR _Current = '_Measures'[3_TotalSalary]
+			    VAR _LY = '_Measures'[3_TotalSalary LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			
+			```
+		isHidden
+		lineageTag: 2640f68a-837a-4eaf-b8e3-2935c4e30bf4
+
+	measure '4_Terminations BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[4_Terminations] - '_Measures'[4_Terminations LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: 9e289ece-d5f2-4740-9efb-9f8bd971b8b1
+
+	measure '4_Terminations Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[4_Terminations] - '_Measures'[4_Terminations LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: dcdf2a9c-2c0e-4fb9-8a1b-400469005fbf
+
+	measure '4_Terminations Reference' = ```
+			
+			    VAR _Current = '_Measures'[4_Terminations]
+			    VAR _LY = '_Measures'[4_Terminations LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+					
+			
+			```
+		isHidden
+		lineageTag: 34090d5f-9077-41f6-a477-4e8f40fb0ae1
+
+	measure '5_HireRate BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[5_HireRate] - '_Measures'[5_HireRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: 07672fbd-52fd-49b6-9944-c0ccb2af4dcc
+
+	measure '5_HireRate Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[5_HireRate] - '_Measures'[5_HireRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: b8f9cc17-1c1b-4b22-acbc-4bb0c21086ea
+
+	measure '5_HireRate Reference' = ```
+			
+			    VAR _Current = '_Measures'[5_HireRate]
+			    VAR _LY = '_Measures'[5_HireRate LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			```
+		isHidden
+		lineageTag: 1a82cb5a-5461-4a28-9d02-fef0c85ccec4
+
+	measure '6_TerminationRate BG Color' = ```
+			
+			    VAR _Delta = '_Measures'[6_TerminationRate] - '_Measures'[6_TerminationRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#E7F3F5",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#F6EDED"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: 5dceca13-7ab0-463c-a764-27beb6ff6920
+
+	measure '6_TerminationRate Font Color' = ```
+			
+			    VAR _Delta = '_Measures'[6_TerminationRate] - '_Measures'[6_TerminationRate LY]
+			    RETURN
+			        SWITCH(
+			            TRUE(),
+			            _Delta > 0, "#038D96",  
+			            _Delta = 0, "FFFFFF00",  
+			            _Delta < 0, "#A84545"   
+			        )
+			
+			
+			```
+		isHidden
+		lineageTag: edf84bb7-a0b8-4834-aab1-173c61281fbc
+
+	measure '6_TerminationRate Reference' = ```
+			
+			    VAR _Current = '_Measures'[6_TerminationRate]
+			    VAR _LY = '_Measures'[6_TerminationRate LY]
+			    VAR _Growth = DIVIDE(_Current - _LY, _LY)
+			    VAR NumOfDigits = IFERROR(LEN(CONVERT(INT(_Current), STRING)), 0)
+			    VAR Suffix = ".0" & SWITCH(TRUE(), NumOfDigits >= 13, "T", NumOfDigits >= 10, "B", NumOfDigits >= 7, "M", NumOfDigits >= 4, "K")
+			    VAR Commas = REPT(",", SWITCH(TRUE(), NumOfDigits >= 13, "4", NumOfDigits >= 10, "3", NumOfDigits >= 7, "2", NumOfDigits >= 4, "1"))
+			    VAR _Format = "#,##0" & Commas & Suffix & ";-#,##0" & Commas & Suffix 
+			    RETURN
+			        IF(_Growth <> 0, FORMAT(_Current - _LY, _Format) & FORMAT(_Growth, " | 0.0% ▲; | 0.0% ▼; ") & " YoY", BLANK())
+			
+			```
+		isHidden
+		lineageTag: 120178e4-fd9f-44f3-8adf-90b641e2aba5
+
+	/// Employees active on the day before the first day of the selected period.
+	measure 'Headcount Start' =
+			VAR _Start = MIN('Date'[Date]) - 1
+			RETURN
+			    CALCULATE(
+			        COUNTROWS('DataTable'),
+			        'DataTable'[HireDate] <= _Start,
+			        ISBLANK('DataTable'[TerminationDate]) ||
+			        'DataTable'[TerminationDate] > _Start
+			    )
+		formatString: #,0
+		displayFolder: Model
+		lineageTag: d5fff592-c14a-436c-9580-1cf08479cc4c
+
+	/// Headcount at the start of the period plus headcount at the end, divided by 2.
+	measure 'Average Headcount' =
+			DIVIDE(
+			    COALESCE('_Measures'[Headcount Start], 0) + '_Measures'[1_Headcount],
+			    2
+			)
+		formatString: #,0.0
+		displayFolder: Model
+		lineageTag: 7f227e77-300d-43a5-9570-ef1017d2da7c
+
+	/// Total salary of active employees divided by headcount, at the end of the period.
+	measure 'Average Salary' = DIVIDE('_Measures'[3_TotalSalary], '_Measures'[1_Headcount])
+		formatString: \$#,0
+		displayFolder: Model
+		lineageTag: 4e5812ff-5591-448f-8f6f-5bd77be13229
+
+	/// Hires minus terminations in the period.
+	measure 'Net Change' = '_Measures'[2_Hires] - '_Measures'[4_Terminations]
+		formatString: +#,0;-#,0;0
+		displayFolder: Model
+		lineageTag: d10aa1fa-9d44-4834-8a25-048f45326a47
+
+	/// False only when the period has no previous year in 'Date' (2020).
+	measure 'Has PY' = NOT ISBLANK ( CALCULATE ( MAX ( 'Date'[Date] ), SAMEPERIODLASTYEAR ( 'Date'[Date] ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 471debf7-55e9-4c81-8827-a97575fa0c83
+
+	/// Rates start in 2021: 2020 begins with no staff (hire rate 200%).
+	measure Rated = YEAR ( MIN ( 'Date'[Date] ) ) >= 2021
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: b572ce4c-1437-4b2e-928e-56bbd402c5e5
+
+	measure 'Period label' =
+			VAR _d1 = MIN ( 'Date'[Date] )
+			VAR _d2 = MAX ( 'Date'[Date] )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( _d1 ), BLANK (),
+			        YEAR ( _d1 ) <> YEAR ( _d2 ), FORMAT ( _d1, "yyyy" ) & "–" & FORMAT ( _d2, "yyyy" ),
+			        MONTH ( _d1 ) = 1 && MONTH ( _d2 ) = 12, FORMAT ( _d1, "yyyy" ),
+			        MONTH ( _d1 ) = MONTH ( _d2 ), FORMAT ( _d1, "mmm yyyy" ),
+			        MONTH ( _d1 ) = ( QUARTER ( _d1 ) - 1 ) * 3 + 1 && MONTH ( _d2 ) = QUARTER ( _d1 ) * 3,
+			            "Q" & QUARTER ( _d1 ) & " " & YEAR ( _d1 ),
+			        FORMAT ( _d1, "mmm" ) & "–" & FORMAT ( _d2, "mmm yyyy" )
+			    )
+		displayFolder: Rep 5
+		lineageTag: d4135904-15cf-41e0-a88d-1e842412c286
+
+	measure 'Period label LY' = CALCULATE ( [Period label], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		displayFolder: Rep 5
+		lineageTag: 607f2f23-4f6c-4e42-9066-e946e4eb36a1
+
+	measure 'Hire rate from 2021' = IF ( [Rated], [5_HireRate] )
+		formatString: 0.0%
+		displayFolder: Rep 5
+		lineageTag: 66ad558f-727c-4947-93f9-6d79712ce30f
+
+	measure 'Hire rate from 2021 LY' = CALCULATE ( [Hire rate from 2021], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0.0%
+		displayFolder: Rep 5
+		lineageTag: c6dca027-af40-467e-818f-31989890622e
+
+	measure 'Termination rate from 2021' = IF ( [Rated], [6_TerminationRate] )
+		formatString: 0.0%
+		displayFolder: Rep 5
+		lineageTag: abb4d0b8-11e7-40bc-a509-66f85dad0961
+
+	measure 'Termination rate from 2021 LY' = CALCULATE ( [Termination rate from 2021], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0.0%
+		displayFolder: Rep 5
+		lineageTag: 048ab105-f02c-4d69-9595-eec730244e57
+
+	/// Pane slicers with a selection (Year not counted). Charts don't filter the badge (interactions None).
+	measure 'Filter count' =
+			INT ( ISFILTERED ( 'Date'[Quarter] ) ) + INT ( ISFILTERED ( 'Date'[Month] ) )
+			    + INT ( ISFILTERED ( 'DataTable'[Department] ) ) + INT ( ISFILTERED ( 'DataTable'[EmploymentType] ) )
+			    + INT ( ISFILTERED ( 'DataTable'[Gender] ) )
+		formatString: 0
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 7b7a0102-bea2-4206-ae9f-6f31b10c41a1
+
+	measure 'Filter badge' = VAR _n = [Filter count] RETURN IF ( _n = 0, "", FORMAT ( _n, "0" ) )
+		displayFolder: Rep 5
+		lineageTag: 3743980f-3976-4c53-a615-4939616e115c
+
+	measure 'Filter count text' = VAR _n = [Filter count] RETURN IF ( _n = 0, "none applied", _n & " applied" )
+		displayFolder: Rep 5
+		lineageTag: 9e1d9b43-ce8a-4e09-a473-52b447ec848b
+
+	measure 'Filter badge fill' = IF ( [Filter count] = 0, "#FFFFFF00", "#038D96" )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: ab932c88-3cb2-46cc-bd09-396f83f9620b
+
+	measure 'KPI Headcount PY text' = IF ( NOT [Has PY], "First year of data", "vs " & FORMAT ( COALESCE ( [1_Headcount LY], 0 ), "#,0" ) & " in " & [Period label LY] )
+		displayFolder: Rep 5
+		lineageTag: 9602c8cf-a0ee-4493-a2a8-d797aabb25f2
+
+	measure 'KPI Headcount delta text' =
+			VAR _p = COALESCE ( [1_Headcount LY], 0 )
+			VAR _d = IF ( [Has PY], COALESCE ( [1_Headcount], 0 ) - COALESCE ( [1_Headcount LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "", IF ( _d = 0, "No change", IF ( _d > 0, "▲ +", "▼ −" ) & FORMAT ( ABS ( _d ), "#,0" ) & IF ( _p <> 0, " · " & IF ( _d > 0, "+", IF ( _d < 0, "−", "" ) ) & FORMAT ( ABS ( _d / _p ), "0.0%" ) ) ) )
+		displayFolder: Rep 5
+		lineageTag: b80de2de-2fcb-4289-9548-6f469baa54b4
+
+	measure 'KPI Headcount delta font' =
+			VAR _d = IF ( [Has PY], COALESCE ( [1_Headcount], 0 ) - COALESCE ( [1_Headcount LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#5A6577", IF ( _d = 0, "#5A6577", IF ( ( _d > 0 ) = TRUE (), "#026E75", "#A84545" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: f0a8e2f3-1342-4fd0-8f49-25e8717860fc
+
+	measure 'KPI Headcount delta background' =
+			VAR _d = IF ( [Has PY], COALESCE ( [1_Headcount], 0 ) - COALESCE ( [1_Headcount LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#FFFFFF00", IF ( _d = 0, "#EEF1F6", IF ( ( _d > 0 ) = TRUE (), "#E7F3F5", "#F6EDED" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: d62d98df-48ca-406f-983a-a56ca622648b
+
+	measure 'KPI Hires PY text' = IF ( NOT [Has PY], "First year of data", "vs " & FORMAT ( COALESCE ( [2_Hires LY], 0 ), "#,0" ) & " in " & [Period label LY] )
+		displayFolder: Rep 5
+		lineageTag: 5fb08157-33fd-4d1d-afd0-fca845ce81b0
+
+	measure 'KPI Hires delta text' =
+			VAR _p = COALESCE ( [2_Hires LY], 0 )
+			VAR _d = IF ( [Has PY], COALESCE ( [2_Hires], 0 ) - COALESCE ( [2_Hires LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "", IF ( _d = 0, "No change", IF ( _d > 0, "▲ +", "▼ −" ) & FORMAT ( ABS ( _d ), "#,0" ) & IF ( _p <> 0, " · " & IF ( _d > 0, "+", IF ( _d < 0, "−", "" ) ) & FORMAT ( ABS ( _d / _p ), "0.0%" ) ) ) )
+		displayFolder: Rep 5
+		lineageTag: ee58f270-5119-4b24-a3c8-aa3070fdb13f
+
+	measure 'KPI Hires delta font' =
+			VAR _d = IF ( [Has PY], COALESCE ( [2_Hires], 0 ) - COALESCE ( [2_Hires LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#5A6577", IF ( _d = 0, "#5A6577", IF ( ( _d > 0 ) = TRUE (), "#026E75", "#A84545" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 6428ac3d-d47d-485c-a087-c0942048adcb
+
+	measure 'KPI Hires delta background' =
+			VAR _d = IF ( [Has PY], COALESCE ( [2_Hires], 0 ) - COALESCE ( [2_Hires LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#FFFFFF00", IF ( _d = 0, "#EEF1F6", IF ( ( _d > 0 ) = TRUE (), "#E7F3F5", "#F6EDED" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: f5aeaba1-c4f6-4305-9279-a7dfb5a72c94
+
+	measure 'KPI Terminations PY text' = IF ( NOT [Has PY], "First year of data", "vs " & FORMAT ( COALESCE ( [4_Terminations LY], 0 ), "#,0" ) & " in " & [Period label LY] )
+		displayFolder: Rep 5
+		lineageTag: d4acaaf1-ffd9-475a-b1e4-43625fb15628
+
+	measure 'KPI Terminations delta text' =
+			VAR _p = COALESCE ( [4_Terminations LY], 0 )
+			VAR _d = IF ( [Has PY], COALESCE ( [4_Terminations], 0 ) - COALESCE ( [4_Terminations LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "", IF ( _d = 0, "No change", IF ( _d > 0, "▲ +", "▼ −" ) & FORMAT ( ABS ( _d ), "#,0" ) & IF ( _p <> 0, " · " & IF ( _d > 0, "+", IF ( _d < 0, "−", "" ) ) & FORMAT ( ABS ( _d / _p ), "0.0%" ) ) ) )
+		displayFolder: Rep 5
+		lineageTag: 6978e1cf-050d-4d5e-ad01-34b053302c61
+
+	measure 'KPI Terminations delta font' =
+			VAR _d = IF ( [Has PY], COALESCE ( [4_Terminations], 0 ) - COALESCE ( [4_Terminations LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#5A6577", IF ( _d = 0, "#5A6577", IF ( ( _d > 0 ) = FALSE (), "#026E75", "#A84545" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: a9af9394-e461-4526-8620-89297d6f29b8
+
+	measure 'KPI Terminations delta background' =
+			VAR _d = IF ( [Has PY], COALESCE ( [4_Terminations], 0 ) - COALESCE ( [4_Terminations LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#FFFFFF00", IF ( _d = 0, "#EEF1F6", IF ( ( _d > 0 ) = FALSE (), "#E7F3F5", "#F6EDED" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: d67dcabf-170b-4706-8517-03f31f7f28b0
+
+	measure 'KPI Hire rate PY text' =
+			IF (
+			    NOT [Rated], "Rates start in 2021",
+			    IF ( ISBLANK ( [Hire rate from 2021 LY] ), "No rate last year", "vs " & FORMAT ( [Hire rate from 2021 LY], "0.0%" ) & " in " & [Period label LY] )
+			)
+		displayFolder: Rep 5
+		lineageTag: f82d92f4-72b6-4119-ba34-2fc0343fbe61
+
+	measure 'KPI Hire rate delta text' =
+			VAR _d = IF ( [Rated] && NOT ISBLANK ( [Hire rate from 2021 LY] ), ROUND ( ( [Hire rate from 2021] - [Hire rate from 2021 LY] ) * 100, 1 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "", IF ( _d = 0, "No change", IF ( _d > 0, "▲ +", "▼ −" ) & FORMAT ( ABS ( _d ), "0.0" ) & " pts" ) )
+		displayFolder: Rep 5
+		lineageTag: d30e2036-b2d2-4353-86c1-ec0da3a66e3b
+
+	measure 'KPI Hire rate delta font' =
+			VAR _d = IF ( [Rated] && NOT ISBLANK ( [Hire rate from 2021 LY] ), ROUND ( ( [Hire rate from 2021] - [Hire rate from 2021 LY] ) * 100, 1 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#5A6577", IF ( _d = 0, "#5A6577", IF ( ( _d > 0 ) = TRUE (), "#026E75", "#A84545" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: c16a83d0-0f45-4e29-bc84-3bfd0531344d
+
+	measure 'KPI Hire rate delta background' =
+			VAR _d = IF ( [Rated] && NOT ISBLANK ( [Hire rate from 2021 LY] ), ROUND ( ( [Hire rate from 2021] - [Hire rate from 2021 LY] ) * 100, 1 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#FFFFFF00", IF ( _d = 0, "#EEF1F6", IF ( ( _d > 0 ) = TRUE (), "#E7F3F5", "#F6EDED" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: fe8c6996-11de-4d29-98c0-4e509ec4a452
+
+	measure 'KPI Termination rate PY text' =
+			IF (
+			    NOT [Rated], "Rates start in 2021",
+			    IF ( ISBLANK ( [Termination rate from 2021 LY] ), "No rate last year", "vs " & FORMAT ( [Termination rate from 2021 LY], "0.0%" ) & " in " & [Period label LY] )
+			)
+		displayFolder: Rep 5
+		lineageTag: 3e65261a-1a4c-4b6c-b3db-1fab0cf78f48
+
+	measure 'KPI Termination rate delta text' =
+			VAR _d = IF ( [Rated] && NOT ISBLANK ( [Termination rate from 2021 LY] ), ROUND ( ( [Termination rate from 2021] - [Termination rate from 2021 LY] ) * 100, 1 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "", IF ( _d = 0, "No change", IF ( _d > 0, "▲ +", "▼ −" ) & FORMAT ( ABS ( _d ), "0.0" ) & " pts" ) )
+		displayFolder: Rep 5
+		lineageTag: 70d1738b-e9b0-4a20-a92d-25fb4e8fc205
+
+	measure 'KPI Termination rate delta font' =
+			VAR _d = IF ( [Rated] && NOT ISBLANK ( [Termination rate from 2021 LY] ), ROUND ( ( [Termination rate from 2021] - [Termination rate from 2021 LY] ) * 100, 1 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#5A6577", IF ( _d = 0, "#5A6577", IF ( ( _d > 0 ) = FALSE (), "#026E75", "#A84545" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: c962573d-26f7-4196-b0bd-782c06ac43f4
+
+	measure 'KPI Termination rate delta background' =
+			VAR _d = IF ( [Rated] && NOT ISBLANK ( [Termination rate from 2021 LY] ), ROUND ( ( [Termination rate from 2021] - [Termination rate from 2021 LY] ) * 100, 1 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#FFFFFF00", IF ( _d = 0, "#EEF1F6", IF ( ( _d > 0 ) = FALSE (), "#E7F3F5", "#F6EDED" ) ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 34455661-7477-4f5e-96b4-8dd662bcfcd4
+
+	measure 'KPI Salary PY text' = "avg " & "$" & FORMAT ( [Average Salary] / 1e3, "0.0" ) & "K" & IF ( NOT [Has PY], " · first year of data", " · vs " & "$" & FORMAT ( COALESCE ( [3_TotalSalary LY], 0 ) / 1e6, "0.0" ) & "M" )
+		displayFolder: Rep 5
+		lineageTag: f3d8f860-ad56-4b35-93e3-e4f872ba728d
+
+	measure 'KPI Salary delta text' =
+			VAR _p = COALESCE ( [3_TotalSalary LY], 0 )
+			VAR _d = IF ( [Has PY], COALESCE ( [3_TotalSalary], 0 ) - COALESCE ( [3_TotalSalary LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "", IF ( _d = 0, "No change", IF ( _d > 0, "▲ +", "▼ −" ) & IF ( _p <> 0, FORMAT ( ABS ( _d / _p ), "0.0%" ), "$" & FORMAT ( ABS ( _d ) / 1e6, "0.0" ) & "M" ) ) )
+		displayFolder: Rep 5
+		lineageTag: 729fa7ca-0832-4664-8905-00f50d3ebb6e
+
+	measure 'KPI Salary delta font' =
+			VAR _d = IF ( [Has PY], COALESCE ( [3_TotalSalary], 0 ) - COALESCE ( [3_TotalSalary LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#5A6577", IF ( _d = 0, "#5A6577", "#5A6577" ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 36a7a6a3-3d67-4f1d-9843-585520832d0c
+
+	measure 'KPI Salary delta background' =
+			VAR _d = IF ( [Has PY], COALESCE ( [3_TotalSalary], 0 ) - COALESCE ( [3_TotalSalary LY], 0 ) )
+			RETURN
+			    IF ( ISBLANK ( _d ), "#FFFFFF00", IF ( _d = 0, "#EEF1F6", "#EEF1F6" ) )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 8f81e9ef-8d0f-4b23-a3b9-1275f4d1da1d
+
+	measure 'KPI Hire rate subtitle' =
+			VAR _d = IF ( [Rated] && NOT ISBLANK ( [Hire rate from 2021 LY] ), ( [Hire rate from 2021] - [Hire rate from 2021 LY] ) * 100 )
+			RETURN
+			    [KPI Hire rate PY text] & IF ( NOT ISBLANK ( _d ), " · " & IF ( _d >= 0, "+", "−" ) & FORMAT ( ABS ( _d ), "0.0" ) & " pts" )
+		displayFolder: Rep 5
+		lineageTag: a41844fe-ae40-47f4-9500-1e4afe5139ba
+
+	measure 'Gauge max hire rate' = CEILING ( MAX ( [Hire rate from 2021], COALESCE ( [Hire rate from 2021 LY], 0 ) ) * 1.4, 0.1 )
+		formatString: 0%
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 488fa9a0-d124-4755-a775-f6a8cdfefc67
+
+	measure 'Headcount sparkline SVG' =
+			VAR _y = MAX ( 'Date'[Year] )
+			VAR _m2 = MONTH ( MAX ( 'Date'[Date] ) )
+			VAR _pts = ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@hc", CALCULATE ( [1_Headcount], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) )
+			VAR _lo = MINX ( _pts, [@hc] )
+			VAR _hi = MAXX ( _pts, [@hc] )
+			VAR _r = IF ( _hi = _lo, 1, _hi - _lo )
+			VAR _xy = ADDCOLUMNS ( _pts, "@x", 4 + ( [Value] - 1 ) * 10, "@y", 58 - ( [@hc] - _lo ) / _r * 48 )
+			VAR _line = CONCATENATEX ( _xy, FORMAT ( [@x], "0.0" ) & "," & FORMAT ( [@y], "0.0" ), " ", [Value], ASC )
+			VAR _lx = MAXX ( FILTER ( _xy, [Value] = _m2 ), [@x] )
+			VAR _ly = MAXX ( FILTER ( _xy, [Value] = _m2 ), [@y] )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _hi ),
+			        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='118' height='64' viewBox='0 0 118 64'>"
+			            & "<polygon points='4,64 " & _line & " 114,64' fill='%23038D96' fill-opacity='0.35'/>"
+			            & "<polyline points='" & _line & "' fill='none' stroke='%238CCFD3' stroke-width='2'/>"
+			            & "<circle cx='" & FORMAT ( _lx, "0.0" ) & "' cy='" & FORMAT ( _ly, "0.0" ) & "' r='4' fill='white'/></svg>"
+			    )
+		displayFolder: Rep 5
+		lineageTag: 5d5e396c-6cf1-4986-b885-2d5283d531b4
+		dataCategory: ImageUrl
+
+	measure 'Termination rate bars SVG' =
+			VAR _sel = MAX ( 'Date'[Year] )
+			VAR _t = ADDCOLUMNS ( GENERATESERIES ( 2021, 2024, 1 ), "@r",
+			    CALCULATE ( [Termination rate from 2021], FILTER ( ALL ( 'Date' ), 'Date'[Year] = [Value] ) ) )
+			VAR _mx = MAX ( MAXX ( _t, [@r] ), 0.01 )
+			VAR _bars =
+			    CONCATENATEX (
+			        _t,
+			        VAR _h = COALESCE ( [@r], 0 ) / _mx * 50
+			        VAR _x = ( [Value] - 2021 ) * 30 + 4
+			        VAR _on = [Value] = _sel
+			        RETURN
+			            "<rect x='" & _x & "' y='" & FORMAT ( 62 - _h, "0.0" ) & "' width='22' height='" & FORMAT ( _h, "0.0" )
+			                & "' rx='3' fill='" & IF ( _on, "%23A84545", "%23E3A6A6" ) & "'/>"
+			                & IF ( _on, "<text x='" & _x + 11 & "' y='" & FORMAT ( 58 - _h, "0.0" ) & "' font-size='10' font-family='Segoe UI' "
+			                    & "font-weight='600' fill='%23A84545' text-anchor='middle'>" & FORMAT ( [@r] * 100, "0.0" ) & "%25</text>" )
+			                & "<text x='" & _x + 11 & "' y='75' font-size='10' font-family='Segoe UI' text-anchor='middle' fill='"
+			                & IF ( _on, "%231D2733", "%235A6577" ) & "'>" & RIGHT ( [Value], 2 ) & "</text>",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='118' height='78' viewBox='0 0 118 78'>" & _bars & "</svg>"
+		displayFolder: Rep 5
+		lineageTag: 69beeb8d-6fea-4434-9ce2-770d79b90ece
+		dataCategory: ImageUrl
+
+	measure 'Terminations card HTML' =
+			VAR _y = MAX ( 'Date'[Year] )
+			VAR _m1 = MONTH ( MIN ( 'Date'[Date] ) )
+			VAR _m2 = MONTH ( MAX ( 'Date'[Date] ) )
+			VAR _t = ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@t", CALCULATE ( [4_Terminations], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) )
+			VAR _mx = MAX ( MAXX ( _t, [@t] ), 1 )
+			VAR _busy = TOPN ( 1, _t, [@t], DESC, [Value], ASC )
+			VAR _bars =
+			    CONCATENATEX (
+			        _t,
+			        "<div title='" & FORMAT ( DATE ( _y, [Value], 1 ), "mmm" ) & ": " & COALESCE ( [@t], 0 ) & "' style='flex:1;border-radius:2px;height:"
+			            & MAX ( 2, COALESCE ( [@t], 0 ) / _mx * 52 ) & "px;background:"
+			            & IF ( [Value] >= _m1 && [Value] <= _m2, "#A84545", "#E3A6A6" ) & "'></div>",
+			        "", [Value], ASC
+			    )
+			RETURN
+			    "<div style='font-family:Segoe UI;position:relative;height:100%'>"
+			        & "<div style='font-size:13px;font-weight:600;color:#5A6577'>Terminations</div>"
+			        & "<div style='font-size:36px;font-weight:600;color:#A84545;line-height:44px'>" & FORMAT ( COALESCE ( [4_Terminations], 0 ), "#,0" ) & "</div>"
+			        & "<div style='font-size:12px;color:#5A6577;margin-top:8px'><span style='padding:0 8px;border-radius:11px;font-weight:600;"
+			        & "background:" & [KPI Terminations delta background] & ";color:" & [KPI Terminations delta font] & "'>"
+			        & COALESCE ( [KPI Terminations delta text], "First year" ) & "</span> " & IF ( [Has PY], "vs " & COALESCE ( [4_Terminations LY], 0 ) ) & "</div>"
+			        & "<div style='position:absolute;right:0;top:6px;width:118px'><div style='display:flex;align-items:flex-end;gap:3px;height:52px'>"
+			        & _bars & "</div><div style='font-size:11px;color:#5A6577;text-align:right;margin-top:6px'>"
+			        & IF ( MAXX ( _t, [@t] ) > 0, "busiest " & FORMAT ( DATE ( _y, MAXX ( _busy, [Value] ), 1 ), "mmm" ) & " (" & MAXX ( _busy, [@t] ) & ")", "none this year" )
+			        & "</div></div></div>"
+		displayFolder: Rep 5
+		lineageTag: 5e406427-4582-4c47-b6b8-c7aebb45acaf
+
+	measure Headline =
+			VAR _hc = [1_Headcount]
+			VAR _net = COALESCE ( [2_Hires], 0 ) - COALESCE ( [4_Terminations], 0 )
+			VAR _r = [Termination rate from 2021]
+			VAR _rl = [Termination rate from 2021 LY]
+			VAR _pts = ( _r - _rl ) * 100
+			RETURN
+			    IF (
+			        ISBLANK ( MIN ( 'Date'[Date] ) ), "No data for this selection",
+			        FORMAT ( COALESCE ( _hc, 0 ), "#,0" ) & " employees at the end of " & [Period label] & " · net "
+			            & IF ( _net > 0, "+", IF ( _net < 0, "−", "" ) ) & FORMAT ( ABS ( _net ), "#,0" ) & " (" & FORMAT ( COALESCE ( [2_Hires], 0 ), "#,0" ) & " joined, "
+			            & FORMAT ( COALESCE ( [4_Terminations], 0 ), "#,0" ) & " left)"
+			            & SWITCH (
+			                TRUE (),
+			                ISBLANK ( _r ), " · first year of data, rates start in 2021",
+			                ISBLANK ( _rl ), " · termination rate " & FORMAT ( _r, "0.0%" ),
+			                " · termination rate " & FORMAT ( _r, "0.0%" ) & ", " & IF ( _pts < 0, "down ", "up " )
+			                    & FORMAT ( ABS ( _pts ), "0.0" ) & " pts"
+			            )
+			    )
+		displayFolder: Rep 5
+		lineageTag: d255257c-6d2e-4541-afd4-826dccf30220
+
+	measure 'Headline Mix' =
+			VAR _hc = [1_Headcount]
+			VAR _c = CALCULATE ( [1_Headcount], 'DataTable'[EmploymentType] = "Contractor" )
+			RETURN
+			    IF (
+			        COALESCE ( _hc, 0 ) = 0, "No active employees in this selection",
+			        FORMAT ( _hc, "#,0" ) & " active employees at the end of " & [Period label] & " · "
+			            & FORMAT ( DIVIDE ( _c, _hc, 0 ), "0.0%" ) & " contractors · average salary " & "$" & FORMAT ( [Average Salary] / 1e3, "0.0" ) & "K"
+			    )
+		displayFolder: Rep 5
+		lineageTag: 0c38f983-874f-44c7-b61e-a8ceb29ff2a6
+
+	/// Transparent base series that floats the hires and terminations bars.
+	measure 'Bridge base' =
+			VAR _o = SELECTEDVALUE ( 'Bridge step'[Order], 0 )
+			RETURN
+			    SWITCH ( _o, 2, [Headcount Start], 3, COALESCE ( [Headcount Start], 0 ) + COALESCE ( [2_Hires], 0 ) - COALESCE ( [4_Terminations], 0 ) )
+		formatString: ;;;
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 25dc8e05-6fa5-4adc-b8d1-e8d0c0498979
+
+	measure 'Bridge level' = VAR _o = SELECTEDVALUE ( 'Bridge step'[Order], 0 ) RETURN SWITCH ( _o, 1, COALESCE ( [Headcount Start], 0 ), 4, [1_Headcount] )
+		formatString: #,0
+		displayFolder: Rep 5
+		lineageTag: 02c444d8-3b8a-4233-a250-cd4fcad73a51
+
+	measure 'Bridge up' = IF ( SELECTEDVALUE ( 'Bridge step'[Order], 0 ) = 2, [2_Hires] )
+		formatString: +#,0;-#,0;0
+		displayFolder: Rep 5
+		lineageTag: 9a337e60-b43c-4000-a02c-1892bebb011a
+
+	measure 'Bridge down' = IF ( SELECTEDVALUE ( 'Bridge step'[Order], 0 ) = 3, COALESCE ( [4_Terminations], 0 ) )
+		formatString: −#,0;−#,0;0
+		displayFolder: Rep 5
+		lineageTag: fe9d20f4-ffec-4761-b330-46147f280a93
+
+	measure 'Bridge subtitle' =
+			VAR _net = COALESCE ( [2_Hires], 0 ) - COALESCE ( [4_Terminations], 0 )
+			RETURN
+			    "Net " & IF ( _net > 0, "+", IF ( _net < 0, "−", "" ) ) & FORMAT ( ABS ( _net ), "#,0" ) & " in " & [Period label] & ": "
+			        & FORMAT ( COALESCE ( [2_Hires], 0 ), "#,0" ) & " joined, " & FORMAT ( COALESCE ( [4_Terminations], 0 ), "#,0" ) & " left"
+		displayFolder: Rep 5
+		lineageTag: 7f0d866d-56a8-4086-816b-e4c5060dbb18
+
+	measure 'Terminations (down)' = -[4_Terminations]
+		formatString: #,0;#,0;0
+		displayFolder: Rep 5
+		lineageTag: 55d883d1-4bf5-4e67-9c91-000074c59900
+
+	measure 'Flow title' = "Joiners and Leavers by Month, " & MAX ( 'Date'[Year] )
+		displayFolder: Rep 5
+		lineageTag: 46ce8c06-1469-479c-aa70-e3f2910b114e
+
+	measure 'Flow subtitle' =
+			VAR _y = MAX ( 'Date'[Year] )
+			VAR _t = ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@h", CALCULATE ( [2_Hires], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) )
+			VAR _h = SUMX ( _t, [@h] )
+			VAR _x = CALCULATE ( [4_Terminations], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y ) ) + 0
+			VAR _best = TOPN ( 1, _t, [@h], DESC, [Value], ASC )
+			VAR _net = _h - _x
+			RETURN
+			    "Net " & IF ( _net > 0, "+", IF ( _net < 0, "−", "" ) ) & FORMAT ( ABS ( _net ), "#,0" ) & ": " & FORMAT ( _h, "#,0" ) & " hires, " & FORMAT ( _x, "#,0" )
+			        & " terminations · most hires in " & FORMAT ( DATE ( _y, MAXX ( _best, [Value] ), 1 ), "mmm" ) & " (" & MAXX ( _best, [@h] ) & ")"
+		displayFolder: Rep 5
+		lineageTag: c05cf8e9-d811-4a9f-a758-71cbb98afcb5
+
+	measure 'Flow column axis min' =
+			VAR _y = MAX ( 'Date'[Year] )
+			VAR _mx = MAXX ( ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@m", CALCULATE ( MAX ( COALESCE ( [2_Hires], 0 ), COALESCE ( [4_Terminations], 0 ) ), FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) ), [@m] )
+			VAR _A = MAX ( _mx, 1 )
+			RETURN -1.15 * _A
+		formatString: 0
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: bb63eba8-839c-4ff2-95e4-fbc19db8ba15
+
+	measure 'Flow column axis max' =
+			VAR _y = MAX ( 'Date'[Year] )
+			VAR _mx = MAXX ( ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@m", CALCULATE ( MAX ( COALESCE ( [2_Hires], 0 ), COALESCE ( [4_Terminations], 0 ) ), FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) ), [@m] )
+			VAR _A = MAX ( _mx, 1 )
+			RETURN 2.9 * _A
+		formatString: 0
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: b7baf257-e1f1-4712-aeb9-68be48138be4
+
+	measure 'Flow line axis min' =
+			VAR _y = MAX ( 'Date'[Year] )
+			VAR _t = ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@c", CALCULATE ( [1_Headcount], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) )
+			VAR _l = FILTER ( ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@c", CALCULATE ( [1_Headcount LY], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) ), NOT ISBLANK ( [@c] ) )
+			VAR _lo = MIN ( MINX ( _t, [@c] ), COALESCE ( MINX ( _l, [@c] ), MINX ( _t, [@c] ) ) )
+			VAR _hi = MAX ( MAXX ( _t, [@c] ), COALESCE ( MAXX ( _l, [@c] ), MAXX ( _t, [@c] ) ) )
+			VAR _r = MAX ( _hi - _lo, 1 )
+			RETURN _lo - 1.7 * _r
+		formatString: 0
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 744e222c-d8e1-4c21-9b5b-29eb7549e085
+
+	measure 'Flow line axis max' =
+			VAR _y = MAX ( 'Date'[Year] )
+			VAR _t = ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@c", CALCULATE ( [1_Headcount], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) )
+			VAR _l = FILTER ( ADDCOLUMNS ( GENERATESERIES ( 1, 12, 1 ), "@c", CALCULATE ( [1_Headcount LY], FILTER ( ALL ( 'Date' ), 'Date'[Year] = _y && 'Date'[Month Number] = [Value] ) ) ), NOT ISBLANK ( [@c] ) )
+			VAR _lo = MIN ( MINX ( _t, [@c] ), COALESCE ( MINX ( _l, [@c] ), MINX ( _t, [@c] ) ) )
+			VAR _hi = MAX ( MAXX ( _t, [@c] ), COALESCE ( MAXX ( _l, [@c] ), MAXX ( _t, [@c] ) ) )
+			VAR _r = MAX ( _hi - _lo, 1 )
+			RETURN _hi + 0.22 * _r
+		formatString: 0
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 13e9ae00-6f7a-410a-bb9a-cd9a85c89162
+
+	measure 'Change value' =
+			VAR _c = COALESCE ( [Current], 0 )
+			VAR _p = COALESCE ( [Past Year], 0 )
+			RETURN
+			    IF ( [Has PY] && ( _c <> 0 || _p <> 0 ), _c - _p )
+		displayFolder: Rep 5
+		lineageTag: e4cc0778-25d8-40b8-bd28-09165015f245
+
+		formatStringDefinition = IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", "+\$#,0.0,,""M"";−\$#,0.0,,""M"";\$0.0M", "+#,0;−#,0;0" )
+
+	measure 'Change colour' =
+			VAR _d = [Change value]
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( _d ) || _d = 0, "#1D2733",
+			        SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", "#1D2733",
+			        SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Terminations", IF ( _d > 0, "#A84545", "#026E75" ),
+			        IF ( _d > 0, "#026E75", "#A84545" )
+			    )
+		isHidden
+		displayFolder: Rep 5
+		lineageTag: 860160ec-c598-4dd0-a03a-b6a0aa8df450
+
+	measure 'Change dumbbell SVG' =
+			VAR _o = SELECTEDVALUE ( 'Breakdown by'[Breakdown by Order], 0 )
+			VAR _c = COALESCE ( [Current], 0 )
+			VAR _p = COALESCE ( [Past Year], 0 )
+			VAR _lo0 = SWITCH ( _o, 0, MINX ( ALLSELECTED ( 'DataTable'[Department] ), MIN ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 1, MINX ( ALLSELECTED ( 'DataTable'[Education level] ), MIN ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 2, MINX ( ALLSELECTED ( 'DataTable'[Age group] ), MIN ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 3, MINX ( ALLSELECTED ( 'DataTable'[EmploymentType] ), MIN ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 4, MINX ( ALLSELECTED ( 'DataTable'[Gender] ), MIN ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ) )
+			VAR _hi0 = SWITCH ( _o, 0, MAXX ( ALLSELECTED ( 'DataTable'[Department] ), MAX ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 1, MAXX ( ALLSELECTED ( 'DataTable'[Education level] ), MAX ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 2, MAXX ( ALLSELECTED ( 'DataTable'[Age group] ), MAX ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 3, MAXX ( ALLSELECTED ( 'DataTable'[EmploymentType] ), MAX ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ), 4, MAXX ( ALLSELECTED ( 'DataTable'[Gender] ), MAX ( COALESCE ( [Current], 0 ), COALESCE ( [Past Year], 0 ) ) ) )
+			VAR _pad = MAX ( ( _hi0 - _lo0 ) * 0.08, 1 )
+			VAR _lo = _lo0 - _pad
+			VAR _hi = _hi0 + _pad
+			VAR _xc = 10 + ( _c - _lo ) / ( _hi - _lo ) * 200
+			VAR _xp = 10 + ( _p - _lo ) / ( _hi - _lo ) * 200
+			VAR _d = _c - _p
+			VAR _col = SWITCH (
+			        TRUE (),
+			        ISBLANK ( _d ) || _d = 0, "%235D6B8A",
+			        SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", "%235D6B8A",
+			        SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Terminations", IF ( _d > 0, "%23A84545", "%23038D96" ),
+			        IF ( _d > 0, "%23038D96", "%23A84545" )
+			    )
+			VAR _pct = IF ( _p <> 0, IF ( _d > 0, "+", IF ( _d < 0, "−", "" ) ) & FORMAT ( ABS ( _d / _p ) * 100, "0.0" ) & "%25", "" )  -- a raw % breaks the data URI
+			RETURN
+			    IF (
+			        [Has PY] && ( _c <> 0 || _p <> 0 ),
+			        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='270' height='24' viewBox='0 0 270 24'>"
+			            & "<line x1='" & FORMAT ( _xp, "0.0" ) & "' x2='" & FORMAT ( _xc, "0.0" ) & "' y1='12' y2='12' stroke='" & _col
+			            & "' stroke-width='4' stroke-opacity='0.45'/>"
+			            & "<circle cx='" & FORMAT ( _xp, "0.0" ) & "' cy='12' r='6' fill='white' stroke='%235D6B8A' stroke-width='2'/>"
+			            & "<circle cx='" & FORMAT ( _xc, "0.0" ) & "' cy='12' r='7' fill='" & _col & "'/>"
+			            & "<text x='266' y='16' font-size='11' font-family='Segoe UI' text-anchor='end' fill='%235A6577'>" & _pct & "</text></svg>"
+			    )
+		displayFolder: Rep 5
+		lineageTag: 32fe4de2-d75b-448b-940e-fb157a116acd
+		dataCategory: ImageUrl
+
+	measure 'Change subtitle' =
+			VAR _o = SELECTEDVALUE ( 'Breakdown by'[Breakdown by Order], 0 )
+			VAR _c = COALESCE ( [Current], 0 )
+			VAR _p = COALESCE ( [Past Year], 0 )
+			VAR _d = _c - _p
+			VAR _extra =
+			    SWITCH (
+			        _o,
+			        0,
+			            VAR _t = ADDCOLUMNS ( VALUES ( 'DataTable'[Department] ), "@d", COALESCE ( [Current], 0 ) - COALESCE ( [Past Year], 0 ) )
+			            VAR _up = TOPN ( 1, FILTER ( _t, [@d] > 0 ), [@d], DESC, 'DataTable'[Department], ASC )
+			            VAR _dn = TOPN ( 1, FILTER ( _t, [@d] < 0 ), [@d], ASC, 'DataTable'[Department], ASC )
+			            RETURN
+			                IF ( NOT ISEMPTY ( _up ), " · biggest rise " & MAXX ( _up, 'DataTable'[Department] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MAXX ( _up, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MAXX ( _up, [@d] ) ), "#,0" ) ) )
+			                    & IF ( NOT ISEMPTY ( _dn ), " · biggest fall " & MAXX ( _dn, 'DataTable'[Department] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MINX ( _dn, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MINX ( _dn, [@d] ) ), "#,0" ) ) ),
+			        1,
+			            VAR _t = ADDCOLUMNS ( VALUES ( 'DataTable'[Education level] ), "@d", COALESCE ( [Current], 0 ) - COALESCE ( [Past Year], 0 ) )
+			            VAR _up = TOPN ( 1, FILTER ( _t, [@d] > 0 ), [@d], DESC, 'DataTable'[Education level], ASC )
+			            VAR _dn = TOPN ( 1, FILTER ( _t, [@d] < 0 ), [@d], ASC, 'DataTable'[Education level], ASC )
+			            RETURN
+			                IF ( NOT ISEMPTY ( _up ), " · biggest rise " & MAXX ( _up, 'DataTable'[Education level] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MAXX ( _up, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MAXX ( _up, [@d] ) ), "#,0" ) ) )
+			                    & IF ( NOT ISEMPTY ( _dn ), " · biggest fall " & MAXX ( _dn, 'DataTable'[Education level] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MINX ( _dn, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MINX ( _dn, [@d] ) ), "#,0" ) ) ),
+			        2,
+			            VAR _t = ADDCOLUMNS ( VALUES ( 'DataTable'[Age group] ), "@d", COALESCE ( [Current], 0 ) - COALESCE ( [Past Year], 0 ) )
+			            VAR _up = TOPN ( 1, FILTER ( _t, [@d] > 0 ), [@d], DESC, 'DataTable'[Age group], ASC )
+			            VAR _dn = TOPN ( 1, FILTER ( _t, [@d] < 0 ), [@d], ASC, 'DataTable'[Age group], ASC )
+			            RETURN
+			                IF ( NOT ISEMPTY ( _up ), " · biggest rise " & MAXX ( _up, 'DataTable'[Age group] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MAXX ( _up, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MAXX ( _up, [@d] ) ), "#,0" ) ) )
+			                    & IF ( NOT ISEMPTY ( _dn ), " · biggest fall " & MAXX ( _dn, 'DataTable'[Age group] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MINX ( _dn, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MINX ( _dn, [@d] ) ), "#,0" ) ) ),
+			        3,
+			            VAR _t = ADDCOLUMNS ( VALUES ( 'DataTable'[EmploymentType] ), "@d", COALESCE ( [Current], 0 ) - COALESCE ( [Past Year], 0 ) )
+			            VAR _up = TOPN ( 1, FILTER ( _t, [@d] > 0 ), [@d], DESC, 'DataTable'[EmploymentType], ASC )
+			            VAR _dn = TOPN ( 1, FILTER ( _t, [@d] < 0 ), [@d], ASC, 'DataTable'[EmploymentType], ASC )
+			            RETURN
+			                IF ( NOT ISEMPTY ( _up ), " · biggest rise " & MAXX ( _up, 'DataTable'[EmploymentType] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MAXX ( _up, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MAXX ( _up, [@d] ) ), "#,0" ) ) )
+			                    & IF ( NOT ISEMPTY ( _dn ), " · biggest fall " & MAXX ( _dn, 'DataTable'[EmploymentType] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MINX ( _dn, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MINX ( _dn, [@d] ) ), "#,0" ) ) ),
+			        4,
+			            VAR _t = ADDCOLUMNS ( VALUES ( 'DataTable'[Gender] ), "@d", COALESCE ( [Current], 0 ) - COALESCE ( [Past Year], 0 ) )
+			            VAR _up = TOPN ( 1, FILTER ( _t, [@d] > 0 ), [@d], DESC, 'DataTable'[Gender], ASC )
+			            VAR _dn = TOPN ( 1, FILTER ( _t, [@d] < 0 ), [@d], ASC, 'DataTable'[Gender], ASC )
+			            RETURN
+			                IF ( NOT ISEMPTY ( _up ), " · biggest rise " & MAXX ( _up, 'DataTable'[Gender] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MAXX ( _up, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MAXX ( _up, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MAXX ( _up, [@d] ) ), "#,0" ) ) )
+			                    & IF ( NOT ISEMPTY ( _dn ), " · biggest fall " & MAXX ( _dn, 'DataTable'[Gender] ) & " " & IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & "$" & FORMAT ( ABS ( MINX ( _dn, [@d] ) ) / 1e6, "0.0" ) & "M", IF ( MINX ( _dn, [@d] ) > 0, "+", "−" ) & FORMAT ( ABS ( MINX ( _dn, [@d] ) ), "#,0" ) ) )
+			    )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( MIN ( 'Date'[Date] ) ), "No data for this selection",
+			        NOT [Has PY], YEAR ( MIN ( 'Date'[Date] ) ) & " is the first year of data: choose 2021 or later to compare",
+			        SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) & " " & IF ( _d = 0, "no change", IF ( SELECTEDVALUE ( 'Metric Selection'[Selected_KPI] ) = "Salary", IF ( _d > 0, "+", "−" ) & "$" & FORMAT ( ABS ( _d ) / 1e6, "0.0" ) & "M", IF ( _d > 0, "+", "−" ) & FORMAT ( ABS ( _d ), "#,0" ) ) & IF ( _p <> 0, " (" & IF ( _d > 0, "+", IF ( _d < 0, "−", "" ) ) & FORMAT ( ABS ( _d / _p ), "0.0%" ) & ")" ) )
+			            & " vs " & [Period label LY] & _extra
+			    )
+		displayFolder: Rep 5
+		lineageTag: 4a84a3a6-a406-44dc-8c61-310c3ae91860
+
+	measure 'Departments table HTML' = ```
+			VAR _all = [Termination rate from 2021]
+			VAR _t = ADDCOLUMNS ( VALUES ( 'DataTable'[Department] ), "@hc", [1_Headcount], "@h", [2_Hires], "@x", [4_Terminations], "@s", [3_TotalSalary] )
+			VAR _mxhc = MAX ( MAXX ( _t, [@hc] ), 1 )
+			VAR _mxs = MAX ( MAXX ( _t, [@s] ), 1 )
+			VAR _mxht = MAX ( MAX ( MAXX ( _t, [@h] ), MAXX ( _t, [@x] ) ), 1 )
+			VAR _rows =
+			    CONCATENATEX (
+			        FILTER ( _t, [@hc] + [@h] + [@x] > 0 ),
+			        
+			            VAR _hc = COALESCE ( [1_Headcount], 0 )
+			            VAR _h = COALESCE ( [2_Hires], 0 )
+			            VAR _x = COALESCE ( [4_Terminations], 0 )
+			            VAR _r = [Termination rate from 2021]
+			            VAR _n = _h - _x
+			            RETURN
+			                "<tr style='height:40px;border-bottom:1px solid #EEF1F6'><td>" & 'DataTable'[Department] & "</td><td style='text-align:right'>" & FORMAT ( _hc, "#,0" )
+			                    & "<span style='display:inline-block;height:8px;border-radius:4px;margin-left:10px;background:#8CCFD3;width:" & FORMAT ( _hc / _mxhc * 100, "0" ) & "px'></span>" & "</td><td style='text-align:center;white-space:nowrap'><span style='color:#A84545'>" & _x & "</span> "
+			                    & "<span style='display:inline-block;width:70px;text-align:right'><span style='display:inline-block;height:8px;border-radius:4px 0 0 4px;background:#A84545;width:" & FORMAT ( _x / _mxht * 70, "0" ) & "px'></span></span>"
+			                    & "<span style='display:inline-block;width:1px;height:16px;background:#5A6577;vertical-align:middle'></span>"
+			                    & "<span style='display:inline-block;width:70px'><span style='display:inline-block;height:8px;border-radius:0 4px 4px 0;background:#038D96;width:" & FORMAT ( _h / _mxht * 70, "0" ) & "px'></span></span> "
+			                    & "<span style='color:#026E75'>" & _h & "</span></td>"
+			                    & "<td style='text-align:center'><span style='padding:0 8px;border-radius:10px;font-weight:600;" & IF ( NOT ISBLANK ( _r ) && _r > _all, "background:#F6EDED;color:#A84545", "background:#EEF1F6;color:#5A6577" ) & "'>"
+			                    & IF ( ISBLANK ( _r ), "–", FORMAT ( _r, "0.0%" ) ) & "</span></td>"
+			                    & "<td style='text-align:right;font-weight:600;color:" & IF ( _n < 0, "#A84545", IF ( _n > 0, "#026E75", "#1D2733" ) ) & "'>"
+			                    & IF ( _n > 0, "+", IF ( _n < 0, "−", "" ) ) & FORMAT ( ABS ( _n ), "#,0" ) & "</td><td style='text-align:right'>" & "$" & FORMAT ( [Average Salary] / 1e3, "0.0" ) & "K"
+			                    & "</td><td style='text-align:right'>" & FORMAT ( [3_TotalSalary], "\$#,0" ) & "<span style='display:inline-block;height:8px;border-radius:4px;margin-left:10px;background:#B8C2D6;width:" & FORMAT ( [@s] / _mxs * 46, "0" ) & "px'></span>" & "</td></tr>",
+			        "", [@hc], DESC
+			    )
+			VAR _total =
+			    VAR _x = COALESCE ( [4_Terminations], 0 )
+			    VAR _h = COALESCE ( [2_Hires], 0 )
+			    VAR _n = _h - _x
+			    RETURN
+			        "<tr style='height:40px;font-weight:600;border-top:1.5px solid #12343B'><td>All Departments</td><td style='text-align:right'>"
+			            & FORMAT ( COALESCE ( [1_Headcount], 0 ), "#,0" ) & "</td><td style='text-align:center'><span style='color:#A84545'>" & _x
+			            & "</span> / <span style='color:#026E75'>" & _h & "</span></td><td style='text-align:center'>"
+			            & IF ( ISBLANK ( _all ), "–", FORMAT ( _all, "0.0%" ) ) & "</td><td style='text-align:right'>" & IF ( _n > 0, "+", IF ( _n < 0, "−", "" ) ) & FORMAT ( ABS ( _n ), "#,0" )
+			            & "</td><td style='text-align:right'>" & "$" & FORMAT ( [Average Salary] / 1e3, "0.0" ) & "K" & "</td><td style='text-align:right'>"
+			            & FORMAT ( [3_TotalSalary], "\$#,0" ) & "</td></tr>"
+			RETURN
+			    "<table style='width:100%;border-collapse:collapse;font-family:Segoe UI;font-size:13px;color:#1D2733'>"
+			        & "<tr style='height:26px;background:#EEF1F6;color:#5A6577;font-size:12px;font-weight:600'>"
+			        & "<td>Department</td><td style='text-align:right'>Headcount</td><td style='text-align:center'>Terminations ◂ | ▸ Hires</td>"
+			        & "<td style='text-align:center'>Termination Rate</td><td style='text-align:right'>Net Change</td>"
+			        & "<td style='text-align:right'>Avg Salary</td><td style='text-align:right'>Total Salary</td></tr>"
+			        & _rows & _total & "</table>"
+			```
+		displayFolder: Rep 5
+		lineageTag: 93ba3b91-0819-4a94-ada9-8a1ccd8f1372
+
+	measure 'Departments subtitle' =
+			VAR _all = [Termination rate from 2021]
+			VAR _t = FILTER ( ADDCOLUMNS ( VALUES ( 'DataTable'[Department] ), "@r", [Termination rate from 2021], "@x", [4_Terminations] ), [@x] > 0 )
+			VAR _hi = TOPN ( 1, _t, [@r], DESC, 'DataTable'[Department], ASC )
+			RETURN
+			    "End of " & [Period label] & " · "
+			        & SWITCH (
+			            TRUE (),
+			            ISBLANK ( _all ), "rates start in 2021",
+			            ISEMPTY ( _hi ), "no terminations in the period",
+			            "highest termination rate " & MAXX ( _hi, 'DataTable'[Department] ) & " " & FORMAT ( MAXX ( _hi, [@r] ), "0.0%" )
+			                & ", all departments " & FORMAT ( _all, "0.0%" ) & " · red = above"
+			        )
+		displayFolder: Rep 5
+		lineageTag: f2b42a82-ccb4-4851-b382-66b3dc580ba4
+
+	measure 'Mix subtitle Employment Type' =
+			VAR _t = FILTER ( ADDCOLUMNS ( VALUES ( 'DataTable'[EmploymentType] ), "@n", [1_Headcount] ), [@n] > 0 )
+			RETURN
+			    IF ( ISEMPTY ( _t ), "No data for this selection",
+			        CONCATENATEX ( _t, FORMAT ( [@n], "#,0" ) & " " & LOWER ( 'DataTable'[EmploymentType] ), " · ", 'DataTable'[EmploymentType], ASC ) )
+		displayFolder: Rep 5
+		lineageTag: c76a846f-5141-4ecf-b718-d50c1e22b8ae
+
+	measure 'Mix subtitle Gender' =
+			VAR _t = FILTER ( ADDCOLUMNS ( VALUES ( 'DataTable'[Gender] ), "@n", [1_Headcount] ), [@n] > 0 )
+			RETURN
+			    IF ( ISEMPTY ( _t ), "No data for this selection",
+			        CONCATENATEX ( _t, FORMAT ( [@n], "#,0" ) & " " & LOWER ( 'DataTable'[Gender] ), " · ", 'DataTable'[Gender], ASC ) )
+		displayFolder: Rep 5
+		lineageTag: 1b771976-58bc-422f-9074-17dc5ef03c62
+
+	measure 'Heatmap subtitle' =
+			VAR _t = ADDCOLUMNS ( CROSSJOIN ( VALUES ( 'DataTable'[Age group] ), VALUES ( 'DataTable'[Education level] ) ), "@n", [1_Headcount] )
+			VAR _top = TOPN ( 1, _t, [@n], DESC, 'DataTable'[Age group], ASC, 'DataTable'[Education level], ASC )
+			RETURN
+			    IF ( COALESCE ( [1_Headcount], 0 ) = 0, "No data for this selection",
+			        "Active employees, end of " & [Period label] & " · largest group " & MAXX ( _top, 'DataTable'[Age group] ) & ", "
+			            & MAXX ( _top, 'DataTable'[Education level] ) & " (" & MAXX ( _top, [@n] ) & ")" )
+		displayFolder: Rep 5
+		lineageTag: ed5c3b6e-702f-436f-8cd7-74650fa8c505
+
+	measure 'Leavers to date' =
+			CALCULATE (
+			    COUNTROWS ( 'DataTable' ),
+			    NOT ISBLANK ( 'DataTable'[TerminationDate] ),
+			    'DataTable'[TerminationDate] <= MAX ( 'Date'[Date] )
+			)
+		formatString: #,0
+		displayFolder: Rep 5
+		lineageTag: 68a17b62-5773-4a24-8f79-f21cdfea2eb7
+
+	measure 'Likert SVG' = ```
+			VAR _o = SELECTEDVALUE ( 'Rating'[Order], 0 )
+			VAR _A = COALESCE ( [1_Headcount], 0 )
+			VAR _L = COALESCE ( [Leavers to date], 0 )
+			VAR _body =
+			    SWITCH (
+			        _o,
+			        1, 
+			            VAR _a0 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Low" ), _A, 0 )
+			            VAR _l0 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Low" ), _L, 0 )
+			            VAR _a1 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Medium" ), _A, 0 )
+			            VAR _l1 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Medium" ), _L, 0 )
+			            VAR _a2 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "High" ), _A, 0 )
+			            VAR _l2 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "High" ), _L, 0 )
+			            VAR _a3 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Very High" ), _A, 0 )
+			            VAR _l3 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Very High" ), _L, 0 )
+			            VAR _g0 = ( _l0 - _a0 ) * 100 VAR _g1 = ( _l1 - _a1 ) * 100 VAR _g2 = ( _l2 - _a2 ) * 100 VAR _g3 = ( _l3 - _a3 ) * 100
+			            VAR _k = SWITCH ( TRUE (), ABS ( _g0 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 0, ABS ( _g1 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 1, ABS ( _g2 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 2, ABS ( _g3 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 3 )
+			            VAR _gk = SWITCH ( _k, 0, _g0, 1, _g1, 2, _g2, 3, _g3 )
+			            VAR _note = IF ( _L = 0, "no leavers yet", IF ( ABS ( _gk ) < 0.5, "leavers and active rate it alike",
+			                "“" & SWITCH ( _k, 0, "Low", 1, "Medium", 2, "High", 3, "Very High" ) & "”: leavers " & IF ( _gk > 0, "+", "−" ) & FORMAT ( ABS ( _gk ), "0.0" ) & " pts" ) )
+			            RETURN
+			                "<rect x='90' y='2' width='9' height='9' rx='2' fill='%23A84545'/><text x='103' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Low</text>" & "<rect x='200' y='2' width='9' height='9' rx='2' fill='%23E3A6A6'/><text x='213' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Medium</text>" & "<rect x='310' y='2' width='9' height='9' rx='2' fill='%238CCFD3'/><text x='323' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>High</text>" & "<rect x='420' y='2' width='9' height='9' rx='2' fill='%23026E75'/><text x='433' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Very High</text>"
+			                    & "<text x='856' y='10' font-size='11' font-weight='600' font-family='Segoe UI' text-anchor='end' fill='%231D2733'>" & _note & "</text>"
+			                    & "<text x='0' y='39' font-size='13' font-weight='600' font-family='Segoe UI' fill='%231D2733'>Active</text><text x='0' y='54' font-size='10' font-family='Segoe UI' fill='%235A6577'>" & FORMAT ( _A, "#,0" ) & " people</text>" & "<rect x='" & FORMAT ( 90, "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a0 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23A84545'/>" & IF ( ( _a0 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _a0 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a1 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%23E3A6A6'/>" & IF ( ( _a1 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _a1 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a2 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%238CCFD3'/>" & IF ( ( _a2 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _a2 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a3 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23026E75'/>" & IF ( ( _a3 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ) + ( _a3 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _a3 * 100, "0" ) & "%25</text>" )
+			                    & IF ( _L > 0, "<text x='0' y='87' font-size='13' font-weight='600' font-family='Segoe UI' fill='%231D2733'>Left</text><text x='0' y='102' font-size='10' font-family='Segoe UI' fill='%235A6577'>" & FORMAT ( _L, "#,0" ) & " people</text>" & "<rect x='" & FORMAT ( 90, "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l0 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23A84545'/>" & IF ( ( _l0 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _l0 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l1 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%23E3A6A6'/>" & IF ( ( _l1 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _l1 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l2 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%238CCFD3'/>" & IF ( ( _l2 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _l2 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l3 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23026E75'/>" & IF ( ( _l3 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ) + ( _l3 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _l3 * 100, "0" ) & "%25</text>" ), "<text x='90' y='94' font-size='12' font-family='Segoe UI' fill='%235A6577'>No leavers by the end of the period</text>" ),
+			        2, 
+			            VAR _a0 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Low" ), _A, 0 )
+			            VAR _l0 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Low" ), _L, 0 )
+			            VAR _a1 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Good" ), _A, 0 )
+			            VAR _l1 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Good" ), _L, 0 )
+			            VAR _a2 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Excellent" ), _A, 0 )
+			            VAR _l2 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Excellent" ), _L, 0 )
+			            VAR _a3 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Outstanding" ), _A, 0 )
+			            VAR _l3 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Outstanding" ), _L, 0 )
+			            VAR _g0 = ( _l0 - _a0 ) * 100 VAR _g1 = ( _l1 - _a1 ) * 100 VAR _g2 = ( _l2 - _a2 ) * 100 VAR _g3 = ( _l3 - _a3 ) * 100
+			            VAR _k = SWITCH ( TRUE (), ABS ( _g0 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 0, ABS ( _g1 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 1, ABS ( _g2 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 2, ABS ( _g3 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 3 )
+			            VAR _gk = SWITCH ( _k, 0, _g0, 1, _g1, 2, _g2, 3, _g3 )
+			            VAR _note = IF ( _L = 0, "no leavers yet", IF ( ABS ( _gk ) < 0.5, "leavers and active rate it alike",
+			                "“" & SWITCH ( _k, 0, "Low", 1, "Good", 2, "Excellent", 3, "Outstanding" ) & "”: leavers " & IF ( _gk > 0, "+", "−" ) & FORMAT ( ABS ( _gk ), "0.0" ) & " pts" ) )
+			            RETURN
+			                "<rect x='90' y='2' width='9' height='9' rx='2' fill='%23A84545'/><text x='103' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Low</text>" & "<rect x='200' y='2' width='9' height='9' rx='2' fill='%23E3A6A6'/><text x='213' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Good</text>" & "<rect x='310' y='2' width='9' height='9' rx='2' fill='%238CCFD3'/><text x='323' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Excellent</text>" & "<rect x='420' y='2' width='9' height='9' rx='2' fill='%23026E75'/><text x='433' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Outstanding</text>"
+			                    & "<text x='856' y='10' font-size='11' font-weight='600' font-family='Segoe UI' text-anchor='end' fill='%231D2733'>" & _note & "</text>"
+			                    & "<text x='0' y='39' font-size='13' font-weight='600' font-family='Segoe UI' fill='%231D2733'>Active</text><text x='0' y='54' font-size='10' font-family='Segoe UI' fill='%235A6577'>" & FORMAT ( _A, "#,0" ) & " people</text>" & "<rect x='" & FORMAT ( 90, "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a0 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23A84545'/>" & IF ( ( _a0 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _a0 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a1 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%23E3A6A6'/>" & IF ( ( _a1 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _a1 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a2 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%238CCFD3'/>" & IF ( ( _a2 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _a2 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a3 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23026E75'/>" & IF ( ( _a3 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ) + ( _a3 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _a3 * 100, "0" ) & "%25</text>" )
+			                    & IF ( _L > 0, "<text x='0' y='87' font-size='13' font-weight='600' font-family='Segoe UI' fill='%231D2733'>Left</text><text x='0' y='102' font-size='10' font-family='Segoe UI' fill='%235A6577'>" & FORMAT ( _L, "#,0" ) & " people</text>" & "<rect x='" & FORMAT ( 90, "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l0 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23A84545'/>" & IF ( ( _l0 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _l0 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l1 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%23E3A6A6'/>" & IF ( ( _l1 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _l1 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l2 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%238CCFD3'/>" & IF ( ( _l2 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _l2 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l3 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23026E75'/>" & IF ( ( _l3 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ) + ( _l3 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _l3 * 100, "0" ) & "%25</text>" ), "<text x='90' y='94' font-size='12' font-family='Segoe UI' fill='%235A6577'>No leavers by the end of the period</text>" ),
+			        3, 
+			            VAR _a0 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Bad" ), _A, 0 )
+			            VAR _l0 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Bad" ), _L, 0 )
+			            VAR _a1 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Good" ), _A, 0 )
+			            VAR _l1 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Good" ), _L, 0 )
+			            VAR _a2 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Better" ), _A, 0 )
+			            VAR _l2 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Better" ), _L, 0 )
+			            VAR _a3 = DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Best" ), _A, 0 )
+			            VAR _l3 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Best" ), _L, 0 )
+			            VAR _g0 = ( _l0 - _a0 ) * 100 VAR _g1 = ( _l1 - _a1 ) * 100 VAR _g2 = ( _l2 - _a2 ) * 100 VAR _g3 = ( _l3 - _a3 ) * 100
+			            VAR _k = SWITCH ( TRUE (), ABS ( _g0 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 0, ABS ( _g1 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 1, ABS ( _g2 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 2, ABS ( _g3 ) >= MAX ( MAX ( ABS ( _g0 ), ABS ( _g1 ) ), MAX ( ABS ( _g2 ), ABS ( _g3 ) ) ), 3 )
+			            VAR _gk = SWITCH ( _k, 0, _g0, 1, _g1, 2, _g2, 3, _g3 )
+			            VAR _note = IF ( _L = 0, "no leavers yet", IF ( ABS ( _gk ) < 0.5, "leavers and active rate it alike",
+			                "“" & SWITCH ( _k, 0, "Bad", 1, "Good", 2, "Better", 3, "Best" ) & "”: leavers " & IF ( _gk > 0, "+", "−" ) & FORMAT ( ABS ( _gk ), "0.0" ) & " pts" ) )
+			            RETURN
+			                "<rect x='90' y='2' width='9' height='9' rx='2' fill='%23A84545'/><text x='103' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Bad</text>" & "<rect x='200' y='2' width='9' height='9' rx='2' fill='%23E3A6A6'/><text x='213' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Good</text>" & "<rect x='310' y='2' width='9' height='9' rx='2' fill='%238CCFD3'/><text x='323' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Better</text>" & "<rect x='420' y='2' width='9' height='9' rx='2' fill='%23026E75'/><text x='433' y='10' font-size='11' font-family='Segoe UI' fill='%235A6577'>Best</text>"
+			                    & "<text x='856' y='10' font-size='11' font-weight='600' font-family='Segoe UI' text-anchor='end' fill='%231D2733'>" & _note & "</text>"
+			                    & "<text x='0' y='39' font-size='13' font-weight='600' font-family='Segoe UI' fill='%231D2733'>Active</text><text x='0' y='54' font-size='10' font-family='Segoe UI' fill='%235A6577'>" & FORMAT ( _A, "#,0" ) & " people</text>" & "<rect x='" & FORMAT ( 90, "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a0 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23A84545'/>" & IF ( ( _a0 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _a0 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a1 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%23E3A6A6'/>" & IF ( ( _a1 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _a1 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a2 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%238CCFD3'/>" & IF ( ( _a2 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _a2 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ), "0.0" ) & "' y='22' width='" & FORMAT ( MAX ( ( _a3 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23026E75'/>" & IF ( ( _a3 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _a0 * 760 ) + ( _a1 * 760 ) + ( _a2 * 760 ) + ( _a3 * 760 ) / 2, "0.0" ) & "' y='46' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _a3 * 100, "0" ) & "%25</text>" )
+			                    & IF ( _L > 0, "<text x='0' y='87' font-size='13' font-weight='600' font-family='Segoe UI' fill='%231D2733'>Left</text><text x='0' y='102' font-size='10' font-family='Segoe UI' fill='%235A6577'>" & FORMAT ( _L, "#,0" ) & " people</text>" & "<rect x='" & FORMAT ( 90, "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l0 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23A84545'/>" & IF ( ( _l0 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _l0 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l1 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%23E3A6A6'/>" & IF ( ( _l1 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _l1 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l2 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='1' fill='%238CCFD3'/>" & IF ( ( _l2 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%231D2733'>" & FORMAT ( _l2 * 100, "0" ) & "%25</text>" ) & "<rect x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ), "0.0" ) & "' y='70' width='" & FORMAT ( MAX ( ( _l3 * 760 ) - 2, 0 ), "0.0" ) & "' height='38' rx='5' fill='%23026E75'/>" & IF ( ( _l3 * 760 ) > 34, "<text x='" & FORMAT ( 90 + ( _l0 * 760 ) + ( _l1 * 760 ) + ( _l2 * 760 ) + ( _l3 * 760 ) / 2, "0.0" ) & "' y='94' font-size='12' font-weight='600' font-family='Segoe UI' text-anchor='middle' fill='%23FFFFFF'>" & FORMAT ( _l3 * 100, "0" ) & "%25</text>" ), "<text x='90' y='94' font-size='12' font-family='Segoe UI' fill='%235A6577'>No leavers by the end of the period</text>" )
+			    )
+			RETURN
+			    IF ( _o > 0 && _A + _L > 0,
+			        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='860' height='120' viewBox='0 0 860 120'>" & _body & "</svg>" )
+			```
+		displayFolder: Rep 5
+		lineageTag: dbd92cec-3875-4607-8635-29e97425e5b1
+		dataCategory: ImageUrl
+
+	measure 'Sentiment subtitle' =
+			VAR _A = COALESCE ( [1_Headcount], 0 )
+			VAR _L = COALESCE ( [Leavers to date], 0 )
+			VAR _g00 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Low" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Low" ), _A, 0 )
+			VAR _g01 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Medium" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Medium" ), _A, 0 )
+			VAR _g02 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "High" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "High" ), _A, 0 )
+			VAR _g03 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Very High" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Very High" ), _A, 0 )
+			VAR _g10 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Low" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Low" ), _A, 0 )
+			VAR _g11 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Good" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Good" ), _A, 0 )
+			VAR _g12 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Excellent" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Excellent" ), _A, 0 )
+			VAR _g13 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Outstanding" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Outstanding" ), _A, 0 )
+			VAR _g20 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Bad" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Bad" ), _A, 0 )
+			VAR _g21 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Good" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Good" ), _A, 0 )
+			VAR _g22 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Better" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Better" ), _A, 0 )
+			VAR _g23 = DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Best" ), _L, 0 ) - DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Best" ), _A, 0 )
+			VAR _t = { ( "Job Satisfaction", "Low", _g00, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Low" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Low" ), _A, 0 ) ), ( "Job Satisfaction", "Medium", _g01, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Medium" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Medium" ), _A, 0 ) ), ( "Job Satisfaction", "High", _g02, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "High" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "High" ), _A, 0 ) ), ( "Job Satisfaction", "Very High", _g03, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Job satisfaction] = "Very High" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Job satisfaction] = "Very High" ), _A, 0 ) ), ( "Performance Rating", "Low", _g10, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Low" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Low" ), _A, 0 ) ), ( "Performance Rating", "Good", _g11, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Good" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Good" ), _A, 0 ) ), ( "Performance Rating", "Excellent", _g12, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Excellent" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Excellent" ), _A, 0 ) ), ( "Performance Rating", "Outstanding", _g13, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Performance rating] = "Outstanding" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Performance rating] = "Outstanding" ), _A, 0 ) ), ( "Work-Life Balance", "Bad", _g20, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Bad" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Bad" ), _A, 0 ) ), ( "Work-Life Balance", "Good", _g21, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Good" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Good" ), _A, 0 ) ), ( "Work-Life Balance", "Better", _g22, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Better" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Better" ), _A, 0 ) ), ( "Work-Life Balance", "Best", _g23, DIVIDE ( CALCULATE ( [Leavers to date], 'DataTable'[Work-life balance] = "Best" ), _L, 0 ), DIVIDE ( CALCULATE ( [1_Headcount], 'DataTable'[Work-life balance] = "Best" ), _A, 0 ) ) }
+			VAR _top = TOPN ( 1, _t, ABS ( [Value3] ), DESC )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _A + _L = 0, "No data for this selection",
+			        _L = 0, "No leavers by the end of " & [Period label],
+			        "Biggest gap: " & MAXX ( _top, [Value1] ) & " “" & MAXX ( _top, [Value2] ) & "”, " & FORMAT ( MAXX ( _top, [Value4] ), "0%" )
+			            & " of the " & FORMAT ( _L, "#,0" ) & " leavers vs " & FORMAT ( MAXX ( _top, [Value5] ), "0%" )
+			            & " of active · small numbers, read as a pattern"
+			    )
+		displayFolder: Rep 5
+		lineageTag: c50e5fcb-64f5-4011-8ec4-8ea04b713f32
+
+	measure 'Salary box SVG' =
+			VAR _d = MAX ( 'Date'[Date] )
+			VAR _s =
+			    SELECTCOLUMNS (
+			        FILTER ( 'DataTable', 'DataTable'[HireDate] <= _d && ( ISBLANK ( 'DataTable'[TerminationDate] ) || 'DataTable'[TerminationDate] > _d ) ),
+			        "@s", 'DataTable'[Salary]
+			    )
+			VAR _min = MINX ( _s, [@s] )
+			VAR _max = MAXX ( _s, [@s] )
+			VAR _q1 = PERCENTILEX.INC ( _s, [@s], 0.25 )
+			VAR _md = PERCENTILEX.INC ( _s, [@s], 0.5 )
+			VAR _q3 = PERCENTILEX.INC ( _s, [@s], 0.75 )
+			VAR _avg = AVERAGEX ( _s, [@s] )
+			VAR _grid =
+			    CONCATENATEX (
+			        { 50000, 100000, 150000, 200000 },
+			        "<line x1='" & FORMAT ( 8 + ( [Value] - 40000 ) / 160000 * 284, "0.0" ) & "' x2='" & FORMAT ( 8 + ( [Value] - 40000 ) / 160000 * 284, "0.0" ) & "' y1='4' y2='40' stroke='%23EEF1F6'/>"
+			            & "<text x='" & FORMAT ( 8 + ( [Value] - 40000 ) / 160000 * 284, "0.0" ) & "' y='51' font-size='9' font-family='Segoe UI' text-anchor='middle' fill='%23B8C2D6'>$"
+			            & [Value] / 1000 & "K</text>",
+			        ""
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _min ),
+			        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='52' viewBox='0 0 300 52'>" & _grid
+			            & "<line x1='" & FORMAT ( 8 + ( _min - 40000 ) / 160000 * 284, "0.0" ) & "' x2='" & FORMAT ( 8 + ( _max - 40000 ) / 160000 * 284, "0.0" ) & "' y1='26' y2='26' stroke='%235D6B8A' stroke-width='1.5'/>"
+			            & "<line x1='" & FORMAT ( 8 + ( _min - 40000 ) / 160000 * 284, "0.0" ) & "' x2='" & FORMAT ( 8 + ( _min - 40000 ) / 160000 * 284, "0.0" ) & "' y1='19' y2='33' stroke='%235D6B8A' stroke-width='1.5'/>"
+			            & "<line x1='" & FORMAT ( 8 + ( _max - 40000 ) / 160000 * 284, "0.0" ) & "' x2='" & FORMAT ( 8 + ( _max - 40000 ) / 160000 * 284, "0.0" ) & "' y1='19' y2='33' stroke='%235D6B8A' stroke-width='1.5'/>"
+			            & "<rect x='" & FORMAT ( 8 + ( _q1 - 40000 ) / 160000 * 284, "0.0" ) & "' y='15' width='" & FORMAT ( ( _q3 - _q1 ) / 160000 * 284, "0.0" ) & "' height='22' rx='4' fill='%23B8C2D6'/>"
+			            & "<line x1='" & FORMAT ( 8 + ( _md - 40000 ) / 160000 * 284, "0.0" ) & "' x2='" & FORMAT ( 8 + ( _md - 40000 ) / 160000 * 284, "0.0" ) & "' y1='15' y2='37' stroke='%2312343B' stroke-width='2.5'/>"
+			            & "<circle cx='" & FORMAT ( 8 + ( _avg - 40000 ) / 160000 * 284, "0.0" ) & "' cy='26' r='4.5' fill='%23038D96' stroke='white' stroke-width='1.5'/></svg>"
+			    )
+		displayFolder: Rep 5
+		lineageTag: 54f50e5e-e7d6-44c1-902b-427273aa9c1c
+		dataCategory: ImageUrl
+
+	measure 'Pay subtitle' =
+			VAR _t = FILTER ( ADDCOLUMNS ( VALUES ( 'DataTable'[JobRole] ), "@a", [Average Salary] ), NOT ISBLANK ( [@a] ) )
+			RETURN
+			    IF ( ISEMPTY ( _t ), "No data for this selection",
+			        "All roles " & "$" & FORMAT ( [Average Salary] / 1e3, "0.0" ) & "K" & " average · role averages " & "$" & FORMAT ( MINX ( _t, [@a] ) / 1e3, "0.0" ) & "K" & "–"
+			            & "$" & FORMAT ( MAXX ( _t, [@a] ) / 1e3, "0.0" ) & "K" & ", the spread inside each role is far wider" )
+		displayFolder: Rep 5
+		lineageTag: 241e3297-636b-4bd2-9f72-585c4149528f
+
+	column Value
+		formatString: 0
+		lineageTag: 940c28b6-e1e4-4a9a-8cc3-7a51fced2a13
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = calculated
+		mode: import
+		source = {1}
+
+	annotation PBI_Id = b1b1c136265b48b5937e8bf855eeb197
+

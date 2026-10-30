@@ -1,0 +1,196 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "e4634ba4d8fba6fc599b",
+  "displayName": "Sales performance",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F7F4EE'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "sales-category-bars",
+      "target": "sales-headline",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-year",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-metric",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-quarter",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-month",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-location",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-city",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-category",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-kpi-revenue",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-kpi-profit",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-kpi-margin",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-kpi-units",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-trend",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-location-bars",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-top-stores",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-category-bars",
+      "target": "sales-bottom-stores",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-headline",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-year",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-metric",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-quarter",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-month",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-location",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-city",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-category",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-kpi-revenue",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-kpi-profit",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-kpi-margin",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-kpi-units",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-trend",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-category-bars",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-top-stores",
+      "type": "DataFilter"
+    },
+    {
+      "source": "sales-location-bars",
+      "target": "sales-bottom-stores",
+      "type": "DataFilter"
+    }
+  ]
+}

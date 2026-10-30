@@ -1,0 +1,3703 @@
+{
+  "_note": "Rep 8 HR Overview. Drafted from brd.md section 5 (no wireframe or reference image) by design/scripts/gen_layout.py; edit the script, not this file.",
+  "measureTable": "_Measures",
+  "grid": {
+    "canvas": [
+      1920,
+      1080
+    ],
+    "margin": 32,
+    "columns": 12,
+    "gutter": 24,
+    "column": 132.67
+  },
+  "pages": {
+    "P1": {
+      "displayName": "Summary",
+      "background": "background",
+      "interactions": [
+        {
+          "source": "P1-V16",
+          "targets": [
+            "P1-V09",
+            "P1-V10",
+            "P1-V11",
+            "P1-V12",
+            "P1-V13",
+            "P1-V14",
+            "P1-V25"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P1-V15",
+          "targets": [
+            "P1-V25"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P1-V17",
+          "targets": [
+            "P1-V25"
+          ],
+          "type": "NoFilter"
+        }
+      ],
+      "bookmarks": [
+        {
+          "name": "filters-open",
+          "displayName": "Filters open",
+          "show": [
+            "P1-V23"
+          ],
+          "targets": [
+            "P1-V23"
+          ],
+          "data": false,
+          "display": true
+        },
+        {
+          "name": "filters-close",
+          "displayName": "Filters closed",
+          "hide": [
+            "P1-V23"
+          ],
+          "targets": [
+            "P1-V23"
+          ],
+          "data": false,
+          "display": true
+        },
+        {
+          "name": "clear-filters",
+          "displayName": "Clear filters",
+          "targets": [
+            "P1-V06",
+            "P1-V24"
+          ],
+          "data": true,
+          "display": false
+        }
+      ],
+      "active": true
+    },
+    "P2": {
+      "displayName": "Turnover",
+      "background": "background",
+      "interactions": [
+        {
+          "source": "P2-V17",
+          "targets": [
+            "P2-V14",
+            "P2-V15",
+            "P2-V16",
+            "P2-V30"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V18",
+          "targets": [
+            "P2-V30"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V19",
+          "targets": [
+            "P2-V30"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V20",
+          "targets": [
+            "P2-V30"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V21",
+          "targets": [
+            "P2-V30"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V22",
+          "targets": [
+            "P2-V30"
+          ],
+          "type": "NoFilter"
+        }
+      ],
+      "bookmarks": [
+        {
+          "name": "filters-open",
+          "displayName": "Filters open",
+          "show": [
+            "P2-V28"
+          ],
+          "targets": [
+            "P2-V28"
+          ],
+          "data": false,
+          "display": true
+        },
+        {
+          "name": "filters-close",
+          "displayName": "Filters closed",
+          "hide": [
+            "P2-V28"
+          ],
+          "targets": [
+            "P2-V28"
+          ],
+          "data": false,
+          "display": true
+        },
+        {
+          "name": "clear-filters",
+          "displayName": "Clear filters",
+          "targets": [
+            "P2-V06",
+            "P2-V29",
+            "P2-V08",
+            "P2-V09",
+            "P2-V10",
+            "P2-V11",
+            "P2-V12"
+          ],
+          "data": true,
+          "display": false
+        }
+      ]
+    },
+    "P3": {
+      "displayName": "Departments",
+      "background": "background",
+      "interactions": [
+        {
+          "source": "P3-V07",
+          "targets": [
+            "P3-V16"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P3-V08",
+          "targets": [
+            "P3-V16"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P3-V09",
+          "targets": [
+            "P3-V16"
+          ],
+          "type": "NoFilter"
+        }
+      ],
+      "bookmarks": [
+        {
+          "name": "filters-open",
+          "displayName": "Filters open",
+          "show": [
+            "P3-V15"
+          ],
+          "targets": [
+            "P3-V15"
+          ],
+          "data": false,
+          "display": true
+        },
+        {
+          "name": "filters-close",
+          "displayName": "Filters closed",
+          "hide": [
+            "P3-V15"
+          ],
+          "targets": [
+            "P3-V15"
+          ],
+          "data": false,
+          "display": true
+        },
+        {
+          "name": "clear-filters",
+          "displayName": "Clear filters",
+          "targets": [
+            "P3-V06"
+          ],
+          "data": true,
+          "display": false
+        }
+      ]
+    }
+  },
+  "retired": [
+    "P2-V13",
+    "P1-V07",
+    "P2-V07"
+  ],
+  "visuals": [
+    {
+      "id": "P1-V01",
+      "name": "band",
+      "page": "P1",
+      "type": "shape",
+      "cols": null,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 112,
+      "z": 0,
+      "style": {
+        "fill": "primary",
+        "radius": 0
+      },
+      "container": "off",
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "Full-width primary band, no outline or theme-coloured fill."
+    },
+    {
+      "id": "P1-V02",
+      "name": "title",
+      "page": "P1",
+      "type": "textbox",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 20,
+      "w": 916,
+      "h": 44,
+      "z": 2,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Workforce summary",
+              "font": "semibold",
+              "size": "title",
+              "color": "onDark"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Title on one line, white on the band, not clipped.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V03",
+      "name": "subtitle",
+      "page": "P1",
+      "type": "textbox",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 66,
+      "w": 916,
+      "h": 28,
+      "z": 2,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Snapshot to 31 Dec 2024 · headcount at period end · turnover = leavers ÷ average headcount",
+              "size": "body",
+              "color": "onDarkMuted"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Subtitle on one line under the title.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V04",
+      "name": "nav",
+      "page": "P1",
+      "type": "pageNavigator",
+      "cols": [
+        9,
+        12
+      ],
+      "x": 1285,
+      "y": 36,
+      "w": 603,
+      "h": 40,
+      "z": 2,
+      "notes": "Page navigator, 3 tiles (page display names). States default/hover/selected via pbik_helpers.navigator_states in build.py.",
+      "doneWhen": "Three tiles (Summary, Turnover, Departments), current page selected, labels not clipped.",
+      "build": {
+        "method": "native"
+      },
+      "navigator": {
+        "fill": "card",
+        "outline": "onDarkMuted",
+        "radius": "control.radius",
+        "font": "regular",
+        "size": "body",
+        "colors": {
+          "default": "onDarkMuted",
+          "hover": "onDark",
+          "selected": "primary"
+        },
+        "transparency": {
+          "default": 100,
+          "hover": 85,
+          "selected": 0
+        }
+      }
+    },
+    {
+      "id": "P1-V25",
+      "name": "filters-label",
+      "page": "P1",
+      "type": "cardVisual",
+      "cols": [
+        8,
+        8
+      ],
+      "x": 1129,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 2,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Filters Label]",
+            "displayName": "Filters"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Filters Label]"
+      },
+      "props": {
+        "fillCustom.show@none": false,
+        "fillCustom.transparency@default": 100,
+        "outline.show@default": false,
+        "cardCalloutArea.backgroundTransparency@default": 100,
+        "layout.backgroundShow@none": false,
+        "layout.backgroundTransparency@none": 100,
+        "divider.show@default": false,
+        "shadowCustom.show@default": false,
+        "glowCustom.show@default": false,
+        "accentBar.show@default": false,
+        "label.show@default": false,
+        "value.fontSize@default": "body",
+        "value.fontColor@default": "onDark",
+        "value.horizontalAlignment@default": "center",
+        "layout.alignment@none": "middle"
+      },
+      "container": "off",
+      "doneWhen": "'Filters', or 'Filters (n)' when n pane slicers filter the page (Year only when not 2024), white, centred in the pill; no white box behind it; clicking a chart doesn't change n.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V18",
+      "name": "filters-button",
+      "page": "P1",
+      "type": "actionButton",
+      "cols": [
+        8,
+        8
+      ],
+      "x": 1129,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 3,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-open"
+      },
+      "props": {
+        "text.show": false,
+        "fill.show": false,
+        "icon.show": false,
+        "outline.show": true,
+        "outline.lineColor": "onDarkMuted",
+        "outline.weight@default": 1,
+        "shape.roundEdge@default": 20
+      },
+      "doneWhen": "Outlined pill over the Filters label, on every page; clicking anywhere on it opens the filter pane.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V05",
+      "name": "year",
+      "page": "P1",
+      "type": "advancedSlicerVisual",
+      "cols": null,
+      "x": 1309,
+      "y": 192,
+      "w": 555,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          "Date[Year]"
+        ]
+      },
+      "fields": {
+        "values": "Date[Year]"
+      },
+      "items": 5,
+      "selection": {
+        "field": "Date[Year]",
+        "values": [
+          2024
+        ]
+      },
+      "sync": "year",
+      "props": {
+        "padding.paddingSelection@default": "Custom",
+        "padding.topMargin@default": {
+          "int": 0
+        },
+        "padding.bottomMargin@default": {
+          "int": 0
+        },
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": 18,
+        "fillCustom.show@default": true,
+        "fillCustom.fillColor@default": "card",
+        "fillCustom.transparency@default": 0,
+        "fillCustom.fillColor@{\"id\": \"selection:selected\"}": "teal",
+        "outline.show@default": true,
+        "outline.lineColor@default": "border",
+        "outline.lineColor@{\"id\": \"selection:selected\"}": "teal",
+        "value.fontFamily@default": "Segoe UI",
+        "value.fontSize@default": "body",
+        "value.fontColor@default": "text",
+        "value.horizontalAlignment@default": "center",
+        "value.fontColor@{\"id\": \"selection:selected\"}": "card",
+        "value.fontFamily@{\"id\": \"selection:selected\"}": "Segoe UI Semibold",
+        "container:title.fontSize": "caption",
+        "container:title.fontColor": "textMuted",
+        "container:title.fontFamily": "Segoe UI Semibold",
+        "layout.rowCount@none": {
+          "int": 1
+        },
+        "layout.columnCount@none": {
+          "int": 5
+        },
+        "selection.singleSelect@none": true,
+        "selection.strictSingleSelect@none": true
+      },
+      "container": {
+        "title": "Year"
+      },
+      "doneWhen": "Header 'Year', five buttons in one row, 2024 selected on open, single select forced, text visible. No '(Blank)' item.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true,
+      "filters": [
+        {
+          "field": "Date[Year]",
+          "values": [
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "id": "P1-V06",
+      "name": "month",
+      "page": "P1",
+      "type": "slicer",
+      "cols": null,
+      "x": 1309,
+      "y": 284,
+      "w": 555,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Month]",
+            "displayName": "Month"
+          }
+        ]
+      },
+      "fields": {
+        "values": "Date[Month]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists Date[Month] in order, single select; header not clipped (>= 76 px). No '(Blank)' item.",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold",
+        "selection.singleSelect": true
+      },
+      "sync": "month",
+      "pane": true,
+      "filters": [
+        {
+          "field": "Date[Month]",
+          "values": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "id": "P1-V24",
+      "name": "department-buttons",
+      "page": "P1",
+      "type": "advancedSlicerVisual",
+      "cols": null,
+      "x": 1309,
+      "y": 376,
+      "w": 555,
+      "h": 124,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          "DataTable[Department]"
+        ]
+      },
+      "fields": {
+        "values": "DataTable[Department]"
+      },
+      "items": 6,
+      "sync": "department",
+      "props": {
+        "padding.paddingSelection@default": "Custom",
+        "padding.topMargin@default": {
+          "int": 0
+        },
+        "padding.bottomMargin@default": {
+          "int": 0
+        },
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": 18,
+        "fillCustom.show@default": true,
+        "fillCustom.fillColor@default": "card",
+        "fillCustom.transparency@default": 0,
+        "fillCustom.fillColor@{\"id\": \"selection:selected\"}": "teal",
+        "outline.show@default": true,
+        "outline.lineColor@default": "border",
+        "outline.lineColor@{\"id\": \"selection:selected\"}": "teal",
+        "value.fontFamily@default": "Segoe UI",
+        "value.fontSize@default": "body",
+        "value.fontColor@default": "text",
+        "value.horizontalAlignment@default": "center",
+        "value.fontColor@{\"id\": \"selection:selected\"}": "card",
+        "value.fontFamily@{\"id\": \"selection:selected\"}": "Segoe UI Semibold",
+        "container:title.fontSize": "caption",
+        "container:title.fontColor": "textMuted",
+        "container:title.fontFamily": "Segoe UI Semibold",
+        "layout.rowCount@none": {
+          "int": 2
+        },
+        "layout.columnCount@none": {
+          "int": 3
+        },
+        "selection.singleSelect@none": false
+      },
+      "container": {
+        "title": "Department"
+      },
+      "doneWhen": "Header 'Department', six buttons in 2 rows of 3, multi select, none selected = all; 'Research & Development' fits on one line.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P1-V08",
+      "name": "definitions",
+      "page": "P1",
+      "type": "textbox",
+      "cols": null,
+      "x": 1309,
+      "y": 516,
+      "w": 555,
+      "h": 48,
+      "z": 11,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Year and month filter every page. Groups under 5 employees are hidden on the detail pages. Turnover shows association only: the data has no reason for leaving.",
+              "size": "caption",
+              "color": "textMuted"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Caption wraps inside its box (three lines at most), not clipped.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P1-V19",
+      "name": "pane-bg",
+      "page": "P1",
+      "type": "shape",
+      "cols": [
+        9,
+        12
+      ],
+      "x": 1285,
+      "y": 124,
+      "w": 603,
+      "h": 532,
+      "z": 10,
+      "pane": true,
+      "style": {
+        "fill": "card",
+        "radius": "radius",
+        "outline": "border",
+        "shadow": true
+      },
+      "container": {
+        "background": false,
+        "border": false,
+        "shadow": true
+      },
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "White card on columns 9-12 under the header, 532 px tall: just covers its slicers and buttons; rounded, border, shadow."
+    },
+    {
+      "id": "P1-V20",
+      "name": "pane-title",
+      "page": "P1",
+      "type": "textbox",
+      "cols": null,
+      "x": 1309,
+      "y": 148,
+      "w": 555,
+      "h": 32,
+      "z": 11,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Filters",
+              "font": "semibold",
+              "size": "cardTitle",
+              "color": "text"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Pane title 'Filters'.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P1-V21",
+      "name": "pane-clear",
+      "page": "P1",
+      "type": "actionButton",
+      "cols": null,
+      "x": 1309,
+      "y": 588,
+      "w": 269,
+      "h": 44,
+      "z": 11,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "clear-filters"
+      },
+      "props": {
+        "shape.roundEdge@default": 20,
+        "text.fontSize": "body",
+        "text.fontFamily": "Segoe UI Semibold",
+        "text.horizontalAlignment": "center",
+        "text.show": true,
+        "fill.show": true,
+        "fill.transparency": 0,
+        "outline.show": true,
+        "outline.weight": 1,
+        "text.text": "Clear",
+        "text.fontColor": "primary",
+        "fill.fillColor": "card",
+        "outline.lineColor": "border"
+      },
+      "doneWhen": "'Clear' clears every slicer in the pane except Year; the pane stays open; the counter drops to 0 (1 if Year isn't 2024).",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P1-V22",
+      "name": "pane-close",
+      "page": "P1",
+      "type": "actionButton",
+      "cols": null,
+      "x": 1594,
+      "y": 588,
+      "w": 270,
+      "h": 44,
+      "z": 11,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-close"
+      },
+      "props": {
+        "shape.roundEdge@default": 20,
+        "text.fontSize": "body",
+        "text.fontFamily": "Segoe UI Semibold",
+        "text.horizontalAlignment": "center",
+        "text.show": true,
+        "fill.show": true,
+        "fill.transparency": 0,
+        "outline.show": true,
+        "outline.weight": 1,
+        "text.text": "Close",
+        "text.fontColor": "card",
+        "fill.fillColor": "primary",
+        "outline.lineColor": "primary"
+      },
+      "doneWhen": "'Close' hides the pane; slicer selections stay.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P1-V23",
+      "name": "filter-pane",
+      "page": "P1",
+      "type": "group",
+      "members": [
+        "P1-V19",
+        "P1-V20",
+        "P1-V05",
+        "P1-V06",
+        "P1-V24",
+        "P1-V08",
+        "P1-V21",
+        "P1-V22"
+      ],
+      "displayName": "Filter pane",
+      "hidden": true,
+      "z": 10,
+      "pane": true,
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "Hidden on open; Filters shows it, Close hides it; Selection pane lists it as 'Filter pane'."
+    },
+    {
+      "id": "P1-V09",
+      "name": "kpi-headcount",
+      "page": "P1",
+      "type": "cardVisual",
+      "cols": [
+        1,
+        2
+      ],
+      "x": 32,
+      "y": 136,
+      "w": 289,
+      "h": 148,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Headcount]",
+            "displayName": "Headcount"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Headcount]",
+        "ref": "[Headcount LY Text] · [Headcount Delta Text] (Display)"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "referenceLabels": {
+        "titleOff": true,
+        "layout": "sentence",
+        "valueColor": "textMuted",
+        "valueSize": "kpiSub",
+        "detailSize": "kpiSub",
+        "labels": [
+          {
+            "value": "[Headcount LY Text]",
+            "detail": "[Headcount Delta Text]",
+            "detailColor": "[Headcount Delta Colour]",
+            "blankAs": "–"
+          }
+        ]
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Headcount: label, value and reference line left-aligned 20 px in from the card edge; label above, value at kpi size, one reference line 'LY <value> · <arrow> <change>' in the polarity colour; 2020 shows '–' for LY (no '(Blank)', no '--').",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V10",
+      "name": "kpi-hires",
+      "page": "P1",
+      "type": "cardVisual",
+      "cols": [
+        3,
+        4
+      ],
+      "x": 345,
+      "y": 136,
+      "w": 289,
+      "h": 148,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Hires]",
+            "displayName": "Hires"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Hires]",
+        "ref": "[Hires LY Text] · [Hires Delta Text] (Display)"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "referenceLabels": {
+        "titleOff": true,
+        "layout": "sentence",
+        "valueColor": "textMuted",
+        "valueSize": "kpiSub",
+        "detailSize": "kpiSub",
+        "labels": [
+          {
+            "value": "[Hires LY Text]",
+            "detail": "[Hires Delta Text]",
+            "detailColor": "[Hires Delta Colour]",
+            "blankAs": "–"
+          }
+        ]
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Hires: label, value and reference line left-aligned 20 px in from the card edge; label above, value at kpi size, one reference line 'LY <value> · <arrow> <change>' in the polarity colour; 2020 shows '–' for LY (no '(Blank)', no '--').",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V11",
+      "name": "kpi-leavers",
+      "page": "P1",
+      "type": "cardVisual",
+      "cols": [
+        5,
+        6
+      ],
+      "x": 659,
+      "y": 136,
+      "w": 289,
+      "h": 148,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Leavers]",
+            "displayName": "Leavers"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Leavers]",
+        "ref": "[Leavers LY Text] · [Leavers Delta Text] (Display)"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "referenceLabels": {
+        "titleOff": true,
+        "layout": "sentence",
+        "valueColor": "textMuted",
+        "valueSize": "kpiSub",
+        "detailSize": "kpiSub",
+        "labels": [
+          {
+            "value": "[Leavers LY Text]",
+            "detail": "[Leavers Delta Text]",
+            "detailColor": "[Leavers Delta Colour]",
+            "blankAs": "–"
+          }
+        ]
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Leavers: label, value and reference line left-aligned 20 px in from the card edge; label above, value at kpi size, one reference line 'LY <value> · <arrow> <change>' in the polarity colour; 2020 shows '–' for LY (no '(Blank)', no '--').",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V12",
+      "name": "kpi-net-change",
+      "page": "P1",
+      "type": "cardVisual",
+      "cols": [
+        7,
+        8
+      ],
+      "x": 972,
+      "y": 136,
+      "w": 289,
+      "h": 148,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Net Change]",
+            "displayName": "Net change"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Net Change]",
+        "ref": "[Net Change LY Text] · [Net Change Delta Text] (Display)"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "referenceLabels": {
+        "titleOff": true,
+        "layout": "sentence",
+        "valueColor": "textMuted",
+        "valueSize": "kpiSub",
+        "detailSize": "kpiSub",
+        "labels": [
+          {
+            "value": "[Net Change LY Text]",
+            "detail": "[Net Change Delta Text]",
+            "detailColor": "[Net Change Delta Colour]",
+            "blankAs": "–"
+          }
+        ]
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Net change: label, value and reference line left-aligned 20 px in from the card edge; label above, value at kpi size, one reference line 'LY <value> · <arrow> <change>' in the polarity colour; 2020 shows '–' for LY (no '(Blank)', no '--').",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V13",
+      "name": "kpi-turnover-rate",
+      "page": "P1",
+      "type": "cardVisual",
+      "cols": [
+        9,
+        10
+      ],
+      "x": 1285,
+      "y": 136,
+      "w": 289,
+      "h": 148,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Turnover Rate]",
+            "displayName": "Turnover rate"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Turnover Rate]",
+        "ref": "[Turnover Rate LY Text] · [Turnover Rate Delta Text] (Display)"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "referenceLabels": {
+        "titleOff": true,
+        "layout": "sentence",
+        "valueColor": "textMuted",
+        "valueSize": "kpiSub",
+        "detailSize": "kpiSub",
+        "labels": [
+          {
+            "value": "[Turnover Rate LY Text]",
+            "detail": "[Turnover Rate Delta Text]",
+            "detailColor": "[Turnover Rate Delta Colour]",
+            "blankAs": "–"
+          }
+        ]
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Turnover rate: label, value and reference line left-aligned 20 px in from the card edge; label above, value at kpi size, one reference line 'LY <value> · <arrow> <change>' in the polarity colour; 2020 shows '–' for LY (no '(Blank)', no '--').",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V14",
+      "name": "kpi-hire-rate",
+      "page": "P1",
+      "type": "cardVisual",
+      "cols": [
+        11,
+        12
+      ],
+      "x": 1599,
+      "y": 136,
+      "w": 289,
+      "h": 148,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Hire Rate]",
+            "displayName": "Hire rate"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Hire Rate]",
+        "ref": "[Hire Rate LY Text] · [Hire Rate Delta Text] (Display)"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "referenceLabels": {
+        "titleOff": true,
+        "layout": "sentence",
+        "valueColor": "textMuted",
+        "valueSize": "kpiSub",
+        "detailSize": "kpiSub",
+        "labels": [
+          {
+            "value": "[Hire Rate LY Text]",
+            "detail": "[Hire Rate Delta Text]",
+            "detailColor": "[Hire Rate Delta Colour]",
+            "blankAs": "–"
+          }
+        ]
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Hire rate: label, value and reference line left-aligned 20 px in from the card edge; label above, value at kpi size, one reference line 'LY <value> · <arrow> <change>' in the polarity colour; 2020 shows '–' for LY (no '(Blank)', no '--').",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V15",
+      "name": "headcount-trend",
+      "page": "P1",
+      "type": "lineChart",
+      "cols": [
+        1,
+        8
+      ],
+      "x": 32,
+      "y": 308,
+      "w": 1229,
+      "h": 358,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "Date[Month]"
+        ],
+        "Y": [
+          {
+            "field": "[Headcount]",
+            "displayName": "This year"
+          },
+          {
+            "field": "[Headcount LY]",
+            "displayName": "Last year"
+          }
+        ]
+      },
+      "fields": {
+        "x": "Date[Month]",
+        "y": "[Headcount], [Headcount LY]"
+      },
+      "sort": {
+        "field": "Date[Month]",
+        "direction": "Ascending",
+        "default": true
+      },
+      "props": {
+        "dataPoint.fill@[Headcount]": "teal",
+        "dataPoint.fill@[Headcount LY]": "slateLight",
+        "categoryAxis.showAxisTitle": false,
+        "valueAxis.showAxisTitle": false,
+        "legend.show": true,
+        "legend.position": "TopRight"
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Headcount by month, this year vs last year"
+      },
+      "doneWhen": "12 months Jan–Dec, teal this year over slateLight last year, legend 'This year / Last year' top right as P1-V17, no axis titles; 2020 shows one line.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V16",
+      "name": "turnover-by-department",
+      "page": "P1",
+      "type": "clusteredBarChart",
+      "cols": [
+        9,
+        12
+      ],
+      "x": 1285,
+      "y": 308,
+      "w": 603,
+      "h": 740,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "DataTable[Department]"
+        ],
+        "Y": [
+          {
+            "field": "[Turnover Rate]",
+            "displayName": "Turnover rate"
+          }
+        ]
+      },
+      "fields": {
+        "y": "DataTable[Department]",
+        "x": "[Turnover Rate]"
+      },
+      "sort": {
+        "field": "[Turnover Rate]",
+        "direction": "Descending"
+      },
+      "referenceLines": [
+        {
+          "axis": "value",
+          "value": "[Turnover Rate Company]",
+          "label": "Company",
+          "color": "primary",
+          "style": "dashed",
+          "dataLabel": true
+        }
+      ],
+      "props": {
+        "dataPoint.fill": "red",
+        "labels.show": true,
+        "labels.labelDisplayUnits": 1,
+        "labels.labelPrecision": {
+          "int": 1
+        },
+        "categoryAxis.showAxisTitle": false,
+        "valueAxis.show": false,
+        "categoryAxis.maxMarginFactor": 40,
+        "categoryAxis.innerPadding": 55
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Turnover rate by department",
+        "subtitle": "Dashed line: company rate"
+      },
+      "doneWhen": "Six departments, highest turnover on top, % labels at bar ends (1 dp), dashed company line labelled; clicking a bar filters the charts but not the KPI cards.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P1-V17",
+      "name": "hires-vs-leavers",
+      "page": "P1",
+      "type": "clusteredColumnChart",
+      "cols": [
+        1,
+        8
+      ],
+      "x": 32,
+      "y": 690,
+      "w": 1229,
+      "h": 358,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "Date[Month]"
+        ],
+        "Y": [
+          "[Hires]",
+          "[Leavers]"
+        ]
+      },
+      "fields": {
+        "x": "Date[Month]",
+        "y": "[Hires], [Leavers]"
+      },
+      "sort": {
+        "field": "Date[Month]",
+        "direction": "Ascending",
+        "default": true
+      },
+      "cf": [
+        {
+          "type": "measure",
+          "object": "valueAxis",
+          "property": "end",
+          "measure": "[Axis Max Hires Leavers]",
+          "kind": "value"
+        }
+      ],
+      "props": {
+        "dataPoint.fill@[Hires]": "teal",
+        "dataPoint.fill@[Leavers]": "red",
+        "labels.show": true,
+        "categoryAxis.innerPadding": 40,
+        "layout.clusteredGapSize": 6,
+        "categoryAxis.showAxisTitle": false,
+        "valueAxis.showAxisTitle": false,
+        "legend.position": "TopRight"
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Hires and leavers by month"
+      },
+      "doneWhen": "12 months, teal hires beside red leavers, labels clear of the top (axis max measure), legend top right.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V01",
+      "name": "band",
+      "page": "P2",
+      "type": "shape",
+      "cols": null,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 112,
+      "z": 0,
+      "style": {
+        "fill": "primary",
+        "radius": 0
+      },
+      "container": "off",
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "Full-width primary band, no outline or theme-coloured fill."
+    },
+    {
+      "id": "P2-V02",
+      "name": "title",
+      "page": "P2",
+      "type": "textbox",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 20,
+      "w": 916,
+      "h": 44,
+      "z": 2,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Turnover detail",
+              "font": "semibold",
+              "size": "title",
+              "color": "onDark"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Title on one line, white on the band, not clipped.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V03",
+      "name": "subtitle",
+      "page": "P2",
+      "type": "textbox",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 66,
+      "w": 916,
+      "h": 28,
+      "z": 2,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Open Filters to slice by any mix · groups under 5 employees show blank",
+              "size": "body",
+              "color": "onDarkMuted"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Subtitle on one line under the title.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V04",
+      "name": "nav",
+      "page": "P2",
+      "type": "pageNavigator",
+      "cols": [
+        9,
+        12
+      ],
+      "x": 1285,
+      "y": 36,
+      "w": 603,
+      "h": 40,
+      "z": 2,
+      "notes": "Page navigator, 3 tiles (page display names). States default/hover/selected via pbik_helpers.navigator_states in build.py.",
+      "doneWhen": "Three tiles (Summary, Turnover, Departments), current page selected, labels not clipped.",
+      "build": {
+        "method": "native"
+      },
+      "navigator": {
+        "fill": "card",
+        "outline": "onDarkMuted",
+        "radius": "control.radius",
+        "font": "regular",
+        "size": "body",
+        "colors": {
+          "default": "onDarkMuted",
+          "hover": "onDark",
+          "selected": "primary"
+        },
+        "transparency": {
+          "default": 100,
+          "hover": 85,
+          "selected": 0
+        }
+      }
+    },
+    {
+      "id": "P2-V30",
+      "name": "filters-label",
+      "page": "P2",
+      "type": "cardVisual",
+      "cols": [
+        8,
+        8
+      ],
+      "x": 1129,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 2,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Filters Label]",
+            "displayName": "Filters"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Filters Label]"
+      },
+      "props": {
+        "fillCustom.show@none": false,
+        "fillCustom.transparency@default": 100,
+        "outline.show@default": false,
+        "cardCalloutArea.backgroundTransparency@default": 100,
+        "layout.backgroundShow@none": false,
+        "layout.backgroundTransparency@none": 100,
+        "divider.show@default": false,
+        "shadowCustom.show@default": false,
+        "glowCustom.show@default": false,
+        "accentBar.show@default": false,
+        "label.show@default": false,
+        "value.fontSize@default": "body",
+        "value.fontColor@default": "onDark",
+        "value.horizontalAlignment@default": "center",
+        "layout.alignment@none": "middle"
+      },
+      "container": "off",
+      "doneWhen": "'Filters', or 'Filters (n)' when n pane slicers filter the page (Year only when not 2024), white, centred in the pill; no white box behind it; clicking a chart doesn't change n.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V23",
+      "name": "filters-button",
+      "page": "P2",
+      "type": "actionButton",
+      "cols": [
+        8,
+        8
+      ],
+      "x": 1129,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 3,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-open"
+      },
+      "props": {
+        "text.show": false,
+        "fill.show": false,
+        "icon.show": false,
+        "outline.show": true,
+        "outline.lineColor": "onDarkMuted",
+        "outline.weight@default": 1,
+        "shape.roundEdge@default": 20
+      },
+      "doneWhen": "Outlined pill over the Filters label, on every page; clicking anywhere on it opens the filter pane.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V05",
+      "name": "year",
+      "page": "P2",
+      "type": "slicer",
+      "cols": null,
+      "x": 1309,
+      "y": 192,
+      "w": 269,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Year]",
+            "displayName": "Year"
+          }
+        ]
+      },
+      "fields": {
+        "values": "Date[Year]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists Date[Year] in order, single select; header not clipped (>= 76 px). No '(Blank)' item.",
+      "selection": {
+        "field": "Date[Year]",
+        "values": [
+          2024
+        ]
+      },
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold",
+        "selection.singleSelect": true
+      },
+      "sync": "year",
+      "pane": true,
+      "filters": [
+        {
+          "field": "Date[Year]",
+          "values": [
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "id": "P2-V06",
+      "name": "month",
+      "page": "P2",
+      "type": "slicer",
+      "cols": null,
+      "x": 1594,
+      "y": 192,
+      "w": 269,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Month]",
+            "displayName": "Month"
+          }
+        ]
+      },
+      "fields": {
+        "values": "Date[Month]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists Date[Month] in order, single select; header not clipped (>= 76 px). No '(Blank)' item.",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold",
+        "selection.singleSelect": true
+      },
+      "sync": "month",
+      "pane": true,
+      "filters": [
+        {
+          "field": "Date[Month]",
+          "values": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "id": "P2-V29",
+      "name": "department-buttons",
+      "page": "P2",
+      "type": "advancedSlicerVisual",
+      "cols": null,
+      "x": 1309,
+      "y": 284,
+      "w": 555,
+      "h": 124,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          "DataTable[Department]"
+        ]
+      },
+      "fields": {
+        "values": "DataTable[Department]"
+      },
+      "items": 6,
+      "sync": "department",
+      "props": {
+        "padding.paddingSelection@default": "Custom",
+        "padding.topMargin@default": {
+          "int": 0
+        },
+        "padding.bottomMargin@default": {
+          "int": 0
+        },
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": 18,
+        "fillCustom.show@default": true,
+        "fillCustom.fillColor@default": "card",
+        "fillCustom.transparency@default": 0,
+        "fillCustom.fillColor@{\"id\": \"selection:selected\"}": "teal",
+        "outline.show@default": true,
+        "outline.lineColor@default": "border",
+        "outline.lineColor@{\"id\": \"selection:selected\"}": "teal",
+        "value.fontFamily@default": "Segoe UI",
+        "value.fontSize@default": "body",
+        "value.fontColor@default": "text",
+        "value.horizontalAlignment@default": "center",
+        "value.fontColor@{\"id\": \"selection:selected\"}": "card",
+        "value.fontFamily@{\"id\": \"selection:selected\"}": "Segoe UI Semibold",
+        "container:title.fontSize": "caption",
+        "container:title.fontColor": "textMuted",
+        "container:title.fontFamily": "Segoe UI Semibold",
+        "layout.rowCount@none": {
+          "int": 2
+        },
+        "layout.columnCount@none": {
+          "int": 3
+        },
+        "selection.singleSelect@none": false
+      },
+      "container": {
+        "title": "Department"
+      },
+      "doneWhen": "Header 'Department', six buttons in 2 rows of 3, multi select, none selected = all; 'Research & Development' fits on one line.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V08",
+      "name": "job-role",
+      "page": "P2",
+      "type": "slicer",
+      "cols": null,
+      "x": 1309,
+      "y": 424,
+      "w": 269,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[JobRole]",
+            "displayName": "Job role"
+          }
+        ]
+      },
+      "fields": {
+        "values": "DataTable[JobRole]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists DataTable[JobRole] in order, multi select; header not clipped (>= 76 px).",
+      "notes": "Job role stands in for job level (no job level in the data, BRD section 9).",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V09",
+      "name": "tenure-band",
+      "page": "P2",
+      "type": "slicer",
+      "cols": null,
+      "x": 1594,
+      "y": 424,
+      "w": 269,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[Tenure Band]",
+            "displayName": "Tenure band"
+          }
+        ]
+      },
+      "fields": {
+        "values": "DataTable[Tenure Band]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists DataTable[Tenure Band] in order, multi select; header not clipped (>= 76 px).",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V10",
+      "name": "gender",
+      "page": "P2",
+      "type": "slicer",
+      "cols": null,
+      "x": 1309,
+      "y": 516,
+      "w": 269,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[Gender]",
+            "displayName": "Gender"
+          }
+        ]
+      },
+      "fields": {
+        "values": "DataTable[Gender]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists DataTable[Gender] in order, multi select; header not clipped (>= 76 px).",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V11",
+      "name": "employment-type",
+      "page": "P2",
+      "type": "slicer",
+      "cols": null,
+      "x": 1594,
+      "y": 516,
+      "w": 269,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[EmploymentType]",
+            "displayName": "Employment type"
+          }
+        ]
+      },
+      "fields": {
+        "values": "DataTable[EmploymentType]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists DataTable[EmploymentType] in order, multi select; header not clipped (>= 76 px).",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V12",
+      "name": "age-group",
+      "page": "P2",
+      "type": "slicer",
+      "cols": null,
+      "x": 1309,
+      "y": 608,
+      "w": 269,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "'Age Group'[Age Group]",
+            "displayName": "Age group"
+          }
+        ]
+      },
+      "fields": {
+        "values": "'Age Group'[Age Group]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists 'Age Group'[Age Group] in order, multi select; header not clipped (>= 76 px).",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V24",
+      "name": "pane-bg",
+      "page": "P2",
+      "type": "shape",
+      "cols": [
+        9,
+        12
+      ],
+      "x": 1285,
+      "y": 124,
+      "w": 603,
+      "h": 652,
+      "z": 10,
+      "pane": true,
+      "style": {
+        "fill": "card",
+        "radius": "radius",
+        "outline": "border",
+        "shadow": true
+      },
+      "container": {
+        "background": false,
+        "border": false,
+        "shadow": true
+      },
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "White card on columns 9-12 under the header, 652 px tall: just covers its slicers and buttons; rounded, border, shadow."
+    },
+    {
+      "id": "P2-V25",
+      "name": "pane-title",
+      "page": "P2",
+      "type": "textbox",
+      "cols": null,
+      "x": 1309,
+      "y": 148,
+      "w": 555,
+      "h": 32,
+      "z": 11,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Filters",
+              "font": "semibold",
+              "size": "cardTitle",
+              "color": "text"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Pane title 'Filters'.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V26",
+      "name": "pane-clear",
+      "page": "P2",
+      "type": "actionButton",
+      "cols": null,
+      "x": 1309,
+      "y": 708,
+      "w": 269,
+      "h": 44,
+      "z": 11,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "clear-filters"
+      },
+      "props": {
+        "shape.roundEdge@default": 20,
+        "text.fontSize": "body",
+        "text.fontFamily": "Segoe UI Semibold",
+        "text.horizontalAlignment": "center",
+        "text.show": true,
+        "fill.show": true,
+        "fill.transparency": 0,
+        "outline.show": true,
+        "outline.weight": 1,
+        "text.text": "Clear",
+        "text.fontColor": "primary",
+        "fill.fillColor": "card",
+        "outline.lineColor": "border"
+      },
+      "doneWhen": "'Clear' clears every slicer in the pane except Year; the pane stays open; the counter drops to 0 (1 if Year isn't 2024).",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V27",
+      "name": "pane-close",
+      "page": "P2",
+      "type": "actionButton",
+      "cols": null,
+      "x": 1594,
+      "y": 708,
+      "w": 270,
+      "h": 44,
+      "z": 11,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-close"
+      },
+      "props": {
+        "shape.roundEdge@default": 20,
+        "text.fontSize": "body",
+        "text.fontFamily": "Segoe UI Semibold",
+        "text.horizontalAlignment": "center",
+        "text.show": true,
+        "fill.show": true,
+        "fill.transparency": 0,
+        "outline.show": true,
+        "outline.weight": 1,
+        "text.text": "Close",
+        "text.fontColor": "card",
+        "fill.fillColor": "primary",
+        "outline.lineColor": "primary"
+      },
+      "doneWhen": "'Close' hides the pane; slicer selections stay.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P2-V28",
+      "name": "filter-pane",
+      "page": "P2",
+      "type": "group",
+      "members": [
+        "P2-V24",
+        "P2-V25",
+        "P2-V05",
+        "P2-V06",
+        "P2-V29",
+        "P2-V08",
+        "P2-V09",
+        "P2-V10",
+        "P2-V11",
+        "P2-V12",
+        "P2-V26",
+        "P2-V27"
+      ],
+      "displayName": "Filter pane",
+      "hidden": true,
+      "z": 10,
+      "pane": true,
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "Hidden on open; Filters shows it, Close hides it; Selection pane lists it as 'Filter pane'."
+    },
+    {
+      "id": "P2-V14",
+      "name": "sel-headcount",
+      "page": "P2",
+      "type": "cardVisual",
+      "cols": [
+        1,
+        2
+      ],
+      "x": 32,
+      "y": 136,
+      "w": 289,
+      "h": 88,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Headcount Shown]",
+            "displayName": "Headcount"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Headcount Shown]"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Headcount for the current selection; '–' when the group is under 5 or empty; value and label not clipped at 88 px.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V15",
+      "name": "sel-leavers",
+      "page": "P2",
+      "type": "cardVisual",
+      "cols": [
+        3,
+        4
+      ],
+      "x": 345,
+      "y": 136,
+      "w": 289,
+      "h": 88,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Leavers Shown]",
+            "displayName": "Leavers"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Leavers Shown]"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Leavers for the current selection; '–' when the group is under 5 or empty; value and label not clipped at 88 px.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V16",
+      "name": "sel-turnover-rate",
+      "page": "P2",
+      "type": "cardVisual",
+      "cols": [
+        5,
+        6
+      ],
+      "x": 659,
+      "y": 136,
+      "w": 289,
+      "h": 88,
+      "z": 1,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Turnover Rate Shown]",
+            "displayName": "Turnover rate"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Turnover Rate Shown]"
+      },
+      "props": {
+        "label.position@default": "aboveValue",
+        "label.horizontalAlignment@default": "left",
+        "value.horizontalAlignment@default": "left",
+        "referenceLabelLayout.horizontalAlignment@default": "left",
+        "layout.calloutSize@none": 75,
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "int": 16
+        },
+        "value.fontSize@default": "kpi"
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": [
+          8,
+          16,
+          8,
+          "padding"
+        ]
+      },
+      "doneWhen": "Turnover rate for the current selection; '–' when the group is under 5 or empty; value and label not clipped at 88 px.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V17",
+      "name": "matrix",
+      "page": "P2",
+      "type": "pivotTable",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 248,
+      "w": 916,
+      "h": 336,
+      "z": 1,
+      "bindings": {
+        "Rows": [
+          "DataTable[Department]",
+          "DataTable[JobRole]"
+        ],
+        "Values": [
+          {
+            "field": "[Headcount Shown]",
+            "displayName": "Headcount"
+          },
+          {
+            "field": "[Leavers Shown]",
+            "displayName": "Leavers"
+          },
+          {
+            "field": "[Turnover Rate Shown]",
+            "displayName": "Turnover"
+          },
+          {
+            "field": "[Turnover vs Company Shown]",
+            "displayName": "vs company"
+          },
+          {
+            "field": "[Turnover Rate LY Shown]",
+            "displayName": "Turnover LY"
+          }
+        ]
+      },
+      "fields": {
+        "rows": "Department → JobRole (drill)",
+        "values": "Headcount, Leavers, Turnover, vs company, Turnover LY (Shown)"
+      },
+      "sort": {
+        "field": "[Turnover Rate Shown]",
+        "direction": "Descending"
+      },
+      "cf": [
+        {
+          "type": "gradient",
+          "object": "values",
+          "property": "backColor",
+          "field": "[Turnover Rate Shown]",
+          "target": "[Turnover Rate Shown]",
+          "min": "card",
+          "max": "redLight"
+        },
+        {
+          "type": "measure",
+          "object": "values",
+          "property": "fontColor",
+          "measure": "[Turnover vs Company Colour]",
+          "target": "[Turnover vs Company Shown]"
+        }
+      ],
+      "columnWidths": {
+        "DataTable[Department]": 290,
+        "[Headcount Shown]": 114,
+        "[Leavers Shown]": 114,
+        "[Turnover Rate Shown]": 114,
+        "[Turnover vs Company Shown]": 114,
+        "[Turnover Rate LY Shown]": 114
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Turnover by department and job role"
+      },
+      "doneWhen": "Fills its card (columns span the width, no empty band below); six department rows and a total, no scrollbar collapsed; + expands to job roles; header, grid, fonts and row height as P2-V18; turnover shaded card→redLight, vs company red/teal; under-5 cells blank.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V18",
+      "name": "table",
+      "page": "P2",
+      "type": "tableEx",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 608,
+      "w": 916,
+      "h": 440,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[Department]",
+            "displayName": "Department"
+          },
+          {
+            "field": "DataTable[JobRole]",
+            "displayName": "Job role"
+          },
+          {
+            "field": "[Headcount Shown]",
+            "displayName": "Headcount"
+          },
+          {
+            "field": "[Hires Shown]",
+            "displayName": "Hires"
+          },
+          {
+            "field": "[Leavers Shown]",
+            "displayName": "Leavers"
+          },
+          {
+            "field": "[Net Change Shown]",
+            "displayName": "Net change"
+          },
+          {
+            "field": "[Turnover Rate Shown]",
+            "displayName": "Turnover"
+          },
+          {
+            "field": "[Turnover vs Company Shown]",
+            "displayName": "vs company"
+          }
+        ]
+      },
+      "fields": {
+        "values": "Department, JobRole, Headcount, Hires, Leavers, Net change, Turnover, vs company (Shown)"
+      },
+      "sort": {
+        "field": "[Turnover Rate Shown]",
+        "direction": "Descending"
+      },
+      "cf": [
+        {
+          "type": "gradient",
+          "object": "values",
+          "property": "backColor",
+          "field": "[Turnover Rate Shown]",
+          "target": "[Turnover Rate Shown]",
+          "min": "card",
+          "max": "redLight"
+        },
+        {
+          "type": "measure",
+          "object": "values",
+          "property": "fontColor",
+          "measure": "[Turnover vs Company Colour]",
+          "target": "[Turnover vs Company Shown]"
+        }
+      ],
+      "columnWidths": {
+        "DataTable[Department]": 170,
+        "DataTable[JobRole]": 160,
+        "[Headcount Shown]": 90,
+        "[Hires Shown]": 70,
+        "[Leavers Shown]": 80,
+        "[Net Change Shown]": 95,
+        "[Turnover Rate Shown]": 90,
+        "[Turnover vs Company Shown]": 100
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Department and job role",
+        "subtitle": "36 rows, highest turnover first; scroll for the rest"
+      },
+      "doneWhen": "One row per department × job role (no IDs or names), sorted by turnover, vs company in red when above / teal when below, first column not clipped, vertical scroll only.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V19",
+      "name": "leavers-by-satisfaction",
+      "page": "P2",
+      "type": "clusteredBarChart",
+      "cols": [
+        7,
+        9
+      ],
+      "x": 972,
+      "y": 136,
+      "w": 446,
+      "h": 444,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Job Satisfaction'[Job Satisfaction]"
+        ],
+        "Y": [
+          {
+            "field": "[Leaver Share]",
+            "displayName": "Leavers"
+          },
+          {
+            "field": "[Active Share]",
+            "displayName": "Active"
+          }
+        ]
+      },
+      "fields": {
+        "y": "'Job Satisfaction'[Job Satisfaction]",
+        "x": "[Leaver Share], [Active Share]"
+      },
+      "sort": {
+        "field": "'Job Satisfaction'[Job Satisfaction]",
+        "direction": "Ascending",
+        "default": true
+      },
+      "props": {
+        "dataPoint.fill@[Leaver Share]": "red",
+        "dataPoint.fill@[Active Share]": "slateLight",
+        "labels.show": true,
+        "labels.labelPrecision": {
+          "int": 0
+        },
+        "valueAxis.show": false,
+        "categoryAxis.showAxisTitle": false,
+        "legend.show": true,
+        "legend.position": "TopRight",
+        "categoryAxis.innerPadding": 55,
+        "layout.clusteredGapSize": 4
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Job satisfaction: share of leavers vs active staff"
+      },
+      "doneWhen": "Job satisfaction levels in order, red leaver share beside slateLight active share, % labels; labels clear of each other.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V20",
+      "name": "leavers-by-work-life",
+      "page": "P2",
+      "type": "clusteredBarChart",
+      "cols": [
+        10,
+        12
+      ],
+      "x": 1442,
+      "y": 136,
+      "w": 446,
+      "h": 444,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Work-Life Balance'[Work-Life Balance]"
+        ],
+        "Y": [
+          {
+            "field": "[Leaver Share]",
+            "displayName": "Leavers"
+          },
+          {
+            "field": "[Active Share]",
+            "displayName": "Active"
+          }
+        ]
+      },
+      "fields": {
+        "y": "'Work-Life Balance'[Work-Life Balance]",
+        "x": "[Leaver Share], [Active Share]"
+      },
+      "sort": {
+        "field": "'Work-Life Balance'[Work-Life Balance]",
+        "direction": "Ascending",
+        "default": true
+      },
+      "props": {
+        "dataPoint.fill@[Leaver Share]": "red",
+        "dataPoint.fill@[Active Share]": "slateLight",
+        "labels.show": true,
+        "labels.labelPrecision": {
+          "int": 0
+        },
+        "valueAxis.show": false,
+        "categoryAxis.showAxisTitle": false,
+        "legend.show": false,
+        "legend.position": "TopRight",
+        "categoryAxis.innerPadding": 55,
+        "layout.clusteredGapSize": 4
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Work-life balance: share of leavers vs active staff"
+      },
+      "doneWhen": "Work-life balance levels in order, red leaver share beside slateLight active share, % labels; labels clear of each other.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V21",
+      "name": "leavers-by-performance",
+      "page": "P2",
+      "type": "clusteredBarChart",
+      "cols": [
+        7,
+        9
+      ],
+      "x": 972,
+      "y": 604,
+      "w": 446,
+      "h": 444,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "'Performance'[Performance]"
+        ],
+        "Y": [
+          {
+            "field": "[Leaver Share]",
+            "displayName": "Leavers"
+          },
+          {
+            "field": "[Active Share]",
+            "displayName": "Active"
+          }
+        ]
+      },
+      "fields": {
+        "y": "'Performance'[Performance]",
+        "x": "[Leaver Share], [Active Share]"
+      },
+      "sort": {
+        "field": "'Performance'[Performance]",
+        "direction": "Ascending",
+        "default": true
+      },
+      "props": {
+        "dataPoint.fill@[Leaver Share]": "red",
+        "dataPoint.fill@[Active Share]": "slateLight",
+        "labels.show": true,
+        "labels.labelPrecision": {
+          "int": 0
+        },
+        "valueAxis.show": false,
+        "categoryAxis.showAxisTitle": false,
+        "legend.show": false,
+        "legend.position": "TopRight",
+        "categoryAxis.innerPadding": 55,
+        "layout.clusteredGapSize": 4
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Performance: share of leavers vs active staff"
+      },
+      "doneWhen": "Performance levels in order, red leaver share beside slateLight active share, % labels; labels clear of each other.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P2-V22",
+      "name": "leavers-by-tenure",
+      "page": "P2",
+      "type": "clusteredBarChart",
+      "cols": [
+        10,
+        12
+      ],
+      "x": 1442,
+      "y": 604,
+      "w": 446,
+      "h": 444,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "DataTable[Tenure Band]"
+        ],
+        "Y": [
+          {
+            "field": "[Leaver Share]",
+            "displayName": "Leavers"
+          },
+          {
+            "field": "[Active Share]",
+            "displayName": "Active"
+          }
+        ]
+      },
+      "fields": {
+        "y": "DataTable[Tenure Band]",
+        "x": "[Leaver Share], [Active Share]"
+      },
+      "sort": {
+        "field": "DataTable[Tenure Band]",
+        "direction": "Ascending",
+        "default": true
+      },
+      "props": {
+        "dataPoint.fill@[Leaver Share]": "red",
+        "dataPoint.fill@[Active Share]": "slateLight",
+        "labels.show": true,
+        "labels.labelPrecision": {
+          "int": 0
+        },
+        "valueAxis.show": false,
+        "categoryAxis.showAxisTitle": false,
+        "legend.show": false,
+        "legend.position": "TopRight",
+        "categoryAxis.innerPadding": 55,
+        "layout.clusteredGapSize": 4
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Tenure band: share of leavers vs active staff"
+      },
+      "doneWhen": "Tenure band levels in order, red leaver share beside slateLight active share, % labels; labels clear of each other.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P3-V01",
+      "name": "band",
+      "page": "P3",
+      "type": "shape",
+      "cols": null,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 112,
+      "z": 0,
+      "style": {
+        "fill": "primary",
+        "radius": 0
+      },
+      "container": "off",
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "Full-width primary band, no outline or theme-coloured fill."
+    },
+    {
+      "id": "P3-V02",
+      "name": "title",
+      "page": "P3",
+      "type": "textbox",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 20,
+      "w": 916,
+      "h": 44,
+      "z": 2,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Department comparison",
+              "font": "semibold",
+              "size": "title",
+              "color": "onDark"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Title on one line, white on the band, not clipped.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P3-V03",
+      "name": "subtitle",
+      "page": "P3",
+      "type": "textbox",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 66,
+      "w": 916,
+      "h": 28,
+      "z": 2,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Each department against the company · same year and month as the other pages",
+              "size": "body",
+              "color": "onDarkMuted"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Subtitle on one line under the title.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P3-V04",
+      "name": "nav",
+      "page": "P3",
+      "type": "pageNavigator",
+      "cols": [
+        9,
+        12
+      ],
+      "x": 1285,
+      "y": 36,
+      "w": 603,
+      "h": 40,
+      "z": 2,
+      "notes": "Page navigator, 3 tiles (page display names). States default/hover/selected via pbik_helpers.navigator_states in build.py.",
+      "doneWhen": "Three tiles (Summary, Turnover, Departments), current page selected, labels not clipped.",
+      "build": {
+        "method": "native"
+      },
+      "navigator": {
+        "fill": "card",
+        "outline": "onDarkMuted",
+        "radius": "control.radius",
+        "font": "regular",
+        "size": "body",
+        "colors": {
+          "default": "onDarkMuted",
+          "hover": "onDark",
+          "selected": "primary"
+        },
+        "transparency": {
+          "default": 100,
+          "hover": 85,
+          "selected": 0
+        }
+      }
+    },
+    {
+      "id": "P3-V16",
+      "name": "filters-label",
+      "page": "P3",
+      "type": "cardVisual",
+      "cols": [
+        8,
+        8
+      ],
+      "x": 1129,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 2,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Filters Label]",
+            "displayName": "Filters"
+          }
+        ]
+      },
+      "fields": {
+        "value": "[Filters Label]"
+      },
+      "props": {
+        "fillCustom.show@none": false,
+        "fillCustom.transparency@default": 100,
+        "outline.show@default": false,
+        "cardCalloutArea.backgroundTransparency@default": 100,
+        "layout.backgroundShow@none": false,
+        "layout.backgroundTransparency@none": 100,
+        "divider.show@default": false,
+        "shadowCustom.show@default": false,
+        "glowCustom.show@default": false,
+        "accentBar.show@default": false,
+        "label.show@default": false,
+        "value.fontSize@default": "body",
+        "value.fontColor@default": "onDark",
+        "value.horizontalAlignment@default": "center",
+        "layout.alignment@none": "middle"
+      },
+      "container": "off",
+      "doneWhen": "'Filters', or 'Filters (n)' when n pane slicers filter the page (Year only when not 2024), white, centred in the pill; no white box behind it; clicking a chart doesn't change n.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P3-V10",
+      "name": "filters-button",
+      "page": "P3",
+      "type": "actionButton",
+      "cols": [
+        8,
+        8
+      ],
+      "x": 1129,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 3,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-open"
+      },
+      "props": {
+        "text.show": false,
+        "fill.show": false,
+        "icon.show": false,
+        "outline.show": true,
+        "outline.lineColor": "onDarkMuted",
+        "outline.weight@default": 1,
+        "shape.roundEdge@default": 20
+      },
+      "doneWhen": "Outlined pill over the Filters label, on every page; clicking anywhere on it opens the filter pane.",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P3-V05",
+      "name": "year",
+      "page": "P3",
+      "type": "advancedSlicerVisual",
+      "cols": null,
+      "x": 1309,
+      "y": 192,
+      "w": 555,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          "Date[Year]"
+        ]
+      },
+      "fields": {
+        "values": "Date[Year]"
+      },
+      "items": 5,
+      "selection": {
+        "field": "Date[Year]",
+        "values": [
+          2024
+        ]
+      },
+      "sync": "year",
+      "props": {
+        "padding.paddingSelection@default": "Custom",
+        "padding.topMargin@default": {
+          "int": 0
+        },
+        "padding.bottomMargin@default": {
+          "int": 0
+        },
+        "shapeCustomRectangle.tileShape@default": "rectangleRoundedByPixel",
+        "shapeCustomRectangle.rectangleRoundedCurve@default": 18,
+        "fillCustom.show@default": true,
+        "fillCustom.fillColor@default": "card",
+        "fillCustom.transparency@default": 0,
+        "fillCustom.fillColor@{\"id\": \"selection:selected\"}": "teal",
+        "outline.show@default": true,
+        "outline.lineColor@default": "border",
+        "outline.lineColor@{\"id\": \"selection:selected\"}": "teal",
+        "value.fontFamily@default": "Segoe UI",
+        "value.fontSize@default": "body",
+        "value.fontColor@default": "text",
+        "value.horizontalAlignment@default": "center",
+        "value.fontColor@{\"id\": \"selection:selected\"}": "card",
+        "value.fontFamily@{\"id\": \"selection:selected\"}": "Segoe UI Semibold",
+        "container:title.fontSize": "caption",
+        "container:title.fontColor": "textMuted",
+        "container:title.fontFamily": "Segoe UI Semibold",
+        "layout.rowCount@none": {
+          "int": 1
+        },
+        "layout.columnCount@none": {
+          "int": 5
+        },
+        "selection.singleSelect@none": true,
+        "selection.strictSingleSelect@none": true
+      },
+      "container": {
+        "title": "Year"
+      },
+      "doneWhen": "Header 'Year', five buttons in one row, 2024 selected on open, single select forced, text visible. No '(Blank)' item.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true,
+      "filters": [
+        {
+          "field": "Date[Year]",
+          "values": [
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "id": "P3-V06",
+      "name": "month",
+      "page": "P3",
+      "type": "slicer",
+      "cols": null,
+      "x": 1309,
+      "y": 284,
+      "w": 555,
+      "h": 76,
+      "z": 11,
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Month]",
+            "displayName": "Month"
+          }
+        ]
+      },
+      "fields": {
+        "values": "Date[Month]"
+      },
+      "slicerMode": "dropdown",
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "control.radius"
+        }
+      },
+      "doneWhen": "Dropdown with header, lists Date[Month] in order, single select; header not clipped (>= 76 px). No '(Blank)' item.",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "header.show": true,
+        "header.fontColor": "textMuted",
+        "header.textSize": "caption",
+        "header.fontFamily": "Segoe UI Semibold",
+        "selection.singleSelect": true
+      },
+      "sync": "month",
+      "pane": true,
+      "filters": [
+        {
+          "field": "Date[Month]",
+          "values": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+          ],
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "id": "P3-V11",
+      "name": "pane-bg",
+      "page": "P3",
+      "type": "shape",
+      "cols": [
+        9,
+        12
+      ],
+      "x": 1285,
+      "y": 124,
+      "w": 603,
+      "h": 328,
+      "z": 10,
+      "pane": true,
+      "style": {
+        "fill": "card",
+        "radius": "radius",
+        "outline": "border",
+        "shadow": true
+      },
+      "container": {
+        "background": false,
+        "border": false,
+        "shadow": true
+      },
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "White card on columns 9-12 under the header, 328 px tall: just covers its slicers and buttons; rounded, border, shadow."
+    },
+    {
+      "id": "P3-V12",
+      "name": "pane-title",
+      "page": "P3",
+      "type": "textbox",
+      "cols": null,
+      "x": 1309,
+      "y": 148,
+      "w": 555,
+      "h": 32,
+      "z": 11,
+      "container": "off",
+      "text": [
+        {
+          "runs": [
+            {
+              "text": "Filters",
+              "font": "semibold",
+              "size": "cardTitle",
+              "color": "text"
+            }
+          ]
+        }
+      ],
+      "doneWhen": "Pane title 'Filters'.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P3-V13",
+      "name": "pane-clear",
+      "page": "P3",
+      "type": "actionButton",
+      "cols": null,
+      "x": 1309,
+      "y": 384,
+      "w": 269,
+      "h": 44,
+      "z": 11,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "clear-filters"
+      },
+      "props": {
+        "shape.roundEdge@default": 20,
+        "text.fontSize": "body",
+        "text.fontFamily": "Segoe UI Semibold",
+        "text.horizontalAlignment": "center",
+        "text.show": true,
+        "fill.show": true,
+        "fill.transparency": 0,
+        "outline.show": true,
+        "outline.weight": 1,
+        "text.text": "Clear",
+        "text.fontColor": "primary",
+        "fill.fillColor": "card",
+        "outline.lineColor": "border"
+      },
+      "doneWhen": "'Clear' clears every slicer in the pane except Year; the pane stays open; the counter drops to 0 (1 if Year isn't 2024).",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P3-V14",
+      "name": "pane-close",
+      "page": "P3",
+      "type": "actionButton",
+      "cols": null,
+      "x": 1594,
+      "y": 384,
+      "w": 270,
+      "h": 44,
+      "z": 11,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-close"
+      },
+      "props": {
+        "shape.roundEdge@default": 20,
+        "text.fontSize": "body",
+        "text.fontFamily": "Segoe UI Semibold",
+        "text.horizontalAlignment": "center",
+        "text.show": true,
+        "fill.show": true,
+        "fill.transparency": 0,
+        "outline.show": true,
+        "outline.weight": 1,
+        "text.text": "Close",
+        "text.fontColor": "card",
+        "fill.fillColor": "primary",
+        "outline.lineColor": "primary"
+      },
+      "doneWhen": "'Close' hides the pane; slicer selections stay.",
+      "build": {
+        "method": "native"
+      },
+      "pane": true
+    },
+    {
+      "id": "P3-V15",
+      "name": "filter-pane",
+      "page": "P3",
+      "type": "group",
+      "members": [
+        "P3-V11",
+        "P3-V12",
+        "P3-V05",
+        "P3-V06",
+        "P3-V13",
+        "P3-V14"
+      ],
+      "displayName": "Filter pane",
+      "hidden": true,
+      "z": 10,
+      "pane": true,
+      "build": {
+        "method": "native"
+      },
+      "doneWhen": "Hidden on open; Filters shows it, Close hides it; Selection pane lists it as 'Filter pane'."
+    },
+    {
+      "id": "P3-V07",
+      "name": "department-table",
+      "page": "P3",
+      "type": "tableEx",
+      "cols": [
+        1,
+        12
+      ],
+      "x": 32,
+      "y": 136,
+      "w": 1856,
+      "h": 360,
+      "z": 1,
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[Department]",
+            "displayName": "Department"
+          },
+          {
+            "field": "[Headcount]",
+            "displayName": "Headcount"
+          },
+          {
+            "field": "[Headcount LY]",
+            "displayName": "Headcount LY"
+          },
+          {
+            "field": "[Net Change]",
+            "displayName": "Net change"
+          },
+          {
+            "field": "[Hires]",
+            "displayName": "Hires"
+          },
+          {
+            "field": "[Leavers]",
+            "displayName": "Leavers"
+          },
+          {
+            "field": "[Hire Rate]",
+            "displayName": "Hire rate"
+          },
+          {
+            "field": "[Turnover Rate]",
+            "displayName": "Turnover"
+          },
+          {
+            "field": "[Turnover Rate LY]",
+            "displayName": "Turnover LY"
+          },
+          {
+            "field": "[Turnover vs Company]",
+            "displayName": "vs company"
+          }
+        ]
+      },
+      "fields": {
+        "values": "Department, Headcount, Headcount LY, Net change, Hires, Leavers, Hire rate, Turnover, Turnover LY, vs company"
+      },
+      "sort": {
+        "field": "[Turnover Rate]",
+        "direction": "Descending"
+      },
+      "cf": [
+        {
+          "type": "gradient",
+          "object": "values",
+          "property": "backColor",
+          "field": "[Turnover Rate]",
+          "target": "[Turnover Rate]",
+          "min": "card",
+          "max": "redLight"
+        },
+        {
+          "type": "measure",
+          "object": "values",
+          "property": "fontColor",
+          "measure": "[Turnover vs Company Colour]",
+          "target": "[Turnover vs Company]"
+        }
+      ],
+      "columnWidths": {
+        "DataTable[Department]": 288,
+        "[Headcount]": 168,
+        "[Headcount LY]": 168,
+        "[Net Change]": 168,
+        "[Hires]": 168,
+        "[Leavers]": 168,
+        "[Hire Rate]": 168,
+        "[Turnover Rate]": 168,
+        "[Turnover Rate LY]": 168,
+        "[Turnover vs Company]": 168
+      },
+      "props": {
+        "total.totals": true
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Departments at a glance",
+        "subtitle": "Sorted by turnover · company total at the bottom"
+      },
+      "doneWhen": "Fills its card (columns span the width); six rows plus a total, no scrollbar; departments add up to the total headcount; header, grid, fonts, row height and conditional formatting as P2-V18 (no data bars).",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P3-V08",
+      "name": "turnover-vs-company",
+      "page": "P3",
+      "type": "clusteredBarChart",
+      "cols": [
+        1,
+        6
+      ],
+      "x": 32,
+      "y": 520,
+      "w": 916,
+      "h": 528,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "DataTable[Department]"
+        ],
+        "Y": [
+          {
+            "field": "[Turnover vs Company]",
+            "displayName": "vs company (pts)"
+          }
+        ]
+      },
+      "fields": {
+        "y": "DataTable[Department]",
+        "x": "[Turnover vs Company]"
+      },
+      "sort": {
+        "field": "[Turnover vs Company]",
+        "direction": "Descending"
+      },
+      "cf": [
+        {
+          "type": "measure",
+          "object": "dataPoint",
+          "property": "fill",
+          "measure": "[Turnover vs Company Colour]",
+          "perPoint": true
+        }
+      ],
+      "props": {
+        "labels.show": true,
+        "labels.labelPrecision": {
+          "int": 1
+        },
+        "categoryAxis.showAxisTitle": false,
+        "valueAxis.show": false,
+        "categoryAxis.innerPadding": 55
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Turnover vs company rate",
+        "subtitle": "Percentage points; red = above the company rate"
+      },
+      "doneWhen": "Six bars around zero, red above / teal below the company rate, signed labels (+1.6%).",
+      "build": {
+        "method": "native"
+      }
+    },
+    {
+      "id": "P3-V09",
+      "name": "gender-mix",
+      "page": "P3",
+      "type": "hundredPercentStackedBarChart",
+      "cols": [
+        7,
+        12
+      ],
+      "x": 972,
+      "y": 520,
+      "w": 916,
+      "h": 528,
+      "z": 1,
+      "bindings": {
+        "Category": [
+          "DataTable[Department]"
+        ],
+        "Series": [
+          "DataTable[Gender]"
+        ],
+        "Y": [
+          {
+            "field": "[Headcount Shown]",
+            "displayName": "Headcount"
+          }
+        ]
+      },
+      "fields": {
+        "y": "DataTable[Department]",
+        "legend": "DataTable[Gender]",
+        "x": "[Headcount Shown]"
+      },
+      "props": {
+        "labels.show": true,
+        "labels.labelPrecision": {
+          "int": 0
+        },
+        "categoryAxis.showAxisTitle": false,
+        "valueAxis.show": false,
+        "valueAxis.showAxisTitle": false,
+        "legend.position": "TopRight",
+        "categoryAxis.innerPadding": 55
+      },
+      "container": {
+        "background": {
+          "color": "card"
+        },
+        "border": {
+          "color": "border",
+          "width": 1,
+          "radius": "radius"
+        },
+        "shadow": true,
+        "padding": "padding",
+        "title": "Headcount mix by gender"
+      },
+      "doneWhen": "Six 100% bars, three gender series in chart.series order (teal, slate, tealLight), labels readable on every segment.",
+      "build": {
+        "method": "native"
+      }
+    }
+  ],
+  "theme": "design/themes/pbip-polish.json"
+}

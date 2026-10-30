@@ -1,0 +1,58 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/reportExtension/1.0.0/schema.json",
+  "name": "extension",
+  "entities": [
+    {
+      "name": "_Measures",
+      "measures": [
+        {
+          "name": "img Headcount sparkline",
+          "expression": "[Headcount sparkline SVG]",
+          "dataType": "Text",
+          "dataCategory": "ImageUrl"
+        },
+        {
+          "name": "img Termination rate bars",
+          "expression": "[Termination rate bars SVG]",
+          "dataType": "Text",
+          "dataCategory": "ImageUrl"
+        },
+        {
+          "name": "fmt Dept rate colour",
+          "expression": "VAR _r = [Termination rate from 2021]\nVAR _all = CALCULATE ( [Termination rate from 2021], ALLSELECTED ( 'DataTable'[Department] ) )\nRETURN IF ( NOT ISBLANK ( _r ) && NOT ISBLANK ( _all ) && _r > _all, \"#A84545\", \"#1D2733\" )",
+          "dataType": "Text"
+        },
+        {
+          "name": "fmt Net change colour",
+          "expression": "VAR _n = [Net Change]\nRETURN IF ( ISBLANK ( _n ) || _n = 0, \"#1D2733\", IF ( _n < 0, \"#A84545\", \"#026E75\" ) )",
+          "dataType": "Text"
+        },
+        {
+          "name": "fmt Heatmap font",
+          "expression": "VAR _v = [1_Headcount]\nVAR _mx = MAXX ( CROSSJOIN ( ALL ( 'DataTable'[Age group] ), ALL ( 'DataTable'[Education level] ) ), [1_Headcount] )\nRETURN IF ( NOT ISBLANK ( _v ) && _v >= 0.7 * _mx, \"#FFFFFF\", \"#1D2733\" )",
+          "dataType": "Text"
+        },
+        {
+          "name": "fmt Gauge callout",
+          "expression": "IF ( ISBLANK ( [Hire rate from 2021] ), \"#FFFFFF00\", \"#12343B\" )",
+          "dataType": "Text"
+        },
+        {
+          "name": "fmt Gauge labels",
+          "expression": "IF ( ISBLANK ( [Hire rate from 2021] ), \"#FFFFFF00\", \"#5A6577\" )",
+          "dataType": "Text"
+        },
+        {
+          "name": "bar Headcount",
+          "expression": "[1_Headcount]",
+          "dataType": "Double"
+        },
+        {
+          "name": "bar Total Salary",
+          "expression": "[3_TotalSalary]",
+          "dataType": "Double"
+        }
+      ]
+    }
+  ]
+}

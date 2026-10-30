@@ -1,0 +1,22 @@
+/// Work-life balance ratings in order; filters DataTable[WorkLifeBalance].
+table 'Work-Life Balance'
+	lineageTag: cbbc6280-73d2-43d2-8516-5a949e93ef1c
+
+	column 'Work-Life Balance'
+		lineageTag: 1395746a-bf33-41f3-bb7d-76dcaf48a3af
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Work-Life Balance]
+		sortByColumn: 'Work-Life Balance Order'
+
+	column 'Work-Life Balance Order'
+		isHidden
+		lineageTag: d6def95c-5b49-44b6-8d84-72da0e74f820
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Work-Life Balance Order]
+
+	partition 'Work-Life Balance' = calculated
+		mode: import
+		source = DATATABLE ( "Work-Life Balance", STRING, "Work-Life Balance Order", INTEGER, { { "Bad", 1 }, { "Good", 2 }, { "Better", 3 }, { "Best", 4 } } )
+

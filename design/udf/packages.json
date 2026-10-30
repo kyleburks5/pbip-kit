@@ -1,0 +1,34 @@
+{
+  "_note": "DAX Lib (daxlib.org) packages this kit may install, through the daxlib-mcp server (.mcp.json, pinned to @daxlib/mcp@0.1.0). Order of preference for a function: a package listed here, then new DAX. /plan puts a package a rep needs on the model approval list; /model approved installs it with daxlib-mcp install_package and records it under `installed`. Licences checked 2026-10-24 (VERSIONS.md, docs/it-security.md). A package not listed here needs its licence checked and a row here first. Each package is also vendored (design/udf/vendor/, `vendored`: source commit, licence file, SHA-256 of functions.tmdl) for a laptop where npm is blocked: design/udf/vendored.py turns it into modeling MCP function definitions.",
+  "server": {"name": "daxlib-mcp", "npm": "@daxlib/mcp@0.1.0", "version": "0.1.0", "licence": "MIT",
+             "licenceSource": "npm registry (npm view @daxlib/mcp license) and https://github.com/daxlib/daxlib-mcp",
+             "tools": ["search_packages", "get_package", "get_package_readme", "list_local_instances", "install_package"],
+             "requires": "Power BI Desktop on Windows x64, a model at compatibility level 1702 or later (install_package refuses below it and never raises it: /model raises it as its own approval item), Node.js 18+ (npx)",
+             "tested": "2026-10-24 on a scratch copy of Rep 10 (pbik-daxlib-test): level raised 1606 -> 1702 with the modeling MCP, DaxLib.SVG 2.0.0 installed (58 functions), saved by Desktop to definition/functions.tmdl; pbik model check counts the 58 functions"},
+  "packages": [
+    {"id": "DaxLib.SVG", "version": "2.0.0", "licence": "MIT",
+     "licenceSource": "LICENSE in https://github.com/daxlib/dev-daxlib-svg (the manifest's repositoryUrl)",
+     "authors": "Kurt Buhler, Jake Duddy, Tom Shanley",
+     "use": "SVG measures (ladder step 2): sparklines, bars, dumbbells and other table or card images, before writing SVG by hand",
+     "note": "Pass colours as raw #RRGGBB, never %23: its output keeps a raw % (width='100%'), so Power BI does not decode the URI; raw # renders and %23 draws nothing (checked in Desktop on card and table images, 2026-10-24, v0.4.1). pbik validate flags a %23 argument",
+     "status": "candidate",
+     "vendored": {"folder": "design/udf/vendor/DaxLib.SVG/2.0.0", "source": "daxlib/daxlib@0e65ac4137e73edfcb1cef4ac880b9cd31bb5389 packages/d/daxlib.svg/2.0.0", "licenceFile": "LICENSE from daxlib/dev-daxlib-svg@d73d34b7e74e5f327d54ac8f6adb1d25db35a5cb", "sha256": "9665463736d7eb727248825c98cd1ea6b2bfc01fa2caecc2ad1af27e791fa369", "functions": 58, "date": "2026-10-29"}},
+    {"id": "DataTides.ColourContrast", "version": "0.1.0", "licence": "MIT",
+     "licenceSource": "no repository of its own: it lives in https://github.com/daxlib/daxlib (LICENSE: MIT, Copyright (c) 2025 SQLBI)",
+     "authors": "Juls-BI",
+     "use": "WCAG contrast of measure-driven colours (CLAUDE.md Accessibility): text colour measures checked against their background",
+     "status": "candidate",
+     "vendored": {"folder": "design/udf/vendor/DataTides.ColourContrast/0.1.0", "source": "daxlib/daxlib@0e65ac4137e73edfcb1cef4ac880b9cd31bb5389 packages/d/datatides.colourcontrast/0.1.0", "licenceFile": "LICENSE from daxlib/daxlib@0e65ac4137e73edfcb1cef4ac880b9cd31bb5389", "sha256": "827c3ef166b413e36b7b7f056d5e92751b81113e49a4be5f7d82d0a2193722d4", "functions": 3, "date": "2026-10-29"}},
+    {"id": "DataTides.SignificantChange", "version": "0.1.0", "licence": "MIT",
+     "licenceSource": "no repository of its own: it lives in https://github.com/daxlib/daxlib (LICENSE: MIT, Copyright (c) 2025 SQLBI)",
+     "authors": "Juls-BI",
+     "use": "exception rules (docs/patterns/exception-list.md): z-score, IQR and other outlier tests",
+     "status": "candidate",
+     "vendored": {"folder": "design/udf/vendor/DataTides.SignificantChange/0.1.0", "source": "daxlib/daxlib@0e65ac4137e73edfcb1cef4ac880b9cd31bb5389 packages/d/datatides.significantchange/0.1.0", "licenceFile": "LICENSE from daxlib/daxlib@0e65ac4137e73edfcb1cef4ac880b9cd31bb5389", "sha256": "c7a38f0776795a2283ca3706555250b856baf5641a08cdedf8e3e3c42e6d0ee0", "functions": 11, "date": "2026-10-29"}}
+  ],
+  "notListed": [
+    {"id": "DaxLib.FormatString", "version": "0.1.2",
+     "reason": "its repositoryUrl (https://github.com/data-goblin/DaxLib.FormatString) returned 404 on 2026-10-24: licence unconfirmed"}
+  ],
+  "installed": []
+}

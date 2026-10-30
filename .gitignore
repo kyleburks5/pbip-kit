@@ -1,0 +1,12 @@
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+# A rep whose sources are not in data/ (no refresh possible) may un-ignore its model cache:
+# !<Name>.SemanticModel/.pbi/cache.abf
+design/wireframes/data.json
+data/*
+!data/.gitkeep
+_snapshots/
+__pycache__/
+*.pyc
+# Python wheels copied in for an offline install (tools/doctor.ps1)
+tools/wheels/

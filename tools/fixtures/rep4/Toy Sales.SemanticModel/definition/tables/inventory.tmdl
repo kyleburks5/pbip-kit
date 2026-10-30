@@ -1,0 +1,74 @@
+table inventory
+	lineageTag: 9f696157-651a-4a24-a6ad-9d3db0b5cbf6
+
+	column Store_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: cbf3f4e4-5602-478f-93fa-4f9798034ba7
+		summarizeBy: none
+		sourceColumn: Store_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 471b264b-2758-4d27-a87e-11c8dd7a1761
+		summarizeBy: none
+		sourceColumn: Product_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Stock_On_Hand
+		dataType: int64
+		formatString: 0
+		lineageTag: 0705d1df-fcf6-4843-b7c0-dfac758f7674
+		summarizeBy: none
+		sourceColumn: Stock_On_Hand
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Status Order' =
+			VAR _s = inventory[Store_ID]
+			VAR _p = inventory[Product_ID]
+			VAR _oh = inventory[Stock_On_Hand]
+			VAR _last = CALCULATE ( MAX ( 'Date'[Date] ), REMOVEFILTERS ( 'Date' ) )
+			VAR _u =
+			    CALCULATE (
+			        SUM ( sales[Units] ),
+			        REMOVEFILTERS ( inventory ),
+			        sales[Store_ID] = _s,
+			        sales[Product_ID] = _p,
+			        'Date'[Date] >= _last - 89,
+			        'Date'[Date] <= _last
+			    )
+			VAR _c = DIVIDE ( _oh, DIVIDE ( _u, 90 ) )
+			RETURN
+			    -- Same rule as the [Stock Status] measure: 1 Low, 2 OK, 3 Overstock.
+			    SWITCH ( TRUE (), _oh = 0, 1, ISBLANK ( _c ), 3, _c < 7, 1, _c > 60, 3, 2 )
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c49345b2-f705-4f34-9682-4140126895f5
+		summarizeBy: none
+
+	column 'Stock Status' = SWITCH ( inventory[Status Order], 1, "Low", 2, "OK", "Overstock" )
+		dataType: string
+		lineageTag: d0b99ff5-379d-46d0-a40e-88d2a923015a
+		summarizeBy: none
+		sortByColumn: 'Status Order'
+
+	partition inventory = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\pbip-data\Maven Toys\inventory.csv"),[Delimiter=",", Columns=3, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Store_ID", Int64.Type}, {"Product_ID", Int64.Type}, {"Stock_On_Hand", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

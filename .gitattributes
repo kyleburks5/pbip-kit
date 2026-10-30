@@ -1,0 +1,2 @@
+# Vendored DAX Lib packages stay byte-for-byte as published (vendored.py --check compares SHA-256s)
+design/udf/vendor/** -text

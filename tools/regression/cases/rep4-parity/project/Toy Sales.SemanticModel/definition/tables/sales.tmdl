@@ -1,0 +1,66 @@
+table sales
+	lineageTag: 608296c1-ce30-4eb0-9b06-8f75e0e73aa1
+
+	column Sale_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1b12bf82-828d-40cc-b950-3e6bcf582f8d
+		summarizeBy: none
+		sourceColumn: Sale_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: 8e0c2ef2-7386-46b5-939f-f83b96c5e917
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Store_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3af5e6c5-9765-4942-96e7-4a879d16e849
+		summarizeBy: none
+		sourceColumn: Store_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1eb55d77-3e24-45d9-b139-3fd47eff5a55
+		summarizeBy: none
+		sourceColumn: Product_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Units
+		dataType: int64
+		formatString: 0
+		lineageTag: 53c0b151-fd84-4594-b163-acb3c9f2efe3
+		summarizeBy: none
+		sourceColumn: Units
+
+		annotation SummarizationSetBy = Automatic
+
+	partition sales = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\pbip-data\Maven Toys\sales.csv"),[Delimiter=",", Columns=5, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Sale_ID", Int64.Type}, {"Date", type date}, {"Store_ID", Int64.Type}, {"Product_ID", Int64.Type}, {"Units", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

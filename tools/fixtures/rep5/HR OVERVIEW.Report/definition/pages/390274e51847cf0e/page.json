@@ -1,0 +1,216 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "390274e51847cf0e",
+  "displayName": "Workforce Mix",
+  "width": 1920,
+  "height": 1080,
+  "displayOption": "FitToPage",
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "mix-headline",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-nav",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-sentiment",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-pane-count",
+      "target": "mix-filters-badge",
+      "type": "NoFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-headline",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-nav",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-chart-gender",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-heatmap",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-sentiment",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-pay",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-type",
+      "target": "mix-pane-count",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-headline",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-nav",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-chart-type",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-heatmap",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-sentiment",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-pay",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-chart-gender",
+      "target": "mix-pane-count",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-headline",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-nav",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-chart-type",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-chart-gender",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-sentiment",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-pay",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-heatmap",
+      "target": "mix-pane-count",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-headline",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-nav",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-chart-type",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-chart-gender",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-heatmap",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-sentiment",
+      "type": "DataFilter"
+    },
+    {
+      "source": "mix-pay",
+      "target": "mix-pane-count",
+      "type": "DataFilter"
+    }
+  ]
+}

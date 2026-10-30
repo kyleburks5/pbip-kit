@@ -1,0 +1,7884 @@
+{
+  "_note": "Parity test: 390274e51847cf0e ('Workforce Mix') converted from the files Desktop saved. `source` is the original visual folder; `_gaps` lists what pbik's layout can't express.",
+  "pages": {
+    "P2": {
+      "displayName": "pbik Workforce Mix",
+      "width": 1920,
+      "height": 1080,
+      "displayOption": "FitToPage",
+      "background": {
+        "color": "#EEF1F6",
+        "transparency": 0.0
+      },
+      "interactions": [
+        {
+          "source": "P2-V07",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V06",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V10",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V11",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V12",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V20",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V21",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V15",
+          "targets": [
+            "P2-V03"
+          ],
+          "type": "NoFilter"
+        },
+        {
+          "source": "P2-V10",
+          "targets": [
+            "P2-V07",
+            "P2-V06",
+            "P2-V11",
+            "P2-V12",
+            "P2-V20",
+            "P2-V21",
+            "P2-V15"
+          ],
+          "type": "DataFilter"
+        },
+        {
+          "source": "P2-V11",
+          "targets": [
+            "P2-V07",
+            "P2-V06",
+            "P2-V10",
+            "P2-V12",
+            "P2-V20",
+            "P2-V21",
+            "P2-V15"
+          ],
+          "type": "DataFilter"
+        },
+        {
+          "source": "P2-V12",
+          "targets": [
+            "P2-V07",
+            "P2-V06",
+            "P2-V10",
+            "P2-V11",
+            "P2-V20",
+            "P2-V21",
+            "P2-V15"
+          ],
+          "type": "DataFilter"
+        },
+        {
+          "source": "P2-V21",
+          "targets": [
+            "P2-V07",
+            "P2-V06",
+            "P2-V10",
+            "P2-V11",
+            "P2-V12",
+            "P2-V20",
+            "P2-V15"
+          ],
+          "type": "DataFilter"
+        }
+      ],
+      "bookmarks": [
+        {
+          "name": "filters-open",
+          "displayName": "pbik Workforce Mix · Filters open",
+          "show": [
+            "P2-V08",
+            "P2-V09",
+            "P2-V13",
+            "P2-V15",
+            "P2-V16",
+            "P2-V14",
+            "P2-V17",
+            "P2-V18",
+            "P2-V19",
+            "P2-V22",
+            "P2-V23",
+            "P2-V24",
+            "P2-V25"
+          ]
+        },
+        {
+          "name": "filters-closed",
+          "displayName": "pbik Workforce Mix · Filters closed",
+          "hide": [
+            "P2-V08",
+            "P2-V09",
+            "P2-V13",
+            "P2-V15",
+            "P2-V16",
+            "P2-V14",
+            "P2-V17",
+            "P2-V18",
+            "P2-V19",
+            "P2-V22",
+            "P2-V23",
+            "P2-V24",
+            "P2-V25"
+          ]
+        },
+        {
+          "name": "filters-cleared",
+          "displayName": "pbik Workforce Mix · Filters cleared",
+          "targets": [
+            "P2-V17",
+            "P2-V18",
+            "P2-V19",
+            "P2-V22",
+            "P2-V23"
+          ],
+          "data": true,
+          "display": false
+        }
+      ]
+    }
+  },
+  "retired": [],
+  "visuals": [
+    {
+      "id": "P2-V01",
+      "name": "band",
+      "page": "P2",
+      "type": "shape",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 112,
+      "z": 0,
+      "textFit": false,
+      "source": "mix-band",
+      "build": {
+        "method": "native"
+      },
+      "emptyQuery": true,
+      "props": {
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangle'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 0 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V02",
+      "name": "Title",
+      "page": "P2",
+      "type": "textbox",
+      "x": 32,
+      "y": 16,
+      "w": 916,
+      "h": 50,
+      "z": 1,
+      "textFit": false,
+      "source": "Title",
+      "build": {
+        "method": "native"
+      },
+      "emptyQuery": false,
+      "props": {
+        "general.paragraphs@none": {
+          "raw": [
+            {
+              "textRuns": [
+                {
+                  "value": "Workforce Mix",
+                  "textStyle": {
+                    "fontFamily": "Segoe UI Semibold",
+                    "fontSize": "23pt",
+                    "color": "#FFFFFF"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder None can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V03",
+      "name": "filters-badge",
+      "page": "P2",
+      "type": "cardVisual",
+      "x": 1559,
+      "y": 27,
+      "w": 24,
+      "h": 24,
+      "z": 2,
+      "textFit": false,
+      "source": "mix-filters-badge",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Filter badge]"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Filter badge]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Measure": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "_Measures"
+                      }
+                    },
+                    "Property": "Filter badge fill"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "cardCalloutArea.backgroundTransparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.backgroundShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.backgroundTransparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1500 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V04",
+      "name": "year",
+      "page": "P2",
+      "type": "advancedSlicerVisual",
+      "x": 972,
+      "y": 36,
+      "w": 446,
+      "h": 40,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-year",
+      "build": {
+        "method": "native"
+      },
+      "sync": {
+        "group": "sync-year",
+        "fieldChanges": true,
+        "filterChanges": true
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Year]"
+          }
+        ]
+      },
+      "props": {
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "5D"
+              }
+            }
+          }
+        },
+        "layout.columnPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "6D"
+              }
+            }
+          }
+        },
+        "layout.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "72D"
+              }
+            }
+          }
+        },
+        "outline.lineColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "value.fontFamily@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "general.filter@none": {
+          "raw": {
+            "filter": {
+              "Version": 2,
+              "From": [
+                {
+                  "Name": "d",
+                  "Entity": "Date",
+                  "Type": 0
+                }
+              ],
+              "Where": [
+                {
+                  "Condition": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "d"
+                              }
+                            },
+                            "Property": "Year"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "2024L"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V05",
+      "name": "filters",
+      "page": "P2",
+      "type": "actionButton",
+      "x": 1442,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-filters",
+      "build": {
+        "method": "native"
+      },
+      "emptyQuery": true,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-open"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Filters'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V06",
+      "name": "nav",
+      "page": "P2",
+      "type": "pageNavigator",
+      "x": 1599,
+      "y": 36,
+      "w": 289,
+      "h": 40,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-nav",
+      "build": {
+        "method": "native"
+      },
+      "emptyQuery": true,
+      "props": {
+        "fill.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "fill.fillColor@selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fill.fillColor@hover": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@hover": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "text.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "text.fontFamily@selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "text.fontColor@selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.fontColor@hover": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "72D"
+              }
+            }
+          }
+        },
+        "outline.transparency@selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "layout.cellPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "24D"
+              }
+            }
+          }
+        },
+        "layout.orientation@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        },
+        "pages.showHiddenPages@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "pages.showTooltipPages@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V07",
+      "name": "headline",
+      "page": "P2",
+      "type": "cardVisual",
+      "x": 32,
+      "y": 58,
+      "w": 916,
+      "h": 34,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-headline",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Headline Mix]"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Headline Mix]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#B9D9DC'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "cardCalloutArea.backgroundTransparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.backgroundShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.backgroundTransparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V08",
+      "name": "pane-scrim",
+      "page": "P2",
+      "type": "actionButton",
+      "x": 0,
+      "y": 112,
+      "w": 1920,
+      "h": 968,
+      "z": 3,
+      "textFit": false,
+      "source": "mix-pane-scrim",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "emptyQuery": true,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-closed"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "' '"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "88D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 2900 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V09",
+      "name": "pane",
+      "page": "P2",
+      "type": "shape",
+      "x": 1442,
+      "y": 124,
+      "w": 446,
+      "h": 608,
+      "z": 4,
+      "textFit": false,
+      "source": "mix-pane",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "emptyQuery": true,
+      "props": {
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "16D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "30D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "80D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V10",
+      "name": "chart-type",
+      "page": "P2",
+      "type": "donutChart",
+      "x": 32,
+      "y": 136,
+      "w": 446,
+      "h": 340,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-chart-type",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Category": [
+          {
+            "field": "DataTable[EmploymentType]",
+            "active": true
+          }
+        ],
+        "Y": [
+          {
+            "field": "[1_Headcount]",
+            "displayName": "Employees"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[1_Headcount]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "legend.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "labels.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "labels.labelStyle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Category, percent of total'"
+              }
+            }
+          }
+        },
+        "labels.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "labels.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "labels.percentageLabelPrecision@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "slices.innerRadiusRatio@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "62D"
+              }
+            }
+          }
+        },
+        "dataPoint.borderShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "dataPoint.borderColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataPoint.borderSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "dataPoint.fill@{\"data\": [{\"scopeId\": {\"Comparison\": {\"ComparisonKind\": 0, \"Left\": {\"Column\": {\"Expression\": {\"SourceRef\": {\"Entity\": \"DataTable\"}}, \"Property\": \"EmploymentType\"}}, \"Right\": {\"Literal\": {\"Value\": \"'Contractor'\"}}}}}]}": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5D6B8A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataPoint.fill@{\"data\": [{\"scopeId\": {\"Comparison\": {\"ComparisonKind\": 0, \"Left\": {\"Column\": {\"Expression\": {\"SourceRef\": {\"Entity\": \"DataTable\"}}, \"Property\": \"EmploymentType\"}}, \"Right\": {\"Literal\": {\"Value\": \"'Full-time'\"}}}}}]}": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#038D96'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "16D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "92D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "14D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Employment Type'"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Mix subtitle Employment Type"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V11",
+      "name": "chart-gender",
+      "page": "P2",
+      "type": "donutChart",
+      "x": 502,
+      "y": 136,
+      "w": 446,
+      "h": 340,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-chart-gender",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Category": [
+          {
+            "field": "DataTable[Gender]",
+            "active": true
+          }
+        ],
+        "Y": [
+          {
+            "field": "[1_Headcount]",
+            "displayName": "Employees"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[1_Headcount]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "legend.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "labels.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "labels.labelStyle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Category, percent of total'"
+              }
+            }
+          }
+        },
+        "labels.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "labels.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "labels.percentageLabelPrecision@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "slices.innerRadiusRatio@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "62D"
+              }
+            }
+          }
+        },
+        "dataPoint.borderShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "dataPoint.borderColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataPoint.borderSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "dataPoint.fill@{\"data\": [{\"scopeId\": {\"Comparison\": {\"ComparisonKind\": 0, \"Left\": {\"Column\": {\"Expression\": {\"SourceRef\": {\"Entity\": \"DataTable\"}}, \"Property\": \"Gender\"}}, \"Right\": {\"Literal\": {\"Value\": \"'Female'\"}}}}}]}": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#038D96'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataPoint.fill@{\"data\": [{\"scopeId\": {\"Comparison\": {\"ComparisonKind\": 0, \"Left\": {\"Column\": {\"Expression\": {\"SourceRef\": {\"Entity\": \"DataTable\"}}, \"Property\": \"Gender\"}}, \"Right\": {\"Literal\": {\"Value\": \"'Male'\"}}}}}]}": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5D6B8A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataPoint.fill@{\"data\": [{\"scopeId\": {\"Comparison\": {\"ComparisonKind\": 0, \"Left\": {\"Column\": {\"Expression\": {\"SourceRef\": {\"Entity\": \"DataTable\"}}, \"Property\": \"Gender\"}}, \"Right\": {\"Literal\": {\"Value\": \"'Other'\"}}}}}]}": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#8CCFD3'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "16D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "92D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "14D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Gender'"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Mix subtitle Gender"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V12",
+      "name": "heatmap",
+      "page": "P2",
+      "type": "pivotTable",
+      "x": 972,
+      "y": 136,
+      "w": 916,
+      "h": 340,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-heatmap",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Columns": [
+          {
+            "field": "DataTable[Education level]",
+            "active": true
+          }
+        ],
+        "Rows": [
+          {
+            "field": "DataTable[Age group]",
+            "active": true
+          }
+        ],
+        "Values": [
+          {
+            "field": "[1_Headcount]",
+            "displayName": "Employees"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "DataTable[Age group]",
+          "direction": "Ascending",
+          "default": true
+        }
+      ],
+      "props": {
+        "subTotals.rowSubtotals@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "subTotals.columnSubtotals@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "columnHeaders.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "columnHeaders.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "columnHeaders.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "columnHeaders.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "rowHeaders.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "rowHeaders.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "rowHeaders.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "values.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "values.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.fontColorPrimary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.fontColorSecondary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.backColor@{\"data\": [{\"dataViewWildcard\": {\"matchingOption\": 1}}], \"metadata\": \"_Measures.1_Headcount\"}": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "FillRule": {
+                    "Input": {
+                      "Measure": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "_Measures"
+                          }
+                        },
+                        "Property": "1_Headcount"
+                      }
+                    },
+                    "FillRule": {
+                      "linearGradient3": {
+                        "min": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#E7F3F5'"
+                            }
+                          }
+                        },
+                        "mid": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#8CCFD3'"
+                            }
+                          }
+                        },
+                        "max": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#4DB0B7'"
+                            }
+                          }
+                        },
+                        "nullColoringStrategy": {
+                          "strategy": {
+                            "Literal": {
+                              "Value": "'asZero'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridHorizontal@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "grid.gridHorizontalColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridHorizontalWeight@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "grid.gridVertical@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "grid.gridVerticalColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridVerticalWeight@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "grid.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "7D"
+              }
+            }
+          }
+        },
+        "columnFormatting.alignment@[1_Headcount]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "columnWidth.value@DataTable[Age group]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "110D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[1_Headcount]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "150D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "16D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "92D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "14D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Age Group by Education'"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Heatmap subtitle"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V13",
+      "name": "pane-title",
+      "page": "P2",
+      "type": "textbox",
+      "x": 1466,
+      "y": 138,
+      "w": 120,
+      "h": 40,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-pane-title",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "emptyQuery": true,
+      "props": {
+        "general.paragraphs@none": {
+          "raw": [
+            {
+              "textRuns": [
+                {
+                  "value": "Filters",
+                  "textStyle": {
+                    "fontFamily": "Segoe UI Semibold",
+                    "fontSize": "14pt",
+                    "color": "#12343B"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V14",
+      "name": "pane-x",
+      "page": "P2",
+      "type": "actionButton",
+      "x": 1832,
+      "y": 142,
+      "w": 32,
+      "h": 32,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-pane-x",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "emptyQuery": true,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-closed"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'×'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "14D"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "16D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V15",
+      "name": "pane-count",
+      "page": "P2",
+      "type": "cardVisual",
+      "x": 1558,
+      "y": 145,
+      "w": 200,
+      "h": 26,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-pane-count",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Filter count text]"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Filter count text]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#026E75'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "cardCalloutArea.backgroundTransparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.backgroundShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.backgroundTransparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V16",
+      "name": "pane-note",
+      "page": "P2",
+      "type": "textbox",
+      "x": 1466,
+      "y": 170,
+      "w": 398,
+      "h": 26,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-pane-note",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "emptyQuery": true,
+      "props": {
+        "general.paragraphs@none": {
+          "raw": [
+            {
+              "textRuns": [
+                {
+                  "value": "Values at the end of the period · rates use average headcount, from 2021",
+                  "textStyle": {
+                    "fontFamily": "Segoe UI",
+                    "fontSize": "8pt",
+                    "color": "#5A6577"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V17",
+      "name": "quarter",
+      "page": "P2",
+      "type": "advancedSlicerVisual",
+      "x": 1466,
+      "y": 196,
+      "w": 398,
+      "h": 60,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-quarter",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "sync": {
+        "group": "sync-quarter",
+        "fieldChanges": true,
+        "filterChanges": true
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Quarter]"
+          }
+        ]
+      },
+      "props": {
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "layout.columnPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "layout.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.lineColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "value.fontFamily@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "general.filter@none": {
+          "raw": {
+            "filter": {
+              "Version": 2,
+              "From": [
+                {
+                  "Name": "d",
+                  "Entity": "Date",
+                  "Type": 0
+                }
+              ],
+              "Where": [
+                {
+                  "Condition": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "d"
+                              }
+                            },
+                            "Property": "Quarter"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "2024L"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Quarter'"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V18",
+      "name": "month",
+      "page": "P2",
+      "type": "slicer",
+      "x": 1466,
+      "y": 272,
+      "w": 398,
+      "h": 76,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-month",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "sync": {
+        "group": "sync-month",
+        "fieldChanges": true,
+        "filterChanges": true
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Month]",
+            "active": true
+          }
+        ]
+      },
+      "props": {
+        "data.mode@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Dropdown'"
+              }
+            }
+          }
+        },
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "header.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "header.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Month'"
+              }
+            }
+          }
+        },
+        "header.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "header.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "header.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "items.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "items.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.background@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V19",
+      "name": "department",
+      "page": "P2",
+      "type": "advancedSlicerVisual",
+      "x": 1466,
+      "y": 364,
+      "w": 398,
+      "h": 132,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-department",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "sync": {
+        "group": "sync-department",
+        "fieldChanges": true,
+        "filterChanges": true
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[Department]"
+          }
+        ]
+      },
+      "props": {
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "layout.columnPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "layout.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.lineColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "value.fontFamily@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "general.filter@none": {
+          "raw": {
+            "filter": {
+              "Version": 2,
+              "From": [
+                {
+                  "Name": "d",
+                  "Entity": "Date",
+                  "Type": 0
+                },
+                {
+                  "Name": "d1",
+                  "Entity": "DataTable",
+                  "Type": 0
+                }
+              ],
+              "Where": [
+                {
+                  "Condition": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "d1"
+                              }
+                            },
+                            "Property": "Department"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "2024L"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Department'"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V20",
+      "name": "sentiment",
+      "page": "P2",
+      "type": "tableEx",
+      "x": 32,
+      "y": 500,
+      "w": 1073,
+      "h": 548,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-sentiment",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Rating[Rating]",
+            "displayName": " "
+          },
+          {
+            "field": "[Likert SVG]",
+            "displayName": " "
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "Rating[Rating]",
+          "direction": "Ascending",
+          "default": true
+        }
+      ],
+      "props": {
+        "total.totals@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "total.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "total.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "total.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "columnHeaders.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "6D"
+              }
+            }
+          }
+        },
+        "columnHeaders.outlineStyle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "columnHeaders.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "values.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "values.fontColorPrimary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.fontColorSecondary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.backColorPrimary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.backColorSecondary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridHorizontal@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "grid.gridHorizontalColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridVertical@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "grid.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "6D"
+              }
+            }
+          }
+        },
+        "grid.imageHeight@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "112D"
+              }
+            }
+          }
+        },
+        "grid.imageWidth@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "860D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@Rating[Rating]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "160D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[Likert SVG]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "860D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "16D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "92D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "14D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'How Leavers Rated Their Job'"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Sentiment subtitle"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V21",
+      "name": "pay",
+      "page": "P2",
+      "type": "tableEx",
+      "x": 1129,
+      "y": 500,
+      "w": 759,
+      "h": 548,
+      "z": 1,
+      "textFit": false,
+      "source": "mix-pay",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[JobRole]",
+            "displayName": "Job Role"
+          },
+          {
+            "field": "[1_Headcount]",
+            "displayName": "Staff"
+          },
+          {
+            "field": "[Average Salary]",
+            "displayName": "Average"
+          },
+          {
+            "field": "[Salary box SVG]",
+            "displayName": "Salary Range, $40K–$200K"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Average Salary]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "total.totals@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "total.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "total.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "total.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "columnHeaders.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "columnHeaders.outlineStyle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "columnHeaders.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "values.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "values.fontColorPrimary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.fontColorSecondary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.backColorPrimary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.backColorSecondary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridHorizontal@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "grid.gridHorizontalColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridVertical@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "grid.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "grid.imageHeight@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "52D"
+              }
+            }
+          }
+        },
+        "grid.imageWidth@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "300D"
+              }
+            }
+          }
+        },
+        "columnFormatting.labelDisplayUnits@[Average Salary]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1000D"
+              }
+            }
+          }
+        },
+        "columnFormatting.labelPrecision@[Average Salary]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "columnFormatting.alignment@[Average Salary]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Right'"
+              }
+            }
+          }
+        },
+        "columnFormatting.styleHeader@[Average Salary]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "columnFormatting.alignment@[1_Headcount]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Right'"
+              }
+            }
+          }
+        },
+        "columnFormatting.styleHeader@[1_Headcount]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "columnWidth.value@DataTable[JobRole]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "205D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[1_Headcount]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "80D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[Average Salary]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[Salary box SVG]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "320D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "16D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "92D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "14D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Pay by Job Role'"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Pay subtitle"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V22",
+      "name": "type",
+      "page": "P2",
+      "type": "advancedSlicerVisual",
+      "x": 1466,
+      "y": 512,
+      "w": 398,
+      "h": 60,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-type",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "sync": {
+        "group": "sync-type",
+        "fieldChanges": true,
+        "filterChanges": true
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[EmploymentType]"
+          }
+        ]
+      },
+      "props": {
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "layout.columnPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "layout.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.lineColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "value.fontFamily@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "general.filter@none": {
+          "raw": {
+            "filter": {
+              "Version": 2,
+              "From": [
+                {
+                  "Name": "d",
+                  "Entity": "Date",
+                  "Type": 0
+                },
+                {
+                  "Name": "d1",
+                  "Entity": "DataTable",
+                  "Type": 0
+                }
+              ],
+              "Where": [
+                {
+                  "Condition": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "d1"
+                              }
+                            },
+                            "Property": "EmploymentType"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "2024L"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Employment Type'"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V23",
+      "name": "gender",
+      "page": "P2",
+      "type": "advancedSlicerVisual",
+      "x": 1466,
+      "y": 588,
+      "w": 398,
+      "h": 60,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-gender",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "sync": {
+        "group": "sync-gender",
+        "fieldChanges": true,
+        "filterChanges": true
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "DataTable[Gender]"
+          }
+        ]
+      },
+      "props": {
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "layout.columnPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "layout.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.lineColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1D2733'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "value.fontFamily@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "general.filter@none": {
+          "raw": {
+            "filter": {
+              "Version": 2,
+              "From": [
+                {
+                  "Name": "d",
+                  "Entity": "Date",
+                  "Type": 0
+                },
+                {
+                  "Name": "d1",
+                  "Entity": "DataTable",
+                  "Type": 0
+                }
+              ],
+              "Where": [
+                {
+                  "Condition": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "d1"
+                              }
+                            },
+                            "Property": "Gender"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "2024L"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Gender'"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5A6577'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V24",
+      "name": "pane-clear",
+      "page": "P2",
+      "type": "actionButton",
+      "x": 1466,
+      "y": 672,
+      "w": 193,
+      "h": 36,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-pane-clear",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "emptyQuery": true,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-cleared"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Clear Filters'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#026E75'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#DCE2EA'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P2-V25",
+      "name": "pane-close",
+      "page": "P2",
+      "type": "actionButton",
+      "x": 1671,
+      "y": 672,
+      "w": 193,
+      "h": 36,
+      "z": 5,
+      "textFit": false,
+      "source": "mix-pane-close",
+      "build": {
+        "method": "native"
+      },
+      "hidden": true,
+      "emptyQuery": true,
+      "action": {
+        "type": "Bookmark",
+        "bookmark": "filters-closed"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Close'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#12343B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "18D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 3100 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    }
+  ]
+}

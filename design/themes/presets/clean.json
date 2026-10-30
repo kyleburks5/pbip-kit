@@ -1,0 +1,58 @@
+{
+  "_note": "The default preset (/theme with no brand colours or reference): the neutral slate-teal palette from Rep 5, as design/tokens.json shipped it. colors pins the whole palette; gen_tokens.py still checks every pair.",
+  "name": "clean",
+  "description": "Neutral slate-teal on a cool grey canvas, white cards with a soft shadow, 16px corners.",
+  "mode": "light",
+  "brand": [
+    "primary=#12343B",
+    "brand=#038D96",
+    "bad=#A84545",
+    "second=#5D6B8A",
+    "good=#026E75"
+  ],
+  "colors": {
+    "primary": "#12343B",
+    "teal": "#038D96",
+    "tealDark": "#026E75",
+    "selected": "#037C84",
+    "tealLight": "#8CCFD3",
+    "tealMid": "#4DB0B7",
+    "tealTint": "#E7F3F5",
+    "red": "#A84545",
+    "redLight": "#E3A6A6",
+    "redTint": "#F6EDED",
+    "slate": "#5D6B8A",
+    "slateLight": "#B8C2D6",
+    "slateTint": "#EDF0F6",
+    "good": "#026E75",
+    "goodTint": "#E7F3F5",
+    "bad": "#A84545",
+    "badTint": "#F6EDED",
+    "accent": "#A84545",
+    "warning": "#5D6B8A",
+    "neutral": "#5A6577",
+    "neutralTint": "#EEF1F6",
+    "background": "#EEF1F6",
+    "card": "#FFFFFF",
+    "border": "#DCE2EA",
+    "text": "#1D2733",
+    "textMuted": "#5A6577",
+    "onDarkMuted": "#B9D9DC",
+    "onDark": "#FFFFFF",
+    "html": "#7A4FA0",
+    "htmlTint": "#F2ECF8"
+  },
+  "container": {
+    "radius": 16,
+    "borderWidth": 0,
+    "padding": 20,
+    "paddingTop": 14,
+    "shadow": "0 1px 2px rgba(18,52,59,0.06), 0 6px 16px rgba(18,52,59,0.07)",
+    "pbiShadow": {
+      "_note": "Power BI draws the CSS shadow darker (Rep 3), so visuals use this lighter mapping; preset Custom on every shadow.",
+      "blur": 10,
+      "distance": 3,
+      "transparency": 92
+    }
+  }
+}

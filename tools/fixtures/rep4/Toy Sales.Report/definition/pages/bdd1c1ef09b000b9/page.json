@@ -1,0 +1,141 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "bdd1c1ef09b000b9",
+  "displayName": "Inventory and stock",
+  "width": 1920,
+  "height": 1080,
+  "displayOption": "FitToPage",
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F7F4EE'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-headline",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-location",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-city",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-category",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-kpi-value",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-kpi-units",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-kpi-cover",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-kpi-oos",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-status-mix",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-risk-table",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-category-value",
+      "target": "inventory-status",
+      "type": "DataFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-headline",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-location",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-city",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-category",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-kpi-value",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-kpi-units",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-kpi-cover",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-kpi-oos",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-category-value",
+      "type": "NoFilter"
+    },
+    {
+      "source": "inventory-status",
+      "target": "inventory-status-mix",
+      "type": "NoFilter"
+    }
+  ]
+}

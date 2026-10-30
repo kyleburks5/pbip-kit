@@ -1,0 +1,17 @@
+{
+  "_note": "The colours the templates were drawn in (the clean palette, Rep 5) and the tokens.json name each one follows, by where it sits: text (font, label, title, value colours), line (outlines, borders, lines), shadow (drop shadows) or fill (everything else). pbik build maps them when tokens.json has theme.recolourTemplates (gen_tokens.py sets it), so a new palette reaches what the templates bake in. A template harvested from another palette needs its own entries here.",
+  "colors": {
+    "#FFFFFF": {"fill": "card", "line": "card", "text": "onDark"},
+    "#DCE2EA": {"fill": "border", "line": "border"},
+    "#12343B": {"fill": "primary", "line": "primary", "text": "primaryText", "shadow": "shadow"},
+    "#038D96": {"fill": "teal", "line": "teal", "text": "tealDark"},
+    "#1D2733": {"fill": "text", "line": "text", "text": "text"},
+    "#5A6577": {"fill": "textMuted", "line": "textMuted", "text": "textMuted"},
+    "#A84545": {"fill": "red", "line": "red", "text": "bad"},
+    "#5D6B8A": {"fill": "slate", "line": "slate", "text": "warning"},
+    "#8CCFD3": {"fill": "tealLight", "line": "tealLight"},
+    "#B8C2D6": {"fill": "slateLight", "line": "slateLight"},
+    "#E3A6A6": {"fill": "redLight", "line": "redLight"},
+    "#B9D9DC": {"fill": "onDarkMuted", "line": "onDarkMuted", "text": "onDarkMuted"}
+  }
+}

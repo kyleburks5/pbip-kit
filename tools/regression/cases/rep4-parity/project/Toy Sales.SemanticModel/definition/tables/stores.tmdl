@@ -1,0 +1,86 @@
+table stores
+	lineageTag: 6bd37a79-fd9d-4fdc-ae7e-d202a3b0f537
+
+	column Store_ID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ddd1bb4b-e824-4c41-8e40-c376bc5112f5
+		summarizeBy: none
+		sourceColumn: Store_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Store_Name
+		dataType: string
+		isHidden
+		lineageTag: 64ca1e18-87ae-47df-be06-1b8738fa86e7
+		summarizeBy: none
+		sourceColumn: Store_Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Store_City
+		dataType: string
+		isHidden
+		lineageTag: 044e2fc2-eb5c-4d6f-a135-02ace85e9d3d
+		summarizeBy: none
+		sourceColumn: Store_City
+
+		annotation SummarizationSetBy = Automatic
+
+	column Store_Location
+		dataType: string
+		isHidden
+		lineageTag: d3dbcad4-2bcc-410c-8959-36252b32bd0a
+		summarizeBy: none
+		sourceColumn: Store_Location
+
+		annotation SummarizationSetBy = Automatic
+
+	column Store_Open_Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 367eef3c-d261-4827-b532-41834478c744
+		summarizeBy: none
+		sourceColumn: Store_Open_Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Location Order' = SWITCH ( stores[Store_Location], "Downtown", 1, "Commercial", 2, "Residential", 3, "Airport", 4, 5 )
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 72519a48-c6a1-4e19-a1e6-ef042bc9fa42
+		summarizeBy: none
+
+	column 'Location Type' = stores[Store_Location]
+		dataType: string
+		lineageTag: 4b93dd7f-dd71-43e3-ab9f-6ac90d3d1c4c
+		summarizeBy: none
+		sortByColumn: 'Location Order'
+
+	column Store = SUBSTITUTE ( stores[Store_Name], "Maven Toys ", "" )
+		dataType: string
+		lineageTag: 648049db-c6b6-4086-b14e-34a74d182578
+		summarizeBy: none
+
+	column City = SUBSTITUTE ( stores[Store_City], "Cuidad", "Ciudad" )
+		dataType: string
+		lineageTag: 82230ed8-1951-4d21-a419-588e47acf970
+		summarizeBy: none
+
+	partition stores = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\pbip-data\Maven Toys\stores.csv"),[Delimiter=",", Columns=5, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Store_ID", Int64.Type}, {"Store_Name", type text}, {"Store_City", type text}, {"Store_Location", type text}, {"Store_Open_Date", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

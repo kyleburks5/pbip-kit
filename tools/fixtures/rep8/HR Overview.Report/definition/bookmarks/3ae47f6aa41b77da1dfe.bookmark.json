@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Filters open",
+  "name": "3ae47f6aa41b77da1dfe",
+  "options": {
+    "applyOnlyToTargetVisuals": true,
+    "targetVisualNames": [
+      "P1-V23_filter-pane"
+    ],
+    "suppressActiveSection": true,
+    "suppressData": true
+  },
+  "explorationState": {
+    "version": "1.0",
+    "activeSection": "073208e60cb917dd8428",
+    "sections": {
+      "073208e60cb917dd8428": {
+        "visualContainers": {},
+        "visualContainerGroups": {
+          "P1-V23_filter-pane": {
+            "isHidden": false
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+/// Job satisfaction levels in order; filters DataTable[JobSatisfaction].
+table 'Job Satisfaction'
+	lineageTag: dc5a1a66-ee88-44d1-a0d2-b704628f7b28
+
+	column 'Job Satisfaction'
+		lineageTag: deca311e-505e-4864-ab20-ac83ad9d8253
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Job Satisfaction]
+		sortByColumn: 'Job Satisfaction Order'
+
+	column 'Job Satisfaction Order'
+		isHidden
+		lineageTag: 35c66e82-56b9-4b33-9b93-db3919cd6831
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Job Satisfaction Order]
+
+	partition 'Job Satisfaction' = calculated
+		mode: import
+		source = DATATABLE ( "Job Satisfaction", STRING, "Job Satisfaction Order", INTEGER, { { "Low", 1 }, { "Medium", 2 }, { "High", 3 }, { "Very High", 4 } } )
+

@@ -1,0 +1,7037 @@
+{
+  "_note": "Parity test: e4634ba4d8fba6fc599b ('Sales performance') of Rep 4, converted from the files Desktop saved. `source` is the original visual folder; `_gaps` lists what pbik's layout can't express.",
+  "pages": {
+    "P1": {
+      "displayName": "pbik parity",
+      "width": 1920,
+      "height": 1080,
+      "displayOption": "FitToPage",
+      "background": {
+        "color": "#F7F4EE",
+        "transparency": 0.0
+      },
+      "interactions": [
+        {
+          "source": "P1-V19",
+          "targets": [
+            "P1-V06",
+            "P1-V03",
+            "P1-V07",
+            "P1-V08",
+            "P1-V09",
+            "P1-V10",
+            "P1-V11",
+            "P1-V12",
+            "P1-V14",
+            "P1-V15",
+            "P1-V16",
+            "P1-V17",
+            "P1-V18",
+            "P1-V20",
+            "P1-V21",
+            "P1-V22"
+          ],
+          "type": "DataFilter"
+        },
+        {
+          "source": "P1-V20",
+          "targets": [
+            "P1-V06",
+            "P1-V03",
+            "P1-V07",
+            "P1-V08",
+            "P1-V09",
+            "P1-V10",
+            "P1-V11",
+            "P1-V12",
+            "P1-V14",
+            "P1-V15",
+            "P1-V16",
+            "P1-V17",
+            "P1-V18",
+            "P1-V19",
+            "P1-V21",
+            "P1-V22"
+          ],
+          "type": "DataFilter"
+        }
+      ]
+    }
+  },
+  "retired": [],
+  "visuals": [
+    {
+      "id": "P1-V01",
+      "name": "band",
+      "page": "P1",
+      "type": "shape",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 112,
+      "z": 0,
+      "textFit": false,
+      "source": "sales-band",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangle'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 0 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V02",
+      "name": "title",
+      "page": "P1",
+      "type": "textbox",
+      "x": 32,
+      "y": 16,
+      "w": 1229,
+      "h": 50,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-title",
+      "build": {
+        "method": "native"
+      },
+      "props": {
+        "general.paragraphs@none": {
+          "raw": [
+            {
+              "textRuns": [
+                {
+                  "value": "Store Performance",
+                  "textStyle": {
+                    "fontFamily": "Segoe UI Semibold",
+                    "fontSize": "21pt",
+                    "color": "#ffffff"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V03",
+      "name": "year",
+      "page": "P1",
+      "type": "advancedSlicerVisual",
+      "x": 1285,
+      "y": 36,
+      "w": 289,
+      "h": 40,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-year",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Year]"
+          }
+        ]
+      },
+      "props": {
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "layout.columnPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "72D"
+              }
+            }
+          }
+        },
+        "outline.lineColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "value.fontFamily@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "general.filter@none": {
+          "raw": {
+            "filter": {
+              "Version": 2,
+              "From": [
+                {
+                  "Name": "d",
+                  "Entity": "Date",
+                  "Type": 0
+                }
+              ],
+              "Where": [
+                {
+                  "Condition": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "d"
+                              }
+                            },
+                            "Property": "Year"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "'2023'"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V04",
+      "name": "nav-sales",
+      "page": "P1",
+      "type": "actionButton",
+      "x": 1599,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-nav-sales",
+      "build": {
+        "method": "native"
+      },
+      "action": {
+        "type": "PageNavigation",
+        "page": "Sales performance"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Sales'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V05",
+      "name": "nav-inventory",
+      "page": "P1",
+      "type": "actionButton",
+      "x": 1755,
+      "y": 36,
+      "w": 133,
+      "h": 40,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-nav-inventory",
+      "build": {
+        "method": "native"
+      },
+      "action": {
+        "type": "PageNavigation",
+        "page": "bdd1c1ef09b000b9"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Inventory'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fill.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fill.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "72D"
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V06",
+      "name": "headline",
+      "page": "P1",
+      "type": "cardVisual",
+      "x": 32,
+      "y": 58,
+      "w": 1229,
+      "h": 32,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-headline",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Headline Sales]"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Headline Sales]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#BFE3DD'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "cardCalloutArea.backgroundTransparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.backgroundShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.backgroundTransparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "100D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V07",
+      "name": "metric",
+      "page": "P1",
+      "type": "advancedSlicerVisual",
+      "x": 32,
+      "y": 136,
+      "w": 289,
+      "h": 76,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-metric",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Metric[Metric]"
+          }
+        ]
+      },
+      "props": {
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "layout.rowCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "layout.columnCount@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "layout.columnPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "6D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.lineColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E4F3F0'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "label.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "value.fontFamily@selection:selected": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontColor@selection:selected": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        },
+        "general.filter@none": {
+          "raw": {
+            "filter": {
+              "Version": 2,
+              "From": [
+                {
+                  "Name": "m",
+                  "Entity": "Metric",
+                  "Type": 0
+                }
+              ],
+              "Where": [
+                {
+                  "Condition": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "m"
+                              }
+                            },
+                            "Property": "Metric Fields"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "'''_Measures''[Revenue]'"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'SHOW'"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V08",
+      "name": "quarter",
+      "page": "P1",
+      "type": "slicer",
+      "x": 345,
+      "y": 136,
+      "w": 289,
+      "h": 76,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-quarter",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Quarter]",
+            "active": true
+          }
+        ]
+      },
+      "props": {
+        "data.mode@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Dropdown'"
+              }
+            }
+          }
+        },
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "header.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "header.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'QUARTER'"
+              }
+            }
+          }
+        },
+        "header.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "header.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "header.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "items.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "items.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.background@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V09",
+      "name": "month",
+      "page": "P1",
+      "type": "slicer",
+      "x": 659,
+      "y": 136,
+      "w": 133,
+      "h": 76,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-month",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "Date[Month]",
+            "active": true
+          }
+        ]
+      },
+      "props": {
+        "data.mode@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Dropdown'"
+              }
+            }
+          }
+        },
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "header.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "header.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'MONTH'"
+              }
+            }
+          }
+        },
+        "header.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "header.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "header.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "items.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "items.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.background@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V10",
+      "name": "location",
+      "page": "P1",
+      "type": "slicer",
+      "x": 815,
+      "y": 136,
+      "w": 289,
+      "h": 76,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-location",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "stores[Location Type]",
+            "active": true
+          }
+        ]
+      },
+      "props": {
+        "data.mode@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Dropdown'"
+              }
+            }
+          }
+        },
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "header.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "header.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'LOCATION TYPE'"
+              }
+            }
+          }
+        },
+        "header.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "header.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "header.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "items.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "items.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.background@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V11",
+      "name": "city",
+      "page": "P1",
+      "type": "slicer",
+      "x": 1129,
+      "y": 136,
+      "w": 289,
+      "h": 76,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-city",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "stores[City]",
+            "active": true
+          }
+        ]
+      },
+      "props": {
+        "data.mode@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Dropdown'"
+              }
+            }
+          }
+        },
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "header.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "header.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'CITY'"
+              }
+            }
+          }
+        },
+        "header.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "header.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "header.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "items.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "items.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.background@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V12",
+      "name": "category",
+      "page": "P1",
+      "type": "slicer",
+      "x": 1442,
+      "y": 136,
+      "w": 289,
+      "h": 76,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-category",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "products[Product_Category]",
+            "active": true
+          }
+        ]
+      },
+      "props": {
+        "data.mode@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Dropdown'"
+              }
+            }
+          }
+        },
+        "selection.singleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.strictSingleSelect@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selection.selectAllCheckboxEnabled@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "header.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "header.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'CATEGORY'"
+              }
+            }
+          }
+        },
+        "header.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "header.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "header.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "items.textSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "items.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "items.background@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V13",
+      "name": "reset",
+      "page": "P1",
+      "type": "actionButton",
+      "x": 1755,
+      "y": 172,
+      "w": 133,
+      "h": 40,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-reset",
+      "build": {
+        "method": "native"
+      },
+      "action": {
+        "type": "ClearAllSlicers"
+      },
+      "props": {
+        "text.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "text.text@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Reset'"
+              }
+            }
+          }
+        },
+        "text.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "text.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "text.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "text.horizontalAlignment@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          }
+        },
+        "icon.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "fill.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "outline.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shape.tileShape@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shape.rectangleRoundedCurve@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V14",
+      "name": "kpi-revenue",
+      "page": "P1",
+      "type": "cardVisual",
+      "x": 32,
+      "y": 236,
+      "w": 446,
+      "h": 136,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-kpi-revenue",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Revenue]",
+            "displayName": "Revenue"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Revenue]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "referenceLabels": {
+        "labels": [
+          {
+            "value": "[KPI Revenue PY text]",
+            "detail": "[KPI Revenue delta text]",
+            "detailColor": "[KPI Revenue delta font]",
+            "detailBackground": "[KPI Revenue delta background]"
+          }
+        ],
+        "field": "[Revenue]",
+        "titleOff": true,
+        "valueColor": "#5B6766",
+        "valueSize": 10.0
+      },
+      "props": {
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "shadowCustom.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "shadowCustom.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowBlur@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowDistance@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shadowCustom.angle@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "shadowCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowPositionPreset@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingIndividual@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "24D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "60D"
+              }
+            }
+          }
+        },
+        "accentBar.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "accentBar.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Left'"
+              }
+            }
+          }
+        },
+        "accentBar.width@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "accentBar.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "label.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "label.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "label.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "26D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.showBlankAs@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'No data'"
+              }
+            }
+          }
+        },
+        "value.labelDisplayUnits@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "value.labelPrecision@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V15",
+      "name": "kpi-profit",
+      "page": "P1",
+      "type": "cardVisual",
+      "x": 502,
+      "y": 236,
+      "w": 446,
+      "h": 136,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-kpi-profit",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Profit]",
+            "displayName": "Profit"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Profit]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "referenceLabels": {
+        "labels": [
+          {
+            "value": "[KPI Profit PY text]",
+            "detail": "[KPI Profit delta text]",
+            "detailColor": "[KPI Profit delta font]",
+            "detailBackground": "[KPI Profit delta background]"
+          }
+        ],
+        "field": "[Profit]",
+        "titleOff": true,
+        "valueColor": "#5B6766",
+        "valueSize": 10.0
+      },
+      "props": {
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "shadowCustom.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "shadowCustom.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowBlur@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowDistance@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shadowCustom.angle@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "shadowCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowPositionPreset@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingIndividual@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "24D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "60D"
+              }
+            }
+          }
+        },
+        "accentBar.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "accentBar.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Left'"
+              }
+            }
+          }
+        },
+        "accentBar.width@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "accentBar.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "label.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "label.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "label.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "26D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.showBlankAs@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'No data'"
+              }
+            }
+          }
+        },
+        "value.labelDisplayUnits@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "value.labelPrecision@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V16",
+      "name": "kpi-margin",
+      "page": "P1",
+      "type": "cardVisual",
+      "x": 972,
+      "y": 236,
+      "w": 446,
+      "h": 136,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-kpi-margin",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Margin %]",
+            "displayName": "Margin"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Margin %]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "referenceLabels": {
+        "labels": [
+          {
+            "value": "[KPI Margin PY text]",
+            "detail": "[KPI Margin delta text]",
+            "detailColor": "[KPI Margin delta font]",
+            "detailBackground": "[KPI Margin delta background]"
+          }
+        ],
+        "field": "[Margin %]",
+        "titleOff": true,
+        "valueColor": "#5B6766",
+        "valueSize": 10.0
+      },
+      "props": {
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "shadowCustom.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "shadowCustom.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowBlur@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowDistance@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shadowCustom.angle@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "shadowCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowPositionPreset@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingIndividual@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "24D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "60D"
+              }
+            }
+          }
+        },
+        "accentBar.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "accentBar.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Left'"
+              }
+            }
+          }
+        },
+        "accentBar.width@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "accentBar.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "label.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "label.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "label.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "26D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.showBlankAs@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'No data'"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V17",
+      "name": "kpi-units",
+      "page": "P1",
+      "type": "cardVisual",
+      "x": 1442,
+      "y": 236,
+      "w": 446,
+      "h": 136,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-kpi-units",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Data": [
+          {
+            "field": "[Units Sold]",
+            "displayName": "Units sold"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Units Sold]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "referenceLabels": {
+        "labels": [
+          {
+            "value": "[KPI Units PY text]",
+            "detail": "[KPI Units delta text]",
+            "detailColor": "[KPI Units delta font]",
+            "detailBackground": "[KPI Units delta background]"
+          }
+        ],
+        "field": "[Units Sold]",
+        "titleOff": true,
+        "valueColor": "#5B6766",
+        "valueSize": 10.0
+      },
+      "props": {
+        "fillCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "fillCustom.fillColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fillCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "outline.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "outline.lineColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "outline.weight@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.tileShape@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          }
+        },
+        "shapeCustomRectangle.rectangleRoundedCurve@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "shadowCustom.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "shadowCustom.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "shadowCustom.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowBlur@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowDistance@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "shadowCustom.angle@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "shadowCustom.transparency@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "shadowCustom.shadowPositionPreset@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingSelection@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "padding.paddingIndividual@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "padding.topMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.bottomMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "padding.leftMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "24D"
+              }
+            }
+          }
+        },
+        "padding.rightMargin@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "layout.calloutSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "60D"
+              }
+            }
+          }
+        },
+        "accentBar.show@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "accentBar.position@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Left'"
+              }
+            }
+          }
+        },
+        "accentBar.width@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "accentBar.color@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "label.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "label.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "label.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.fontFamily@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "value.fontSize@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "26D"
+              }
+            }
+          }
+        },
+        "value.fontColor@default": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "value.showBlankAs@default": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'No data'"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V18",
+      "name": "trend",
+      "page": "P1",
+      "type": "lineChart",
+      "x": 32,
+      "y": 396,
+      "w": 1229,
+      "h": 312,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-trend",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Category": [
+          {
+            "field": "Date[Month]",
+            "active": true
+          }
+        ],
+        "Tooltips": [
+          {
+            "field": "[Selected Metric vs PY %]"
+          }
+        ],
+        "Y": [
+          {
+            "field": "[Selected Metric]",
+            "displayName": "This year"
+          },
+          {
+            "field": "[Selected Metric PY]",
+            "displayName": "Last year"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "Date[Month]",
+          "direction": "Ascending",
+          "default": true
+        }
+      ],
+      "props": {
+        "categoryAxis.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "categoryAxis.axisType@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Categorical'"
+              }
+            }
+          }
+        },
+        "categoryAxis.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "categoryAxis.labelColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "categoryAxis.showAxisTitle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "categoryAxis.gridlineShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "valueAxis.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "valueAxis.showAxisTitle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "valueAxis.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "valueAxis.labelColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "valueAxis.gridlineShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "valueAxis.gridlineColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "valueAxis.gridlineStyle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'dotted'"
+              }
+            }
+          }
+        },
+        "valueAxis.start@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "legend.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "legend.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'TopRight'"
+              }
+            }
+          }
+        },
+        "legend.showTitle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "legend.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "legend.labelColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataPoint.fill@[Selected Metric]": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataPoint.fill@[Selected Metric PY]": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E0A526'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "labels.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "lineStyles.strokeWidth@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "3D"
+              }
+            }
+          }
+        },
+        "lineStyles.showMarker@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "lineStyles.markerSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "5D"
+              }
+            }
+          }
+        },
+        "lineStyles.lineChartType@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'linear'"
+              }
+            }
+          }
+        },
+        "lineStyles.strokeWidth@[Selected Metric PY]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          }
+        },
+        "lineStyles.showMarker@[Selected Metric PY]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Trend Title"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Trend Subtitle"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V19",
+      "name": "category-bars",
+      "page": "P1",
+      "type": "clusteredBarChart",
+      "x": 1285,
+      "y": 396,
+      "w": 603,
+      "h": 312,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-category-bars",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Category": [
+          {
+            "field": "products[Product_Category]",
+            "active": true
+          }
+        ],
+        "Tooltips": [
+          {
+            "field": "[Margin %]"
+          },
+          {
+            "field": "[Selected Metric vs PY %]"
+          }
+        ],
+        "Y": [
+          {
+            "field": "[Selected Metric]"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Selected Metric]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "categoryAxis.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "categoryAxis.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "categoryAxis.labelColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "categoryAxis.showAxisTitle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "categoryAxis.maxMarginFactor@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "35D"
+              }
+            }
+          }
+        },
+        "valueAxis.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "valueAxis.gridlineShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "valueAxis.showAxisTitle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "legend.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "dataPoint.fill@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "labels.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "labels.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "labels.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "labels.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "labels.labelPosition@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'OutsideEnd'"
+              }
+            }
+          }
+        },
+        "labels.enableBackground@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Category Title"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Category Subtitle"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V20",
+      "name": "location-bars",
+      "page": "P1",
+      "type": "clusteredBarChart",
+      "x": 32,
+      "y": 732,
+      "w": 603,
+      "h": 316,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-location-bars",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Category": [
+          {
+            "field": "stores[Location Type]",
+            "active": true
+          }
+        ],
+        "Tooltips": [
+          {
+            "field": "[Store Count]"
+          },
+          {
+            "field": "[Selected Metric per Store]"
+          }
+        ],
+        "Y": [
+          {
+            "field": "[Selected Metric]"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "stores[Location Type]",
+          "direction": "Ascending",
+          "default": true
+        }
+      ],
+      "props": {
+        "categoryAxis.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "categoryAxis.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "categoryAxis.labelColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "categoryAxis.showAxisTitle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "categoryAxis.maxMarginFactor@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "35D"
+              }
+            }
+          }
+        },
+        "valueAxis.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "valueAxis.gridlineShow@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "valueAxis.showAxisTitle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "legend.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "dataPoint.fill@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#14837B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "labels.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "labels.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "labels.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "labels.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "labels.labelPosition@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'OutsideEnd'"
+              }
+            }
+          }
+        },
+        "labels.enableBackground@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Location Title"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Location Subtitle"
+              }
+            }
+          }
+        }
+      },
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V21",
+      "name": "top-stores",
+      "page": "P1",
+      "type": "tableEx",
+      "x": 659,
+      "y": 732,
+      "w": 603,
+      "h": 316,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-top-stores",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "stores[Store]"
+          },
+          {
+            "field": "stores[City]"
+          },
+          {
+            "field": "[Top Store Value]",
+            "displayName": "Value"
+          },
+          {
+            "field": "[Top Store vs PY %]",
+            "displayName": "vs PY"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Top Store Value]",
+          "direction": "Descending",
+          "default": true
+        }
+      ],
+      "props": {
+        "total.totals@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "columnHeaders.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F7F4EE'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "columnHeaders.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "columnHeaders.outlineStyle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "columnHeaders.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "values.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "values.fontColorPrimary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.fontColorSecondary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridHorizontal@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "grid.gridHorizontalColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridVertical@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "grid.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "5D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@stores[Store]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "190D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@stores[City]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "150D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[Top Store Value]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "115D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[Top Store vs PY %]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "columnFormatting.alignment@[Top Store Value]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Right'"
+              }
+            }
+          }
+        },
+        "columnFormatting.styleHeader@[Top Store Value]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "columnFormatting.alignment@[Top Store vs PY %]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Right'"
+              }
+            }
+          }
+        },
+        "columnFormatting.styleHeader@[Top Store vs PY %]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Top 5 stores'"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Top Stores Subtitle"
+              }
+            }
+          }
+        }
+      },
+      "cf": [
+        {
+          "type": "measure",
+          "object": "values",
+          "property": "fontColor",
+          "measure": "[vs PY colour]",
+          "target": "[Top Store vs PY %]"
+        }
+      ],
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    },
+    {
+      "id": "P1-V22",
+      "name": "bottom-stores",
+      "page": "P1",
+      "type": "tableEx",
+      "x": 1285,
+      "y": 732,
+      "w": 603,
+      "h": 316,
+      "z": 1,
+      "textFit": false,
+      "source": "sales-bottom-stores",
+      "build": {
+        "method": "native"
+      },
+      "bindings": {
+        "Values": [
+          {
+            "field": "stores[Store]"
+          },
+          {
+            "field": "stores[City]"
+          },
+          {
+            "field": "[Bottom Store Value]",
+            "displayName": "Value"
+          },
+          {
+            "field": "[Bottom Store vs PY %]",
+            "displayName": "vs PY"
+          }
+        ]
+      },
+      "sort": [
+        {
+          "field": "[Bottom Store Value]",
+          "direction": "Ascending",
+          "default": true
+        }
+      ],
+      "props": {
+        "total.totals@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "columnHeaders.backColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F7F4EE'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "columnHeaders.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "columnHeaders.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "columnHeaders.outlineStyle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "columnHeaders.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.wordWrap@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "values.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "values.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "values.fontColorPrimary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "values.fontColorSecondary@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridHorizontal@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "grid.gridHorizontalColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "grid.gridVertical@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "grid.rowPadding@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "5D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@stores[Store]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "190D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@stores[City]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "150D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[Bottom Store Value]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "115D"
+              }
+            }
+          }
+        },
+        "columnWidth.value@[Bottom Store vs PY %]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "columnFormatting.alignment@[Bottom Store Value]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Right'"
+              }
+            }
+          }
+        },
+        "columnFormatting.styleHeader@[Bottom Store Value]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "columnFormatting.alignment@[Bottom Store vs PY %]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Right'"
+              }
+            }
+          }
+        },
+        "columnFormatting.styleHeader@[Bottom Store vs PY %]": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:background.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#FFFFFF'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:background.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "container:border.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:border.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E8E1D6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:border.width@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:border.radius@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:dropShadow.color@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#0F4D4A'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:dropShadow.position@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Outer'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.preset@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Custom'"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowBlur@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "4D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.shadowDistance@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.angle@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "90D"
+              }
+            }
+          }
+        },
+        "container:dropShadow.transparency@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "95D"
+              }
+            }
+          }
+        },
+        "container:padding.top@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.bottom@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.left@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:padding.right@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "container:title.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:title.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI Semibold'"
+              }
+            }
+          }
+        },
+        "container:title.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "13D"
+              }
+            }
+          }
+        },
+        "container:title.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#1E2A2B'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:title.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:title.text@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Bottom 5 stores'"
+              }
+            }
+          }
+        },
+        "container:subTitle.show@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontFamily@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'Segoe UI'"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontSize@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "container:subTitle.fontColor@none": {
+          "raw": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#5B6766'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "container:subTitle.alignment@none": {
+          "raw": {
+            "expr": {
+              "Literal": {
+                "Value": "'left'"
+              }
+            }
+          }
+        },
+        "container:subTitle.text@none": {
+          "raw": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Measures"
+                  }
+                },
+                "Property": "Bottom Stores Subtitle"
+              }
+            }
+          }
+        }
+      },
+      "cf": [
+        {
+          "type": "measure",
+          "object": "values",
+          "property": "fontColor",
+          "measure": "[vs PY colour]",
+          "target": "[Bottom Store vs PY %]"
+        }
+      ],
+      "_gaps": [
+        "z 1000 / tabOrder 0 can't be set exactly (pbik writes layer*1000+n and n*100)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "74bf08333a5608e47082",
+  "displayName": "Turnover",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#EEF1F6'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "P2-V17_matrix",
+      "target": "P2-V14_sel-headcount",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V17_matrix",
+      "target": "P2-V15_sel-leavers",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V17_matrix",
+      "target": "P2-V16_sel-turnover-rate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V17_matrix",
+      "target": "P2-V30_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V18_table",
+      "target": "P2-V30_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V19_leavers-by-satisfaction",
+      "target": "P2-V30_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V20_leavers-by-work-life",
+      "target": "P2-V30_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V21_leavers-by-performance",
+      "target": "P2-V30_filters-label",
+      "type": "NoFilter"
+    },
+    {
+      "source": "P2-V22_leavers-by-tenure",
+      "target": "P2-V30_filters-label",
+      "type": "NoFilter"
+    }
+  ]
+}

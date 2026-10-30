@@ -1,0 +1,26 @@
+relationship DataTable_HireDate_Date_Date
+	isActive: false
+	fromColumn: DataTable.HireDate
+	toColumn: Date.Date
+
+relationship DataTable_TerminationDate_Date_Date
+	isActive: false
+	fromColumn: DataTable.TerminationDate
+	toColumn: Date.Date
+
+relationship 'DataTable_JobSatisfaction_Job Satisfaction_Job Satisfaction'
+	fromColumn: DataTable.JobSatisfaction
+	toColumn: 'Job Satisfaction'.'Job Satisfaction'
+
+relationship DataTable_Performance_Performance_Performance
+	fromColumn: DataTable.Performance
+	toColumn: Performance.Performance
+
+relationship 'DataTable_WorkLifeBalance_Work-Life Balance_Work-Life Balance'
+	fromColumn: DataTable.WorkLifeBalance
+	toColumn: 'Work-Life Balance'.'Work-Life Balance'
+
+relationship 'DataTable_AgeGroup_Age Group_Age Group'
+	fromColumn: DataTable.AgeGroup
+	toColumn: 'Age Group'.'Age Group'
+

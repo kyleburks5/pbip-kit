@@ -1,0 +1,44 @@
+table Metric
+	lineageTag: 55ee61d4-485d-45b6-b481-d648f5b3347f
+
+	column 'Metric Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d67906d3-48b5-48eb-8de2-0aaafa0f1bec
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+	column 'Metric Fields'
+		dataType: string
+		isHidden
+		lineageTag: 5d625c20-62fa-4475-8338-7881577aa3e5
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Metric Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+	column Metric
+		dataType: string
+		lineageTag: b772164d-e9d5-431d-b5ee-3a773fa4319e
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Metric Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Metric Fields'
+
+	partition Metric = calculated
+		mode: import
+		source =
+				{
+				    ("Revenue", NAMEOF('_Measures'[Revenue]), 0),
+				    ("Profit", NAMEOF('_Measures'[Profit]), 1),
+				    ("Units", NAMEOF('_Measures'[Units Sold]), 2)
+				}
+
