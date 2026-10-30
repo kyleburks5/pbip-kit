@@ -97,6 +97,7 @@ In Copilot, each command starts with `kit-` (`/kit-plan`). The command files are
 
 - **Reads:** layout.json, tokens, the spec's done-when lines, `design/checks.md`, `.claude/rules/pbik.md`,
   `.claude/rules/svg.md` and the build lessons.
+- **Checks first:** `pbik project check`; it stops when Desktop is newer than `targetDesktop` (run `/update`).
 - **Produces:** the report files (`pbik build`), `design/specs/visual-map.json`, a commit, and a numbered Desktop
   click list.
 - **Done when:** a second `pbik build` prints "No changes", `pbik validate` passes, and `audit_layout.py`,
@@ -135,6 +136,12 @@ After any tool or plugin update. Builds one card, one button slicer and one tabl
 After a Power BI Desktop update. Runs [UPDATE-ROUTINE.md](UPDATE-ROUTINE.md): record the version, the regression
 suite, `/smoke`, new visuals or settings through the Patterns page, harvest and refresh the catalog, propose a
 release.
+
+### `/wrapup`
+
+At the end of a report, after the last `/fix` is approved. Lists the lessons the report produced with where each goes
+by the placement order ([lessons/README.md](lessons/README.md)) and the CLAUDE.md rules a new check now enforces,
+writes them, shows the diff and waits for your approval; then runs the tests and the regression suite and commits.
 
 ## The visual-method ladder
 
@@ -179,10 +186,10 @@ layout key, is [tools/pbik/README.md](../tools/pbik/README.md).
 | `catalog refresh / show / list` | The settings catalog: what Desktop has saved, per visual type |
 | `roundtrip <Report>` | After a Desktop save, lists what Desktop rewrote, by visual ID (read only) |
 | `schemas fetch <Report>` / `schemas support` / `schemas lower <Report>` | The schema cache; schema versions by Desktop release; lower a report's schemas for an older Desktop |
-| `project show` / `project record` | The target Desktop and catalog in `design/specs/project.json`; record this machine's Desktop version |
+| `project show` / `project record` / `project check` | The target Desktop and catalog in `design/specs/project.json`; record this machine's Desktop version; check it against the target (`/build` runs it first) |
 | `desktop state / reload / screenshot` | Through the Desktop Bridge: unsaved check, report-only reload, page screenshots |
 
-Exit codes: 0 ok, 1 checks failed, 2 bad input, 3 Desktop Bridge not available, 4 Desktop has unsaved changes.
+Exit codes: 0 ok, 1 checks failed, 2 bad input, 3 Desktop Bridge not available, 4 Desktop has unsaved changes, 5 Desktop is newer than the target (run `/update`).
 
 Rules worth knowing ([.claude/rules/pbik.md](../.claude/rules/pbik.md) has them all):
 
@@ -270,7 +277,7 @@ When a fix works, the assistant proposes a lesson and waits for your approval. I
    checks).
 
 Each proposal says where it goes and why not higher. When a check starts enforcing a rule, the rule is proposed for
-retirement. At the end of a report, the wrap-up places the remaining lessons, runs the tests and commits.
+retirement. At the end of a report, `/wrapup` places the remaining lessons, runs the tests and commits.
 
 After editing `CLAUDE.md`, `.claude/rules/` or `.claude/commands/`, run `python tools\copilot\sync.py` so Copilot gets
 the same text.

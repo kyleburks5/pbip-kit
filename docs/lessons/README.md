@@ -43,7 +43,8 @@ anywhere. Wait for approval, then remove it.
 
 ## Rep wrap-up
 
-At the end of a rep (after the last /fix is approved):
+At the end of a rep (after the last /fix is approved), `/wrapup` runs these steps and shows the diff before
+anything is committed:
 
 1. List the lessons the rep produced that aren't placed yet, in the table above.
 2. List CLAUDE.md rules that a check added during the rep now enforces, and propose retiring them.

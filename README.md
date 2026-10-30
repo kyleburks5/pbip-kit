@@ -1,6 +1,6 @@
 # pbip-kit
 
-**Status: v1.0** (2026-10-29). Tests, the regression suite and the setup check pass; the Copilot end-to-end check
+**Status: v1.1** (2026-10-30). Tests, the regression suite and the setup check pass; the Copilot end-to-end check
 is pending and runs at work on the first day ([VERSIONS.md](VERSIONS.md)).
 
 A starting folder for building polished Power BI reports with an AI coding assistant.

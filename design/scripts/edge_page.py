@@ -11,7 +11,7 @@ Vega-Lite renders), and the Edge processes started with this call's own profile 
 leaves the machine except what the page itself loads (the wireframe's pinned Vega-Lite scripts, when online).
 screenshot() uses Edge's --screenshot and waits for a complete PNG (svg_to_png.wait_for_png).
 """
-import http.server, os, pathlib, shutil, subprocess, sys, tempfile, threading
+import http.server, ntpath, os, pathlib, shutil, subprocess, sys, tempfile, threading
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -60,10 +60,12 @@ def _serve(page):
 
 
 def stop_edge(profile):
-    """Stop the Edge processes started with this profile folder (Edge 156 leaves them running)."""
+    """Stop the browser processes started with this profile folder (Edge 156 leaves them running). The process name
+    comes from EDGE, so a Chrome set there (chrome.exe) is stopped too."""
     if os.name != "nt":
         return
-    ps = ("Get-CimInstance Win32_Process -Filter \"Name='msedge.exe'\" | Where-Object { $_.CommandLine -like "
+    exe = ntpath.basename(EDGE).replace("'", "") or "msedge.exe"
+    ps = (f"Get-CimInstance Win32_Process -Filter \"Name='{exe}'\" | Where-Object {{ $_.CommandLine -like "
           f"'*{str(profile)}*' }} | ForEach-Object {{ Stop-Process -Id $_.ProcessId -Force -ErrorAction "
           "SilentlyContinue }")
     subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True)

@@ -170,6 +170,7 @@ if ($store) { $dver = "$($store.Version)"; $where = 'Microsoft Store' } else {
     $exe = @("$env:ProgramFiles\Microsoft Power BI Desktop\bin\PBIDesktop.exe",
              "${env:ProgramFiles(x86)}\Microsoft Power BI Desktop\bin\PBIDesktop.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
     if ($exe) { $dver = (Get-Item $exe).VersionInfo.ProductVersion; $where = $exe }
+    if ($dver -match '^\s*(\d+(\.\d+){1,3})') { $dver = $Matches[1] }   # MSI: '2.155.756.0 (26.06)+<hash>'
 }
 if (-not $dver) { Report 'FAIL' 'Power BI Desktop' 'not found (Store package or Program Files install)' 'Power BI Desktop (Microsoft Store or Company Portal); the version VERSIONS.md names, or newer' }
 elseif ($pinned -and -not $dver.StartsWith($pinned)) { Report 'WARN' 'Power BI Desktop' "$dver ($where); VERSIONS.md was tested with $pinned" 'run /update (record it, regression suite, /smoke) before building; set targetDesktop in design/specs/project.json if it is older' }

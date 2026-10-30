@@ -156,6 +156,28 @@ class SvgToPngTests(unittest.TestCase):
         self.assertNotEqual(out.read_bytes(), self.PNG)
 
 
+class EdgePageTests(unittest.TestCase):
+    """stop_edge() stops the processes of the browser EDGE names, so Chrome works as the headless browser."""
+
+    def stopped(self, exe):
+        import edge_page
+        seen = []
+        saved = edge_page.EDGE, edge_page.subprocess.run
+        edge_page.EDGE, edge_page.subprocess.run = exe, lambda a, **k: seen.append(a[-1])
+        try:
+            edge_page.stop_edge("C:/tmp/profile")
+        finally:
+            edge_page.EDGE, edge_page.subprocess.run = saved
+        return seen[0] if seen else ""
+
+    @unittest.skipUnless(sys.platform == "win32", "stop_edge runs on Windows only")
+    def test_stops_the_browser_edge_names(self):
+        self.assertIn("Name='msedge.exe'", self.stopped(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"))
+        chrome = self.stopped(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+        self.assertIn("Name='chrome.exe'", chrome)
+        self.assertIn("*C:/tmp/profile*", chrome)
+
+
 class VersionsTests(unittest.TestCase):
     """VERSIONS.md releases (semantic versioning, Desktop tested on), one pbik version everywhere, and the update docs
     naming only pbik commands that exist."""

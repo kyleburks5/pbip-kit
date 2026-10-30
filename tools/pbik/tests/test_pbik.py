@@ -6,7 +6,7 @@ The source folder is only read: its *.Report and *.SemanticModel (definition onl
 The default is the Rep 4 fixture in the kit (tools/fixtures/README.md), so the tests run on a clean clone; a missing
 source fails the run, never skips it.
 """
-import hashlib, json, os, pathlib, shutil, subprocess, sys, tempfile, unittest
+import contextlib, hashlib, io, json, os, pathlib, shutil, subprocess, sys, tempfile, unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
 PBIK = HERE.parent / "pbik.py"
@@ -1481,6 +1481,46 @@ class PbikTests(unittest.TestCase):
         out = pbik("project", "show", "--project", pj).stdout
         self.assertIn("visualContainer    2.7.0", out)
         self.assertIn("recorded       Desktop 2.160.1.0", out)
+
+    def test_104b_desktop_version_with_build_suffix(self):
+        """MSI and IT-managed installs report '2.155.756.0 (26.06)+<hash>': pbik takes the leading version."""
+        from pbikit import versions as V
+        self.assertEqual(V.desktop_version("2.155.756.0 (26.06)+3f9c2a1b\r\n"), "2.155.756.0")
+        self.assertEqual(V.desktop_version("2.159.883.0"), "2.159.883.0")
+        self.assertIsNone(V.desktop_version(""))
+        self.assertIsNone(V.desktop_version("Power BI Desktop"))
+        pj = self.tmp / "pin104b" / "project.json"
+        V.record(pj, "2.155.756.0 (26.06)+3f9c2a1b", today="2026-10-30")
+        self.assertEqual(json.loads(pj.read_text(encoding="utf-8"))["desktop"]["version"], "2.155.756.0")
+
+    def test_104c_project_check(self):
+        """Desktop newer than targetDesktop: exit 5 (run /update first); equal: pass; older: warn and pass; latest:
+        pass; version not found: exit 3."""
+        from pbikit import versions as V
+        pj = self.tmp / "pin104c" / "project.json"
+        pj.parent.mkdir(parents=True)
+        pj.write_text(json.dumps({"targetDesktop": "2.155.756.0", "catalog": "work"}), encoding="utf-8")
+        newer = pbik("project", "check", "--project", pj, "--version", "2.159.883.0", ok=(5,))
+        self.assertIn("run /update first", newer.stderr)
+        self.assertIn("matches", pbik("project", "check", "--project", pj, "--version",
+                                      "2.155.756.0 (26.06)+3f9c2a1b").stdout)
+        self.assertIn("warning: Desktop 2.152.882.0 is older", pbik("project", "check", "--project", pj,
+                                                                    "--version", "2.152.882.0").stdout)
+        pj.write_text(json.dumps({"targetDesktop": "2.155", "catalog": "work"}), encoding="utf-8")
+        self.assertEqual(V.check(pj, "2.155.900.0"), 0, "a target of 2.155 matches every 2.155 build")
+        self.assertEqual(V.check(pj, "2.156.1.0"), 5)
+        pj.write_text(json.dumps({"targetDesktop": "latest", "catalog": "home"}), encoding="utf-8")
+        self.assertEqual(V.check(pj, "2.199.1.0"), 0)
+        self.assertEqual(V.check(self.tmp / "pin104c" / "missing.json", "2.199.1.0"), 0, "no project.json: latest")
+        saved = V.detect_desktop
+        V.detect_desktop = lambda: None
+        try:
+            self.assertEqual(V.check(pj), 0, "latest passes without a version")
+            pj.write_text(json.dumps({"targetDesktop": "2.155.756.0"}), encoding="utf-8")
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(V.check(pj), 3)
+        finally:
+            V.detect_desktop = saved
 
     # ---------------------------------------------------------------- roundtrip
     def _desktop_rewrite(self, rep):

@@ -61,7 +61,8 @@ Goal: build polished Power BI reports (PBIP + PBIR) from a requirements file (de
 3. `/build`: build with `pbik build` from layout.json (styling through the theme and tokens), then run `pbik validate`, design/scripts/audit_layout.py and design/scripts/audit_ids.py.
 4. I save and reload in Desktop; `/review` screenshots, compares to the wireframe and design/checks.md, and runs the numbers audit.
 5. `/fix`: fix the review items, re-check, repeat.
-6. After each step, say what changed.
+6. `/wrapup` after the last /fix: places the rep's lessons (docs/lessons/README.md), shows the diff, waits for approval.
+7. After each step, say what changed.
 - `/theme` makes the colour scheme on its own (brand colours, a reference, or a preset: clean, bento, corporate;
   every text and state AA); /plan step 2 runs the same.
 - `/smoke` after any tool or plugin update; `/update` after a Power BI Desktop update (docs/UPDATE-ROUTINE.md);

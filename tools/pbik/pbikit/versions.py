@@ -4,6 +4,7 @@
     pbik schemas lower <Report>            lower every file's $schema to what the target opens
     pbik project show                      the target Desktop, its release month, pinned schema versions, catalog
     pbik project record [--version X]      write the Desktop version on this machine into project.json
+    pbik project check [--version X]       installed Desktop against targetDesktop (/build runs it first)
 
 Two Microsoft sources, both public (refresh needs the network; build and validate never go online):
 - each PBIR schema's CHANGELOG.md in github.com/microsoft/json-schemas (fabric/item/report/definition/<kind>/):
@@ -20,7 +21,7 @@ Project file (design/specs/project.json):
   {"targetDesktop": "latest" | "2.152.882.0", "catalog": "home", "customVisuals": false (optional),
    "desktop": {"version": "2.159.883.0", "recorded": "2026-10-29"}}     (written by `pbik project record`, at /model)
 """
-import datetime, html, json, pathlib, re, subprocess, urllib.request
+import datetime, html, json, pathlib, re, subprocess, sys, urllib.request
 
 from .objects import load, save
 
@@ -216,6 +217,13 @@ def target_for(root=None, project=None, support=None):
     return Target((d or {}).get("targetDesktop", "latest"), support), d, p
 
 
+def desktop_version(text):
+    """The leading version number of what Desktop reports: '2.155.756.0 (26.06)+<hash>' (MSI and IT-managed
+    installs) -> '2.155.756.0'. None if it doesn't start with one."""
+    m = re.match(r"\s*(2\.\d+\.\d+(?:\.\d+)?)(?![\d.])", text or "")
+    return m.group(1) if m else None
+
+
 def detect_desktop():
     """Installed Power BI Desktop version (Store package, then the MSI install), or None."""
     cmds = ["(Get-AppxPackage -Name *PowerBI* | Sort-Object Version -Descending | Select-Object -First 1).Version",
@@ -227,15 +235,15 @@ def detect_desktop():
                                text=True, timeout=60)
         except (OSError, subprocess.TimeoutExpired):
             return None
-        v = (r.stdout or "").strip()
-        if re.fullmatch(r"2\.\d+\.\d+(\.\d+)?", v):
+        v = desktop_version(r.stdout)
+        if v:
             return v
     return None
 
 
 def record(path, version=None, today=None):
     p = pathlib.Path(path)
-    v = version or detect_desktop()
+    v = desktop_version(version) if version else detect_desktop()
     if not v:
         raise SystemExit("pbik: couldn't find Power BI Desktop's version: pass --version (Help > About)")
     d = load_project(p) or {"targetDesktop": "latest", "catalog": "home"}
@@ -243,6 +251,30 @@ def record(path, version=None, today=None):
     save(p, d)
     print(f"{p}: Desktop {v} recorded; targetDesktop {d.get('targetDesktop', 'latest')}")
     return d
+
+
+def check(path, version=None):
+    """Installed Desktop against targetDesktop: 0 when they match, Desktop is older (a warning) or the target is
+    "latest"; 5 when Desktop is newer (run /update first); 3 when the version can't be found."""
+    d = load_project(path) or {}
+    target = str(d.get("targetDesktop", "latest"))
+    v = desktop_version(version) if version else detect_desktop()
+    if target.lower() == "latest":
+        print(f"ok: targetDesktop latest; Desktop {v or '(version not found)'}")
+        return 0
+    if not v:
+        print("pbik: couldn't find Power BI Desktop's version: pass --version (Help > About)", file=sys.stderr)
+        return 3
+    t = vtuple(target)
+    have = vtuple(v)[:len(t)]                 # a target of 2.152 matches every 2.152.x build
+    if have > t:
+        print(f"Desktop {v} is newer than targetDesktop {target}: run /update first", file=sys.stderr)
+        return 5
+    if have < t:
+        print(f"warning: Desktop {v} is older than targetDesktop {target}: it may not open what pbik writes")
+        return 0
+    print(f"ok: Desktop {v} matches targetDesktop {target}")
+    return 0
 
 
 def show(path, support=None):

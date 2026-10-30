@@ -122,6 +122,10 @@ def main(argv=None):
     pr = pjs.add_parser("record", help="write this machine's Desktop version into project.json (/model)")
     pr.add_argument("--project", default=str(versions_default()))
     pr.add_argument("--version", help="Desktop version (default: detected from the installed Desktop)")
+    pc = pjs.add_parser("check", help="installed Desktop against targetDesktop: exit 5 if Desktop is newer "
+                                      "(run /update first), 3 if its version can't be found (/build runs it first)")
+    pc.add_argument("--project", default=str(versions_default()))
+    pc.add_argument("--version", help="Desktop version (default: detected from the installed Desktop)")
 
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
@@ -188,6 +192,8 @@ def main(argv=None):
         from . import versions as V
         if args.sub == "show":
             V.show(args.project)
+        elif args.sub == "check":
+            return V.check(args.project, args.version)
         else:
             V.record(args.project, args.version)
     elif c == "schemas" and args.sub == "lower":

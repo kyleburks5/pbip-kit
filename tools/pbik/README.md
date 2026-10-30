@@ -1,4 +1,4 @@
-# pbik 0.10.0
+# pbik 0.11.0
 
 pbip-kit's own command line tool for PBIR reports and TMDL models. Python standard library only; `jsonschema` is
 optional (schema checks).
@@ -14,7 +14,8 @@ tools\pbik\pbik.cmd <command> ...                rem same, through the wrapper
 pip install --user -e tools\pbik                 rem then: pbik <command> ...  (or python -m pbikit)
 ```
 
-Exit codes: 0 ok, 1 checks failed, 2 bad input, 3 Desktop bridge not available, 4 Desktop has unsaved changes.
+Exit codes: 0 ok, 1 checks failed, 2 bad input, 3 Desktop bridge not available (`project check`: Desktop version not
+found), 4 Desktop has unsaved changes, 5 Desktop is newer than targetDesktop (`project check`).
 
 ## Commands
 
@@ -240,7 +241,7 @@ reference) from `https://developer.microsoft.com/json-schemas/` into `tools/pbik
 skipped. Microsoft doesn't publish every version Desktop writes (visualContainer 2.14.0 returned 404 on 2026-10-17).
 `--project` also fetches the target Desktop's versions.
 
-### `schemas support [--refresh] | schemas lower <Report> | project show | project record`
+### `schemas support [--refresh] | schemas lower <Report> | project show | project record | project check`
 Version-aware builds (`pbikit/versions.py`, docs/UPDATE-ROUTINE.md). A rep's `design/specs/project.json`:
 
 ```json
@@ -265,12 +266,17 @@ Version-aware builds (`pbikit/versions.py`, docs/UPDATE-ROUTINE.md). A rep's `de
   once that Desktop saves them.
 - `project show` prints the target, its release and the schema version per kind; `project record [--version X]`
   writes this machine's Desktop version (Store package or the MSI install) to `desktop` (/model does it). It never
-  changes the target.
+  changes the target. Desktop installed from the MSI (IT-managed) reports `2.155.756.0 (26.06)+<hash>`: pbik takes the
+  leading version number, here and in `project check`.
+- `project check [--version X]` compares this machine's Desktop with `targetDesktop` (/build runs it first): exit 5
+  when Desktop is newer ("run /update first"), 3 when its version can't be found, a warning (exit 0) when it is older,
+  0 when they match or the target is `"latest"`. A target of `2.155` matches every 2.155 build.
 
 ```bat
 pbik schemas support --refresh
 pbik project show
 pbik project record
+pbik project check
 pbik schemas lower "..\pbip-patterns-work\HR Overview.Report"
 ```
 
