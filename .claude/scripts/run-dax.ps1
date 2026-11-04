@@ -1,6 +1,7 @@
 # Read-only: run the DAX query in a file against the open Desktop model (ADOMD client shipped with Desktop).
-# Usage: run-dax.ps1 -File <query.dax> [-Port <port>]   (port: modeling MCP ListLocalInstances)
-param([Parameter(Mandatory)][string]$File, [int]$Port = 55933)
+# Usage: run-dax.ps1 -File <query.dax> -Port <port>   (port: wireframe_data.py --port auto finds it, or the
+# modeling MCP ListLocalInstances; no default: a remembered port is a closed Desktop's)
+param([Parameter(Mandatory)][string]$File, [Parameter(Mandatory)][int]$Port)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8  # callers decode UTF-8
 $sep = ' ' + [char]0xA6 + ' '  # the file is read as ANSI by PowerShell 5.1, so no literal non-ASCII here

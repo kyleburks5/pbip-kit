@@ -180,6 +180,21 @@ def topn_filter(name, field, by, n, bottom=False):
             "howCreated": "User"}
 
 
+def measure_filter(name, field, kind, value):
+    """A visual-level filter on a measure (filter pane "Show items when the value is ..."): an Advanced filter with
+    one Comparison (ComparisonKind 0 =, 1 >, 2 >=, 3 <, 4 <=). Values are written as decimals (0D)."""
+    entity, schema = _entity(field)
+    a = _alias(entity, set())
+    try:
+        lit = {"Literal": {"Value": f"{float(value):g}D"}}
+    except (TypeError, ValueError):
+        raise FieldError(f"measure filter value {value!r} is not a number")
+    cond = {"Comparison": {"ComparisonKind": kind, "Left": _src(field, a), "Right": lit}}
+    return {"name": name, "field": field, "type": "Advanced",
+            "filter": {"Version": 2, "From": [_from(entity, schema, a)], "Where": [{"Condition": cond}]},
+            "howCreated": "User"}
+
+
 def selection_filter(field, data_type, values):
     """Slicer default selection (objects.general.filter), as Desktop saves a clicked value."""
     entity, schema = _entity(field)
@@ -189,5 +204,5 @@ def selection_filter(field, data_type, values):
                                             "Values": [[typed_literal(v, data_type)] for v in values]}}}]}
 
 
-__all__ = ["Resolver", "FieldError", "typed_literal", "categorical_filter", "topn_filter", "selection_filter", "qref",
-           "L"]
+__all__ = ["Resolver", "FieldError", "typed_literal", "categorical_filter", "topn_filter", "measure_filter",
+           "selection_filter", "qref", "L"]

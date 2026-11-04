@@ -1,0 +1,14 @@
+Tidy the kit's lessons and files: $ARGUMENTS
+Run between reps, when /wrapup suggests it (a budget near its limit, or 3+ reports since the last tidy). Read docs/lessons/README.md first. Nothing is ever deleted: a retired lesson moves to docs/lessons/_retired.md (with the date, its ID and why), an unused file moves to _archive/ (same relative path). Never change the semantic model or a report.
+1. Start clean: `git status` must show no changes; if it does, stop and tell me. Tag the current state `git tag pre-tidy-<today's date>` (add `-2` if the tag exists) so the tidy can be undone.
+2. Gather the candidates, without changing anything yet:
+   - `python tools/lessons.py status` (budgets) and `python tools/lessons.py check`;
+   - duplicates: `python tools/lessons.py similar`, and rules repeated between lessons, CLAUDE.md, .claude/rules and the command files: propose one merged lesson, keeping the older ID and both Sources;
+   - enforced lessons: a lesson whose Enforced by names a check that now enforces all of it can be shrunk to a pointer, or retired to _retired.md if the check's message already says everything; a CLAUDE.md or command-file rule a check enforces can go (the lesson stays);
+   - contradictions: lessons, rules or commands that say opposite things; show each pair with both Sources and ask me which holds;
+   - stale: `python tools/lessons.py stale` (lessons naming files that are gone, scripts nothing names) and lessons about a Desktop or tool version the kit no longer targets. Flag them only; never remove a stale lesson or file on your own;
+   - old changelog rows: `python tools/lessons.py changelog --days 30`: propose condensing rows older than that into one row per component and month in VERSIONS.md, keeping every version number and the Desktop each was tested on.
+3. Show me one numbered list, one item per change: what, where, why, and the before and after text. Ask item by item (I may say "all of 1-5"); apply only what I approve.
+4. Apply the approved items: move, don't delete; keep IDs (a retired ID is never reused); run `python tools/lessons.py index`, `python tools/lessons.py check` (0 errors) and `python tools/copilot/sync.py` if CLAUDE.md, .claude/rules or .claude/commands changed.
+5. Run every test: `python tools/run_tests.py --regression`. On a failure caused by the tidy, undo that item and say so.
+Show me `git diff --stat` and the diff, and wait for my approval before committing ("tidy: <date>"). Then say what changed, what was flagged but kept, and how to undo it (`git reset --hard pre-tidy-<date>` before the commit is pushed).

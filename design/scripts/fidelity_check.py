@@ -347,9 +347,10 @@ def main(argv=None):
     model_txt = None
     if a.port:
         from pbikit import slicerfit, tmdl
-        port = slicerfit.discover_port() if a.port == "auto" else int(a.port)
-        if not port:
-            ap.error("--port auto: no open Desktop model found")
+        try:
+            port = slicerfit.require_port(a.port)
+        except RuntimeError as e:
+            ap.error(str(e))
         mf = next(root.glob("*.SemanticModel"), None)
         W.load_extensions(root)
         model_txt = model_texts(layout, tmdl.load(mf) if mf else None, port)

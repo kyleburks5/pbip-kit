@@ -1,17 +1,20 @@
-"""Kit tests outside pbik: Copilot files (tools/copilot/sync.py), the go/no-go check (tools/doctor.ps1) and the
-vendored DAX Lib packages (design/udf/vendored.py).
+"""Kit tests outside pbik: Copilot files (tools/copilot/sync.py), the go/no-go check (tools/doctor.ps1), the
+vendored DAX Lib packages (design/udf/vendored.py) and the lessons' format and budgets (tools/lessons.py).
 
     python tools\\tests\\test_kit.py
 """
 import contextlib, io, json, pathlib, re, shutil, subprocess, sys, tempfile, unittest
+from unittest import mock
 
 KIT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KIT / "tools" / "copilot"))
+sys.path.insert(0, str(KIT / "tools"))
 sys.path.insert(0, str(KIT / "design" / "scripts"))
 sys.path.insert(0, str(KIT / "tools" / "pbik"))
 sys.path.insert(0, str(KIT / "design" / "udf"))
 
 import ambition, ladder  # noqa: E402
+import lessons  # noqa: E402
 import svg_to_png  # noqa: E402
 import sync  # noqa: E402
 
@@ -58,12 +61,82 @@ class AmbitionTests(unittest.TestCase):
         self.assertIn("partial", ambition.spec_issues("## Design ambition\nbaseline, normal, exceptions\n## X\n")[0])
 
 
-class ClaudeMdTests(unittest.TestCase):
-    MAX_LINES = 150  # docs/lessons/README.md: one in, one out
+class BudgetTests(unittest.TestCase):
+    """The lean learning system (docs/lessons/README.md, tools/lessons.py): lesson format and indexes, budgets
+    (CLAUDE.md 150 lines, a lesson file 120, a pattern entry 80: a warning at the budget, a failure 25% over), no
+    duplicate rules and no PROJECT-ONLY lesson in the kit."""
 
-    def test_claude_md_stays_small(self):
+    def test_kit_passes_the_lesson_check(self):
+        warns, errs = lessons.check()
+        for w in warns:
+            print(f"\n  budget warning: {w}", end="")
+        self.assertEqual(errs, [], "fix the lessons (python tools/lessons.py check)")
+
+    def test_claude_md_within_its_budget(self):
         n = len((KIT / "CLAUDE.md").read_text(encoding="utf-8").splitlines())
-        self.assertLessEqual(n, self.MAX_LINES, f"CLAUDE.md has {n} lines: place lessons per docs/lessons/README.md")
+        self.assertLessEqual(n, lessons.BUDGETS["CLAUDE.md"] * lessons.OVER,
+                             f"CLAUDE.md has {n} lines: place lessons per docs/lessons/README.md")
+
+    def test_warn_at_budget_fail_25_percent_over(self):
+        tmp = pathlib.Path(tempfile.mkdtemp())
+        try:
+            (tmp / "docs" / "lessons").mkdir(parents=True)
+            (tmp / "docs" / "patterns").mkdir(parents=True)
+            (tmp / "CLAUDE.md").write_text("x\n" * 150, encoding="utf-8")                  # at budget: warn
+            (tmp / "docs" / "lessons" / "build.md").write_text("x\n" * 140, encoding="utf-8")   # over, < 25%: warn
+            (tmp / "docs" / "patterns" / "p.md").write_text("x\n" * 101, encoding="utf-8")   # 80 x 1.25 = 100: fail
+            (tmp / "docs" / "patterns" / "q.md").write_text("x\n" * 100, encoding="utf-8")   # exactly 25%: warn
+            with mock.patch.object(lessons, "ROOT", tmp), mock.patch.object(lessons, "LESSONS", tmp / "docs" / "lessons"):
+                warns, errs = lessons.budget_findings()
+            self.assertEqual(len(warns), 3, warns)
+            self.assertEqual(len(errs), 1, errs)
+            self.assertIn("docs/patterns/p.md: 101 lines", errs[0])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_format_duplicates_and_project_only(self):
+        tmp = pathlib.Path(tempfile.mkdtemp())
+        try:
+            f = tmp / "slicers.md"
+            f.write_text("# S\n\n## Index\n\n## S-01 One\n- **Rule:** Keep it short.\n- **Why:** w\n"
+                         "- **Enforced by:** not enforced (read)\n- **Source:** Rep 1\n\n"
+                         "## S-02 Two\n- **Rule:** keep it, short!\n- **Why:** w\n- **Source:** Rep 2 PROJECT-ONLY\n\n"
+                         "## X-03 Three\n- **Rule:** r\n- **Why:** w\n- **Enforced by:** t\n- **Source:** s\n"
+                         "stray text\n## Notes\n", encoding="utf-8")
+            les, probs = lessons.parse(f)
+            self.assertEqual([x["id"] for x in les], ["S-01", "S-02", "X-03"])
+            self.assertTrue(any("S-02 has no **Enforced by:**" in p_ for p_ in probs), probs)
+            self.assertTrue(any("X-03 should start with S-" in p_ for p_ in probs), probs)
+            self.assertTrue(any("text outside its four fields" in p_ for p_ in probs), probs)
+            self.assertTrue(any("'Notes'" in p_ for p_ in probs), probs)
+            self.assertEqual(lessons.duplicates(les), ["S-02 repeats the rule of S-01"])
+            self.assertEqual(len(lessons.project_only(les)), 1)
+            self.assertFalse(lessons.enforced(les[0]))
+            self.assertTrue(lessons.enforced(les[2]))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_every_lesson_file_has_an_index_and_the_readme_lists_every_lesson(self):
+        readme = (KIT / "docs" / "lessons" / "README.md").read_text(encoding="utf-8")
+        for f in lessons.lesson_files():
+            text = f.read_text(encoding="utf-8")
+            self.assertLess(text.index("## Index"), text.index("\n## ", text.index("## Index") + 3), f.name)
+            for x in lessons.parse(f)[0]:
+                self.assertIn(f"| {x['id']} |", text.split("<!-- /lessons:index -->")[0], f"{f.name} index: {x['id']}")
+                self.assertIn(f"| {x['id']} |", readme, f"README: {x['id']}")
+
+    def test_tidy_suggested_after_three_reports(self):
+        with mock.patch.object(lessons, "reports_since_tidy", return_value=("pre-tidy-2026-11-01", 3)), \
+                mock.patch.object(lessons, "budgets", return_value=[]):
+            self.assertIn("3 reports wrapped up since the last tidy (pre-tidy-2026-11-01)", lessons.tidy_due()[0])
+        with mock.patch.object(lessons, "reports_since_tidy", return_value=(None, 2)), \
+                mock.patch.object(lessons, "budgets", return_value=[("lesson file", KIT / "x.md", 109, 120)]):
+            self.assertEqual(lessons.tidy_due(), ["x.md at 109 of 120 lines"], "within 10% of a budget")
+
+    def test_changelog_rows_older_than(self):
+        import datetime
+        rows = lessons.changelog_rows(30, today=datetime.date(2026, 11, 20))
+        self.assertTrue(rows and all(r.startswith("| 2026-10-") for r in rows))
 
 
 class CopilotTests(unittest.TestCase):

@@ -140,8 +140,17 @@ release.
 ### `/wrapup`
 
 At the end of a report, after the last `/fix` is approved. Lists the lessons the report produced with where each goes
-by the placement order ([lessons/README.md](lessons/README.md)) and the CLAUDE.md rules a new check now enforces,
-writes them, shows the diff and waits for your approval; then runs the tests and the regression suite and commits.
+by the placement order ([lessons/README.md](lessons/README.md)), updating an existing lesson rather than adding a
+duplicate, showing contradictions with both sources, and leaving PROJECT-ONLY items in the report's own notes. Lists
+the CLAUDE.md rules a new check now enforces, writes them, shows the diff and waits for your approval; then runs the
+tests and the regression suite, commits, and suggests `/tidy` when a budget is near or 3+ reports have passed.
+
+### `/tidy`
+
+Between reports (Copilot `/kit-tidy`). Tags `pre-tidy-<date>`, then proposes, item by item: merging duplicate
+lessons, retiring lessons a check now enforces, settling contradictions (both sources shown), condensing old
+changelog rows; stale lessons and unused files are flagged, never removed. Nothing is deleted: retired lessons go to
+`docs/lessons/_retired.md`, unused files to `_archive/`. Runs every test after, then waits for your approval.
 
 ## The visual-method ladder
 
@@ -273,8 +282,8 @@ When a fix works, the assistant proposes a lesson and waits for your approval. I
 3. **The command file** (`.claude/commands/<step>.md`), if it applies to one step only.
 4. **A topic file** in `docs/lessons/` (dax, build, cards, slicers, charts, accessibility, audit-modes), or a rules
    file in `.claude/rules/`, if it is background.
-5. **CLAUDE.md**, only if it applies to every session. One in, one out: CLAUDE.md stays under 150 lines (a test
-   checks).
+5. **CLAUDE.md**, only if it applies to every session. One in, one out. Budgets (a test warns at the budget and
+   fails 25% over): CLAUDE.md 150 lines, a lesson file 120, a pattern entry 80.
 
 Each proposal says where it goes and why not higher. When a check starts enforcing a rule, the rule is proposed for
 retirement. At the end of a report, `/wrapup` places the remaining lessons, runs the tests and commits.

@@ -30,6 +30,7 @@ import json, pathlib, re
 
 from . import a11y, catalog as CAT, schemas, slicerfit, tmdl, versions
 from . import deneb as DN
+from . import htmlcontent as HC
 from .objects import load
 from .report import ID_RE, Report
 
@@ -122,6 +123,46 @@ def svg_issues(name, expr):
     for s_ in strings:
         for pos in raw_percent(s_):
             out.append(f"{name}: raw '%' in SVG text ...{s_[max(0, pos - 25):pos + 10]}... (write %25)")
+    return out
+
+
+MULTI_SERIES = {"lineChart", "areaChart", "stackedAreaChart", "barChart", "clusteredBarChart", "columnChart",
+                "clusteredColumnChart", "hundredPercentStackedBarChart", "hundredPercentStackedColumnChart",
+                "lineStackedColumnComboChart", "lineClusteredColumnComboChart", "ribbonChart"}
+
+
+def _lit(entries, prop, selector="any"):
+    """The literal value of prop in the object's entries (any selector, or exactly this one), or None."""
+    for e in entries or []:
+        if selector != "any" and e.get("selector") != selector:
+            continue
+        v = e.get("properties", {}).get(prop)
+        if isinstance(v, dict):
+            return v.get("expr", {}).get("Literal", {}).get("Value")
+    return None
+
+
+def lesson_checks(d, h):
+    """Warnings for lessons promoted into checks (docs/lessons: slicers S-01, S-03; charts CH-02)."""
+    vis = d.get("visual", {})
+    vt, objs = vis.get("visualType"), vis.get("objects", {})
+    out = []
+    if vt == "advancedSlicerVisual" and isinstance(h, (int, float)) and h < 40:
+        pad = objs.get("padding")
+        custom = _lit(pad, "paddingSelection") == "'Custom'"
+        flat = all(str(_lit(pad, k) or "").rstrip("LD") in ("0", "0.0") for k in ("topMargin", "bottomMargin"))
+        if not (custom and flat):
+            out.append(f"button slicer {h:g}px tall without padding Custom 0 top and bottom: the button text "
+                       "disappears (lesson S-01)")
+    if vt == "slicer" and isinstance(h, (int, float)) and h < 76 and _lit(objs.get("data"), "mode") == "'Dropdown'" \
+            and _lit(objs.get("header"), "show") != "false":
+        out.append(f"dropdown slicer with a header is {h:g}px tall: it needs at least 76px (lesson S-03)")
+    if vt in MULTI_SERIES:
+        ys = vis.get("query", {}).get("queryState", {}).get("Y", {}).get("projections", [])
+        bare = any("fill" in e.get("properties", {}) and not e.get("selector") for e in objs.get("dataPoint", []))
+        if len(ys) > 1 and bare:
+            out.append(f"selector-less dataPoint.fill on a chart with {len(ys)} series is ignored: colour each series "
+                       "by its metadata selector (lesson CH-02)")
     return out
 
 
@@ -332,6 +373,10 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
                 slicers.append((where, m.group(1) if m else None, d))
             if d.get("visual", {}).get("visualType") == DN.TYPE:
                 denebs.append((where, d))
+            if HC.is_html_content(d.get("visual", {}).get("visualType")) and HC.height_issue(h):
+                fd.warn(where, HC.height_issue(h))
+            for w_ in lesson_checks(d, h):
+                fd.warn(where, w_)
             if d.get("visual", {}).get("visualType") == "actionButton":
                 for e in d["visual"].get("objects", {}).get("text", []):
                     extra = [p for p in e.get("properties", {}) if p != "show"]

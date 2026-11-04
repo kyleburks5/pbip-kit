@@ -18,6 +18,7 @@ from . import bookmarks as BM
 from . import deneb as DN
 from . import fields as F
 from . import fieldrefs as FR
+from . import htmlcontent as HC
 from . import versions
 from .objects import (b, chrome_off, colour_expr, drop_shadow, ex, i, load, n, native_ref, navigator_states, qref,
                       ref_labels, s, save, shape_objects, solid, solid_ex, theme_colour)
@@ -355,16 +356,22 @@ def apply_query(ctx, v, d):
 def build_filter(ctx, owner, k, spec):
     name = "pbik_" + stable_name(owner, k, spec.get("field"), length=16)
     fld = ctx.field(spec["field"])
-    if "Column" not in fld:
-        raise BuildError(f"{owner}: filter field {spec['field']!r} must be a column")
-    kind = spec.get("type", "Categorical")
-    if kind.lower() == "topn":
+    if "Measure" in fld:
+        if owner.startswith("page:"):
+            raise BuildError(f"{owner}: {spec['field']} is a measure: Power BI filters on a measure only at visual "
+                             "level; move the filter to each visual's `filters`")
+        if spec.get("op") not in OPS or "value" not in spec:
+            raise BuildError(f"{owner}: measure filter {spec['field']} needs `op` ({', '.join(OPS)}) and `value`")
+        f = F.measure_filter(name, fld, OPS[spec["op"]], spec["value"])
+    elif "Column" not in fld:
+        raise BuildError(f"{owner}: filter field {spec['field']!r} must be a column or a measure")
+    elif spec.get("type", "Categorical").lower() == "topn":
         f = F.topn_filter(name, fld, ctx.field(spec["by"]), spec.get("n", 5),
                           bottom=spec.get("direction", "Top").lower() == "bottom")
-    elif kind.lower() == "categorical":
+    elif spec.get("type", "Categorical").lower() == "categorical":
         f = F.categorical_filter(name, fld, ctx.res.column_type(fld), spec.get("values", []), spec.get("invert", False))
     else:
-        raise BuildError(f"{owner}: filter type {kind!r} not supported (Categorical, TopN)")
+        raise BuildError(f"{owner}: filter type {spec['type']!r} not supported (Categorical, TopN; a measure: op, value)")
     if spec.get("hidden"):
         f["isHiddenInViewMode"] = True
     if spec.get("locked"):
@@ -869,6 +876,16 @@ def page_background(ctx, spec):
     return [{"properties": {"color": solid(ctx.colour(colour)), "transparency": n(tr)}}]
 
 
+def apply_html_content(ctx, vid, v, d):
+    """HTML Content visuals render with legacy rendering on (pbikit/htmlcontent.py); warn under 43px tall."""
+    if not HC.is_html_content(v["type"]):
+        return
+    set_prop(ctx, vid, d, "objects", "compatibility", None, "legacyRendering", b(True))
+    issue = HC.height_issue(v.get("h"))
+    if issue:
+        ctx.res.warnings.append(f"{vid}: {issue}")
+
+
 def apply_deneb(ctx, vid, v, d):
     """A Deneb visual's spec and state, as Desktop saved them (pbikit/deneb.py)."""
     spec = v.get("_deneb")
@@ -1161,6 +1178,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_navigator(ctx, vid, v, d)
             apply_props(ctx, vid, v, d)
             apply_deneb(ctx, vid, v, d)
+            apply_html_content(ctx, vid, v, d)
             new = {json.dumps(x) for x in ctx.owned_new.get(vid, [])}
             for item in old_owned.get(vid, []):
                 if json.dumps(item) not in new:
@@ -1216,6 +1234,8 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         rep.write(f, d)
     if any(v.get("_deneb") is not None for v in visuals):
         register_custom_visual(rep, DN.TYPE)
+    for hc in sorted({v["type"] for v in visuals if HC.is_html_content(v["type"])}):
+        register_custom_visual(rep, hc)
     bm_owned = BM.write(rep, layout, page_ids, vnames, {v["id"]: v["type"] for v in visuals}, old_map, prune, log)
 
     # prune

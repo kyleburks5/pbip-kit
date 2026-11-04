@@ -1,6 +1,9 @@
 """Aggregate numbers for the high-fidelity wireframe, from each visual's own bindings (read-only; docs/it-security.md).
 
-    python design/scripts/wireframe_data.py --port <Desktop port>         writes design/wireframes/wireframe-data.json
+    python design/scripts/wireframe_data.py                               writes design/wireframes/wireframe-data.json
+                                                                           (--port auto, the default: the newest Desktop
+                                                                           workspace that answers; stops with "Open the
+                                                                           report in Desktop first" when none does)
     python design/scripts/wireframe_data.py --dry-run                      prints the queries, runs nothing
 
 For every visual in design/specs/layout.json with bindings, one DAX query at the visual's own grain:
@@ -59,6 +62,7 @@ class PrivacyError(Exception):
 
 
 DEFS = {"text": "", "names": set(), "formats": {}}    # --define: query-scoped MEASURE definitions
+HTML_CONTENT_RE = re.compile(r"htmlContent[0-9A-Fa-f]{32}")       # the HTML Content visual, any version GUID
 EXT = {}                                              # report extension measures: name -> (entity, expression)
 
 
@@ -210,6 +214,27 @@ def filter_args(model, specs):
     return out
 
 
+MEASURE_OPS = {"=": "=", "==": "=", ">": ">", ">=": ">=", "<": "<", "<=": "<="}
+
+
+def measure_filters(model, specs, defines):
+    """The DAX condition of a visual's measure filters (layout `filters` with op and value), or ''."""
+    out = []
+    for f in specs or []:
+        if f.get("op") not in MEASURE_OPS or not isinstance(f.get("value"), (int, float)):
+            continue
+        try:
+            kind, tbl, name, agg = parse(f["field"])
+        except (KeyError, ValueError):
+            continue
+        if kind != "measure":
+            continue
+        ref = dax_ref(kind, tbl, name, agg) if known_measure(model, name)[0] else measure_dax(model, f["field"], defines)
+        if ref:
+            out.append(f"( {ref} ) {MEASURE_OPS[f['op']]} {f['value']}")
+    return " && ".join(out)
+
+
 def visual_query(v, layout, model, privacy, sels):
     """{dax, groups: [{label, ref, sortBy}], values: [{label, field, format}], cat, leg} or None (nothing bound)."""
     b = v.get("bindings") or {}
@@ -242,6 +267,8 @@ def visual_query(v, layout, model, privacy, sels):
                         if not ref:
                             continue             # unknown: drawn without numbers
                         ref = one_line(ref)      # extension measures are text (images, colours)
+                if HTML_CONTENT_RE.fullmatch(v["type"]) and kind == "measure":
+                    ref = one_line(ref)          # HTML text: run-dax.ps1 prints one row per line
                 values.append({"label": label, "field": it["field"], "ref": ref, "role": role, "format": fmt})
     if not groups and not values:
         return None
@@ -326,10 +353,15 @@ def visual_query(v, layout, model, privacy, sels):
         filt = filt + [f"TREATAS ( __top{len(top_vars) - 1}, {col} )"]
         top = top or {"n": n, "field": f["field"], "by": f.get("by"), "top": up}
     head = "DEFINE\n" + "\n".join(defines + top_vars) + "\n" if defines or top_vars else ""
-    if groups:
+    keep = measure_filters(model, v.get("filters"), defines)     # "show items when the value is ..."
+    if groups and keep:
+        body = f"FILTER ( SUMMARIZECOLUMNS ( {', '.join(cols + meas)} ), {keep} )"
+        dax = head + (f"EVALUATE CALCULATETABLE ( {body}, {', '.join(filt)} )" if filt else f"EVALUATE {body}")
+    elif groups:
         dax = head + "EVALUATE SUMMARIZECOLUMNS ( " + ", ".join(cols + filt + meas) + " )"
     else:
         body = "ROW ( " + ", ".join(meas) + " )"
+        body = f"FILTER ( {body}, {keep} )" if keep else body
         dax = head + (f"EVALUATE CALCULATETABLE ( {body}, {', '.join(filt)} )" if filt else f"EVALUATE {body}")
     cat = next((k for k, g in enumerate(groups) if g["role"] in CAT_ROLES), 0 if groups else None)
     leg = next((k for k, g in enumerate(groups) if g["role"] in LEG_ROLES), None)
@@ -519,7 +551,8 @@ def fetch(layout, model, port, runner=None):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--port", help="the open Desktop model's port, or 'auto' (the newest Desktop workspace)")
+    ap.add_argument("--port", default="auto",
+                    help="the open Desktop model's port, or 'auto' (default: the newest Desktop workspace that answers)")
     ap.add_argument("--layout", default=str(ROOT / "design" / "specs" / "layout.json"))
     ap.add_argument("--model", help="the *.SemanticModel folder (default: the one in the project root)")
     ap.add_argument("--out", default=str(ROOT / "design" / "wireframes" / "wireframe-data.json"))
@@ -538,15 +571,13 @@ def main(argv=None):
             for vid, q in queries(layout, model).items():
                 print(f"[{vid}] {q['dax']}")
             return 0
-        if not a.port:
-            ap.error("--port is required (the open Desktop model), or --dry-run")
-        port = a.port
-        if port == "auto":
-            from pbikit import slicerfit
-            port = slicerfit.discover_port()
-            if not port:
-                ap.error("--port auto: no open Desktop model found")
-        out = fetch(layout, model, int(port))
+        from pbikit import slicerfit
+        try:
+            port = slicerfit.require_port(a.port)      # Desktop running, and the port answers (not a stale file)
+        except RuntimeError as e:
+            print(f"wireframe_data: {e}", file=sys.stderr)
+            return 2
+        out = fetch(layout, model, port)
     except PrivacyError as e:
         print(f"wireframe_data: {e}", file=sys.stderr)
         return 1

@@ -19,10 +19,8 @@ Goal: build polished Power BI reports (PBIP + PBIR) from a requirements file (de
 - Plugin versions are pinned (auto-update off). At the start of each session, compare the installed plugin versions (~/.claude/plugins/installed_plugins.json) with VERSIONS.md. If they differ, add a row to the changelog in VERSIONS.md with the date, the plugin, the old and new version, and a note to run /smoke (one card, one button slicer, one table) before building anything large.
 
 ## Accessibility
-- Every data visual and image has alt text; text meets WCAG 2.1 AA contrast (button, navigator and slicer text in each
-  state too); no text below 10pt (tokens `a11y.minFontPt`); tab order follows reading order. Details:
-  docs/lessons/accessibility.md. `pbik validate` checks all four as warnings (pbikit/a11y.py). Fix them in layout.json,
-  or note why one is accepted in the spec by visual ID.
+- Alt text, WCAG 2.1 AA contrast in every state, no text below 10pt, tab order in reading order: lessons A-01 to A-05
+  (docs/lessons/accessibility.md), all warned on by `pbik validate`. Fix in layout.json, or note the exception by ID.
 
 ## Native first
 - Build with native Power BI visuals and settings. Use SVG measures, HTML or custom visuals only as
@@ -53,7 +51,7 @@ Goal: build polished Power BI reports (PBIP + PBIR) from a requirements file (de
 3. `/build`: build with `pbik build` from layout.json (styling through the theme and tokens), then run `pbik validate`, design/scripts/audit_layout.py and design/scripts/audit_ids.py.
 4. I save and reload in Desktop; `/review` screenshots, compares to the wireframe and design/checks.md, and runs the numbers audit.
 5. `/fix`: fix the review items, re-check, repeat.
-6. `/wrapup` after the last /fix: places the rep's lessons (docs/lessons/README.md), shows the diff, waits for approval.
+6. `/wrapup` after the last /fix: places the rep's lessons (docs/lessons/README.md), updating existing ones, shows the diff, waits for approval; it suggests `/tidy` when a budget is near or 3+ reps have passed.
 7. After each step, say what changed.
 - `/theme` makes the colour scheme on its own (brand colours, a reference, or a preset: clean, bento, corporate;
   every text and state AA); /plan step 2 runs the same.
@@ -66,9 +64,11 @@ row-level access isn't cleared): /model recommends one and records it in design/
 modes, their provisional thresholds and what every mode keeps are in docs/lessons/audit-modes.md.
 
 ## Lessons
-When a fix works, propose a lesson where docs/lessons/README.md places it (here only if it applies to every session; one in, one out) and wait for approval. Each lesson names the rep it came from; helpers named
-Topic lessons live in docs/lessons/ and the commands point to them at the step that needs them: dax.md, build.md,
-cards.md (shapes, containers, new card), slicers.md, charts.md (charts and tables), accessibility.md, audit-modes.md.
+When a fix works, propose a lesson where docs/lessons/README.md places it (a check first; here only if it applies to
+every session; one in, one out) and wait for approval. Lessons are Rule / Why / Enforced by / Source with an ID, in
+docs/lessons/<topic>.md (dax, build, cards, slicers, charts, accessibility, audit-modes), each with an index; update a
+lesson rather than add a duplicate, and never put a PROJECT-ONLY lesson in the kit. `python tools/lessons.py check`
+(in the tests) enforces the format and the budgets. `/tidy` merges, retires and flags, never deletes.
 pbik and Desktop quirks are in .claude/rules/pbik.md, SVG in .claude/rules/svg.md, and every gap with its Desktop click
 steps in design/known-gaps.md (the pre-pbik gaps are history in examples/known-gaps-pbir.md).
 

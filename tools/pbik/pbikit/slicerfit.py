@@ -10,7 +10,7 @@ Items come from the open Desktop model (`--port`, a DAX VALUES query through .cl
 Desktop isn't reachable, from the visual's `items` hint in layout.json (a count, or the list of labels).
 Label widths are estimates for Segoe UI (no font metrics), so a warning means "check it in Desktop".
 """
-import math, os, pathlib, re, shutil, subprocess, tempfile
+import math, os, pathlib, re, shutil, socket, subprocess, tempfile
 
 PT_PX = 96 / 72
 DEFAULT_FONT_PT = 10
@@ -103,16 +103,63 @@ def slicer_column(d):
 
 # ---- items from the open Desktop model
 
-def discover_port():
-    """Port of the newest Desktop Analysis Services workspace (msmdsrv.port.txt), or None."""
-    roots = [pathlib.Path(os.environ.get("USERPROFILE", "~")).expanduser() / "Microsoft" / "Power BI Desktop Store App",
-             pathlib.Path(os.environ.get("LOCALAPPDATA", "~")).expanduser() / "Microsoft" / "Power BI Desktop"]
-    files = [f for r in roots for f in r.glob("AnalysisServicesWorkspaces/*/Data/msmdsrv.port.txt")]
-    if not files:
+DESKTOP_FIRST = "Open the report in Desktop first"
+
+
+def port_answers(port, timeout=0.5):
+    """True when something listens on localhost:port (a closed Desktop leaves its port file behind)."""
+    try:
+        with socket.create_connection(("127.0.0.1", int(port)), timeout=timeout):
+            return True
+    except (OSError, ValueError):
+        return False
+
+
+def desktop_running():
+    """True when a PBIDesktop.exe process runs (Windows; elsewhere None: not checked)."""
+    if os.name != "nt":
         return None
-    raw = max(files, key=lambda f: f.stat().st_mtime).read_bytes()
-    text = raw.decode("utf-16-le" if b"\x00" in raw else "utf-8", errors="ignore").strip("﻿\x00 \r\n")
+    r = subprocess.run(["tasklist", "/FI", "IMAGENAME eq PBIDesktop.exe", "/NH"], capture_output=True, text=True,
+                       errors="replace")
+    return "PBIDesktop.exe" in (r.stdout or "")
+
+
+def _port_files(roots=None):
+    roots = roots or [pathlib.Path(os.environ.get("USERPROFILE", "~")).expanduser() / "Microsoft" / "Power BI Desktop Store App",
+                      pathlib.Path(os.environ.get("LOCALAPPDATA", "~")).expanduser() / "Microsoft" / "Power BI Desktop"]
+    files = [f for r in roots for f in pathlib.Path(r).glob("AnalysisServicesWorkspaces/*/Data/msmdsrv.port.txt")]
+    return sorted(files, key=lambda f: f.stat().st_mtime, reverse=True)
+
+
+def _read_port(f):
+    raw = f.read_bytes()
+    text = raw.decode("utf-16-le" if b"\x00" in raw else "utf-8", errors="ignore").strip("\ufeff\x00 \r\n")
     return int(text) if text.isdigit() else None
+
+
+def discover_port(roots=None, answers=port_answers):
+    """Port of the newest Desktop Analysis Services workspace that answers, or None. Port files left by a closed
+    Desktop (nothing listens on them any more) are skipped."""
+    for f in _port_files(roots):
+        port = _read_port(f)
+        if port and answers(port):
+            return port
+    return None
+
+
+def require_port(port=None, roots=None, answers=port_answers, running=desktop_running):
+    """The port to query: the given one if it answers, else the newest live workspace. Raises RuntimeError
+    ("Open the report in Desktop first") when Desktop isn't running or no workspace answers."""
+    if running() is False:
+        raise RuntimeError(f"{DESKTOP_FIRST}: Power BI Desktop isn't running")
+    if port not in (None, "auto"):
+        if answers(int(port)):
+            return int(port)
+        raise RuntimeError(f"{DESKTOP_FIRST}: nothing answers on port {port} (Desktop closed or reopened?)")
+    found = discover_port(roots, answers)
+    if not found:
+        raise RuntimeError(f"{DESKTOP_FIRST}: no open Desktop model answers (only port files of a closed Desktop)")
+    return found
 
 
 def find_run_dax(*starts):

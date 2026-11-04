@@ -185,13 +185,15 @@ class WireframeTests(unittest.TestCase):
             lf.parent.mkdir(parents=True)
             lf.write_text(json.dumps(lay), encoding="utf-8")
             out = tmp / "wf.json"
-            orig = W.run
+            from pbikit import slicerfit
+            orig, orig_port = W.run, slicerfit.require_port
             W.run = lambda dax, port, script=None: run(dax, port)
+            slicerfit.require_port = lambda port=None, *a, **k: 1     # no Desktop here: the port "answers"
             try:
                 rc = W.main(["--port", "1", "--layout", str(lf), "--model", str(next((CASES / "rep8" / "project").glob("*.SemanticModel"))),
                              "--out", str(out)])
             finally:
-                W.run = orig
+                W.run, slicerfit.require_port = orig, orig_port
             self.assertEqual(rc, 1)
             self.assertFalse(out.exists())
         finally:
@@ -784,6 +786,99 @@ class DesktopMatchTests(unittest.TestCase):
         self.assertEqual(len(re.findall(r'data-item="[^"]+"', a)), 2)
         self.assertNotIn("solid", a)
         self.assertIn("1px solid", b)
+
+
+class KitV12Tests(unittest.TestCase):
+    """Kit v1.2: Desktop's {"id": "default"} selector, theme colours as Desktop saves them, HTML Content, the no-data
+    banner and visual measure filters."""
+
+    def test_default_selector_and_theme_data_colours(self):
+        R = G.Resolver({"colors": {"card": "#FFFFFF", "text": "#111111"}}, {"dataColors": ["#336699", "#993366"],
+                                                                         "background": "#FAFAFA", "foreground": "#222222"})
+        raw = lambda cid, pct=0: {"raw": {"solid": {"color": {"expr": {"ThemeDataColor": {"ColorId": cid, "Percent": pct}}}}}}
+        v = {"props": {'text.fontColor@{"id":"default"}': raw(2), 'fill.show@{"id": "default"}': False,
+                       "outline.lineColor@default": "#123456"}}
+        self.assertEqual(G.prop(v, "text.fontColor"), {"theme": 2, "percent": 0.0})
+        self.assertIs(G.prop(v, "fill.show"), False, '{"id": "default"} with spaces too')
+        self.assertEqual(G.prop(v, "outline.lineColor"), "#123456")
+        self.assertIsNone(G.prop({"props": {'fill.show@{"metadata": "T.M"}': False}}, "fill.show"),
+                          "a per-field selector isn't the visual-wide value")
+        self.assertEqual(R.colour(G.prop(v, "text.fontColor")), "#336699", "ColorId 2 = dataColors[0]")
+        self.assertEqual(R.colour(raw(0)), "#FAFAFA", "ColorId 0 = background")
+        self.assertEqual(R.colour(raw(1)), "#222222", "ColorId 1 = foreground")
+        self.assertEqual(R.colour(raw(3, -0.5)), G.shade("#993366", -0.5), "Percent darkens")
+        self.assertIsNone(G.selector_key('{"id":"default"}'))
+
+    def test_html_content_tag_frame_and_placeholder(self):
+        hc = "htmlContent443BE3AD55E043BF878BED274D3A6855"
+        v = {"id": "P1-V01", "name": "h", "page": "P1", "type": hc, "x": 0, "y": 0, "w": 400, "h": 200,
+             "bindings": {"content": ["[Status HTML]"]}, "build": {"method": "custom-visual", "step": 4}}
+        out = page_of([v], {"P1-V01": {"groups": [], "values": ["Status HTML"], "formats": [None],
+                                       "rows": [["<b>On track</b><script>alert(1)</script>"]]}})
+        spec = json.loads(out.split('id="spec">', 1)[1].split("</script>", 1)[0])
+        s = spec["visuals"][0]
+        self.assertEqual((s["tag"], s["render"], s["known"]), ("HTML Content", "htmlContent", True))
+        self.assertIn("sandbox", out.split("R.htmlContent", 1)[1][:1200])
+        self.assertIn("default-src 'none'", out)
+        self.assertNotIn('id="nodata-banner"', out, "with data: no banner")
+        lay, tok, _, theme = case("rep8")
+        no_data = G.build_html(dict(lay, pages={"P1": {"displayName": "One"}}, visuals=[v]), tok, theme, None)
+        self.assertIn("No data – placeholder values", no_data)
+        dom = edge_dom(self, out)
+        frame = svg_of(dom, "P1-V01")
+        self.assertIn("<iframe", frame)
+        self.assertIn('sandbox=""', frame)
+        dom2 = edge_dom(self, no_data)
+        self.assertIn("HTML Content", svg_of(dom2, "P1-V01"))
+        self.assertNotIn("<iframe", svg_of(dom2, "P1-V01"), "no data: a labelled box")
+        self.assertIn('id="nodata-banner"', dom2)
+
+    def test_html_content_measures_one_line_in_the_query(self):
+        lay, _, model, _ = case("rep8")
+        lay["privacy"] = PRIVACY
+        lay["visuals"] = [{"id": "P1-V01", "name": "h", "page": "P1", "type": "htmlContent443BE3AD55E043BF878BED274D3A6855",
+                           "x": 0, "y": 0, "w": 400, "h": 200, "bindings": {"content": ["[Headcount]"]}}]
+        q = W.queries(lay, model)["P1-V01"]
+        self.assertIn("SUBSTITUTE ( SUBSTITUTE ( [Headcount]", q["dax"])
+
+    def test_visual_measure_filters_in_the_query(self):
+        lay, _, model, _ = case("rep8")
+        lay["privacy"] = PRIVACY
+        lay["visuals"] = [{"id": "P1-V01", "name": "t", "page": "P1", "type": "tableEx", "x": 0, "y": 0, "w": 400,
+                           "h": 200, "bindings": {"Values": ["DataTable[Department]", "[Headcount]"]},
+                           "filters": [{"field": "[Headcount]", "op": ">", "value": 10}]},
+                          {"id": "P1-V02", "name": "c", "page": "P1", "type": "cardVisual", "x": 0, "y": 300, "w": 200,
+                           "h": 100, "bindings": {"Data": ["[Headcount]"]},
+                           "filters": [{"field": "[Headcount]", "op": "<=", "value": 5}]}]
+        qs = W.queries(lay, model)
+        self.assertIn("EVALUATE FILTER ( SUMMARIZECOLUMNS ( 'DataTable'[Department]", qs["P1-V01"]["dax"])
+        self.assertIn("( [Headcount] ) > 10 )", qs["P1-V01"]["dax"])
+        self.assertIn("FILTER ( ROW ( ", qs["P1-V02"]["dax"])
+        self.assertIn("( [Headcount] ) <= 5", qs["P1-V02"]["dax"])
+
+    def test_require_port_skips_stale_port_files(self):
+        from pbikit import slicerfit as SF
+        tmp = pathlib.Path(tempfile.mkdtemp())
+        try:
+            import os, time
+            for k, port in enumerate((50001, 50002)):     # 50002 is newer but its Desktop closed
+                d = tmp / "AnalysisServicesWorkspaces" / f"ws{k}" / "Data"
+                d.mkdir(parents=True)
+                (d / "msmdsrv.port.txt").write_bytes(str(port).encode("utf-16-le"))
+                os.utime(d / "msmdsrv.port.txt", (time.time() + k, time.time() + k))
+            live = lambda p: p == 50001
+            self.assertEqual(SF.discover_port([tmp], answers=live), 50001)
+            self.assertIsNone(SF.discover_port([tmp], answers=lambda p: False))
+            self.assertEqual(SF.require_port(None, [tmp], answers=live, running=lambda: True), 50001)
+            self.assertEqual(SF.require_port("50001", [tmp], answers=live, running=lambda: True), 50001)
+            for args in ((None, lambda: False), ("50002", lambda: True), ("auto", lambda: None)):
+                with self.assertRaises(RuntimeError) as cm:
+                    SF.require_port(args[0], [tmp], answers=lambda p: False, running=args[1])
+                self.assertIn("Open the report in Desktop first", str(cm.exception))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        ps = (KIT / ".claude" / "scripts" / "run-dax.ps1").read_text(encoding="utf-8")
+        self.assertIn("[Parameter(Mandatory)][int]$Port", ps, "no hard-coded default port")
 
 
 class FidelityTests(unittest.TestCase):

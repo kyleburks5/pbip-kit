@@ -28,6 +28,7 @@ DESCRIPTIONS = {   # what each kit command does (CLAUDE.md "Workflow"); a new co
     "validate": "The numbers audit on its own (look-only)",
     "update": "After a Power BI Desktop update: record it, regression and smoke, Patterns page, harvest, catalog",
     "wrapup": "End of a rep: place its lessons by the kit's placement order, show the diff, wait for approval",
+    "tidy": "Between reps: merge duplicate lessons, retire enforced ones, flag stale ones; never deletes",
 }
 HINTS = {   # shown in the chat box after /<name>: what to type
     "brd": "the brief: audience, questions, data in data/",
@@ -41,6 +42,7 @@ HINTS = {   # shown in the chat box after /<name>: what to type
     "validate": "nothing, or the key values to audit",
     "update": "the new Desktop version or release notes",
     "wrapup": "nothing, or the rep number and lessons to add",
+    "tidy": "nothing, or the lesson files to tidy",
 }
 
 

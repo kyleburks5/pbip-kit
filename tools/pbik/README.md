@@ -1,4 +1,4 @@
-# pbik 0.11.0
+# pbik 0.12.0
 
 pbip-kit's own command line tool for PBIR reports and TMDL models. Python standard library only; `jsonschema` is
 optional (schema checks).
@@ -84,6 +84,8 @@ against the model's TMDL and `reportExtensions.json`.
 | visual | `sort: {field, direction, default}` (or a list) | `query.sortDefinition`; `default: true` writes `isDefaultSort` (Desktop keeps true, drops false) |
 | visual | `filters: [{field, values, invert, hidden, locked}]` | categorical filter, values typed by the column (2024L, 1.5D, 'text') |
 | visual | `filters: [{type: "TopN", field, by, n, direction: "Top" or "Bottom"}]` | Top N filter |
+| visual | `filters: [{field: "[Measure]", op: "=" / ">" / ">=" / "<" / "<=", value: <number>}]` | a measure filter ("show items when the value is ..."): an `Advanced` filter with one Comparison, the value as a decimal (0D). Visuals only: a measure filter in a page's `filters` stops the build with an error (Power BI filters on measures per visual). Not Desktop-tested yet (kit v1.2) |
+| visual | `type: "htmlContent<GUID>"` (the HTML Content visual, any version) | `objects.compatibility.legacyRendering` true, and the visual in report.json `publicCustomVisuals` (pbikit/htmlcontent.py, from the visual's capabilities.json; not Desktop-tested yet). Under 43px tall: a build and validate warning. A custom visual: ladder step 4, uncertified until checked (docs/it-security.md) |
 | visual | `selection: {field, values}` | slicer default selection (`objects.general.filter`) |
 | visual | `referenceLines: [{axis: value, value2 or category; value: number or [Measure]; label, color, style, width, dataLabel}]` | `y1` / `y2` / `xAxisReferenceLine`; on a horizontal bar chart the value axis is still y1 (`x` there is an error) |
 | visual | `columnWidths: {field: px}` (tables, matrices) | `columnWidth` on each column's metadata selector |
@@ -160,6 +162,9 @@ Schema checks against each file's `$schema`, plus the kit rules:
   colours, not `%23` (its output keeps a raw `%`, so `%23` draws nothing in Desktop, v0.4.1);
 - visuals stay inside the page;
 - filter values on numeric columns are numbers, not text (`'2024'` never matches);
+- lessons promoted to checks (warnings, `lesson_checks`): a button slicer under 40px without padding Custom 0 top and
+  bottom (S-01), a dropdown slicer with a header under 76px (S-03), a selector-less `dataPoint.fill` on a chart with
+  more than one series (CH-02); an HTML Content visual under 43px;
 - a size property holds a number, not text (`fontSize 'kpi'` is ignored by Desktop); button text off `{id: default}` is a warning;
 - every bound field exists in the model's TMDL or in `reportExtensions.json`; an extension measure references no other
   extension measure (visuals using such a chain failed in Desktop, v0.4);

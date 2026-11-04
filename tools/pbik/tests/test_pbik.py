@@ -1741,6 +1741,78 @@ class PbikTests(unittest.TestCase):
         self.assertIn("P1-V63: columnWidths fit needs", r.stdout)
         self.assertIn("P1-V64: columnWidths names fields that aren't bound", r.stdout)
 
+    def test_53_visual_measure_filters(self):
+        """A visual filter on a measure (field, op, value) is an Advanced filter with one Comparison; on a page it
+        stops the build."""
+        def edit(lay):
+            lay["visuals"].append({"id": "P1-V65", "name": "mf", "page": "P1", "type": "tableEx", "x": 32, "y": 700,
+                                   "w": 600, "h": 300, "bindings": {"Values": ["Date[Year]", "[Revenue]"]},
+                                   "filters": [{"field": "[Revenue]", "op": ">", "value": 0},
+                                               {"field": "[Units Sold]", "op": "<=", "value": 1.5}]})
+        work, rep, lf = self._item5("mf53", edit)
+        pbik("build", rep, lf)
+        fs = visual(rep, "P1-V65")["filterConfig"]["filters"]
+        self.assertEqual([f["type"] for f in fs], ["Advanced", "Advanced"])
+        cmps = [f["filter"]["Where"][0]["Condition"]["Comparison"] for f in fs]
+        self.assertEqual([c["ComparisonKind"] for c in cmps], [1, 4])
+        self.assertEqual([c["Right"]["Literal"]["Value"] for c in cmps], ["0D", "1.5D"])
+        self.assertEqual(cmps[0]["Left"]["Measure"]["Property"], "Revenue")
+        self.assertEqual(fs[0]["field"]["Measure"]["Property"], "Revenue")
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+
+        def bad(lay):
+            lay["pages"]["P1"]["filters"] = [{"field": "[Revenue]", "op": ">", "value": 0}]
+            lay["visuals"].append({"id": "P1-V66", "name": "mf-noop", "page": "P1", "type": "tableEx", "x": 32,
+                                   "y": 700, "w": 600, "h": 300, "bindings": {"Values": ["Date[Year]"]},
+                                   "filters": [{"field": "[Revenue]", "value": 0}]})
+        work, rep, lf = self._item5("mf53b", bad)
+        r = pbik("build", rep, lf, ok=(1,))
+        self.assertIn("[Revenue] is a measure: Power BI filters on a measure only at visual level", r.stdout)
+        self.assertIn("measure filter [Revenue] needs `op`", r.stdout)
+
+    def test_54_html_content_legacy_rendering_and_height(self):
+        """Any htmlContent<GUID> type gets compatibility.legacyRendering true; under 43px build and validate warn."""
+        hc = "htmlContent443BE3AD55E043BF878BED274D3A6855"
+
+        def edit(lay):
+            lay["visuals"].append({"id": "P1-V67", "name": "html", "page": "P1", "type": hc, "x": 32, "y": 700,
+                                   "w": 600, "h": 40, "bindings": {"content": ["[Revenue]"]},
+                                   "build": {"method": "custom-visual", "step": 4}})
+        work, rep, lf = self._item5("hc54", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("P1-V67: HTML Content visual is 40px tall, under 43px", r.stdout)
+        comp = visual(rep, "P1-V67")["visual"]["objects"]["compatibility"][0]["properties"]
+        self.assertEqual(comp["legacyRendering"]["expr"]["Literal"]["Value"], "true")
+        rj = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        self.assertIn(hc, rj["publicCustomVisuals"])
+        v = pbik("validate", rep, ok=(0, 1))
+        self.assertIn("HTML Content visual is 40px tall", v.stdout)
+        from pbikit import htmlcontent as HC
+        self.assertTrue(HC.is_html_content(hc))
+        self.assertFalse(HC.is_html_content("htmlContent"))
+        self.assertIsNone(HC.height_issue(43))
+
+    def test_55_lessons_promoted_to_checks(self):
+        """Lessons S-01, S-03 and CH-02 as validate warnings (pbikit/validate.py lesson_checks)."""
+        from pbikit.validate import lesson_checks
+        L = lambda v: {"expr": {"Literal": {"Value": v}}}      # noqa: E731
+        btn = {"visual": {"visualType": "advancedSlicerVisual", "objects": {}}}
+        self.assertIn("lesson S-01", lesson_checks(btn, 36)[0])
+        btn["visual"]["objects"]["padding"] = [{"properties": {"paddingSelection": L("'Custom'"), "topMargin": L("0L"),
+                                                               "bottomMargin": L("0L")}, "selector": {"id": "default"}}]
+        self.assertEqual(lesson_checks(btn, 36), [])
+        self.assertEqual(lesson_checks({"visual": {"visualType": "advancedSlicerVisual"}}, 52), [])
+        dd = {"visual": {"visualType": "slicer", "objects": {"data": [{"properties": {"mode": L("'Dropdown'")}}]}}}
+        self.assertIn("lesson S-03", lesson_checks(dd, 60)[0])
+        self.assertEqual(lesson_checks(dd, 76), [])
+        dd["visual"]["objects"]["header"] = [{"properties": {"show": L("false")}}]
+        self.assertEqual(lesson_checks(dd, 60), [], "no header: fine")
+        ch = {"visual": {"visualType": "lineChart", "query": {"queryState": {"Y": {"projections": [{}, {}]}}},
+                         "objects": {"dataPoint": [{"properties": {"fill": {}}}]}}}
+        self.assertIn("lesson CH-02", lesson_checks(ch, 300)[0])
+        ch["visual"]["objects"]["dataPoint"][0]["selector"] = {"metadata": "_Measures.Revenue"}
+        self.assertEqual(lesson_checks(ch, 300), [])
+
     # ---------------------------------------------------------------- model check
     def test_40_model_check(self):
         r = pbik("model", "check", self.model, ok=(1,))

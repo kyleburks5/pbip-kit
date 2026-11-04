@@ -1,7 +1,9 @@
 """High-fidelity wireframe (the kit default): design/wireframes/wireframe.html from layout.json, tokens and the theme.
 
     python design/scripts/gen_wireframe_hf.py                          numbers from design/wireframes/wireframe-data.json
-    python design/scripts/gen_wireframe_hf.py --data none              no numbers: sample shapes, marked "no data"
+    python design/scripts/gen_wireframe_hf.py --data none              no numbers: sample shapes and a red "No data –
+                                                                       placeholder values" banner (/plan: only for a
+                                                                       live connection or PHI)
     python design/scripts/gen_wireframe_hf.py --layout L --tokens T --theme TH --out OUT
 
 Generic for any layout and design. Every visual is drawn from:
@@ -25,6 +27,10 @@ Image visuals, page-background visuals (wallpapers), a page's `background.image`
 `background.image` are drawn from their files (`resource` / `image`, or the registered ItemName found in design/images,
 design/assets or the report's RegisteredResources), embedded once each; a missing file is a placeholder naming it.
 Cards draw no value when `value.show` is off (image cards) and use `value.labelPrecision` for decimals.
+props: a value on Desktop's `{"id": "default"}` selector is the visual-wide value, as with no selector; colours saved
+as theme colours (ThemeDataColor ColorId / Percent: 0 background, 1 foreground, 2 onwards dataColors) resolve to the
+theme's colours. HTML Content (any `htmlContent<GUID>` type, tagged "HTML Content"): with data, the measure's HTML in a
+sandboxed frame (no scripts, no network: a CSP that loads nothing but data: images); without, a labelled box.
 Drawn as Desktop draws them (the Rep 10 limits W1-W9, test_wireframe.py DesktopMatchTests): a matrix with a field on
 Columns as a grid with its cell colours, line charts over negative values (ranks) with their label measures at the
 ends, image cards and table images from the SVG their measure returned (wireframe_data.py), new cards with their
@@ -61,6 +67,7 @@ VEGA_CDN = ["https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js",
             "https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"]
 SLICER_MODES = {"list": "list", "basic": "list", "dropdown": "dropdown", "between": "between", "before": "between",
                 "after": "between"}
+HTML_CONTENT_RE = re.compile(r"htmlContent[0-9A-Fa-f]{32}")       # the HTML Content visual, any version GUID
 METHOD_TAG = {"svg-measure": "SVG in {}", "svg": "SVG in {}", "html-measure": "HTML Content in {}",
               "html": "HTML Content in {}", "custom-visual": "Custom visual", "deneb": "Deneb"}
 
@@ -89,6 +96,9 @@ class Resolver:
             if "fx" in v or "expr" in v:
                 return default                           # from a measure: not known on disk
             if "raw" in v:
+                th = plain(v)
+                if isinstance(th, dict) and "theme" in th:
+                    return self.colour(th, default)
                 m = re.search(r"#[0-9A-Fa-f]{6}", json.dumps(v["raw"]))
                 return m.group(0) if m else default
             return default
@@ -162,12 +172,24 @@ def shade(hexc, pct):
     return "#" + "".join(f"{round(c + (t - c) * p):02X}" for c in (r, g, b))
 
 
+def theme_ref(r):
+    """{"theme": n, "percent": p} for a colour Desktop saved as a theme colour
+    ({"expr": {"ThemeDataColor": {"ColorId": n, "Percent": p}}}), or None."""
+    td = r.get("expr", {}).get("ThemeDataColor") if isinstance(r, dict) and isinstance(r.get("expr"), dict) else None
+    if isinstance(td, dict) and isinstance(td.get("ColorId"), (int, float)):
+        return {"theme": int(td["ColorId"]), "percent": float(td.get("Percent") or 0)}
+    return None
+
+
 def plain(x):
-    """A props value as plain Python: {"raw": <PBIR literal>} -> 'Dropdown' / True / 10.0 / '#hex'; {"int": n} -> n."""
+    """A props value as plain Python: {"raw": <PBIR literal>} -> 'Dropdown' / True / 10.0 / '#hex'; a theme colour
+    (ThemeDataColor ColorId / Percent) -> {"theme": n, "percent": p}; {"int": n} -> n."""
     if isinstance(x, dict) and "raw" in x:
         r = x["raw"]
         if isinstance(r, dict) and "solid" in r:
             r = r["solid"].get("color", {})
+        if theme_ref(r):
+            return theme_ref(r)
         lit = r.get("expr", {}).get("Literal", {}).get("Value") if isinstance(r, dict) else None
         if lit is None:
             return x
@@ -182,13 +204,33 @@ def plain(x):
     return x
 
 
+DEFAULT_SELS = ("", "default", "none")
+
+
+def visual_wide(sel):
+    """True for the selectors that mean the whole visual: none, 'default', 'none', and Desktop's {"id": "default"}."""
+    if sel in DEFAULT_SELS:
+        return True
+    try:
+        d = json.loads(sel)
+    except ValueError:
+        return False
+    return d == {"id": "default"}
+
+
 def prop(v, key, *sels):
-    """A props value for object.property under any of the selectors ('' = none, 'default', '{json}', ...)."""
+    """A props value for object.property under any of the selectors ('' = none, 'default', '{json}', ...); without
+    selectors, the visual-wide value (no selector, 'default', or Desktop's {"id": "default"})."""
     pr = v.get("props") or {}
-    for sel in sels or ("", "default", "none"):
+    for sel in sels or DEFAULT_SELS:
         k = key if sel == "" else f"{key}@{sel}"
         if k in pr:
             return plain(pr[k])
+    if not sels or any(s in DEFAULT_SELS for s in sels):
+        for k, val in pr.items():
+            base, at, sel = k.partition("@")
+            if base == key and at and visual_wide(sel):
+                return plain(val)
     return None
 
 
@@ -422,14 +464,18 @@ def spec_for(R, v, layout, member_of):
         s["sort"] = {"field": lab, "desc": str(srt.get("direction", "Descending")).lower().startswith("desc")}
     method = (v.get("build") or {}).get("method", "native")
     base = TAGS.get(t, t)
+    if HTML_CONTENT_RE.fullmatch(t):
+        base = "HTML Content"
+        s["render"] = "htmlContent"
     if t == "slicer":
         mode = SLICER_MODES.get(str(v.get("slicerMode") or prop(v, "data.mode") or
                                     R.theme_style("slicer", "data").get("mode") or "list").lower(), "list")
         base = {"list": "Slicer (list)", "dropdown": "Slicer (dropdown)", "between": "Slicer (between)"}[mode]
         s["mode"] = mode
-    s["tag"] = METHOD_TAG[method].format(base) if method in METHOD_TAG else base
-    s["method"] = method
-    s["known"] = t in TAGS
+    s["tag"] = base if s.get("render") == "htmlContent" else (METHOD_TAG[method].format(base) if method in METHOD_TAG
+                                                             else base)
+    s["method"] = "html" if s.get("render") == "htmlContent" else method
+    s["known"] = t in TAGS or s.get("render") == "htmlContent"
     s["pattern"] = v.get("pattern") if v.get("pattern") in PATTERNS else None
     if t == "deneb":
         s["deneb"] = deneb_spec(v, layout)
@@ -754,7 +800,8 @@ html, body {{ margin: 0; background: #2b3138; font-family: '{fam}', 'Segoe UI', 
 body.notag .ptn {{ display: none; }}
 .vlnote {{ position: absolute; left: 4px; bottom: 3px; font-size: 10px; color: #8a5b00; }}
 body.nobadge .badge, body.notag .tag, body.notag .nodata, body.notag .hiddenrows, body.notag .vlnote {{ display: none; }}
-body.shot #bar {{ display: none; }}
+body.shot #bar, body.shot #nodata-banner {{ display: none; }}
+#nodata-banner {{ position: sticky; top: 0; z-index: 49; background: #C62828; color: #fff; font-weight: 600; font-size: 14px; padding: 8px 16px; text-align: center; }}
 body.shot #stage {{ padding: 0; }}
 .nodata {{ position: absolute; right: 4px; bottom: 3px; font-size: 10px; color: #8a96a3; }}
 .hiddenrows {{ position: absolute; right: 4px; bottom: 3px; z-index: 40; font-size: 10px; color: #6b7682; background: rgba(255,255,255,.85); padding: 1px 4px; border-radius: 4px; }}
@@ -767,6 +814,7 @@ table.grid th:first-child, table.grid td:first-child, table.grid .l {{ text-alig
 </style></head>
 <body>
 <div id="bar"><span id="tabs"></span><button id="labels" class="on" type="button" aria-pressed="true" title="Show or hide every visual ID badge, visual-type tag and wireframe note">Labels</button><span class="hint">B ID badges · T visual tags · 1–9 pages · {html.escape("aggregates only, groups under 5 hidden" if have else "no data: sample shapes")}</span></div>
+{"" if have else '<div id="nodata-banner" role="alert">No data – placeholder values</div>'}
 <div id="stage">{static}</div>
 {"".join(f'<script src="{u}"></script>' for u in VEGA_CDN) if vega == "cdn" else ""}
 <script type="application/json" id="spec">{js({"pages": pages, "visuals": specs, "images": R.images.uris, "dataColors": R.data_colors, "vega": vega, "tokens": {"colors": R.C, "font": tokens.get("font", {})}})}</script>
@@ -977,6 +1025,23 @@ R.cardVisual = (s, el, w, h) => {
   el.dataset.main = c.value && !d.sample ? shown.join(' | ') : '';
 };
 R.card = R.cardVisual;
+// HTML Content (any htmlContent<GUID> type): the measure's HTML in a sandboxed frame (no scripts, no network)
+const HTML_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:";
+R.htmlContent = (s, el) => {
+  const d = D[s.id], nG = d ? d.groups.length : 0;
+  const parts = d ? d.rows.map(r => r.slice(nG).filter(x => typeof x === 'string').join('')).filter(Boolean) : [];
+  if (!parts.length) {
+    el.insertAdjacentHTML('beforeend', `<div class="placeholder"><div><b>HTML Content</b><br>${esc(s.fields.map(f => f.label).join(', '))}<br><small>${d ? 'the measure returned no HTML' : 'no data: the HTML shows here with data'}</small></div></div>`);
+    return;
+  }
+  const f = document.createElement('iframe');
+  f.setAttribute('sandbox', '');                    // no scripts, forms, popups or same-origin access
+  f.setAttribute('referrerpolicy', 'no-referrer');
+  f.title = 'HTML Content ' + s.id;
+  f.srcdoc = `<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${HTML_CSP}"><style>body{margin:0;font-family:'${FONT}',sans-serif;color:${txt}}</style>` + parts.join('');
+  Object.assign(f.style, {border: '0', width: '100%', height: '100%', display: 'block', background: 'transparent'});
+  el.appendChild(f);
+};
 function axisChart(s, el, w, h, horizontal, mode, dIn, secRoom) {
   const d = dIn || dataOf(s, horizontal ? 6 : 8), sr = series(d), cats = sr.cats, ch = s.chart || {};
   const CA = ch.cat || {}, VA = ch.val || {}, TT = ch.totals || {}, LB = ch.labels || {};
@@ -1528,7 +1593,7 @@ function draw(s, el) {
     (s.pattern ? `<span class="ptn">pattern: ${esc(s.pattern)}</span>` : ''));
   {
     const w = Math.max(body.clientWidth, 10), h = Math.max(body.clientHeight, 10);
-    try { (s.type === 'deneb' ? R.deneb : (s.pattern && P[s.pattern]) || R[s.type] || R._unknown)(s, body, w, h); } catch (e) { body.insertAdjacentHTML('beforeend', `<div class="placeholder">render error: ${esc(e.message)}</div>`); console.error(s.id, e); }
+    try { (s.type === 'deneb' ? R.deneb : (s.pattern && P[s.pattern]) || R[s.render || s.type] || R._unknown)(s, body, w, h); } catch (e) { body.insertAdjacentHTML('beforeend', `<div class="placeholder">render error: ${esc(e.message)}</div>`); console.error(s.id, e); }
     const d = D[s.id]; if (!HAVE && !['textbox', 'shape', 'basicShape', 'actionButton', 'pageNavigator', 'bookmarkNavigator', 'group', 'image', 'deneb'].includes(s.type) && s.fields.length) body.insertAdjacentHTML('beforeend', '<span class="nodata">sample shape · no data</span>');
     if (d && d.hidden) body.insertAdjacentHTML('beforeend', `<span class="hiddenrows">${d.hidden} group(s) under the minimum hidden</span>`);
   }
