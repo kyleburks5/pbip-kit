@@ -19,6 +19,8 @@ from . import deneb as DN
 from . import fields as F
 from . import fieldrefs as FR
 from . import htmlcontent as HC
+from . import deprecations as DEP
+from . import schemaprops as SP
 from . import versions
 from .objects import (b, chrome_off, colour_expr, drop_shadow, ex, i, load, n, native_ref, navigator_states, qref,
                       ref_labels, s, save, shape_objects, solid, solid_ex, theme_colour)
@@ -62,6 +64,7 @@ class Ctx:
         self.report, self.layout, self.tokens = report, layout, tokens or {}
         self.res = F.Resolver(report, layout.get("measureTable"))
         self.owned_new = {}        # vid -> [[where, key, selector, prop]]
+        self.strict = False        # --strict: a property outside Microsoft's schema is an error, not a warning
 
     # tokens
     def colour(self, v):
@@ -876,6 +879,140 @@ def page_background(ctx, spec):
     return [{"properties": {"color": solid(ctx.colour(colour)), "transparency": n(tr)}}]
 
 
+PANE_CARDS = {"applied": "Applied", "available": "Available"}
+
+
+def pane_value(ctx, prop, v):
+    """A filter pane / filter card value: fonts as Desktop's quoted text, the rest as for `props`."""
+    if prop == "fontFamily" and isinstance(v, str):
+        return s(ctx.font(v))
+    return prop_value(ctx, prop, v)
+
+
+def apply_page_pane(ctx, key, spec, d, page_url):
+    """Page `filterPane` (page objects.outspacePane, no selector) and `filterCards` (objects.filterCard on selector
+    {id: Applied} / {id: Available}, the `$id`s Desktop's base theme uses). Schema-checked; not Desktop-tested
+    (roadmap batch 1, gap 1)."""
+    owner = f"page:{key}"
+    for prop, val in (spec.get("filterPane") or {}).items():
+        schema_gate(ctx, owner, *SP.page_prop(page_url, "outspacePane", prop))
+        set_prop(ctx, owner, d, "page", "outspacePane", None, prop, pane_value(ctx, prop, val))
+    for card, props in (spec.get("filterCards") or {}).items():
+        sel_id = PANE_CARDS.get(str(card).lower())
+        if not sel_id:
+            raise BuildError(f"{owner}: filterCards key {card!r} must be applied or available")
+        for prop, val in (props or {}).items():
+            schema_gate(ctx, owner, *SP.page_prop(page_url, "filterCard", prop))
+            set_prop(ctx, owner, d, "page", "filterCard", {"id": sel_id}, prop, pane_value(ctx, prop, val))
+
+
+def schema_gate(ctx, owner, status, msg):
+    """A property Microsoft's schema doesn't have: a warning, or (strict) an error."""
+    if status not in (SP.UNKNOWN, SP.NEAREST):
+        return
+    if ctx.strict and status == SP.UNKNOWN:
+        raise BuildError(f"{msg} (--strict)")
+    ctx.res.warnings.append(f"{owner}: {msg}; Desktop may refuse the file (schema error) or ignore it")
+
+
+def check_props_schema(ctx, vid, v, container_url):
+    """Every `props` key against the cached schema (container objects are listed per object; a visual's objects are
+    open in the schema for every visual type, so those pass here and the settings catalog checks them)."""
+    for key in (v.get("props") or {}):
+        where, k = ("visualContainerObjects", key[len("container:"):]) if key.startswith("container:") else ("objects", key)
+        path = k.partition("@")[0]
+        obj, _, prop = path.partition(".")
+        schema_gate(ctx, vid, *SP.visual_prop(container_url, where, obj, prop or None))
+
+
+REPORT_PANE = {"expanded", "visible"}
+
+
+def apply_report(ctx, rep, layout, old_map):
+    """Top-level `report`: `filterPane: {expanded, visible}` -> report.json objects.outspacePane, `settings: {...}`
+    -> report.json settings (#ExplorationSettings). In place: everything else in report.json stays as Desktop wrote
+    it (filterConfig, section, themes, resources). Each key pbik sets remembers the value Desktop had before, and goes
+    back to it when the key leaves layout.json. Returns (report.json dict or None, owned dict for visual-map.json)."""
+    spec = layout.get("report") or {}
+    old = (old_map.get("reportOwned") or {})
+    if not spec and not old:
+        return None, {}
+    rf = rep.defn / "report.json"
+    d = load(rf)
+    url = d.get("$schema", "")
+    owned = {"settings": {}, "objects": {}}
+    pane = spec.get("filterPane") or {}
+    for prop in pane:
+        if prop not in REPORT_PANE:
+            raise BuildError(f"report.filterPane.{prop}: only expanded and visible are report-level (page "
+                             "`filterPane` formats the pane)")
+    for prop, val in pane.items():
+        if not isinstance(val, bool):
+            raise BuildError(f"report.filterPane.{prop} must be true or false")
+        schema_gate(ctx, "report", *SP.report_prop(url, "outspacePane", prop))
+        entries = d.setdefault("objects", {}).setdefault("outspacePane", [])
+        e = next((x for x in entries if not x.get("selector")), None)
+        if e is None:
+            e = {"properties": {}}
+            entries.append(e)
+        was = (old.get("objects") or {}).get(f"outspacePane.{prop}", {"was": e["properties"].get(prop)})
+        owned["objects"][f"outspacePane.{prop}"] = was
+        e["properties"][prop] = b(val)
+    for key, val in (spec.get("settings") or {}).items():
+        schema_gate(ctx, "report", *SP.report_setting(url, key, val))
+        st = d.setdefault("settings", {})
+        owned["settings"][key] = (old.get("settings") or {}).get(key, {"was": st.get(key)})
+        st[key] = val
+    # keys pbik set before and no longer in layout.json go back to Desktop's value (or away)
+    for path, rec in (old.get("objects") or {}).items():
+        if path in owned["objects"]:
+            continue
+        obj, prop = path.split(".", 1)
+        for e in d.get("objects", {}).get(obj, []):
+            if e.get("selector"):
+                continue
+            if rec.get("was") is None:
+                e.get("properties", {}).pop(prop, None)
+            else:
+                e.setdefault("properties", {})[prop] = rec["was"]
+        lst = d.get("objects", {}).get(obj)
+        if lst is not None:
+            lst[:] = [e for e in lst if e.get("properties") or e.get("selector")]
+            if not lst:
+                del d["objects"][obj]
+        if "objects" in d and not d["objects"]:
+            del d["objects"]
+    for key, rec in (old.get("settings") or {}).items():
+        if key in owned["settings"]:
+            continue
+        if rec.get("was") is None:
+            d.get("settings", {}).pop(key, None)
+        else:
+            d.setdefault("settings", {})[key] = rec["was"]
+    if d.get("settings"):          # Desktop writes settings in the schema's property order (pbik-smoke-013 save)
+        order = SP.property_order(url, ["settings"])
+        if order:
+            rank = {k: n_ for n_, k in enumerate(order)}
+            d["settings"] = dict(sorted(d["settings"].items(), key=lambda kv: rank.get(kv[0], len(rank))))
+    owned = {k: v for k, v in owned.items() if v}
+    if pane.get("visible") is False:
+        ctx.res.warnings.append("report: filterPane.visible false hides the filter pane in view mode: a filter that "
+                                "isn't hidden can't be changed there (pbik validate lists them)")
+    return d, owned
+
+
+def keep_desktop_filters(old, d):
+    """--reset / a Deneb swap rebuilds a visual from its template: keep the filters Desktop saved (automatic filters,
+    and filters made in the pane, any name not pbik_ / tpl_), so a rebuild never loses them (roadmap gap 24)."""
+    mine = [f_ for f_ in (old.get("filterConfig") or {}).get("filters", [])
+            if not f_.get("name", "").startswith(("pbik_", "tpl_"))]
+    if not mine:
+        return
+    fc = d.setdefault("filterConfig", {}).setdefault("filters", [])
+    have = {f_.get("name") for f_ in fc}
+    fc.extend(f_ for f_ in mine if f_.get("name") not in have)
+
+
 def apply_html_content(ctx, vid, v, d):
     """HTML Content visuals render with legacy rendering on (pbikit/htmlcontent.py); warn under 43px tall."""
     if not HC.is_html_content(v["type"]):
@@ -915,7 +1052,7 @@ def register_custom_visual(rep, name):
 
 
 def build(report_path, layout_path, prune=False, reset=False, map_path=None, tokens_path=None, templates=None,
-          quiet=False, no_custom_visuals=False, project=None):
+          quiet=False, no_custom_visuals=False, project=None, strict=False):
     layout_path = pathlib.Path(layout_path).resolve()
     if project is None and (layout_path.parent / "project.json").exists():
         project = layout_path.parent / "project.json"        # design/specs/project.json, next to layout.json
@@ -942,7 +1079,13 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     rep.project = project
     rep.changed.extend(theme_changed)
     ctx = Ctx(rep, layout, tokens)
+    ctx.strict = strict
     errors, log = [], []
+    try:
+        report_doc, report_owned = apply_report(ctx, rep, layout, old_map)
+    except BuildError as e:
+        errors.append(f"report: {e}")
+        report_doc, report_owned = None, {}
 
     pages_spec = layout.get("pages", {})
     visuals = [v for v in layout.get("visuals", []) if (v.get("build") or {}).get("method") != "page-background"]
@@ -992,9 +1135,22 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         canvas = tokens.get("canvas", {})
         d["height"] = spec.get("height", d.get("height", canvas.get("height", 1080)))
         d["width"] = spec.get("width", d.get("width", canvas.get("width", 1920)))
+        dep = DEP.display_issue(d["displayOption"], SP.deprecated(d["$schema"], ["displayOption"]))
+        if dep:
+            ctx.res.warnings.append(f"page {key}: {dep}")
         bg = page_background(ctx, spec)
         if bg:
             d.setdefault("objects", {})["background"] = bg
+        try:
+            apply_page_pane(ctx, key, spec, d, d["$schema"])
+        except BuildError as e:
+            errors.append(f"page {key}: {e}")
+        new_p = {json.dumps(x) for x in ctx.owned_new.get(f"page:{key}", [])}
+        for item in (old_map.get("owned") or {}).get(f"page:{key}", []):
+            if json.dumps(item) not in new_p:
+                release(d, *item)
+        if "objects" in d and not d["objects"]:
+            del d["objects"]
         if spec.get("hidden") is not None:
             if spec["hidden"]:
                 d["visibility"] = "HiddenInViewMode"
@@ -1157,6 +1313,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                 if src.exists() and (reset or swap):
                     old = load(src)
                     d["position"] = old.get("position", {})
+                    keep_desktop_filters(old, d)
             apply_empty_query(v, d, tpl, existing=src.exists() and not reset)
             d["name"] = vnames[vid]
             set_position(d, vid, v, box(vid), parent, box, vnames, ctx)
@@ -1177,6 +1334,11 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_sync(ctx, vid, v, d)
             apply_navigator(ctx, vid, v, d)
             apply_props(ctx, vid, v, d)
+            check_props_schema(ctx, vid, v, d["$schema"])
+            retiring = DEP.visual_issue(v["type"], in_build=True) or DEP.link_issue(
+                d["visual"].get("visualContainerObjects", {}).get("visualLink"))
+            if retiring:
+                ctx.res.warnings.append(f"{vid}: {retiring}")
             apply_deneb(ctx, vid, v, d)
             apply_html_content(ctx, vid, v, d)
             new = {json.dumps(x) for x in ctx.owned_new.get(vid, [])}
@@ -1232,6 +1394,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     rep.write(rep.defn / "pages" / "pages.json", meta)
     for vid, (f, d) in vfiles.items():
         rep.write(f, d)
+    report_json_changed = report_doc is not None and rep.write(rep.defn / "report.json", report_doc)
     if any(v.get("_deneb") is not None for v in visuals):
         register_custom_visual(rep, DN.TYPE)
     for hc in sorted({v["type"] for v in visuals if HC.is_html_content(v["type"])}):
@@ -1269,6 +1432,8 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                "owned": {k: v for k, v in sorted(ctx.owned_new.items())},
                "interactions": new_inter,
                "bookmarks": bm_owned}
+    if report_owned:                    # report.json keys pbik set, with the value Desktop had before
+        out_map["reportOwned"] = report_owned
     if rep.target.pinned:              # files Desktop owns: only their $schema goes down to the target's version
         for f in (rep.defn / "report.json", rep.defn / "version.json"):
             d = load(f) if f.exists() else {}
@@ -1286,6 +1451,10 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             print(line)
         for r in removed:
             print(f"removed {r}")
+        if report_json_changed:
+            print("note: report.json changed (report settings or filter pane). Desktop's reload doesn't apply "
+                  "report.json during the preview (Microsoft Learn, external editing): close Desktop without saving "
+                  "and reopen instead of `pbik desktop reload`")
         if rep.changed:
             print(f"{len(rep.changed)} file(s) written:")
             for c in rep.changed:

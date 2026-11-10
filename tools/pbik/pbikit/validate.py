@@ -30,6 +30,9 @@ import json, pathlib, re
 
 from . import a11y, catalog as CAT, schemas, slicerfit, tmdl, versions
 from . import deneb as DN
+from . import deprecations as DEP
+from . import fields as F
+from . import schemaprops as SP
 from . import htmlcontent as HC
 from .objects import load
 from .report import ID_RE, Report
@@ -285,6 +288,98 @@ def check_deneb(fd, rep, denebs, lay, project=None):
             fd.err(v["id"], f"the fallback must be native or SVG (it is {fb.get('type')}, {method})")
 
 
+def check_schema_props(fd, rep, pages, layout, strict):
+    """Properties outside Microsoft's cached schema (pbikit/schemaprops.py): warnings, errors with --strict. Visuals:
+    the properties pbik owns (visual-map.json next to --layout), else every property of an ID'd visual; a visual's
+    `objects` are open in the schema for every visual type, so only container objects can miss. Pages and report.json:
+    every object property and setting."""
+    say = fd.err if strict else fd.warn
+    owned = None
+    if layout:
+        mf = pathlib.Path(layout).parent / "visual-map.json"
+        if mf.exists():
+            owned = load(mf).get("owned", {})
+    seen = set()
+    for _, pd, pfolder in pages:
+        page_url = pd.get("$schema", "")
+        for obj, entries in (pd.get("objects") or {}).items():
+            for e in entries:
+                for prop in (e.get("properties") or {}) or [None]:
+                    st, msg = SP.page_prop(page_url, obj, prop)
+                    if st in (SP.UNKNOWN, SP.NEAREST):
+                        (say if st == SP.UNKNOWN else fd.warn)(f"page {pd.get('displayName')}", msg)
+        for d, f in rep.visuals(pfolder):
+            m = ID_RE.match(f.parent.name)
+            vis = d.get("visual")
+            if not m or not vis:
+                continue
+            vid = m.group(1)
+            if owned is not None:
+                items = [(w, k, pr) for w, k, _, pr in owned.get(vid, []) if w in ("objects", "visualContainerObjects")]
+            else:
+                items = [(w, k, pr) for w in ("objects", "visualContainerObjects") for k, lst in (vis.get(w) or {}).items()
+                         for e in lst for pr in ((e.get("properties") or {}) or [None])]
+            for where, key, prop in items:
+                st, msg = SP.visual_prop(d.get("$schema", ""), where, key, prop)
+                if st in (SP.UNKNOWN, SP.NEAREST) and (vid, msg) not in seen:
+                    seen.add((vid, msg))
+                    (say if st == SP.UNKNOWN else fd.warn)(vid, msg)
+    rf = rep.defn / "report.json"
+    rd = load(rf) if rf.exists() else {}
+    url = rd.get("$schema", "")
+    for obj, entries in (rd.get("objects") or {}).items():
+        for e in entries:
+            for prop in (e.get("properties") or {}):
+                st, msg = SP.report_prop(url, obj, prop)
+                if st in (SP.UNKNOWN, SP.NEAREST):
+                    (say if st == SP.UNKNOWN else fd.warn)("report.json", msg)
+    for key, val in (rd.get("settings") or {}).items():
+        st, msg = SP.report_setting(url, key, val)
+        if st in (SP.UNKNOWN, SP.NEAREST):
+            (say if st == SP.UNKNOWN else fd.warn)("report.json", msg)
+
+
+def _pane_flag(rd, prop):
+    for e in (rd.get("objects") or {}).get("outspacePane", []):
+        if not e.get("selector"):
+            v = (e.get("properties") or {}).get(prop)
+            if isinstance(v, dict):
+                return v.get("expr", {}).get("Literal", {}).get("Value")
+    return None
+
+
+def check_filter_pane(fd, rep, pages):
+    """report.json outspacePane (roadmap gaps 1 and 24): a hidden pane (visible false) with filters view-mode users
+    could change but can't reach is a warning; a collapsed pane (expanded false) gets a note: automatic filters reach
+    the files only after the pane has been expanded once (Microsoft Learn, PBIR considerations), which is expected,
+    not a loss; the filters pbik writes are explicit and saved either way."""
+    rf = rep.defn / "report.json"
+    rd = load(rf) if rf.exists() else {}
+    visible, expanded = _pane_flag(rd, "visible"), _pane_flag(rd, "expanded")
+    if visible == "false":
+        open_ = []
+        for f_ in (rd.get("filterConfig") or {}).get("filters", []):
+            if not f_.get("isHiddenInViewMode"):
+                open_.append(f"report/{f_.get('name')}")
+        for _, pd, pfolder in pages:
+            for f_ in (pd.get("filterConfig") or {}).get("filters", []):
+                if not f_.get("isHiddenInViewMode") and not F.is_automatic(f_):
+                    open_.append(f"{pd.get('displayName')}/{f_.get('name')}")
+            for d, f in rep.visuals(pfolder):
+                for f_ in (d.get("filterConfig") or {}).get("filters", []):
+                    if not f_.get("isHiddenInViewMode") and not F.is_automatic(f_):
+                        open_.append(f"{f.parent.name}/{f_.get('name')}")
+        if open_:
+            fd.warn("report.json", f"the filter pane is hidden in view mode (outspacePane.visible false), but "
+                                   f"{len(open_)} filter(s) aren't hidden, so view-mode users can't see or change "
+                                   f"them: {', '.join(open_[:5])}{' ...' if len(open_) > 5 else ''}. Set `hidden: "
+                                   "true` on them, or show the pane")
+    if expanded == "false":
+        print("note    filter pane collapsed by default: Desktop saves automatic filters only after the pane has been "
+              "opened once, so they may never reach the files (expected). pbik's own filters are written explicitly; "
+              "`pbik roundtrip` labels added automatic filters as pane-dependent")
+
+
 def check_target(fd, rep, files, rel):
     t = rep.target
     if not t.pinned:
@@ -346,6 +441,9 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     denebs = []                   # (where, visual.json) for Deneb visuals
     for name, pd, pfolder in pages:
         pw, ph = pd.get("width", 1280), pd.get("height", 720)
+        dep = DEP.display_issue(pd.get("displayOption"), SP.deprecated(pd.get("$schema", ""), ["displayOption"]))
+        if dep:
+            fd.warn(f"page {pd.get('displayName')}", dep)
         for d, f in rep.visuals(pfolder):
             folder = f.parent.name
             where = f"{pd.get('displayName')}/{folder}"
@@ -377,6 +475,10 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
                 fd.warn(where, HC.height_issue(h))
             for w_ in lesson_checks(d, h):
                 fd.warn(where, w_)
+            retiring = DEP.visual_issue(d.get("visual", {}).get("visualType")) or DEP.link_issue(
+                d.get("visual", {}).get("visualContainerObjects", {}).get("visualLink"))
+            if retiring:
+                fd.warn(where, retiring)
             if d.get("visual", {}).get("visualType") == "actionButton":
                 for e in d["visual"].get("objects", {}).get("text", []):
                     extra = [p for p in e.get("properties", {}) if p != "show"]
@@ -480,6 +582,10 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
 
     # ---- Deneb visuals: a valid Vega-Lite spec over the dataset, registered in report.json, a fallback in layout.json
     check_deneb(fd, rep, denebs, load(layout) if layout else None, project)
+
+    # ---- Microsoft's schema, property by property (warnings; errors with --strict), and the filter pane
+    check_schema_props(fd, rep, pages, layout, strict_schema)
+    check_filter_pane(fd, rep, pages)
 
     # ---- settings catalog
     if use_catalog:

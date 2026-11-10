@@ -87,6 +87,15 @@ class Resolver:
 
 
 # ---------------------------------------------------------------- literals
+def is_automatic(f):
+    """An automatic filter (the filter card Power BI makes for each field a visual uses): `howCreated: Auto` in
+    Microsoft's schema, but Desktop 2.159.883.0 saved them with no `howCreated` and no condition, only name, field and
+    type (pbik-smoke-013 save, 2026-11-10). A filter with a condition, or made another way, isn't one."""
+    if not isinstance(f, dict) or "field" not in f:
+        return False
+    return f.get("howCreated") == "Auto" or ("howCreated" not in f and "filter" not in f)
+
+
 def typed_literal(value, data_type):
     """A filter value written the way the column's type needs it (a number as text never matches)."""
     if value is None:

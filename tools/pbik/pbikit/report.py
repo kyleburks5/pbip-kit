@@ -52,7 +52,9 @@ class Report:
         if isinstance(d, dict) and d.get("$schema"):
             d["$schema"] = versions.capped_url(d["$schema"], self.target)
         if save(f, d):
-            self.changed.append(str(pathlib.Path(f).relative_to(self.path.parent)).replace("\\", "/"))
+            rel = str(pathlib.Path(f).relative_to(self.path.parent)).replace("\\", "/")
+            if rel not in self.changed:
+                self.changed.append(rel)
             return True
         return False
 

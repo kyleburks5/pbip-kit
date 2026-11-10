@@ -36,6 +36,8 @@ def main(argv=None):
                    help="build each Deneb visual's native or SVG `fallback` instead (same ID and folder; "
                         "project.json customVisuals false does the same)")
     b.add_argument("--project", help="project.json (default: next to layout.json): targetDesktop caps $schema versions")
+    b.add_argument("--strict", action="store_true",
+                   help="a property, setting or value outside Microsoft's cached schema is an error (default: warning)")
 
     m = sub.add_parser("measure", help="report extension measures").add_subparsers(dest="sub", required=True)
     me = m.add_parser("ext", help="reportExtensions.json measures").add_subparsers(dest="op", required=True)
@@ -73,6 +75,8 @@ def main(argv=None):
     v.add_argument("--no-catalog", action="store_true", help="skip the settings catalog check")
     v.add_argument("--no-a11y", action="store_true", help="skip the accessibility checks")
     v.add_argument("--project", help="project.json (default: <project>/design/specs/project.json): target and catalog")
+    v.add_argument("--strict", action="store_true",
+                   help="properties pbik wrote that aren't in Microsoft's cached schema are errors (default: warnings)")
 
     ca = sub.add_parser("catalog", help="settings Desktop saved").add_subparsers(dest="sub", required=True)
     cr = ca.add_parser("refresh", help="scan Desktop-saved files and merge them into the catalog")
@@ -150,7 +154,7 @@ def main(argv=None):
         from .build import build
         build(args.report, args.layout, prune=args.prune, reset=args.reset, map_path=args.map,
               tokens_path=args.tokens, templates=args.templates, no_custom_visuals=args.no_custom_visuals,
-              project=args.project)
+              project=args.project, strict=args.strict)
     elif c == "measure":
         from . import extensions as X
         if args.op == "add":
@@ -170,7 +174,7 @@ def main(argv=None):
         from .validate import validate
         return 1 if validate(args.report, args.layout, port=args.port, catalog=args.catalog,
                              use_catalog=not args.no_catalog, use_a11y=not args.no_a11y,
-                             project=args.project).errors else 0
+                             project=args.project, strict_schema=args.strict).errors else 0
     elif c == "catalog":
         from . import catalog as CAT
         if args.sub == "refresh":

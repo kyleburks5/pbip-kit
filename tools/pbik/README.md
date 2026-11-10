@@ -1,4 +1,4 @@
-# pbik 0.12.0
+# pbik 0.13.0
 
 pbip-kit's own command line tool for PBIR reports and TMDL models. Python standard library only; `jsonschema` is
 optional (schema checks).
@@ -55,14 +55,27 @@ pbik build "Sales.Report" design\specs\layout.json --reset     rem rebuild every
 pbik build "Sales.Report" design\specs\layout.json --no-custom-visuals   rem each Deneb visual's fallback instead
 ```
 
-Options: `--map`, `--tokens` (default `design/tokens.json`), `--templates` (default `design/templates`).
+Options: `--map`, `--tokens` (default `design/tokens.json`), `--templates` (default `design/templates`), `--strict`
+(a property, setting or value outside Microsoft's cached schema stops the build: nothing is written; without it, a
+warning).
+
+Every `props` key, `container:` prop, page `filterPane` / `filterCards` property and `report` key is checked against
+the cached Microsoft schema (`pbikit/schemaprops.py`, standard library). Microsoft's schema lists container, page and
+report objects property by property, but leaves a visual's `objects` open for every visual type (any object, any
+property): those pass here, and the settings catalog in `pbik validate` is what checks them per visual type. A schema
+that isn't cached is skipped (`pbik schemas fetch`). The build also warns on a retiring visual (Map, Filled map), a Q&A
+button and a deprecated page `displayOption` (as validate, below); the Q&A visual is warned by validate only.
+
+`--reset` (and a Deneb / fallback swap) keeps the filters Desktop saved on the visual (automatic filters, and filters
+made in the pane: any name not `pbik_` / `tpl_`), so a rebuild never loses them.
 
 When tokens.json has `theme.recolourTemplates` (gen_tokens.py, `/theme`, sets it), a visual created from a template
 has the template's literal colours mapped to the tokens by role: design/templates/palette.json lists the colours the
 templates were drawn in and the token name each follows as text, line, shadow or fill (pbikit/recolour.py). The build
 log lists them. Visuals already built keep theirs until `--reset` (design/known-gaps.md).
 
-The layout keys are below; `tests/sample/layout.json` uses all of them. Colours are hex values or `tokens.colors`
+The layout keys are below; `tests/sample/layout.json` uses all of them except the 0.13 filter pane and report keys
+(`report`, page `filterPane` / `filterCards`), which tests 110-118 add to copies. Colours are hex values or `tokens.colors`
 names; font sizes are points or `tokens.fontPt` names; paddings and radii can name `tokens.container` values.
 Fields use the layout notation: `[Measure]`, `Table[Column]`, `'Table name'[Column]`, `Sum(Table[Column])`, checked
 against the model's TMDL and `reportExtensions.json`.
@@ -70,9 +83,13 @@ against the model's TMDL and `reportExtensions.json`.
 | Where | Key | Writes |
 | --- | --- | --- |
 | top | `theme: "design/themes/pbip-polish.json"` | registers and applies the theme first (as `pbik theme apply`; path from the project root) |
+| top | `report: {filterPane: {expanded, visible}, settings: {<setting>: value}}` | report.json, in place (filterConfig, themes, resources and Desktop's other settings stay): `objects.outspacePane` `expanded` (false = the pane opens collapsed) and `visible` (false = hidden in view mode), as Desktop saved `expanded` in Reps 1-7; `settings` (written in the schema's property order, as Desktop
+saves them) = Microsoft's #ExplorationSettings (`exportDataMode`, `hideVisualContainerHeader`, `useEnhancedTooltips`, `pagesPosition`, `locale`, ...), each checked against the cached report schema (names and values). Each key remembers the value Desktop had and gets it back when it leaves layout.json (visual-map.json `reportOwned`). Desktop's reload doesn't apply report.json during the preview (Learn, external editing): close without saving and reopen. Pane state and settings other than `expanded` not yet Desktop-tested (roadmap batch 1) |
 | page | `displayName`, `width`, `height`, `displayOption`, `hidden` | page.json; new pages get a stable 20-hex name |
 | page | `active: true` (one page) | `pages.json` `activePageName`: the page the report opens on (default: the first page) |
 | page | `background` (colour, or `{color, transparency}`) | `objects.background` |
+| page | `filterPane: {backgroundColor, transparency, foregroundColor, titleSize, searchTextSize, headerSize, fontFamily, border, borderColor, checkboxAndApplyColor, inputBoxColor, width}` | the filter pane's look on this page: `objects.outspacePane`, no selector (page schema #OutspacePane); colours and sizes take tokens, `fontFamily` takes `regular` / `semibold` / a family. Not yet Desktop-tested |
+| page | `filterCards: {applied: {...}, available: {...}}` (backgroundColor, transparency, border, borderColor, foregroundColor, textSize, fontFamily, inputBoxColor) | `objects.filterCard` on selector `{id: Applied}` / `{id: Available}` (the `$id`s Desktop's base themes use for filter cards). Not yet Desktop-tested |
 | page | `filters` | page-level filters (as for visuals, below) |
 | page | `interactions: [{source, targets: [IDs] or "*", type}]` | `visualInteractions` (`NoFilter`, `DataFilter`, `HighlightFilter`) |
 | page | `bookmarks: [{name, displayName, show: [IDs], hide: [IDs], targets: [IDs], data, display, changesPage}]` | `definition/bookmarks/<id>.bookmark.json` + `bookmarks.json`, as Desktop saved them in Rep 5. Applies only to the listed visuals; `data: false` (default) is display only (filters and slicer selections unchanged); `data: true, display: false` resets the targets' selections; `changesPage: false` (default) doesn't switch page. Ids are stable (page key + name); pbik's bookmarks are owned like its visuals (`--prune` removes dropped ones); Desktop's are never touched |
@@ -186,6 +203,18 @@ Schema checks against each file's `$schema`, plus the kit rules:
   fill on buttons, navigators and button slicers, else the topmost opaque shape or visual underneath, else the page);
   no text below `tokens.a11y.minFontPt` (10pt); tab order in reading order. `--no-a11y` skips them.
 - target Desktop (project.json `targetDesktop`): a file whose `$schema` version is newer than that Desktop supports;
+- Microsoft's schema, property by property (warnings; errors with `--strict`, `pbikit/schemaprops.py`): a container,
+  page or report property, or a report setting or value, not in the cached schema (visuals: the `owned` list next to
+  `--layout`, else every property). A visual's `objects` are open in the schema, so the settings catalog checks those.
+  With `jsonschema` installed the full schema pass still errors on the same file, because the object is closed in the
+  schema and Desktop may not open it;
+- retiring and deprecated (warnings, `pbikit/deprecations.py`, roadmap gap 20): the Q&A visual (validate only; type
+  id `qnaVisual` unconfirmed: Desktop 2.159.883.0 no longer offers the visual) and a button's Q&A action (Q&A goes away
+  in February 2027), Map and Filled map (Bing Maps, scheduled for deprecation; use Azure Maps),
+  and page `displayOption` `DeprecatedDynamic` / `ActualSizeTopLeft` (read from the schema's Deprecated mark);
+- filter pane (report.json `outspacePane`): hidden in view mode (`visible` false) while filters that aren't hidden
+  remain (a warning: users can't reach them); collapsed (`expanded` false) prints a note: automatic filters reach the
+  files only after the pane has been opened once, which is expected, not a loss;
 - settings catalog (warnings): a property, value type or selector pbik wrote (the `owned` list in `visual-map.json`
   next to `--layout`; without it, every property of an ID'd visual) that no Desktop-saved file in
   the catalog (`tools/pbik/catalogs/home.json`, or project.json `catalog`) has. Desktop may ignore or rewrite such a setting: check it in Desktop, or find the form
@@ -194,6 +223,7 @@ Schema checks against each file's `$schema`, plus the kit rules:
 ```bat
 pbik validate "Sales.Report" --layout design\specs\layout.json
 pbik validate "Sales.Report" --layout design\specs\layout.json --port auto
+pbik validate "Sales.Report" --layout design\specs\layout.json --strict     rem schema misses are errors
 ```
 
 ### `roundtrip <Report> [--rev REV] [--to REV] [--before <copy>] [--out <md>]`
@@ -201,6 +231,13 @@ After a report pbik built is saved once in Desktop, lists what Desktop rewrote, 
 fixes: keys Desktop added (write them too), keys it dropped (stop writing them), values it rewrote, the same value in
 another JSON form (`32.0` -> `32`), a new `$schema` version, and key or entry order. Object entries are matched by
 selector. Fixes seen on many visuals are counted at the top. Read-only: it changes nothing.
+
+Filters are matched by name. Differences that follow the filter pane, not pbik, are labelled `pane` and listed apart,
+never as fixes: an automatic filter Desktop saved once the pane had been opened (`howCreated: Auto`, or as
+Desktop 2.159.883.0 saves them: name, field and type only, no `howCreated` and no condition) (Microsoft Learn:
+automatic filters persist only after the pane has been expanded), and the pane's `expanded` / `visible` state as the
+author left it (the layout's `report.filterPane` sets it on the next build). Roundtrip still skips `StaticResources`
+(roadmap gap 24's other half).
 
 pbik's side is the last commit (the kit commits after every build) and Desktop's the working tree; `--rev` / `--to`
 pick two revisions, `--before` a copy of the report as pbik wrote it.
@@ -244,7 +281,8 @@ Schemas come from a local cache. `pbik schemas fetch <Report>` downloads the dec
 reference) from `https://developer.microsoft.com/json-schemas/` into `tools/pbik/schemas/` (git-ignored). Without
 `jsonschema`, or for a schema not in the cache, validate runs the kit rules and warns that schema checks were
 skipped. Microsoft doesn't publish every version Desktop writes (visualContainer 2.14.0 returned 404 on 2026-10-17).
-`--project` also fetches the target Desktop's versions.
+`--project` also fetches the target Desktop's versions. `PBIK_SCHEMA_CACHE=<folder>` uses another cache folder (the
+tests point it at small stand-in schemas, so they need no download).
 
 ### `schemas support [--refresh] | schemas lower <Report> | project show | project record | project check`
 Version-aware builds (`pbikit/versions.py`, docs/UPDATE-ROUTINE.md). A rep's `design/specs/project.json`:
@@ -341,7 +379,7 @@ validate and model check, and break copies on purpose to check each rule fires.
 
 See "pbik can't write it yet" in the kit's `design/known-gaps.md` for the full list with workarounds. In short:
 data bookmarks that save a selection, advanced and report-level filters, drill-through and tooltip pages, mobile
-layout, shape maps with an uploaded map file, report.json settings, per-member formatting (scopeId selectors; a JSON
+layout, shape maps with an uploaded map file, per-member formatting (scopeId selectors; a JSON
 selector in `props` works one member at a time), registered images as a layout key (`pbik_helpers.image_objects`),
 new card small multiples (`pbik_helpers.small_multiples_grid`), and custom, Python, R or Deneb visuals.
 

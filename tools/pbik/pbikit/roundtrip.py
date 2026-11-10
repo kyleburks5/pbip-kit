@@ -14,11 +14,18 @@ Object entries are matched by selector, not by position. Each difference is one 
 - format:   same value, other JSON form (32.0 -> 32)  -> write Desktop's form;
 - schema:   Desktop moved the file to another $schema version;
 - order:    same content, other key or list order     -> usually harmless; listed once per file;
-- newline:  Desktop drops the final newline (every file; listed once in the summary, not per file).
+- newline:  Desktop drops the final newline (every file; listed once in the summary, not per file);
+- pane:     depends on the filter pane, not on pbik: an automatic filter Desktop added (howCreated Auto, or as
+            Desktop saves them: no howCreated and no condition, fields.is_automatic), or the
+            pane's expanded / visible state saved as the author left it. Never a proposal to write: automatic filters
+            reach the files only after the pane has been expanded once (Microsoft Learn, PBIR considerations and
+            limitations; roadmap gap 24), and the layout's `report.filterPane` sets the pane state on the next build.
+Filters are matched by name, so one added filter is one line.
 Proposals that repeat across visuals are counted at the top, so one pbik fix can be read off for all of them.
 """
 import json, pathlib, re, subprocess
 
+from .fields import is_automatic
 from .report import ID_RE, Report, fail
 
 SKIP_DIRS = ("StaticResources",)
@@ -94,6 +101,14 @@ def diff(a, b, path=""):
             if not out and list(ka) != list(kb):
                 out.append(("order", path.lstrip("."), None, None))
             return out
+    if _is_named_filters(path, a, b):
+        ka, kb = {e["name"]: e for e in a}, {e["name"]: e for e in b}
+        for k, e in ka.items():
+            out += diff(e, kb[k], f"{path}@{k}") if k in kb else [("removed", f"{path}@{k}".lstrip("."), e, None)]
+        out += [("added", f"{path}@{k}".lstrip("."), None, e) for k, e in kb.items() if k not in ka]
+        if not out and list(ka) != list(kb):
+            out.append(("order", path.lstrip("."), None, None))
+        return out
     if isinstance(a, list) and isinstance(b, list):
         if len(a) != len(b) or any(x != y for x, y in zip(a, b)):
             if sorted(map(json.dumps, a)) == sorted(map(json.dumps, b)):
@@ -109,6 +124,31 @@ def diff(a, b, path=""):
     if type(a) is not type(b):                                    # 32.0 == 32 in Python, not in the file
         return [("format", path.lstrip("."), a, b)]
     return []
+
+
+def _is_named_filters(path, a, b):
+    if not (path.endswith("filters") and isinstance(a, list) and isinstance(b, list)):
+        return False
+    both = a + b
+    return all(isinstance(e, dict) and "name" in e for e in both) and         len({e["name"] for e in a}) == len(a) and len({e["name"] for e in b}) == len(b)
+
+
+def _auto_only(v):
+    """An automatic filter, a list of them, or a filterConfig holding only automatic filters."""
+    if isinstance(v, dict) and "filters" in v and len(v) == 1:
+        v = v["filters"]
+    if isinstance(v, list):
+        return bool(v) and all(_auto_only(x) for x in v)
+    return is_automatic(v)
+
+
+def pane_dependent(kind, path, a, b):
+    """Differences that follow the filter pane, not pbik (roadmap gap 24)."""
+    if kind == "added" and "filterConfig" in path and _auto_only(b):
+        return True
+    if kind == "removed" and "filterConfig" in path and _auto_only(a):
+        return True
+    return bool(re.search(r"(^|\.)objects\.outspacePane(\.|@|$)", path)) and         bool(re.search(r"expanded|visible", path + json.dumps(a) + json.dumps(b)))
 
 
 SCHEMA_RE = re.compile(r"/definition/([A-Za-z]+)/(\d+\.\d+\.\d+)/")
@@ -145,6 +185,10 @@ def proposal(kind, path, a, b):
         return f"Desktop writes {path} as {_short(b)} (pbik: {_short(a)}): same value, Desktop's form"
     if kind == "order":
         return f"key or entry order differs in {path or 'the file'} (content the same)"
+    if kind == "pane":
+        return (f"{path} follows the filter pane, not pbik ({_short(b if b is not None else a)}): don't write it "
+                "(automatic filters are saved once the pane has been opened; the pane state comes from the layout's "
+                "`report.filterPane`)")
     return f"{kind} {path}"
 
 
@@ -185,7 +229,7 @@ def compare(before, after):
             ma, mb = SCHEMA_RE.search(sa or ""), SCHEMA_RE.search(sb or "")
             ds.append(("schema", "$schema", f"{ma.group(1)} {ma.group(2)}" if ma else sa,
                        f"{mb.group(1)} {mb.group(2)}" if mb else sb))
-        ds += diff(a, b)
+        ds += [("pane", *d[1:]) if pane_dependent(*d) else d for d in diff(a, b)]
         if ds:
             found.setdefault(owner(rel, b), []).extend(ds)
     return found, newline, only
@@ -196,9 +240,12 @@ def report_text(found, newline, only, label):
              "What Desktop rewrote on its first save of files pbik wrote, as proposed pbik fixes. Nothing was changed.",
              ""]
     counts = {}
+    pane = set()
     for who, ds in found.items():
         for d in ds:
-            if d[0] != "order":
+            if d[0] == "pane":
+                pane.add(who)
+            elif d[0] != "order":
                 counts.setdefault(generic(*d), set()).add(who)
     lines.append("## Proposed pbik fixes (by how many visuals or files show them)")
     lines.append("")
@@ -210,6 +257,11 @@ def report_text(found, newline, only, label):
         lines.append(f"- {g}  ({len(ws)}: {', '.join(ws[:8])}{' ...' if len(ws) > 8 else ''})")
     if not counts and not newline:
         lines.append("- none: Desktop kept everything pbik wrote.")
+    if pane:
+        ps = sorted(pane)
+        lines += ["", f"Pane-dependent, not pbik fixes ({len(ps)}: {', '.join(ps[:8])}{' ...' if len(ps) > 8 else ''}): "
+                      "automatic filters Desktop saved after the filter pane was opened, or the pane state as the "
+                      "author left it. Don't write them; the layout's `report.filterPane` sets the pane."]
     lines += ["", "## By visual ID", ""]
     for who in sorted(found, key=lambda w: (not re.match(r"P\d+-V", w), w)):
         lines.append(f"### {who}")

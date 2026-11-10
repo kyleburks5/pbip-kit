@@ -4,9 +4,10 @@
 https://developer.microsoft.com/json-schemas/ into tools/pbik/schemas/ (git-ignored). Validation never goes online:
 a schema missing from the cache is reported as skipped. jsonschema is optional; without it schema checks are skipped.
 """
-import json, pathlib, re, urllib.parse, urllib.request
+import json, os, pathlib, re, urllib.parse, urllib.request
 
-CACHE = pathlib.Path(__file__).resolve().parents[1] / "schemas"
+# PBIK_SCHEMA_CACHE points pbik at another cache folder (the tests use small stand-in schemas there)
+CACHE = pathlib.Path(os.environ.get("PBIK_SCHEMA_CACHE") or pathlib.Path(__file__).resolve().parents[1] / "schemas")
 BASE = "https://developer.microsoft.com/json-schemas/"
 
 

@@ -1,6 +1,7 @@
 # pbik coverage roadmap (pbik 0.12.0, 2026-11-10)
 
-Read-only review: nothing in the kit was changed. Sources used, and only these:
+Read-only review: nothing in the kit was changed. Batch 1 (gaps 1, 20, 24 and schema-checked props; the gap 23 answer) shipped in
+pbik 0.13.0: design/reviews/pbik-roadmap-batch1.md. Sources used, and only these:
 
 - **pbik itself**: `tools/pbik/README.md`, `pbik <command> --help`, the `pbikit/` source, and the kit's
   `design/known-gaps.md` ("pbik can't write it yet"), which records how often each gap came up in Reps 1-10.

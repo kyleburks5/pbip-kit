@@ -1944,6 +1944,301 @@ class PbikTests(unittest.TestCase):
         from pbikit import __version__
         self.assertIn(f"pbik {__version__}", r.stdout)
 
+    # ---------------------------------------------------------------- roadmap batch 1 (gaps 1, 20, 24; schema props)
+    def _batch1(self, name, edit=None):
+        work = self.tmp / name
+        shutil.copytree(self.proj, work)
+        rep = work / self.report.name
+        lf = work / "design" / "specs" / "layout.json"
+        if edit:
+            lay = json.loads(lf.read_text(encoding="utf-8"))
+            edit(lay)
+            lf.write_text(json.dumps(lay, indent=2), encoding="utf-8")
+        return work, rep, lf
+
+    def _relayout(self, lf, edit):
+        lay = json.loads(lf.read_text(encoding="utf-8"))
+        edit(lay)
+        lf.write_text(json.dumps(lay, indent=2), encoding="utf-8")
+
+    def test_110_report_settings_and_filter_pane(self):
+        """Gap 1: layout `report` writes report.json in place; dropping a key restores what Desktop had."""
+        def edit(lay):
+            lay["report"] = {"filterPane": {"expanded": False, "visible": True},
+                             "settings": {"exportDataMode": "None", "hideVisualContainerHeader": True}}
+        work, rep, lf = self._batch1("b110", edit)
+        before = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        r = pbik("build", rep, lf)
+        self.assertIn("report.json changed", r.stdout)
+        d = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        pane = next(e for e in d["objects"]["outspacePane"] if not e.get("selector"))["properties"]
+        self.assertEqual(pane["expanded"], {"expr": {"Literal": {"Value": "false"}}})
+        self.assertEqual(pane["visible"], {"expr": {"Literal": {"Value": "true"}}})
+        self.assertEqual(d["settings"]["exportDataMode"], "None")
+        self.assertIs(d["settings"]["hideVisualContainerHeader"], True)
+        for k in ("themeCollection", "resourcePackages"):          # the rest of report.json stays as it was
+            self.assertEqual(d[k], before[k])
+        self.assertEqual(d["objects"].get("section"), before.get("objects", {}).get("section"))
+        m = json.loads((work / "design" / "specs" / "visual-map.json").read_text(encoding="utf-8"))
+        self.assertEqual(m["reportOwned"]["settings"]["exportDataMode"], {"was": before["settings"]["exportDataMode"]})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self._relayout(lf, lambda lay: lay.pop("report"))
+        pbik("build", rep, lf)
+        d = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(d["settings"], before["settings"])        # Desktop's value back, pbik's own key gone
+        self.assertEqual(d.get("objects"), before.get("objects"))
+        self.assertNotIn("reportOwned", json.loads((work / "design" / "specs" / "visual-map.json").read_text(encoding="utf-8")))
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+
+    def test_111_report_key_errors(self):
+        work, rep, lf = self._batch1("b111", lambda lay: lay.update(report={"filterPane": {"width": 300}}))
+        r = pbik("build", rep, lf, ok=(1,))
+        self.assertIn("only expanded and visible are report-level", r.stdout)
+        self._relayout(lf, lambda lay: lay.update(report={"filterPane": {"expanded": "no"}}))
+        self.assertIn("must be true or false", pbik("build", rep, lf, ok=(1,)).stdout)
+
+    def test_112_page_filter_pane_and_cards(self):
+        def edit(lay):
+            lay["pages"]["P1"]["filterPane"] = {"backgroundColor": "#FFFFFF", "width": 280, "border": True,
+                                                "fontFamily": "regular", "titleSize": "body"}
+            lay["pages"]["P1"]["filterCards"] = {"applied": {"backgroundColor": "#F2F2F2", "border": False},
+                                                 "available": {"foregroundColor": "#222222"}}
+        work, rep, lf = self._batch1("b112", edit)
+        pbik("build", rep, lf)
+        pg = next(json.loads(f.read_text(encoding="utf-8")) for f in rep.glob("definition/pages/*/page.json")
+                  if json.loads(f.read_text(encoding="utf-8"))["displayName"] == "pbik sales")
+        op = pg["objects"]["outspacePane"]
+        self.assertEqual(len(op), 1)
+        self.assertNotIn("selector", op[0])
+        self.assertEqual(op[0]["properties"]["width"], {"expr": {"Literal": {"Value": "280D"}}})
+        self.assertTrue(op[0]["properties"]["fontFamily"]["expr"]["Literal"]["Value"].startswith("'"))
+        self.assertEqual(op[0]["properties"]["titleSize"]["expr"]["Literal"]["Value"][-1], "D")
+        cards = {e["selector"]["id"]: e["properties"] for e in pg["objects"]["filterCard"]}
+        self.assertEqual(set(cards), {"Applied", "Available"})
+        self.assertEqual(cards["Applied"]["border"], {"expr": {"Literal": {"Value": "false"}}})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self._relayout(lf, lambda lay: (lay["pages"]["P1"].pop("filterPane"), lay["pages"]["P1"].pop("filterCards")))
+        pbik("build", rep, lf)
+        pg = next(json.loads(f.read_text(encoding="utf-8")) for f in rep.glob("definition/pages/*/page.json")
+                  if json.loads(f.read_text(encoding="utf-8"))["displayName"] == "pbik sales")
+        self.assertNotIn("outspacePane", pg.get("objects", {}))
+        self.assertNotIn("filterCard", pg.get("objects", {}))
+        self.assertIn("background", pg["objects"])
+        self._relayout(lf, lambda lay: lay["pages"]["P1"].update(filterCards={"pinned": {"border": True}}))
+        self.assertIn("must be applied or available", pbik("build", rep, lf, ok=(1,)).stdout)
+
+    def test_113_reset_keeps_desktop_filters(self):
+        """Gap 24: an automatic filter Desktop saved (after the pane was opened) survives --reset."""
+        work, rep, lf = self._batch1("b113")
+        f = next(rep.glob("definition/pages/*/visuals/P1-V04_*/visual.json"))
+        d = json.loads(f.read_text(encoding="utf-8"))
+        auto = {"name": "a1b2c3d4e5f6a7b8c9d0", "field": {"Column": {"Expression": {"SourceRef": {"Entity": "stores"}},
+                                                                   "Property": "City"}},
+                "type": "Categorical", "howCreated": "Auto"}
+        d.setdefault("filterConfig", {}).setdefault("filters", []).append(auto)
+        f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        pbik("build", rep, lf, "--reset")
+        names = [x["name"] for x in visual(rep, "P1-V04")["filterConfig"]["filters"]]
+        self.assertIn(auto["name"], names)
+        self.assertTrue(any(n_.startswith("pbik_") for n_ in names))        # pbik's Top N filter is still there
+        self.assertEqual(len(names), len(set(names)))
+
+    def _stand_in_schemas(self, root):
+        """Small hand-written schemas shaped like Microsoft's (closed container title, report pane and settings; open
+        visual objects; page displayOption with two values marked Deprecated). Not copies of Microsoft's files."""
+        base = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/"
+        cache = root / "fabric" / "item" / "report" / "definition"
+        entry = lambda ref: {"type": "array", "items": {"type": "object", "properties": {  # noqa: E731
+            "selector": {}, "properties": {"$ref": ref}}}}
+        files = {
+            "visualContainer/2.13.0/schema.json": {"type": "object", "properties": {
+                "visual": {"$ref": base + "visualConfiguration/2.8.0/schema-embedded.json"}}},
+            "visualConfiguration/2.8.0/schema-embedded.json": {"type": "object", "properties": {
+                "objects": {"type": "object", "additionalProperties": {"type": "array"}},
+                "visualContainerObjects": {"type": "object", "properties": {"title": entry("#/definitions/Title")}}},
+                "definitions": {"Title": {"type": "object", "additionalProperties": False, "properties": {
+                    k: {} for k in ("show", "text", "heading", "titleWrap", "fontColor", "background", "alignment",
+                                    "fontSize", "bold", "italic", "underline", "fontFamily")}}}},
+            "page/2.1.0/schema.json": {"type": "object", "properties": {
+                "displayOption": {"type": "string", "anyOf": [
+                    {"const": "DeprecatedDynamic", "description": "Deprecated: Use other display options."},
+                    {"const": "FitToPage"}, {"const": "FitToWidth"}, {"const": "ActualSize"},
+                    {"const": "ActualSizeTopLeft", "description": "Deprecated: Use ActualSize instead."}]},
+                "objects": {"type": "object", "properties": {"outspacePane": entry("#/definitions/Pane"),
+                                                             "filterCard": entry("#/definitions/Card")}}},
+                "definitions": {"Pane": {"type": "object", "additionalProperties": False, "properties": {
+                    k: {} for k in ("backgroundColor", "transparency", "foregroundColor", "titleSize", "searchTextSize",
+                                    "headerSize", "fontFamily", "border", "borderColor", "checkboxAndApplyColor",
+                                    "inputBoxColor", "width")}},
+                    "Card": {"type": "object", "additionalProperties": False, "properties": {
+                        k: {} for k in ("backgroundColor", "transparency", "border", "borderColor", "foregroundColor",
+                                        "textSize", "fontFamily", "inputBoxColor")}}}},
+            "report/3.3.0/schema.json": {"type": "object", "properties": {
+                "objects": {"type": "object", "additionalProperties": False, "properties": {
+                    "outspacePane": entry("#/definitions/Pane"), "section": entry("#/definitions/Section")}},
+                "settings": {"type": "object", "additionalProperties": False, "properties": {
+                    "exportDataMode": {"type": "string", "anyOf": [{"const": "AllowSummarized"},
+                                                                   {"const": "AllowSummarizedAndUnderlying"},
+                                                                   {"const": "None"}]},
+                    **{k: {"type": "boolean"} for k in (
+                        "useStylableVisualContainerHeader", "defaultDrillFilterOtherVisuals", "allowChangeFilterTypes",
+                        "useEnhancedTooltips", "useDefaultAggregateDisplayName", "hideVisualContainerHeader")}}}},
+                "definitions": {"Pane": {"type": "object", "additionalProperties": False,
+                                         "properties": {"expanded": {}, "visible": {}}},
+                                "Section": {"type": "object", "additionalProperties": False,
+                                            "properties": {"verticalAlignment": {}}}}},
+        }
+        for rel, doc in files.items():
+            p = cache / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(doc), encoding="utf-8")
+        return root
+
+    def _pbik_env(self, cache, *args, ok=(0,)):
+        env = dict(os.environ, PBIK_SCHEMA_CACHE=str(cache))
+        r = subprocess.run([sys.executable, str(PBIK), *map(str, args)], capture_output=True, text=True,
+                           encoding="utf-8", env=env)
+        if r.returncode not in ok:
+            raise AssertionError(f"pbik {' '.join(map(str, args))} -> {r.returncode}\n{r.stdout}\n{r.stderr}")
+        return r
+
+    def test_114_schema_props_warn_and_strict(self):
+        """Item b: a property outside Microsoft's schema warns; --strict fails (build writes nothing)."""
+        cache = self._stand_in_schemas(self.tmp / "b114-schemas")
+
+        def edit(lay):
+            v = next(x for x in lay["visuals"] if x["id"] == "P1-V04")
+            v.setdefault("props", {})["container:title.notAProp"] = True
+            v["props"]["dataPoint.anythingGoes"] = True               # visual objects: open for every type
+            lay["report"] = {"settings": {"exportDataMode": "Everything"}}
+        work, rep, lf = self._batch1("b114", edit)
+        before = tree_hash(rep)
+        r = self._pbik_env(cache, "build", rep, lf, "--strict", ok=(1,))
+        self.assertIn("container:title.notAProp is not in Microsoft's visualConfiguration 2.8.0 schema (--strict)", r.stdout)
+        self.assertIn("exportDataMode = 'Everything' is not one of the schema's values", r.stdout)
+        self.assertNotIn("anythingGoes", r.stdout)
+        self.assertEqual(tree_hash(rep), before, "a strict failure writes nothing")
+        r = self._pbik_env(cache, "build", rep, lf)
+        self.assertIn("warning: P1-V04: container:title.notAProp is not in Microsoft's", r.stdout)
+        self.assertIn("warning: report: report setting exportDataMode = 'Everything'", r.stdout)
+        v = self._pbik_env(cache, "validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(0, 1))
+        self.assertIn("warning P1-V04: container:title.notAProp", v.stdout)
+        v = self._pbik_env(cache, "validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", "--strict", ok=(1,))
+        self.assertIn("error   P1-V04: container:title.notAProp", v.stdout)
+        self.assertIn("error   report.json: report setting exportDataMode", v.stdout)
+
+    def test_114b_settings_in_schema_order(self):
+        """Desktop writes report settings in the schema's property order (pbik-smoke-013 save, 2026-11-10)."""
+        cache = self._stand_in_schemas(self.tmp / "b114b-schemas")
+        work, rep, lf = self._batch1("b114b", lambda lay: lay.update(report={"settings": {
+            "hideVisualContainerHeader": True, "exportDataMode": "None"}}))
+        self._pbik_env(cache, "build", rep, lf)
+        keys = list(json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))["settings"])
+        self.assertLess(keys.index("useStylableVisualContainerHeader"), keys.index("useEnhancedTooltips"))
+        self.assertEqual(keys[-1], "hideVisualContainerHeader")     # last in the stand-in schema's order
+        self.assertIn("No changes", self._pbik_env(cache, "build", rep, lf).stdout)
+        from pbikit import fields as F
+        self.assertTrue(F.is_automatic({"name": "x", "field": {}, "type": "Categorical"}))
+        self.assertTrue(F.is_automatic({"name": "x", "field": {}, "type": "Categorical", "howCreated": "Auto"}))
+        self.assertFalse(F.is_automatic({"name": "x", "field": {}, "type": "Categorical", "filter": {}}))
+        self.assertFalse(F.is_automatic({"name": "x", "field": {}, "type": "Categorical", "howCreated": "User"}))
+
+    def test_115_schema_walker(self):
+        from pbikit import schemaprops as SP, schemas as S
+        cache = self._stand_in_schemas(self.tmp / "b115-schemas")
+        base = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/"
+        old = S.CACHE
+        S.CACHE, SP._W = cache, SP.Walker()
+        try:
+            vc, pg, rp = (base + "visualContainer/2.13.0/schema.json", base + "page/2.1.0/schema.json",
+                          base + "report/3.3.0/schema.json")
+            self.assertEqual(SP.visual_prop(vc, "visualContainerObjects", "title", "fontSize")[0], SP.OK)
+            self.assertEqual(SP.visual_prop(vc, "visualContainerObjects", "title", "nope")[0], SP.UNKNOWN)
+            self.assertEqual(SP.visual_prop(vc, "objects", "dataPoint", "fill")[0], SP.OPEN)
+            self.assertEqual(SP.page_prop(pg, "filterCard", "textSize")[0], SP.OK)
+            self.assertEqual(SP.page_prop(pg, "filterCard", "width")[0], SP.UNKNOWN)
+            self.assertEqual(SP.report_prop(rp, "outspacePane", "expanded")[0], SP.OK)
+            self.assertEqual(SP.report_setting(rp, "exportDataMode", "None")[0], SP.OK)
+            self.assertEqual(SP.report_setting(rp, "made up", True)[0], SP.UNKNOWN)
+            self.assertEqual(SP.deprecated(pg, ["displayOption"]), {"DeprecatedDynamic", "ActualSizeTopLeft"})
+            self.assertEqual(SP.visual_prop(base + "notCachedKind/1.0.0/schema.json", "objects", "a", "b")[0],
+                             SP.UNCACHED)
+            self.assertIsNone(SP.deprecated(base + "page/9.9.9/schema.json", ["displayOption"]))
+            vc14 = base + "visualContainer/2.14.0/schema.json"     # Desktop writes it; Microsoft hasn't published it
+            st, msg = SP.visual_prop(vc14, "visualContainerObjects", "title", "nope")
+            self.assertEqual(st, SP.NEAREST)
+            self.assertIn("checked against visualContainer 2.13.0", msg)
+            self.assertEqual(SP.visual_prop(vc14, "visualContainerObjects", "title", "text")[0], SP.OK)
+        finally:
+            S.CACHE, SP._W = old, SP.Walker()
+
+    def test_116_retiring_visuals_and_deprecated_display_option(self):
+        """Gap 20: Q&A and Bing Maps visuals, a Q&A button and deprecated page displayOption values warn."""
+        work, rep, lf = self._batch1("b116", lambda lay: lay["pages"]["P2"].update(displayOption="ActualSizeTopLeft"))
+        r = pbik("build", rep, lf)
+        self.assertIn("displayOption ActualSizeTopLeft is deprecated in Microsoft's page schema: use ActualSize", r.stdout)
+        for vid, vt in (("P1-V04", "map"), ("P1-V05", "filledMap"), ("P2-V03", "qnaVisual")):
+            f = next(rep.glob(f"definition/pages/*/visuals/{vid}_*/visual.json"))
+            d = json.loads(f.read_text(encoding="utf-8"))
+            d["visual"]["visualType"] = vt
+            f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        f = next(rep.glob("definition/pages/*/visuals/P1-V06_*/visual.json"))
+        d = json.loads(f.read_text(encoding="utf-8"))
+        d["visual"].setdefault("visualContainerObjects", {})["visualLink"] = [
+            {"properties": {"show": {"expr": {"Literal": {"Value": "true"}}},
+                            "type": {"expr": {"Literal": {"Value": "'Q&A'"}}}}}]
+        f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        v = pbik("validate", rep, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertIn("the Map visual (Bing Maps) is retiring", v)
+        self.assertIn("the Filled map visual (Bing Maps) is retiring", v)
+        self.assertIn("the Q&A visual is retiring: Q&A goes away in February 2027", v)
+        self.assertIn("button action Q&A is retiring", v)
+        self.assertIn("displayOption ActualSizeTopLeft is deprecated", v)
+        from pbikit import deprecations as DEP
+        self.assertIsNone(DEP.visual_issue("azureMap"))
+        self.assertIsNone(DEP.visual_issue("qnaVisual", in_build=True))      # validate only (type id unconfirmed)
+        self.assertIn("retiring", DEP.visual_issue("filledMap", in_build=True))
+        self.assertIsNone(DEP.display_issue("ActualSize", None))
+        self.assertIn("FitToPage", DEP.display_issue("DeprecatedDynamic", None))
+
+    def test_117_hidden_pane_with_open_filters(self):
+        work, rep, lf = self._batch1("b117", lambda lay: lay.update(report={"filterPane": {"visible": False,
+                                                                                         "expanded": False}}))
+        r = pbik("build", rep, lf)
+        self.assertIn("filterPane.visible false hides the filter pane", r.stdout)
+        v = pbik("validate", rep, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertIn("the filter pane is hidden in view mode", v)
+        self.assertIn("filter pane collapsed by default", v)
+
+    def test_118_roundtrip_labels_pane_dependent_changes(self):
+        """Gap 24: automatic filters and the pane state Desktop saved are labelled pane-dependent, not pbik fixes."""
+        work, rep, lf = self._batch1("b118", lambda lay: lay.update(report={"filterPane": {"expanded": False}}))
+        pbik("build", rep, lf)
+        for args in (["init", "-q"], ["add", "-A"], ["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "build"]):
+            subprocess.run(["git", "-C", str(work), *args], check=True, capture_output=True)
+        f = next(rep.glob("definition/pages/*/visuals/P1-V04_*/visual.json"))
+        d = json.loads(f.read_text(encoding="utf-8"))
+        d["filterConfig"]["filters"].append({"name": "auto0001", "type": "Categorical", "howCreated": "Auto",
+                                             "field": {"Column": {"Expression": {"SourceRef": {"Entity": "stores"}},
+                                                                  "Property": "City"}}})
+        d["filterConfig"]["filters"].append({"name": "c208b5f087d7071caa26", "type": "Advanced",   # as Desktop saved
+                                             "field": {"Measure": {"Expression": {"SourceRef": {"Entity": "_Measures"}},
+                                                                   "Property": "Revenue"}}})          # one (no howCreated)
+        d["filterConfig"]["filters"].append({"name": "user0001", "type": "Categorical", "howCreated": "User"})
+        f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        rf = rep / "definition" / "report.json"
+        rd = json.loads(rf.read_text(encoding="utf-8"))
+        next(e for e in rd["objects"]["outspacePane"] if not e.get("selector"))["properties"]["expanded"] = \
+            {"expr": {"Literal": {"Value": "true"}}}
+        rf.write_text(json.dumps(rd, indent=2), encoding="utf-8")
+        r = pbik("roundtrip", rep).stdout
+        self.assertIn("Pane-dependent, not pbik fixes", r)
+        self.assertIn("- pane: filterConfig.filters@auto0001 follows the filter pane", r)
+        self.assertIn("- pane: filterConfig.filters@c208b5f087d7071caa26 follows the filter pane", r)
+        self.assertIn("follows the filter pane", r.split("### report.json", 1)[1])
+        self.assertIn("added: Desktop adds filterConfig.filters@user0001", r)       # a real addition stays a proposal
+        self.assertNotIn("auto0001  (", r.split("## By visual ID")[0])
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

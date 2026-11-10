@@ -62,6 +62,11 @@ pbik rules (tools/pbik/README.md has every command) and the Desktop and PBIR fac
   `styleHeader: true`; `columnHeaders` per field is ignored. Theme `total.totals: false` didn't hide totals; set it on
   the visual (`props: {"total.totals": false}`).
 - A theme change shows in Desktop after a report reload; there is no need to reopen.
+- report.json (layout `report`: filter pane, report settings) isn't applied by Desktop's reload during the preview
+  (Learn, external editing, 2026-09-29): close without saving and reopen; `pbik build` says so when it changed.
+  Automatic filters reach visual.json only after the filter pane has been opened once, so with a collapsed pane
+  they may never be saved: expected, and `pbik roundtrip` labels them `pane`, not as fixes. Desktop saves them with
+  no `howCreated` and no condition (name, field, type), not `howCreated: Auto` (smoke save, 2026-11-10).
 - Deneb (Patterns page save, 2026-10-24): `visualType` deneb7E15AEF80B9E4D4F8E12924291ECE89A, fields on the
   `dataset` role, the spec as one string in `vega.jsonSpec`, `stateManagement` beside it, and report.json
   `publicCustomVisuals` listing the visual. The saved file has no Deneb version, provider or config: the version shows
