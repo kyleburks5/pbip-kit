@@ -21,6 +21,9 @@ Object entries are matched by selector, not by position. Each difference is one 
             reach the files only after the pane has been expanded once (Microsoft Learn, PBIR considerations and
             limitations; roadmap gap 24), and the layout's `report.filterPane` sets the pane state on the next build.
 Filters are matched by name, so one added filter is one line.
+Registered resources (StaticResources/RegisteredResources: the theme pbik registered, images) are compared too, in
+their own section (roadmap gap 24): a JSON resource (the theme) by key, any other file by content hash, so Desktop
+rewriting the theme or an image shows up.
 Proposals that repeat across visuals are counted at the top, so one pbik fix can be read off for all of them.
 """
 import json, pathlib, re, subprocess
@@ -48,6 +51,52 @@ def side_from_git(rep_path, rev):
     for n in names:
         if n.endswith(".json"):
             out[n[len(rel) + 1:]] = _git(top, "show", f"{rev}:{n}").decode("utf-8")
+    return out
+
+
+def resources_from_git(rep_path, rev):
+    """{relative path: bytes} of StaticResources/RegisteredResources files at a git revision."""
+    top = pathlib.Path(_git(rep_path, "rev-parse", "--show-toplevel").decode().strip())
+    rel = rep_path.resolve().relative_to(top.resolve()).as_posix()
+    names = _git(top, "ls-tree", "-r", "--name-only", rev, "--",
+                 f"{rel}/StaticResources/RegisteredResources").decode("utf-8").splitlines()
+    return {n[len(rel) + 1:]: _git(top, "show", f"{rev}:{n}") for n in names}
+
+
+def resources_from_folder(rep_path):
+    base = pathlib.Path(rep_path)
+    return {f.relative_to(base).as_posix(): f.read_bytes()
+            for f in sorted((base / "StaticResources" / "RegisteredResources").glob("**/*")) if f.is_file()}
+
+
+def compare_resources(before, after):
+    """[line] for registered resources Desktop added, deleted or rewrote (roadmap gap 24)."""
+    import hashlib
+    out = []
+    for rel in sorted(set(before) | set(after)):
+        name = rel.split("/")[-1]
+        if rel not in after:
+            out.append(f"- deleted: Desktop removed {name} (pbik registered it): check report.json resourcePackages")
+        elif rel not in before:
+            out.append(f"- added: Desktop registered {name}")
+        elif before[rel] != after[rel]:
+            if rel.lower().endswith(".json"):
+                try:
+                    a, b = json.loads(before[rel].decode("utf-8-sig")), json.loads(after[rel].decode("utf-8-sig"))
+                except (ValueError, UnicodeDecodeError):
+                    a = b = None
+                if a is not None:
+                    ds = [d for d in diff(a, b) if d[0] != "order"]
+                    if not ds:
+                        out.append(f"- format: {name} rewritten with the same content (key order or whitespace)")
+                    for d in ds[:20]:
+                        out.append(f"- {d[0]}: {name}: {proposal(*d)}")
+                    if len(ds) > 20:
+                        out.append(f"- ... {len(ds) - 20} more difference(s) in {name}")
+                    continue
+            ha, hb = (hashlib.sha1(x).hexdigest()[:10] for x in (before[rel], after[rel]))
+            out.append(f"- changed: Desktop rewrote {name} ({len(before[rel])} -> {len(after[rel])} bytes, "
+                       f"sha1 {ha} -> {hb})")
     return out
 
 
@@ -235,7 +284,7 @@ def compare(before, after):
     return found, newline, only
 
 
-def report_text(found, newline, only, label):
+def report_text(found, newline, only, label, resources=None):
     lines = [f"# pbik roundtrip: {label}", "",
              "What Desktop rewrote on its first save of files pbik wrote, as proposed pbik fixes. Nothing was changed.",
              ""]
@@ -270,6 +319,9 @@ def report_text(found, newline, only, label):
         lines.append("")
     if only:
         lines += ["## Files on one side only", ""] + [f"- {x}" for x in only] + [""]
+    if resources is not None:
+        lines += ["## Registered resources (StaticResources/RegisteredResources)", ""]
+        lines += (resources or ["- none changed: Desktop kept the theme and images pbik registered."]) + [""]
     return "\n".join(lines)
 
 
@@ -279,16 +331,21 @@ def roundtrip(report_path, rev=None, to=None, before=None, out=None):
         if before:
             b_rep = Report(before)
             left, label_a = side_from_folder(b_rep.path), str(before)
+            res_a = resources_from_folder(b_rep.path)
         else:
             left, label_a = side_from_git(rep.path, rev or "HEAD"), rev or "HEAD"
+            res_a = resources_from_git(rep.path, rev or "HEAD")
         if to:
             right, label_b = side_from_git(rep.path, to), to
+            res_b = resources_from_git(rep.path, to)
         else:
             right, label_b = side_from_folder(rep.path), "working tree"
+            res_b = resources_from_folder(rep.path)
     except RuntimeError as e:
         fail(f"git: {e} (pass --before <copy of the report as pbik wrote it> outside a git repository)")
     found, newline, only = compare(left, right)
-    text = report_text(found, newline, only, f"{rep.path.name}, pbik = {label_a}, Desktop = {label_b}")
+    text = report_text(found, newline, only, f"{rep.path.name}, pbik = {label_a}, Desktop = {label_b}",
+                       compare_resources(res_a, res_b))
     print(text)
     if out:
         p = pathlib.Path(out)

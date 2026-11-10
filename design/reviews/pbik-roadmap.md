@@ -273,3 +273,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 22 | Done (check only) | alt text over 250 characters, text box text not in its alt text, data visuals without a sort |
 | 13 | Done, UNVERIFIED in Desktop | `annotate`, `annotations` on report, pages, visuals; validate checks unique names and pbik.id; adds `pbikit/unverified.py` and `schemaprops.tree_issues` for every later unverified gap |
 | 23 | Done (check only) | 260-character path warning (validate, build), August 2026 Desktop minimum (`project check`, `desktop` exit 3), filter-reset note after reload |
+| 24 | Done (check only) | the second half: roundtrip compares StaticResources/RegisteredResources (theme by key, images by hash); batch 1 did the pane half |

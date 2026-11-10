@@ -2350,6 +2350,24 @@ class PbikTests(unittest.TestCase):
         r = pbik("project", "check", "--project", pj, "--version", "2.155.756.0")
         self.assertIn("reloading external changes needs", r.stdout)
 
+    def test_123_roundtrip_registered_resources(self):
+        """Gap 24: roundtrip compares StaticResources/RegisteredResources (theme by key, images by hash)."""
+        work, rep, lf = self._batch1("b123")
+        before = work / "before"
+        shutil.copytree(rep, before / rep.name)
+        r = pbik("roundtrip", rep, "--before", before / rep.name).stdout
+        self.assertIn("none changed: Desktop kept the theme and images", r)
+        res = rep / "StaticResources" / "RegisteredResources"
+        theme = next(res.glob("*.json"))
+        d = json.loads(theme.read_text(encoding="utf-8"))
+        d["name"] = "rewritten by Desktop"
+        theme.write_text(json.dumps(d), encoding="utf-8")
+        (res / "new-logo.png").write_bytes(b"PNG fake")
+        r = pbik("roundtrip", rep, "--before", before / rep.name).stdout
+        sec = r.split("## Registered resources", 1)[1]
+        self.assertIn(f"- changed: {theme.name}: Desktop rewrites name", sec)
+        self.assertIn("- added: Desktop registered new-logo.png", sec)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

@@ -248,8 +248,10 @@ Filters are matched by name. Differences that follow the filter pane, not pbik, 
 never as fixes: an automatic filter Desktop saved once the pane had been opened (`howCreated: Auto`, or as
 Desktop 2.159.883.0 saves them: name, field and type only, no `howCreated` and no condition) (Microsoft Learn:
 automatic filters persist only after the pane has been expanded), and the pane's `expanded` / `visible` state as the
-author left it (the layout's `report.filterPane` sets it on the next build). Roundtrip still skips `StaticResources`
-(roadmap gap 24's other half).
+author left it (the layout's `report.filterPane` sets it on the next build). Registered resources
+(`StaticResources/RegisteredResources`: the theme pbik registered, images) are compared in their own section: a JSON
+resource key by key, any other file by content hash, so Desktop rewriting the theme or an image shows up (roadmap
+gap 24).
 
 pbik's side is the last commit (the kit commits after every build) and Desktop's the working tree; `--rev` / `--to`
 pick two revisions, `--before` a copy of the report as pbik wrote it.

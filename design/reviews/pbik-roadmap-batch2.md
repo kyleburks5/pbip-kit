@@ -70,3 +70,12 @@ notes that the reload resets filters, so a screenshot shows the default state. N
 every path under 260 characters) and "Considerations and limitations" (reloading resets filters). The cut-off
 2.156.951.0 is the July 2026 release in the Desktop update archive (the gap 23 answer in pbik-roadmap-batch1.md):
 Learn prints no version number for August 2026, so pbik treats anything up to July's build as too old.
+## Gap 24, second half: roundtrip sees registered resources (done, check only)
+
+**What pbik does now**: `pbik roundtrip` reads `StaticResources/RegisteredResources` on both sides (git revision or
+`--before` copy, and the working tree) and lists, in a section of its own, resources Desktop added, deleted or
+rewrote: JSON resources (the theme) key by key with the same proposal lines as `definition/`, other files (images) by
+size and SHA-1. Read-only, as before. Test 123. Batch 1 did the pane-dependent half.
+
+**Provenance**: [L1] *Power BI Desktop project report folder*, "RegisteredResources\" (the theme and images Desktop
+keeps there); pbik's roundtrip.py (`SKIP_DIRS`, `side_from_git`, `side_from_folder`).
