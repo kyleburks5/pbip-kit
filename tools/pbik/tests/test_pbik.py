@@ -2258,6 +2258,27 @@ class PbikTests(unittest.TestCase):
             container={"altText": "band"}))
         self.assertIn("decorative and altText both set", pbik("build", rep, lf, ok=(2,)).stderr)
 
+    def test_120_learn_accessibility_checklist(self):
+        """Gap 22: alt text over 250 characters, text box text missing from its alt text, data visuals without a sort."""
+        def edit(lay):
+            vs = {x["id"]: x for x in lay["visuals"]}
+            vs["P1-V04"].setdefault("container", {})["altText"] = "x" * 260
+        work, rep, lf = self._batch1("b120", edit)
+        pbik("build", rep, lf)
+        f = next(rep.glob("definition/pages/*/visuals/P1-V04_*/visual.json"))
+        d = json.loads(f.read_text(encoding="utf-8"))
+        d["visual"]["query"].pop("sortDefinition", None)
+        f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
+        self.assertIn("alt text is 260 characters; Power BI keeps 250", v)
+        self.assertIn("P1-V02_title: a11y: text box text isn't in its alt text", v)
+        self.assertRegex(v, r"data visual\(s\) without a sort order of their own \([^)]*P1-V04_")
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V02").update(
+            container={"altText": "Sales overview"}))
+        pbik("build", rep, lf)
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
+        self.assertNotIn("P1-V02_title: a11y: text box text", v)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

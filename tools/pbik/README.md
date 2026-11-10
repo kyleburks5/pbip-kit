@@ -204,7 +204,8 @@ Schema checks against each file's `$schema`, plus the kit rules:
   fill on buttons, navigators and button slicers, else the topmost opaque shape or visual underneath, else the page);
   no text below `tokens.a11y.minFontPt` (10pt); tab order in reading order; a shape without alt text that layout.json
   doesn't mark `decorative` (one warning per page; decorative visuals are listed in a note to hide from the tab order
-  in Desktop). `--no-a11y` skips them.
+  in Desktop); and Learn's checklist (roadmap gap 22): alt text over 250 characters, a text box whose text isn't in
+  its alt text, data visuals without a sort order of their own (one warning per page). `--no-a11y` skips them.
 - target Desktop (project.json `targetDesktop`): a file whose `$schema` version is newer than that Desktop supports;
 - Microsoft's schema, property by property (warnings; errors with `--strict`, `pbikit/schemaprops.py`): a container,
   page or report property, or a report setting or value, not in the cached schema (visuals: the `owned` list next to

@@ -14,7 +14,10 @@
   (Microsoft Learn, "Design Power BI reports for accessibility", updated 2026-09-29: decorative shapes and images are
   hidden from the tab order; the rest need alt text). One warning per page. The PBIR form of "hidden from tab order"
   isn't in Microsoft's schema (visualContainer 2.13.0 #VisualContainerPosition `tabOrder` is a number with no hidden
-  value), so pbik doesn't write it yet: validate prints a note listing the decorative visuals to hide in Desktop.
+  value), so pbik doesn't write it yet: validate prints a note listing the decorative visuals to hide in Desktop;
+- Learn's checklist (roadmap gap 22): alt text longer than 250 characters (Power BI's limit); a text box whose text
+  isn't in its alt text (a screen reader reads the alt text); data visuals with no sort order of their own
+  (query.sortDefinition: the accessible Show data table follows the visual's sort), one warning per page.
 """
 import re
 
@@ -23,6 +26,9 @@ DECOR = {"shape", "basicShape"}
 STATEFUL = {"actionButton", "pageNavigator", "bookmarkNavigator", "advancedSlicerVisual"}   # text on per-state fills
 TEXT_PROPS = re.compile(r"(fontcolor|labelcolor|titlecolor|valuecolor|detailcolor|color)$", re.I)
 SIZE_PROPS = re.compile(r"(fontsize|textsize|labelfontsize)$", re.I)
+ALT_MAX = 250                    # Learn: alt text is limited to 250 characters
+NO_SORT = {"card", "cardVisual", "multiRowCard", "kpi", "gauge", "image", "textbox", "shape", "basicShape",
+           "actionButton", "pageNavigator", "bookmarkNavigator"} | SLICERS     # one value, or no data: no order
 MIN_OPAQUE = 50                  # transparency below this counts as a solid background
 
 
@@ -207,6 +213,7 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
         bg_page = page_bg_of(pd) or "#FFFFFF"
         tab = []
         undeclared = []
+        unsorted = []
         for d, f in vs:
             vis = d.get("visual")
             name = d.get("name", f.parent.name)
@@ -220,6 +227,21 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
             alt = next((p.get("altText") for k, s, p in _entries(vis, "visualContainerObjects")
                         if k == "general" and p.get("altText")), None)
             no_alt = alt is None or _lit(alt) in ("''", "' '")
+            lit_alt = _lit(alt) if alt is not None else None
+            if isinstance(lit_alt, str) and len(lit_alt) - 2 > ALT_MAX:
+                fd.warn(where, f"a11y: alt text is {len(lit_alt) - 2} characters; Power BI keeps {ALT_MAX} (Microsoft "
+                               "Learn): shorten it")
+            if vt == "textbox" and name not in decorative:
+                words = " ".join(r.get("value", "") for e in (vis.get("objects", {}).get("general") or [])
+                                 for para in e.get("properties", {}).get("paragraphs", []) or []
+                                 for r in para.get("textRuns", []))
+                norm = lambda x: re.sub(r"\s+", " ", x or "").strip().lower()     # noqa: E731
+                if norm(words) and norm(words) not in norm(lit_alt.strip("'").replace("''", "'") if
+                                                           isinstance(lit_alt, str) else ""):
+                    fd.warn(where, "a11y: text box text isn't in its alt text (container.altText): screen readers "
+                                   "read the alt text, so repeat the text there (Microsoft Learn checklist, Textbox)")
+            if bound and vt not in NO_SORT and not hidden and not (vis.get("query") or {}).get("sortDefinition"):
+                unsorted.append(f.parent.name)
             if name in decorative:
                 if not hidden:
                     to_hide.append(f"{page}/{f.parent.name}")
@@ -266,6 +288,11 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
                                f"in layout.json ({', '.join(undeclared[:6])}{' ...' if len(undeclared) > 6 else ''}): "
                                "give each alt text, or mark it decorative (Microsoft Learn: decorative shapes and images "
                                "are hidden from the tab order)")
+        if unsorted:
+            fd.warn(f"{page}", f"a11y: {len(unsorted)} data visual(s) without a sort order of their own "
+                               f"({', '.join(unsorted[:6])}{' ...' if len(unsorted) > 6 else ''}): the accessible "
+                               "Show data table follows the visual's sort, so set `sort` in layout.json (Microsoft "
+                               "Learn checklist, Sort order)")
         want = reading_order([t[:5] for t in tab])
         got = [t[0] for t in sorted(tab, key=lambda t: t[5])]
         if want != got:

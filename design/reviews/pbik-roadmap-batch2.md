@@ -29,3 +29,15 @@ checklist item (hide P1-V01 from the tab order in the smoke report, save, run ro
 items "Shapes" and "Images" (decorative ones hidden from the tab order); S:visualContainer 2.13.0
 #VisualContainerPosition; pbik's a11y.py.
 
+## Gap 22: Learn's accessibility checklist (done, check only)
+
+**What pbik does now** (`pbik validate`, a11y warnings, no report output change): alt text longer than 250
+characters; a text box whose text isn't contained in its alt text (screen readers read the alt text); data visuals
+with fields but no `query.sortDefinition` (the accessible Show data table follows the visual's sort), one warning per
+page listing them. Cards, KPIs, gauges, slicers, images, shapes, buttons and navigators are skipped by the sort rule
+(one value, or no data). Test 120.
+
+**Provenance**: [L7] *Design Power BI reports for accessibility* (updated 2026-09-29): "Alt text" (250-character
+limit), checklist "Textbox" and "Sort order"; S:visualConfiguration 2.8.0 #VisualContainerGeneralFormattingObjects
+(`altText`), #SortDefinition; pbik's a11y.py.
+
