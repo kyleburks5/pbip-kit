@@ -380,6 +380,14 @@ def check_filter_pane(fd, rep, pages):
               "`pbik roundtrip` labels added automatic filters as pane-dependent")
 
 
+def decorative_names(layout):
+    """Visual names layout.json marks `decorative: true` (roadmap gap 21), or None without a layout."""
+    if not layout:
+        return None
+    lay = load(layout)
+    return {f"{v['id']}_{v['name']}" for v in lay.get("visuals", []) if v.get("decorative")}
+
+
 def check_target(fd, rep, files, rel):
     t = rep.target
     if not t.pinned:
@@ -601,7 +609,7 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
             tf = pathlib.Path(layout).resolve().parent.parent / "tokens.json"
             if tf.exists():
                 min_pt = load(tf).get("a11y", {}).get("minFontPt", 10)
-        a11y.check(fd, pages, rep, page_background, min_pt)
+        a11y.check(fd, pages, rep, page_background, min_pt, decorative_names(layout))
 
     # ---- button slicer fit
     check_slicers(fd, slicers, load(layout) if layout else None, port, rep.path)

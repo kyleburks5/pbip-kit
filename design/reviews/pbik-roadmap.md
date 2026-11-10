@@ -264,3 +264,10 @@ found by diffing every cached schema definition against the coverage map. Some r
 - The `definitionStructure` 3.3.0 schema: the folder is listed, but its `schema.json` returned 404.
 - visualContainer 2.14.0: Desktop writes it but Microsoft hasn't published it (404). Anything new in it isn't listed
   here.
+
+## Batch 2 status (bulk run 2026-11-10, design/reviews/pbik-roadmap-batch2.md)
+
+| # | Status | Note |
+|---|---|---|
+| 21 | Partial: check done; writing "hidden from tab order" blocked | `decorative: true` layout key and validate warning; the PBIR form needs one Desktop save (checklist) |
+

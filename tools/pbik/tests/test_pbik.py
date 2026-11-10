@@ -2239,6 +2239,25 @@ class PbikTests(unittest.TestCase):
         self.assertIn("added: Desktop adds filterConfig.filters@user0001", r)       # a real addition stays a proposal
         self.assertNotIn("auto0001  (", r.split("## By visual ID")[0])
 
+    # ---------------------------------------------------------------- roadmap batch 2 (pre-bulk-2026-11-10)
+    def test_119_decorative_shapes_and_images(self):
+        """Gap 21: a shape without alt text must be marked decorative; decorative visuals leave the tab-order check."""
+        work, rep, lf = self._batch1("b119")
+        pbik("build", rep, lf)
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
+        self.assertRegex(v, r"a11y: \d+ shape\(s\) with no alt text and not marked `decorative: true`.*P1-V01_band")
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V01").update(decorative=True))
+        pbik("build", rep, lf)
+        m = json.loads((work / "design" / "specs" / "visual-map.json").read_text(encoding="utf-8"))
+        self.assertTrue(m["visuals"]["P1-V01"]["decorative"])
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
+        self.assertNotIn("P1-V01_band)", v.split("decorative visual(s) still have")[0])
+        self.assertIn("decorative visual(s) still have a tab stop", v)
+        self.assertIn("pbik sales/P1-V01_band", v)
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V01").update(
+            container={"altText": "band"}))
+        self.assertIn("decorative and altText both set", pbik("build", rep, lf, ok=(2,)).stderr)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

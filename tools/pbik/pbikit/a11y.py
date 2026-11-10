@@ -8,7 +8,13 @@
   font). Colours from measures or theme indices are not checked;
 - font size: no text below the minimum (tokens `a11y.minFontPt`, default 10pt, the kit's caption size);
 - tab order: the tab order of the visible, non-decorative visuals on a page follows reading order (top to bottom in
-  rows, left to right in a row). Shapes, hidden visuals and visuals in hidden groups are skipped.
+  rows, left to right in a row). Shapes, hidden visuals, visuals in hidden groups and visuals marked `decorative` in
+  layout.json are skipped;
+- decorative (roadmap gap 21): a shape or image with no alt text that layout.json doesn't mark `decorative: true`
+  (Microsoft Learn, "Design Power BI reports for accessibility", updated 2026-09-29: decorative shapes and images are
+  hidden from the tab order; the rest need alt text). One warning per page. The PBIR form of "hidden from tab order"
+  isn't in Microsoft's schema (visualContainer 2.13.0 #VisualContainerPosition `tabOrder` is a number with no hidden
+  value), so pbik doesn't write it yet: validate prints a note listing the decorative visuals to hide in Desktop.
 """
 import re
 
@@ -189,13 +195,18 @@ def reading_order(items):
     return [it[0] for row in rows for it in sorted(row, key=lambda t: t[1])]
 
 
-def check(fd, pages, rep, page_bg_of, min_pt=10):
+def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
+    """decorative: visual names layout.json marks `decorative: true` (None: no layout given, so every shape or image
+    without alt text is listed)."""
+    decorative = set(decorative or ())
+    to_hide = []
     for _, pd, pfolder in pages:
         page = pd.get("displayName")
         vs = rep.visuals(pfolder)
         bx = boxes(vs)
         bg_page = page_bg_of(pd) or "#FFFFFF"
         tab = []
+        undeclared = []
         for d, f in vs:
             vis = d.get("visual")
             name = d.get("name", f.parent.name)
@@ -206,11 +217,18 @@ def check(fd, pages, rep, page_bg_of, min_pt=10):
             x, y, w, h, z, hidden = bx[name]
             # alt text
             bound = bool((vis.get("query") or {}).get("queryState"))
-            if (bound and vt not in SLICERS) or vt == "image":
-                alt = next((p.get("altText") for k, s, p in _entries(vis, "visualContainerObjects")
-                            if k == "general" and p.get("altText")), None)
-                if alt is None or _lit(alt) in ("''", "' '"):
-                    fd.warn(where, "a11y: no alt text (container.altText)")
+            alt = next((p.get("altText") for k, s, p in _entries(vis, "visualContainerObjects")
+                        if k == "general" and p.get("altText")), None)
+            no_alt = alt is None or _lit(alt) in ("''", "' '")
+            if name in decorative:
+                if not hidden:
+                    to_hide.append(f"{page}/{f.parent.name}")
+            elif (bound and vt not in SLICERS) or vt == "image" and not bound:
+                if no_alt:
+                    fd.warn(where, "a11y: no alt text (container.altText)" +
+                            ("; or mark it `decorative: true` in layout.json if it only decorates" if vt == "image" else ""))
+            elif vt in DECOR and no_alt and not hidden:
+                undeclared.append(f.parent.name)
             # font size
             for prop, pt in sizes(d):
                 if pt < min_pt:
@@ -241,14 +259,23 @@ def check(fd, pages, rep, page_bg_of, min_pt=10):
                              sel["id"] in ("default", "hover", "selected", "disabled", "press", "selection:selected")
                              else "")
                     fd.warn(where, f"a11y: {prop}{state} {colour} on {bg} is {ratio:.2f}:1, below {need:g}:1 (WCAG AA)")
-            if not hidden and vt not in DECOR and "tabOrder" in d.get("position", {}):
+            if not hidden and vt not in DECOR and name not in decorative and "tabOrder" in d.get("position", {}):
                 tab.append((name, x, y, w, h, d["position"]["tabOrder"]))
+        if undeclared:
+            fd.warn(f"{page}", f"a11y: {len(undeclared)} shape(s) with no alt text and not marked `decorative: true` "
+                               f"in layout.json ({', '.join(undeclared[:6])}{' ...' if len(undeclared) > 6 else ''}): "
+                               "give each alt text, or mark it decorative (Microsoft Learn: decorative shapes and images "
+                               "are hidden from the tab order)")
         want = reading_order([t[:5] for t in tab])
         got = [t[0] for t in sorted(tab, key=lambda t: t[5])]
         if want != got:
             k = next(i for i, (a, b) in enumerate(zip(want, got)) if a != b)
             fd.warn(f"{page}", f"a11y: tab order doesn't follow reading order: tab stop {k + 1} is {got[k]}, "
                                f"reading order expects {want[k]}")
+    if to_hide:
+        print(f"note    {len(to_hide)} decorative visual(s) still have a tab stop: pbik can't write \"hidden from tab "
+              f"order\" yet (its PBIR form isn't in Microsoft's schema; roadmap gap 21). In Desktop: View > Selection, "
+              f"Tab order, hide {', '.join(to_hide[:6])}{' ...' if len(to_hide) > 6 else ''}")
 
 
 SELECTED_STATES = ("selection:selected", "selected", "press")
