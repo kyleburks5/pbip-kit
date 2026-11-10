@@ -57,3 +57,16 @@ checked against the newest older one and stays a warning).
 visual; Desktop keeps them); S:report 3.3.0, S:page 2.1.0, S:visualContainer 2.13.0 `annotations` and #Annotation
 (`name`, `value` strings, "Unique name"). Extension-measure annotations (S:reportExtension 1.0.0) aren't written: no
 layout key reaches them yet.
+## Gap 23: prerequisites for reloading external changes (done, check only)
+
+**What pbik does now**: `pbik validate` warns on report or model files whose full path is 260 characters or longer,
+and `pbik build` on each visual.json it writes past the limit (pbik's `<ID>_<name>` folders make paths longer).
+`pbik project check` warns when the installed Desktop is 2.156.951.0 or older; `pbik desktop` (exit 3, Desktop open
+but no bridge) says whether the Desktop is too old or the preview option is off. After `pbik desktop reload` pbik
+notes that the reload resets filters, so a screenshot shows the default state. No report output change. Test 122.
+
+**Provenance**: [L3] *Edit Power BI Desktop project files outside Power BI Desktop* (updated 2026-09-29),
+"Prerequisites" (the August 2026 release or later, the preview option **Detect and reload external PBIP changes**,
+every path under 260 characters) and "Considerations and limitations" (reloading resets filters). The cut-off
+2.156.951.0 is the July 2026 release in the Desktop update archive (the gap 23 answer in pbik-roadmap-batch1.md):
+Learn prints no version number for August 2026, so pbik treats anything up to July's build as too old.

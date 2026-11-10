@@ -1467,6 +1467,9 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     rep.write(rep.defn / "pages" / "pages.json", meta)
     for vid, (f, d) in vfiles.items():
         rep.write(f, d)
+        if len(str(pathlib.Path(f).resolve())) >= versions.PATH_LIMIT:   # roadmap gap 23
+            ctx.res.warnings.append(f"{vid}: {pathlib.Path(f).resolve()} is {len(str(pathlib.Path(f).resolve()))} "
+                                    f"characters; Desktop needs every project path under {versions.PATH_LIMIT}")
     report_json_changed = report_doc is not None and rep.write(rep.defn / "report.json", report_doc)
     if any(v.get("_deneb") is not None for v in visuals):
         register_custom_visual(rep, DN.TYPE)

@@ -209,6 +209,8 @@ Schema checks against each file's `$schema`, plus the kit rules:
   in Desktop); and Learn's checklist (roadmap gap 22): alt text over 250 characters, a text box whose text isn't in
   its alt text, data visuals without a sort order of their own (one warning per page). `--no-a11y` skips them.
 - target Desktop (project.json `targetDesktop`): a file whose `$schema` version is newer than that Desktop supports;
+- paths (roadmap gap 23): a report or model file whose full path is 260 characters or longer (Desktop can't reload
+  or open it; Learn, external editing). `pbik build` warns on each visual.json it writes past the limit;
 - Microsoft's schema, property by property (warnings; errors with `--strict`, `pbikit/schemaprops.py`): a container,
   page or report property, or a report setting or value, not in the cached schema (visuals: the `owned` list next to
   `--layout`, else every property). A visual's `objects` are open in the schema, so the settings catalog checks those.
@@ -323,7 +325,9 @@ Version-aware builds (`pbikit/versions.py`, docs/UPDATE-ROUTINE.md). A rep's `de
   leading version number, here and in `project check`.
 - `project check [--version X]` compares this machine's Desktop with `targetDesktop` (/build runs it first): exit 5
   when Desktop is newer ("run /update first"), 3 when its version can't be found, a warning (exit 0) when it is older,
-  0 when they match or the target is `"latest"`. A target of `2.155` matches every 2.155 build.
+  0 when they match or the target is `"latest"`. A target of `2.155` matches every 2.155 build. It also warns when
+  Desktop is older than the August 2026 release that reloading external changes needs (2.156.951.0, July 2026, or
+  older; roadmap gap 23).
 
 ```bat
 pbik schemas support --refresh
@@ -357,7 +361,10 @@ pbik model check "Sales.SemanticModel" --folder Model
 
 ### `desktop state | reload | screenshot`
 Runs `.claude/scripts/pbi-bridge.ps1` (found above the current folder, or `--bridge <path>`). If PowerShell, the
-script or the Desktop Bridge isn't available, pbik says so and exits with code 3.
+script or the Desktop Bridge isn't available, pbik says so and exits with code 3; when Desktop is open but has no
+bridge, it adds whether this Desktop is too old for reloading (before August 2026) or needs the preview option
+**Detect and reload external PBIP changes** (roadmap gap 23). After a reload it reminds you that reloading resets
+filters and slicer selections, so a screenshot shows the default state.
 
 ```bat
 pbik desktop state --fail-if-dirty                            rem exit 4 when Desktop has unsaved changes

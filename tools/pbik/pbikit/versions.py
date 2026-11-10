@@ -217,6 +217,37 @@ def target_for(root=None, project=None, support=None):
     return Target((d or {}).get("targetDesktop", "latest"), support), d, p
 
 
+# Microsoft Learn, "Edit Power BI Desktop project files outside Power BI Desktop" (updated 2026-09-29), Prerequisites:
+# detecting and reloading external changes needs the August 2026 release or later, with the preview option "Detect and
+# reload external PBIP changes" on. Learn gives no version number for August 2026; the last numbered release before it
+# is 2.156.951.0 (July 2026, Desktop update archive), so anything up to that build is too old (roadmap gap 23).
+RELOAD_LAST_TOO_OLD = "2.156.951.0"
+PATH_LIMIT = 260                       # the same page: every project file path under 260 characters
+
+
+def reload_issue(version):
+    """A message when this Desktop is older than the August 2026 release that external reload needs, else None."""
+    v = desktop_version(version) if version else None
+    if not v:
+        return None
+    if vtuple(v)[:3] <= vtuple(RELOAD_LAST_TOO_OLD)[:3]:
+        return (f"Desktop {v} is older than the August 2026 release that reloading external changes needs (Microsoft "
+                "Learn, external editing): `pbik desktop reload` and the Desktop Bridge aren't available; close and "
+                "reopen the report instead (.claude/rules/pbik.md)")
+    return None
+
+
+def long_paths(folders, limit=PATH_LIMIT):
+    """[(length, path)] of files whose full path is limit characters or more, longest first."""
+    out = []
+    for folder in folders:
+        for f in pathlib.Path(folder).rglob("*"):
+            n = len(str(f.resolve()))
+            if f.is_file() and n >= limit:
+                out.append((n, str(f)))
+    return sorted(out, reverse=True)
+
+
 def desktop_version(text):
     """The leading version number of what Desktop reports: '2.155.756.0 (26.06)+<hash>' (MSI and IT-managed
     installs) -> '2.155.756.0'. None if it doesn't start with one."""
@@ -259,6 +290,8 @@ def check(path, version=None):
     d = load_project(path) or {}
     target = str(d.get("targetDesktop", "latest"))
     v = desktop_version(version) if version else detect_desktop()
+    if v and reload_issue(v):
+        print(f"warning: {reload_issue(v)}")
     if target.lower() == "latest":
         print(f"ok: targetDesktop latest; Desktop {v or '(version not found)'}")
         return 0

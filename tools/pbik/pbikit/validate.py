@@ -458,6 +458,11 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     else:
         fd.warn("schemas", f"schema checks skipped: {checker.reason}")
     check_target(fd, rep, files, rel)
+    long_ = versions.long_paths([rep.path] + ([rep.model_folder()] if rep.model_folder() else []))
+    if long_:
+        fd.warn("paths", f"{len(long_)} file path(s) are {versions.PATH_LIMIT} characters or longer (longest "
+                         f"{long_[0][0]}: ...{long_[0][1][-80:]}): Desktop can't reload or open them (Microsoft Learn, "
+                         "external editing). Move the project to a shorter folder, or shorten page and visual names")
 
     # ---- pages and visuals
     pages = rep.pages()

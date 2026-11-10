@@ -2331,6 +2331,25 @@ class PbikTests(unittest.TestCase):
         finally:
             S.CACHE, SP._W = old, SP.Walker()
 
+    def test_122_reload_prerequisites(self):
+        """Gap 23: the August 2026 Desktop minimum for reloading, and the 260-character path limit."""
+        from pbikit import versions as V
+        self.assertIn("older than the August 2026 release", V.reload_issue("2.155.756.0 (26.06)+abc"))
+        self.assertIn("older than the August 2026 release", V.reload_issue("2.156.951.0"))
+        self.assertIsNone(V.reload_issue("2.159.883.0"))
+        self.assertIsNone(V.reload_issue(None))
+        work = self.tmp / "b122"
+        deep = work / ("d" * 40) / ("e" * 40)
+        deep.mkdir(parents=True)
+        (deep / "x.json").write_text("{}", encoding="utf-8")
+        hits = V.long_paths([work], limit=len(str((deep / "x.json").resolve())))
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(V.long_paths([work], limit=10 ** 4), [])
+        pj = work / "project.json"
+        pj.write_text(json.dumps({"targetDesktop": "latest"}), encoding="utf-8")
+        r = pbik("project", "check", "--project", pj, "--version", "2.155.756.0")
+        self.assertIn("reloading external changes needs", r.stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

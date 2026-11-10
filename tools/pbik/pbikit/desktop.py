@@ -19,8 +19,13 @@ def find_bridge(start=None):
     return None
 
 
-def unavailable(msg):
+def unavailable(msg, check_version=False):
     print(f"Desktop bridge not available: {msg}")
+    if check_version:                   # roadmap gap 23: say when this Desktop can't reload external changes at all
+        from . import versions as V
+        issue = V.reload_issue(os.environ.get("PBIK_DESKTOP_VERSION") or V.detect_desktop())
+        print(issue or "It needs the August 2026 Desktop or later with the preview option \"Detect and reload "
+                       "external PBIP changes\" turned on (Options > Preview features, then restart).")
     sys.exit(UNAVAILABLE)
 
 
@@ -37,7 +42,7 @@ def run(action, *args, bridge=None):
     if r.returncode != 0:
         low = out.lower()
         if "no desktop bridge pipe" in low or "pipe" in low and ("timeout" in low or "not found" in low):
-            unavailable("Power BI Desktop is not open, or its Desktop Bridge preview is off")
+            unavailable("Power BI Desktop is not open, or its Desktop Bridge preview is off", check_version=True)
         if "running scripts is disabled" in low or "execution polic" in low:
             unavailable("PowerShell's execution policy blocks the bridge script (tools/doctor.ps1 shows the policy)")
         if "multiple desktop instances" in low:
@@ -89,6 +94,8 @@ def reload(bridge=None, force=False):
         print("warning: the bridge reports no unsaved-changes flag; check Desktop's title bar before relying on this")
     print(run("reload", bridge=bridge).strip())
     print("Reloaded. The reload marks the report unsaved: close without saving and reopen before the next reload.")
+    print("Reloading resets filters and slicer selections to what the files hold (Microsoft Learn, external editing): "
+          "a screenshot now shows the report's default state.")
 
 
 def screenshot(page, out, report=None, region=None, scale=1, bridge=None):
