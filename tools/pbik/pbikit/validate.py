@@ -34,6 +34,7 @@ from . import deprecations as DEP
 from . import fields as F
 from . import schemaprops as SP
 from . import htmlcontent as HC
+from . import unverified as UV
 from .objects import load
 from .report import ID_RE, Report
 
@@ -388,6 +389,26 @@ def decorative_names(layout):
     return {f"{v['id']}_{v['name']}" for v in lay.get("visuals", []) if v.get("decorative")}
 
 
+def check_annotations(fd, rep, pages):
+    """Annotations (roadmap gap 13): names unique per file (the schema's #Annotation: "Unique name"), and pbik.id
+    matching the visual's folder ID (a mismatch is a copy made in Desktop or by hand)."""
+    rd = load(rep.defn / "report.json") if (rep.defn / "report.json").exists() else {}
+    docs = [("report.json", rd)] + [(f"page {pd.get('displayName')}", pd) for _, pd, _ in pages]
+    for _, pd, pfolder in pages:
+        for d, f in rep.visuals(pfolder):
+            docs.append((f.parent.name, d))
+            m = ID_RE.match(f.parent.name)
+            pid = next((a.get("value") for a in d.get("annotations") or [] if a.get("name") == "pbik.id"), None)
+            if pid and m and pid != m.group(1):
+                fd.warn(f.parent.name, f"annotation pbik.id is {pid}, but the folder's ID is {m.group(1)}: a copy? "
+                                       "give it its own ID in layout.json")
+    for where, d in docs:
+        names = [a.get("name") for a in d.get("annotations") or [] if isinstance(a, dict)]
+        dup = sorted({x for x in names if names.count(x) > 1})
+        if dup:
+            fd.err(where, f"annotation name(s) {dup} used twice (each name must be unique)")
+
+
 def check_target(fd, rep, files, rel):
     t = rep.target
     if not t.pinned:
@@ -594,6 +615,8 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     # ---- Microsoft's schema, property by property (warnings; errors with --strict), and the filter pane
     check_schema_props(fd, rep, pages, layout, strict_schema)
     check_filter_pane(fd, rep, pages)
+    check_annotations(fd, rep, pages)
+    UV.check(fd, rep)
 
     # ---- settings catalog
     if use_catalog:

@@ -181,3 +181,34 @@ def deprecated(url, path):
     if st != OK:
         return None
     return {v for v, dep in enum_values(node).items() if dep}
+
+
+def tree_issues(url, path, node, label=""):
+    """Every key in a JSON fragment pbik writes that Microsoft's cached schema doesn't allow there: [(status, message)].
+    url: the file's $schema; path: where the fragment sits (e.g. ["annotations"]). Closed objects are checked key by
+    key and recursed into; open or uncached parts pass. A version Microsoft hasn't published is checked against the
+    newest older cached one (NEAREST, a warning only). Used for the roadmap batch 2 features (pbikit/unverified.py)."""
+    status = UNKNOWN
+    if _W._doc(url) is None:
+        near = nearest_cached(url)
+        if near is None:
+            return []
+        url, status = near, NEAREST
+    return _tree(url, list(path), node, label, status)
+
+
+def _tree(url, path, node, label, status):
+    out = []
+    if isinstance(node, list):
+        for x in node:
+            out += _tree(url, path, x, label, status)
+        return out
+    if not isinstance(node, dict):
+        return out
+    for k, v in node.items():
+        st, _, where = _W.walk(url, path + [k])
+        if st == UNKNOWN:
+            out.append((status, f"{label}{'.'.join(map(str, path + [k]))} is not in Microsoft's {_short(where)} schema"))
+        elif st == OK:
+            out += _tree(url, path + [k], v, label, status)
+    return out

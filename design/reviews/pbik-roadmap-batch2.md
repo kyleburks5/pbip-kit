@@ -40,4 +40,20 @@ page listing them. Cards, KPIs, gauges, slicers, images, shapes, buttons and nav
 **Provenance**: [L7] *Design Power BI reports for accessibility* (updated 2026-09-29): "Alt text" (250-character
 limit), checklist "Textbox" and "Sort order"; S:visualConfiguration 2.8.0 #VisualContainerGeneralFormattingObjects
 (`altText`), #SortDefinition; pbik's a11y.py.
+## Gap 13: annotations (done, UNVERIFIED in Desktop)
 
+**What pbik does now**: layout `annotate: true` stamps `pbik.page` on pages and `pbik.id` / `pbik.layout` (12 hex of
+the visual's layout entry) on visuals and groups; `annotations: {name: text}` on a visual, a page or `report` writes
+`annotations: [{name, value}]` in place. Names layout.json sets are owned (visual-map `owned` / `reportOwned`) and
+removed when they leave it; other annotations stay. `pbik validate` errors on a name used twice in one file and warns
+when `pbik.id` differs from the folder's ID. Test 121.
+
+This gap also adds the batch's safety net: `pbikit/unverified.py` (each unverified feature: `pbik build` prints it,
+`pbik validate` lists the files that carry it) and `schemaprops.tree_issues`, which checks every key of a JSON
+fragment pbik writes against the cached schema (warning, `--strict` error; a version Microsoft hasn't published is
+checked against the newest older one and stays a warning).
+
+**Provenance**: [L1] *Power BI Desktop project report folder*, "PBIR annotations" (annotations on report, page and
+visual; Desktop keeps them); S:report 3.3.0, S:page 2.1.0, S:visualContainer 2.13.0 `annotations` and #Annotation
+(`name`, `value` strings, "Unique name"). Extension-measure annotations (S:reportExtension 1.0.0) aren't written: no
+layout key reaches them yet.

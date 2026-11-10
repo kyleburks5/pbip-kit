@@ -21,6 +21,7 @@ from . import fieldrefs as FR
 from . import htmlcontent as HC
 from . import deprecations as DEP
 from . import schemaprops as SP
+from . import unverified as UV
 from . import versions
 from .objects import (b, chrome_off, colour_expr, drop_shadow, ex, i, load, n, native_ref, navigator_states, qref,
                       ref_labels, s, save, shape_objects, solid, solid_ex, theme_colour)
@@ -65,6 +66,7 @@ class Ctx:
         self.res = F.Resolver(report, layout.get("measureTable"))
         self.owned_new = {}        # vid -> [[where, key, selector, prop]]
         self.strict = False        # --strict: a property outside Microsoft's schema is an error, not a warning
+        self.unverified = set()    # roadmap batch 2 features this build writes (pbikit/unverified.py)
 
     # tokens
     def colour(self, v):
@@ -149,6 +151,12 @@ def ensure_entry(ctx, vid, d, where, key, selector):
 def release(d, where, key, sel_key, prop):
     if where == "top":                          # a top-level key pbik owns (parentGroupName)
         d.pop(key, None)
+        return
+    if where == "annotations":                  # an annotation pbik wrote (roadmap gap 13)
+        lst = d.get("annotations") or []
+        lst[:] = [a for a in lst if a.get("name") != key]
+        if "annotations" in d and not lst:
+            del d["annotations"]
         return
     if where == "visual":                       # a visual-level key pbik owns (syncGroup)
         d.get("visual", {}).pop(key, None)
@@ -906,6 +914,50 @@ def apply_page_pane(ctx, key, spec, d, page_url):
             set_prop(ctx, owner, d, "page", "filterCard", {"id": sel_id}, prop, pane_value(ctx, prop, val))
 
 
+def tree_gate(ctx, owner, url, path, node):
+    """A whole JSON fragment pbik writes for an unverified feature, checked against the cached schema: a warning, or
+    (strict) an error (roadmap batch 2)."""
+    for status, msg in SP.tree_issues(url, path, node):
+        schema_gate(ctx, owner, status, msg)
+
+
+def set_annotations(lst, wanted, owner):
+    for name, value in wanted.items():
+        if not isinstance(value, str):
+            raise BuildError(f"{owner}: annotation {name!r} must be text (the schema's #Annotation value is a string)")
+        e = next((a for a in lst if a.get("name") == name), None)
+        if e is None:
+            lst.append({"name": name, "value": value})
+        else:
+            e["value"] = value
+
+
+def apply_annotations(ctx, owner, d, wanted):
+    """annotations [{name, value}] in place (roadmap gap 13): the names layout.json sets are owned, the rest stay."""
+    if not wanted:
+        return
+    lst = d.setdefault("annotations", [])
+    set_annotations(lst, wanted, owner)
+    for name in wanted:
+        ctx.owned_new.setdefault(owner, []).append(["annotations", name, None, None])
+    ctx.unverified.add("annotations")
+    tree_gate(ctx, owner, d.get("$schema", ""), ["annotations"], lst)
+
+
+def visual_annotations(layout, v):
+    ann = dict(v.get("annotations") or {})
+    if layout.get("annotate"):
+        ann.setdefault("pbik.id", v["id"])
+        ann.setdefault("pbik.layout", layout_hash(v))
+    return ann
+
+
+def layout_hash(v):
+    """12 hex of the visual's layout.json entry: tells whether a visual still matches the layout it was built from."""
+    import hashlib
+    return hashlib.sha1(json.dumps(v, sort_keys=True, default=str).encode("utf-8")).hexdigest()[:12]
+
+
 def schema_gate(ctx, owner, status, msg):
     """A property Microsoft's schema doesn't have: a warning, or (strict) an error."""
     if status not in (SP.UNKNOWN, SP.NEAREST):
@@ -940,7 +992,7 @@ def apply_report(ctx, rep, layout, old_map):
     rf = rep.defn / "report.json"
     d = load(rf)
     url = d.get("$schema", "")
-    owned = {"settings": {}, "objects": {}}
+    owned = {"settings": {}, "objects": {}, "annotations": []}
     pane = spec.get("filterPane") or {}
     for prop in pane:
         if prop not in REPORT_PANE:
@@ -958,6 +1010,18 @@ def apply_report(ctx, rep, layout, old_map):
         was = (old.get("objects") or {}).get(f"outspacePane.{prop}", {"was": e["properties"].get(prop)})
         owned["objects"][f"outspacePane.{prop}"] = was
         e["properties"][prop] = b(val)
+    ann = spec.get("annotations") or {}
+    lst = d.setdefault("annotations", [])
+    set_annotations(lst, ann, "report")
+    for name in (old.get("annotations") or []):
+        if name not in ann:
+            lst[:] = [a for a in lst if a.get("name") != name]
+    if not lst:
+        d.pop("annotations", None)
+    if ann:
+        owned["annotations"] = sorted(ann)
+        ctx.unverified.add("annotations")
+        tree_gate(ctx, "report", url, ["annotations"], lst)
     for key, val in (spec.get("settings") or {}).items():
         schema_gate(ctx, "report", *SP.report_setting(url, key, val))
         st = d.setdefault("settings", {})
@@ -1146,6 +1210,10 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             d.setdefault("objects", {})["background"] = bg
         try:
             apply_page_pane(ctx, key, spec, d, d["$schema"])
+            ann = dict(spec.get("annotations") or {})
+            if layout.get("annotate"):
+                ann.setdefault("pbik.page", key)
+            apply_annotations(ctx, f"page:{key}", d, ann)
         except BuildError as e:
             errors.append(f"page {key}: {e}")
         new_p = {json.dumps(x) for x in ctx.owned_new.get(f"page:{key}", [])}
@@ -1252,6 +1320,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                 set_position(d, vid, v, box(vid), parent, box, vnames, ctx)
                 d["visualGroup"] = {"displayName": v.get("displayName", v["name"]),
                                     "groupMode": v.get("mode", "ScaleMode")}
+                apply_annotations(ctx, vid, d, visual_annotations(layout, v))
                 for item in old_owned.get(vid, []):
                     if json.dumps(item) not in {json.dumps(x) for x in ctx.owned_new.get(vid, [])}:
                         release(d, *item)
@@ -1342,6 +1411,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                 d["visual"].get("visualContainerObjects", {}).get("visualLink"))
             if retiring:
                 ctx.res.warnings.append(f"{vid}: {retiring}")
+            apply_annotations(ctx, vid, d, visual_annotations(layout, v))
             apply_deneb(ctx, vid, v, d)
             apply_html_content(ctx, vid, v, d)
             new = {json.dumps(x) for x in ctx.owned_new.get(vid, [])}
@@ -1450,6 +1520,8 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     if not quiet:
         if rep.target.pinned:
             print(f"target Desktop {rep.target.desktop}: $schema versions capped to {rep.target.note}")
+        for key in sorted(ctx.unverified, key=lambda k: UV.FEATURES[k][0]):
+            print(f"warning: {UV.message(key)}")
         for w in ctx.res.warnings:
             print(f"warning: {w}")
         for line in log:

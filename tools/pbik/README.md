@@ -83,6 +83,8 @@ against the model's TMDL and `reportExtensions.json`.
 | Where | Key | Writes |
 | --- | --- | --- |
 | top | `theme: "design/themes/pbip-polish.json"` | registers and applies the theme first (as `pbik theme apply`; path from the project root) |
+| top | `annotate: true` | every page gets the annotation `pbik.page` (its layout key) and every visual `pbik.id` (its ID) and `pbik.layout` (12 hex of its layout.json entry); Desktop ignores annotations and keeps them ([L1] PBIR annotations). **UNVERIFIED in Desktop** (roadmap gap 13) |
+| top, page, visual | `annotations: {name: text}` (top: under `report`) | `annotations: [{name, value}]` on report.json, page.json or visual.json, in place: names layout.json sets are owned (removed when they leave it), others stay. `pbik validate` errors on a name used twice in a file and warns when a visual's `pbik.id` isn't its folder's ID (a copy). **UNVERIFIED in Desktop** |
 | top | `report: {filterPane: {expanded, visible}, settings: {<setting>: value}}` | report.json, in place (filterConfig, themes, resources and Desktop's other settings stay): `objects.outspacePane` `expanded` (false = the pane opens collapsed) and `visible` (false = hidden in view mode), as Desktop saved `expanded` in Reps 1-7; `settings` (written in the schema's property order, as Desktop
 saves them) = Microsoft's #ExplorationSettings (`exportDataMode`, `hideVisualContainerHeader`, `useEnhancedTooltips`, `pagesPosition`, `locale`, ...), each checked against the cached report schema (names and values). Each key remembers the value Desktop had and gets it back when it leaves layout.json (visual-map.json `reportOwned`). Desktop's reload doesn't apply report.json during the preview (Learn, external editing): close without saving and reopen. Pane state and settings other than `expanded` not yet Desktop-tested (roadmap batch 1) |
 | page | `displayName`, `width`, `height`, `displayOption`, `hidden` | page.json; new pages get a stable 20-hex name |
@@ -212,6 +214,10 @@ Schema checks against each file's `$schema`, plus the kit rules:
   `--layout`, else every property). A visual's `objects` are open in the schema, so the settings catalog checks those.
   With `jsonschema` installed the full schema pass still errors on the same file, because the object is closed in the
   schema and Desktop may not open it;
+- UNVERIFIED in Desktop (warnings, `pbikit/unverified.py`, roadmap batch 2): every feature pbik writes from Microsoft's
+  schema only that no Desktop save has confirmed yet, with the files it is in. `pbik build` prints the same per
+  feature it writes and checks the JSON it writes for them against the cached schema (a warning; `--strict` an
+  error, nothing written);
 - retiring and deprecated (warnings, `pbikit/deprecations.py`, roadmap gap 20): the Q&A visual (validate only; type
   id `qnaVisual` unconfirmed: Desktop 2.159.883.0 no longer offers the visual) and a button's Q&A action (Q&A goes away
   in February 2027), Map and Filled map (Bing Maps, scheduled for deprecation; use Azure Maps),

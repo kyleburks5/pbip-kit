@@ -271,3 +271,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 |---|---|---|
 | 21 | Partial: check done; writing "hidden from tab order" blocked | `decorative: true` layout key and validate warning; the PBIR form needs one Desktop save (checklist) |
 | 22 | Done (check only) | alt text over 250 characters, text box text not in its alt text, data visuals without a sort |
+| 13 | Done, UNVERIFIED in Desktop | `annotate`, `annotations` on report, pages, visuals; validate checks unique names and pbik.id; adds `pbikit/unverified.py` and `schemaprops.tree_issues` for every later unverified gap |

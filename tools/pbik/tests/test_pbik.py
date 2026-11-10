@@ -2052,7 +2052,9 @@ class PbikTests(unittest.TestCase):
             "selector": {}, "properties": {"$ref": ref}}}}
         files = {
             "visualContainer/2.13.0/schema.json": {"type": "object", "properties": {
-                "visual": {"$ref": base + "visualConfiguration/2.8.0/schema-embedded.json"}}},
+                "visual": {"$ref": base + "visualConfiguration/2.8.0/schema-embedded.json"},
+                "annotations": {"type": "array", "items": {"type": "object", "additionalProperties": False,
+                                                           "properties": {"name": {}, "value": {}}}}}},
             "visualConfiguration/2.8.0/schema-embedded.json": {"type": "object", "properties": {
                 "objects": {"type": "object", "additionalProperties": {"type": "array"}},
                 "visualContainerObjects": {"type": "object", "properties": {"title": entry("#/definitions/Title")}}},
@@ -2278,6 +2280,56 @@ class PbikTests(unittest.TestCase):
         pbik("build", rep, lf)
         v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
         self.assertNotIn("P1-V02_title: a11y: text box text", v)
+
+    def test_121_annotations(self):
+        """Gap 13: annotate stamps pbik.id / pbik.layout / pbik.page; layout annotations are owned; unverified listed."""
+        def edit(lay):
+            lay["annotate"] = True
+            next(x for x in lay["visuals"] if x["id"] == "P1-V04")["annotations"] = {"owner": "sales team"}
+            lay["report"] = {"annotations": {"kit": "pbip-kit"}}
+        work, rep, lf = self._batch1("b121", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 13): annotations", r.stdout)
+        ann = {a["name"]: a["value"] for a in visual(rep, "P1-V04")["annotations"]}
+        self.assertEqual(ann["pbik.id"], "P1-V04")
+        self.assertEqual(ann["owner"], "sales team")
+        self.assertRegex(ann["pbik.layout"], r"^[0-9a-f]{12}$")
+        pg = next(json.loads(f.read_text(encoding="utf-8")) for f in rep.glob("definition/pages/*/page.json")
+                  if json.loads(f.read_text(encoding="utf-8"))["displayName"] == "pbik sales")
+        self.assertEqual(pg["annotations"], [{"name": "pbik.page", "value": "P1"}])
+        rd = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(rd["annotations"], [{"name": "kit", "value": "pbip-kit"}])
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertIn("warning unverified: UNVERIFIED in Desktop (roadmap gap 13)", v)
+        f = next(rep.glob("definition/pages/*/visuals/P1-V05_*/visual.json"))     # a copy keeps the other's ID
+        d = json.loads(f.read_text(encoding="utf-8"))
+        d["annotations"] = [{"name": "pbik.id", "value": "P1-V04"}, {"name": "x", "value": "1"},
+                            {"name": "x", "value": "2"}]
+        f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(1,)).stdout
+        self.assertIn("annotation pbik.id is P1-V04, but the folder's ID is P1-V05", v)
+        self.assertIn("annotation name(s) ['x'] used twice", v)
+        def drop(lay):
+            lay.pop("annotate"), lay.pop("report")
+            next(x for x in lay["visuals"] if x["id"] == "P1-V04").pop("annotations")
+        self._relayout(lf, drop)
+        pbik("build", rep, lf)
+        self.assertNotIn("annotations", visual(rep, "P1-V04"))
+        self.assertNotIn("annotations", json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8")))
+        cache = self._stand_in_schemas(self.tmp / "b121-schemas")
+        from pbikit import schemaprops as SP, schemas as S
+        old, S.CACHE, SP._W = S.CACHE, cache, SP.Walker()
+        try:
+            url = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+            self.assertEqual(SP.tree_issues(url, ["annotations"], [{"name": "a", "value": "b"}]), [])
+            bad = SP.tree_issues(url, ["annotations"], [{"name": "a", "value": "b", "colour": "red"}])
+            self.assertEqual(bad[0][0], SP.UNKNOWN)
+            self.assertIn("annotations.colour is not in Microsoft's", bad[0][1])
+            self.assertEqual(SP.tree_issues(url.replace("2.13.0", "2.14.0"), ["annotations"], [{"z": 1}])[0][0],
+                             SP.NEAREST)
+        finally:
+            S.CACHE, SP._W = old, SP.Walker()
 
 
 class VersionTests(unittest.TestCase):
