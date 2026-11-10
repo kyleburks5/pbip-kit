@@ -78,5 +78,11 @@ def _pbik_annotations(kind, doc):
         isinstance(a, dict) for a in (doc.get("annotations") or []))
 
 
+feature("landing", 12, "the landing page (pages.json landingPageName, layout page `landing`)",
+        lambda kind, doc: kind == "pages" and bool(doc.get("landingPageName")))
+feature("page-props", 12, "page settings through page `props` (pageSize, displayArea, pageInformation, outspace, "
+        "pageRefresh, personalizeVisual)",
+        lambda kind, doc: kind == "page" and bool(set(doc.get("objects") or {}) & {
+            "pageSize", "displayArea", "pageInformation", "outspace", "pageRefresh", "personalizeVisual"}))
 feature("annotations", 13, "annotations on report.json, pages and visuals (layout `annotate`, `annotations`)",
         _pbik_annotations)

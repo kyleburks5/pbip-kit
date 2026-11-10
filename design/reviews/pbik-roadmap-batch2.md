@@ -96,3 +96,19 @@ Images page, save, roundtrip) shows the form.
 **Provenance**: S:report 3.3.0 #ResourcePackageItem / #ResourcePackageItemType (Image); S:semanticQuery 1.4.0
 #QueryResourcePackageItem; S:page 2.1.0 #Background; [L1] "RegisteredResources\"; `design/templates/image.json`;
 pbik's theme.py (`_register`) and objects.py (`image_objects`).
+## Gap 12: page settings and lifecycle (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: page `landing: true` writes pages.json `landingPageName` (owned: visual-map `landing`, removed
+when the key goes); page `props` writes any page object property (`pageRefresh`, `pageSize`, `displayArea`,
+`pageInformation`, `outspace`, `personalizeVisual`, `background`) with the same value notation as visual `props`,
+each property checked against the cached page schema (warning, `--strict` error); `--prune` removes a page pbik made
+that left layout.json (folder, `pageOrder`, `activePageName`, `landingPageName`; without `--prune` it is kept and
+listed). Pages made in Desktop are never touched. Test 125.
+
+**UNVERIFIED in Desktop**: `landingPageName` and the page objects (no Desktop-saved file in the kit has them). Page
+removal writes no new form. Value types for `pageRefresh` (`duration`, `refreshType`, `checkEvery`) aren't in the
+schema (properties listed, values open); the checklist sets one and roundtrip shows Desktop's form.
+
+**Provenance**: S:pagesMetadata 1.1.0 `landingPageName` ("takes precedence over activePageName", the page name);
+S:page 2.1.0 #PageFormattingObjects, #PageSize, #DisplayArea, #PageRefresh, #PageInformation, #Background; pbik's
+build.py (`set_prop`, `prop_value`, `--prune` for visuals).

@@ -2391,6 +2391,42 @@ class PbikTests(unittest.TestCase):
         self._relayout(lf, lambda lay: lay["visuals"].append(dict(lay["visuals"][-1], id="P1-V21", type="shape")))
         self.assertIn("image is for image visuals", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_125_page_settings_and_lifecycle(self):
+        """Gap 12: landing page, page props (schema-checked), and --prune removing a page pbik made."""
+        def edit(lay):
+            lay["pages"]["P2"]["landing"] = True
+            lay["pages"]["P2"]["props"] = {"pageRefresh.show": True, "displayArea.verticalAlignment": "Middle"}
+        work, rep, lf = self._batch1("b125", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 12): the landing page", r.stdout)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 12): page settings", r.stdout)
+        meta = json.loads((rep / "definition" / "pages" / "pages.json").read_text(encoding="utf-8"))
+        p2 = Report(rep).page_by("pbik stock")
+        self.assertEqual(meta["landingPageName"], p2[0])
+        self.assertEqual(p2[1]["objects"]["pageRefresh"], [{"properties": {"show": {"expr": {"Literal": {"Value": "true"}}}}}])
+        self.assertEqual(p2[1]["objects"]["displayArea"][0]["properties"]["verticalAlignment"],
+                         {"expr": {"Literal": {"Value": "'Middle'"}}})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        def drop(lay):
+            lay["pages"].pop("P2")
+            lay["visuals"] = [v for v in lay["visuals"] if v["page"] != "P2"]
+            for v in lay["visuals"]:                                # P1's button to P2 goes too
+                if (v.get("action") or {}).get("page") in ("P2", "pbik stock"):
+                    v.pop("action")
+        self._relayout(lf, drop)
+        r = pbik("build", rep, lf)
+        self.assertIn("page P2 (pbik stock) is not in layout.json (kept; --prune removes it)", r.stdout)
+        self.assertTrue(Report(rep).page_by("pbik stock"))
+        r = pbik("build", rep, lf, "--prune")
+        self.assertIn("removed page pbik stock", r.stdout)
+        self.assertIsNone(Report(rep).page_by("pbik stock"))
+        meta = json.loads((rep / "definition" / "pages" / "pages.json").read_text(encoding="utf-8"))
+        self.assertNotIn(p2[0], meta["pageOrder"])
+        self.assertNotIn("landingPageName", meta)
+        self.assertIn("0 error(s)", pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout)
+        self._relayout(lf, lambda lay: lay["pages"]["P1"].update(props={"filterCard.textSize": 12}))
+        self.assertIn("use the page's filterPane / filterCards keys", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

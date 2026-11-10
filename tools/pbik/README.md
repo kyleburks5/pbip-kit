@@ -45,7 +45,8 @@ in Reps 4, 5 and 8, restyled to Rep 8; `tools/patterns/patterns.json` lists them
 ### `build <Report> design/specs/layout.json`
 Creates or updates pages and visuals by visual ID. Run it as often as you like: it writes only files whose content
 changes, and a second run prints `No changes`. It writes the ID map `design/specs/visual-map.json`, which
-`audit_ids.py` reads. Visuals that left layout.json stay until you pass `--prune`. Visuals without an ID (made in
+`audit_ids.py` reads. Visuals, and pages pbik made, that left layout.json stay until you pass `--prune` (roadmap gap 12:
+the page folder goes, and pages.json drops it from `pageOrder`, `activePageName` and `landingPageName`). Visuals without an ID (made in
 Desktop) are never touched.
 
 ```bat
@@ -90,6 +91,8 @@ saves them) = Microsoft's #ExplorationSettings (`exportDataMode`, `hideVisualCon
 | page | `displayName`, `width`, `height`, `displayOption`, `hidden` | page.json; new pages get a stable 20-hex name |
 | page | `active: true` (one page) | `pages.json` `activePageName`: the page the report opens on (default: the first page) |
 | page | `background` (colour, or `{color, transparency}`) | `objects.background` |
+| page | `landing: true` (one page) | `pages.json` `landingPageName` (pagesMetadata 1.1.0): the page every user opens on, over `active`; pbik removes it when the key goes. **UNVERIFIED in Desktop** (roadmap gap 12) |
+| page | `props: {"object.property[@selector]": value}` | any page object (`pageSize`, `displayArea`, `pageInformation`, `outspace`, `pageRefresh`, `personalizeVisual`, `background`), values as in visual `props`, each checked against the cached page schema (#PageFormattingObjects is closed per object). The filter pane objects take `filterPane` / `filterCards`. **UNVERIFIED in Desktop** (roadmap gap 12) |
 | page | `filterPane: {backgroundColor, transparency, foregroundColor, titleSize, searchTextSize, headerSize, fontFamily, border, borderColor, checkboxAndApplyColor, inputBoxColor, width}` | the filter pane's look on this page: `objects.outspacePane`, no selector (page schema #OutspacePane); colours and sizes take tokens, `fontFamily` takes `regular` / `semibold` / a family. Not yet Desktop-tested |
 | page | `filterCards: {applied: {...}, available: {...}}` (backgroundColor, transparency, border, borderColor, foregroundColor, textSize, fontFamily, inputBoxColor) | `objects.filterCard` on selector `{id: Applied}` / `{id: Available}` (the `$id`s Desktop's base themes use for filter cards). Not yet Desktop-tested |
 | page | `filters` | page-level filters (as for visuals, below) |
