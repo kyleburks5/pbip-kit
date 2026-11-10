@@ -69,6 +69,18 @@ def apply(report_path, theme_file, quiet=False, project=None):
     return rep.changed
 
 
+def register_image(report_path, file, project=None):
+    """Register an image for `pbik build` (layout `image`, roadmap gap 3): -> (item name, files changed)."""
+    rep = Report(report_path)
+    rep.project = project
+    p = pathlib.Path(file)
+    if p.suffix.lower() not in IMAGE_EXT:
+        fail(f"image {file}: not an image ({', '.join(sorted(IMAGE_EXT))})")
+    d, rf, item = _register(rep, p, "Image")
+    rep.write(rf, d)
+    return item, rep.changed
+
+
 def resource_add(report_path, file, name=None):
     rep = Report(report_path)
     p = pathlib.Path(file)

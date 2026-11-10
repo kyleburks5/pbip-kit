@@ -1077,6 +1077,36 @@ def keep_desktop_filters(old, d):
     fc.extend(f_ for f_ in mine if f_.get("name") not in have)
 
 
+IMAGE_SCALING = {"fit": "Fit", "fill": "Fill", "normal": "Normal"}
+
+
+def image_spec(v):
+    """layout `image`: "<file>" or {file, scaling} -> (file, scaling)."""
+    im = v["image"]
+    im = {"file": im} if isinstance(im, str) else dict(im)
+    if not im.get("file"):
+        raise BuildError(f"{v['id']}: image needs a file (a PNG path from the project root)")
+    sc = IMAGE_SCALING.get(str(im.get("scaling", "fit")).lower())
+    if not sc:
+        raise BuildError(f"{v['id']}: image scaling {im.get('scaling')!r} ({', '.join(IMAGE_SCALING)})")
+    return im["file"], sc
+
+
+def apply_image(ctx, vid, v, d):
+    """image (roadmap gap 3): an image visual bound to a registered resource, in the form Desktop saved on the
+    Patterns page (design/templates/image.json): general.imageUrl = ResourcePackageItem (RegisteredResources,
+    PackageType 1), imageScaling.imageScalingType. The file is registered by build() first (`pbik resource add`)."""
+    if "image" not in v:
+        return
+    if v["type"] != "image":
+        raise BuildError(f"{vid}: image is for image visuals (type image); a card image is cf type image")
+    _, sc = image_spec(v)
+    item = ctx.images[vid]
+    set_prop(ctx, vid, d, "objects", "general", None, "imageUrl", {"expr": {"ResourcePackageItem": {
+        "PackageName": "RegisteredResources", "PackageType": 1, "ItemName": item}}})
+    set_prop(ctx, vid, d, "objects", "imageScaling", None, "imageScalingType", s(sc))
+
+
 def apply_html_content(ctx, vid, v, d):
     """HTML Content visuals render with legacy rendering on (pbikit/htmlcontent.py); warn under 43px tall."""
     if not HC.is_html_content(v["type"]):
@@ -1139,10 +1169,24 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             fail(f"theme {tf} not found (run design/scripts/gen_theme.py first)")
         from .theme import apply as apply_theme
         theme_changed = apply_theme(report_path, tf, quiet=True, project=project)
+    images, image_changed = {}, []
+    for v in layout.get("visuals", []):        # roadmap gap 3: register each image visual's file first
+        if "image" not in v:
+            continue
+        try:
+            file, _ = image_spec(v)
+        except BuildError as e:
+            fail(str(e))
+        src = pathlib.Path(file)
+        src = src if src.is_absolute() else design.parent / src
+        from .theme import register_image
+        images[v["id"]], ch = register_image(report_path, src, project)
+        image_changed += [c for c in ch if c not in image_changed]
     rep = Report(report_path)
     rep.project = project
-    rep.changed.extend(theme_changed)
+    rep.changed.extend(theme_changed + [c for c in image_changed if c not in theme_changed])
     ctx = Ctx(rep, layout, tokens)
+    ctx.images = images
     ctx.strict = strict
     errors, log = [], []
     try:
@@ -1405,6 +1449,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_slicer_mode(ctx, vid, v, d)
             apply_sync(ctx, vid, v, d)
             apply_navigator(ctx, vid, v, d)
+            apply_image(ctx, vid, v, d)
             apply_props(ctx, vid, v, d)
             check_props_schema(ctx, vid, v, d["$schema"])
             retiring = DEP.visual_issue(v["type"], in_build=True) or DEP.link_issue(

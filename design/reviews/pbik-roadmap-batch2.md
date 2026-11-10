@@ -79,3 +79,20 @@ size and SHA-1. Read-only, as before. Test 123. Batch 1 did the pane-dependent h
 
 **Provenance**: [L1] *Power BI Desktop project report folder*, "RegisteredResources\" (the theme and images Desktop
 keeps there); pbik's roundtrip.py (`SKIP_DIRS`, `side_from_git`, `side_from_folder`).
+## Gap 3: images as a layout key (image visuals done; page images blocked)
+
+**What pbik does now**: layout `image: "<file>"` or `{file, scaling}` on an image visual registers the file (the same
+`_register` as `pbik resource add`, idempotent) before the build, then writes `general.imageUrl` as a
+ResourcePackageItem (RegisteredResources, PackageType 1, the item name) and `imageScaling.imageScalingType`. Not
+marked unverified: it is the form Desktop saved on the Patterns page (`design/templates/image.json`, harvested from
+the Desktop-saved Patterns report) and the PNG route .claude/rules/svg.md records as tested in Desktop (Reps 6-7).
+Test 124.
+
+**Blocked**: a page background image and a wallpaper (`outspace`) image. S:page 2.1.0 #Background lists an `image`
+property (and #PageFormattingObjects an `outspace` object) but says nothing of the value's shape, and no Desktop-saved
+file in the kit has one. Next step: the Desktop checklist (set an image as the background of the smoke report's
+Images page, save, roundtrip) shows the form.
+
+**Provenance**: S:report 3.3.0 #ResourcePackageItem / #ResourcePackageItemType (Image); S:semanticQuery 1.4.0
+#QueryResourcePackageItem; S:page 2.1.0 #Background; [L1] "RegisteredResources\"; `design/templates/image.json`;
+pbik's theme.py (`_register`) and objects.py (`image_objects`).

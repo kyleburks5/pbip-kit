@@ -2368,6 +2368,29 @@ class PbikTests(unittest.TestCase):
         self.assertIn(f"- changed: {theme.name}: Desktop rewrites name", sec)
         self.assertIn("- added: Desktop registered new-logo.png", sec)
 
+    def test_124_image_key(self):
+        """Gap 3: layout `image` registers the file and binds it as the Patterns page's image did (Desktop-saved)."""
+        def edit(lay):
+            lay["visuals"].append({"id": "P1-V20", "name": "logo", "page": "P1", "type": "image", "x": 1700, "y": 40,
+                                   "w": 64, "h": 64, "z": 2, "image": {"file": "design/images/logo.png",
+                                                                       "scaling": "fill"},
+                                   "container": {"altText": "Company logo"}})
+        work, rep, lf = self._batch1("b124", edit)
+        (work / "design" / "images").mkdir()
+        (work / "design" / "images" / "logo.png").write_bytes(b"PNG stand-in")
+        r = pbik("build", rep, lf)
+        self.assertIn("StaticResources/RegisteredResources/logo.png", r.stdout)
+        g = visual(rep, "P1-V20")["visual"]["objects"]
+        self.assertEqual(g["general"][0]["properties"]["imageUrl"]["expr"]["ResourcePackageItem"],
+                         {"PackageName": "RegisteredResources", "PackageType": 1, "ItemName": "logo.png"})
+        self.assertEqual(g["imageScaling"][0]["properties"]["imageScalingType"], {"expr": {"Literal": {"Value": "'Fill'"}}})
+        rd = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        items = next(p_ for p_ in rd["resourcePackages"] if p_["name"] == "RegisteredResources")["items"]
+        self.assertIn({"name": "logo.png", "path": "logo.png", "type": "Image"}, items)
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self._relayout(lf, lambda lay: lay["visuals"].append(dict(lay["visuals"][-1], id="P1-V21", type="shape")))
+        self.assertIn("image is for image visuals", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""
