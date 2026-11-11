@@ -1282,7 +1282,8 @@ def apply_drillthrough(ctx, key, spec, d):
                 "useCrossReportDrillthrough") is not True:
             ctx.res.warnings.append(f"{owner}: crossReport drill-through needs the report setting "
                                     "useCrossReportDrillthrough: set `report.settings.useCrossReportDrillthrough: true`")
-    binding["acceptsFilterContext"] = "Default" if dt.get("keepFilters", True) else "None"
+    if not dt.get("keepFilters", True):      # Desktop drops the Default (pbik-smoke-bulk save, 2026-11-11)
+        binding["acceptsFilterContext"] = "None"
     d["type"] = "Drillthrough"
     d["pageBinding"] = binding
     d.setdefault("filterConfig", {}).setdefault("filters", []).extend(flts)

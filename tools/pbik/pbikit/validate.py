@@ -599,6 +599,17 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
         if len(ps) > 1:
             fd.err("pages", f"pageBinding.name {bn} is on {len(ps)} pages ({', '.join(map(str, ps))}): it must be "
                             "unique across the report (a copied page keeps it; give each its own)")
+    for name, pd, pfolder in pages:                 # a drill-through page needs a way back (roadmap gap 7)
+        if pd.get("type") != "Drillthrough":
+            continue
+        back = any("Back" in str((((e.get("properties") or {}).get("type") or {}).get("expr", {}).get("Literal", {})
+                                  .get("Value", "")))
+                   for d, _ in rep.visuals(pfolder)
+                   for e in (d.get("visual", {}).get("visualContainerObjects", {}).get("visualLink") or []))
+        if not back:
+            fd.warn(f"page {pd.get('displayName')}", "drill-through page without a Back button: Desktop adds one only "
+                                                     "when you make the page in Desktop; add a button with action "
+                                                     "`{type: Back}`")
     for name, pd, pfolder in pages:                 # a visual's report-page tooltip names a Tooltip page
         for d, f in rep.visuals(pfolder):
             for e in (d.get("visual", {}).get("visualContainerObjects", {}).get("visualTooltip") or []):

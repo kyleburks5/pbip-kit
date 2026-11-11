@@ -2592,7 +2592,7 @@ class PbikTests(unittest.TestCase):
             next(x for x in lay["visuals"] if x["id"] == "P1-V06")["action"] = {"type": "Drillthrough", "page": "P3"}
         work, rep, lf = self._batch1("b131", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 7)", r.stdout)
+        self.assertNotIn("roadmap gap 7)", r.stdout)                 # confirmed in Desktop (2026-11-11)
         name, pg, _ = Report(rep).page_by("pbik store detail")
         self.assertEqual(pg["type"], "Drillthrough")
         pb = pg["pageBinding"]
@@ -2603,7 +2603,9 @@ class PbikTests(unittest.TestCase):
         link = visual(rep, "P1-V06")["visual"]["visualContainerObjects"]["visualLink"][0]["properties"]
         self.assertEqual(link["drillthroughSection"], {"expr": {"Literal": {"Value": f"'{name}'"}}})
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
-        self.assertIn("0 error(s)", pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout)
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout
+        self.assertIn("0 error(s)", v)
+        self.assertIn("drill-through page without a Back button", v)
         self._relayout(lf, lambda lay: lay["pages"]["P3"].update(filters=[{"field": "products[Product_Category]",
                                                                              "values": ["Toys"]}]))
         pbik("build", rep, lf)
