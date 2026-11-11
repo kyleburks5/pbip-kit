@@ -2461,11 +2461,15 @@ class PbikTests(unittest.TestCase):
         pg = Report(rep).page_by("pbik sales")[1]
         fs = {f["type"]: f for f in pg["filterConfig"]["filters"]}
         self.assertEqual(pg["filterConfig"]["filterSortOrder"], "Custom")
-        rng = fs["Range"]
-        self.assertEqual((rng["displayName"], rng["ordinal"]), ("First half", 2))
-        btw = rng["filter"]["Where"][0]["Condition"]["Between"]
-        self.assertEqual((btw["LowerBound"], btw["UpperBound"]), ({"Literal": {"Value": "1L"}}, {"Literal": {"Value": "6L"}}))
-        orc = fs["Advanced"]["filter"]["Where"][0]["Condition"]["Or"]
+        rng = next(f for f in pg["filterConfig"]["filters"] if f.get("displayName") == "First half")
+        self.assertEqual((rng["type"], rng["ordinal"]), ("Advanced", 2))
+        both = rng["filter"]["Where"][0]["Condition"]["And"]
+        self.assertEqual((both["Left"]["Comparison"]["ComparisonKind"], both["Left"]["Comparison"]["Right"]),
+                         (2, {"Literal": {"Value": "1L"}}))
+        self.assertEqual((both["Right"]["Comparison"]["ComparisonKind"], both["Right"]["Comparison"]["Right"]),
+                         (4, {"Literal": {"Value": "6L"}}))
+        adv = next(f for f in pg["filterConfig"]["filters"] if f["type"] == "Advanced" and "Or" in json.dumps(f["filter"]))
+        orc = adv["filter"]["Where"][0]["Condition"]["Or"]
         self.assertEqual(orc["Left"]["Contains"]["Right"], {"Literal": {"Value": "'ville'"}})
         self.assertEqual(orc["Right"]["Comparison"]["Right"], {"Literal": {"Value": "null"}})
         low = fs["RelativeDate"]["filter"]["Where"][0]["Condition"]["Between"]["LowerBound"]["DateSpan"]

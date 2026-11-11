@@ -179,19 +179,13 @@ feature("cross-report", 29, "cross-report drill-through (drillthrough `crossRepo
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]
-    if fc.get("filterSortOrder") or (kind == "report" and mine):
-        return True
-    for f in mine:
-        if f.get("type") in ("Range", "RelativeDate") or "displayName" in f or "ordinal" in f:
-            return True
-        txt = json.dumps(f.get("filter", {}))
-        if f.get("type") == "Advanced" and ('"Contains"' in txt or '"StartsWith"' in txt or '"null"' in txt):
-            return True
-    return False
+    # Advanced text conditions, RelativeDate, displayName, ordinal, filterSortOrder and report filters were confirmed in
+    # Desktop (2026-11-11); only the range (Advanced with two comparisons, rewritten after that check) is listed
+    return any(f.get("type") == "Advanced" and '"ComparisonKind": 2' in json.dumps(f.get("filter", {})) and
+               '"ComparisonKind": 4' in json.dumps(f.get("filter", {})) for f in mine)
 
 
-feature("filters", 4, "filter types Range, RelativeDate and Advanced text conditions, report-level filters, filter "
-        "displayName / ordinal and filterSortOrder", _new_filters)
+feature("filters", 4, "range filters (`type: Range`, written as Advanced with two comparisons)", _new_filters)
 feature("annotations", 13, "annotations on report.json, pages and visuals (layout `annotate`, `annotations`)",
         _pbik_annotations)
 

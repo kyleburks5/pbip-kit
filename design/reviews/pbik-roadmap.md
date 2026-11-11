@@ -308,3 +308,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 8 | Partial after the Desktop check | hierarchy-level fields confirmed (2026-11-11), with `active` flags as Desktop saves them; `expand` is a build error: Desktop kept the state but drew the matrix collapsed |
 | 9 | Fixed after the Desktop check, UNVERIFIED again | Desktop refused duplicate native reference names; later duplicates now take Desktop's field-well labels ("Median of Amount") |
 | 10 | Fixed after the Desktop check, UNVERIFIED again | the sparkline shared the measure's native reference name; it is now "<measure> by <column>" (Desktop's well label) |
+| 4 | Partial after the Desktop check | Advanced text, RelativeDate, report filters, displayName / ordinal / order confirmed (2026-11-11); Range rewritten as Advanced >= And <=, UNVERIFIED again |

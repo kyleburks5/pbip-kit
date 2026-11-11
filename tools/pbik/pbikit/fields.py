@@ -231,14 +231,17 @@ def _where(field, cond_of):
 
 
 def range_filter(name, field, data_type, low, high):
-    """Values between low and high, both included: a Range filter with one Between condition."""
+    """Values between low and high, both included: the pane's Advanced mode, "is greater than or equal to" And "is less
+    than or equal to". A `type: Range` filter with Between was rewritten by Desktop to Categorical and shown as Basic
+    filtering "is (All)" (pbik-smoke-bulk, 2026-11-11)."""
     if low is None or high is None:
         raise FieldError("a Range filter needs min and max")
-    return {"name": name, "field": field, "type": "Range",
-            "filter": _where(field, lambda col: {"Between": {"Expression": col,
-                                                             "LowerBound": typed_literal(low, data_type),
-                                                             "UpperBound": typed_literal(high, data_type)}}),
-            "howCreated": "User"}
+
+    def cond(col):
+        return {"And": {"Left": {"Comparison": {"ComparisonKind": 2, "Left": col, "Right": typed_literal(low, data_type)}},
+                        "Right": {"Comparison": {"ComparisonKind": 4, "Left": col,
+                                                 "Right": typed_literal(high, data_type)}}}}
+    return {"name": name, "field": field, "type": "Advanced", "filter": _where(field, cond), "howCreated": "User"}
 
 
 def _text_cond(col, op, value, data_type):
