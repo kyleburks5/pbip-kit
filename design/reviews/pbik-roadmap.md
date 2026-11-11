@@ -306,3 +306,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 7 | Done, confirmed in Desktop | right-click and button drill-through work (2026-11-11); Default acceptsFilterContext no longer written; validate warns on a drill-through page with no Back button |
 | 29 | Done, confirmed in Desktop | the page's Cross-report toggle is On and the report setting ticked (2026-11-11); cross-workspace drilling itself needs the Service |
 | 8 | Partial after the Desktop check | hierarchy-level fields confirmed (2026-11-11), with `active` flags as Desktop saves them; `expand` is a build error: Desktop kept the state but drew the matrix collapsed |
+| 9 | Fixed after the Desktop check, UNVERIFIED again | Desktop refused duplicate native reference names; later duplicates now take Desktop's field-well labels ("Median of Amount") |

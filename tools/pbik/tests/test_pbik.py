@@ -2730,6 +2730,12 @@ class PbikTests(unittest.TestCase):
         r = pbik("build", rep, lf)
         self.assertIn("UNVERIFIED in Desktop (roadmap gap 9)", r.stdout)
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V05")["bindings"].update(
+            Values=["stores[Store]", "Avg(sales[Units])", "Median(sales[Units])", "Percentile(sales[Units], 0.9)",
+                    "Sum(sales[Units])"]))
+        pbik("build", rep, lf)
+        refs = [p["nativeQueryRef"] for p in visual(rep, "P1-V05")["visual"]["query"]["queryState"]["Values"]["projections"]]
+        self.assertEqual(refs, ["Store", "Units", "Median of Units", "Percentile.Inc(Units, 0.9)", "Sum of Units"])
 
     def test_138_visual_calcs_and_sparklines(self):
         """Gap 10: a visual calculation and a sparkline column as binding items."""

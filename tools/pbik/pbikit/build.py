@@ -473,6 +473,34 @@ def apply_expand(ctx, vid, v, d):
     tree_gate(ctx, vid, d.get("$schema", ""), ["visual", "expansionStates"], d["visual"]["expansionStates"])
 
 
+AGG_LABELS = {0: "Sum", 1: "Average", 2: "Count (Distinct)", 3: "Min", 4: "Max", 5: "Count", 6: "Median",
+              7: "Standard deviation", 8: "Variance"}
+
+
+def unique_native_refs(qs):
+    """Desktop refuses a query whose select clause has two expressions with one native reference name ("Could not
+    resolve the QueryDefinition", pbik-smoke-bulk, 2026-11-11, roadmap gaps 9 and 10). The first keeps its plain name;
+    a later aggregation of the same column takes Desktop's field-well label ("Median of Amount",
+    "Percentile.Inc(Amount, 0.9)"), anything else a number."""
+    seen = set()
+    for role in qs.values():
+        for p in role.get("projections", []):
+            name = p.get("nativeQueryRef")
+            if name not in seen:
+                seen.add(name)
+                continue
+            f = p["field"]
+            if "Aggregation" in f:
+                name = f"{AGG_LABELS.get(f['Aggregation'].get('Function'), 'Value')} of {name}"
+            elif "Percentile" in f:
+                name = f"Percentile.Inc({name}, {f['Percentile']['K']:g})"
+            base, k = name, 2
+            while name in seen:
+                name, k = f"{base} {k}", k + 1
+            p["nativeQueryRef"] = name
+            seen.add(name)
+
+
 def apply_query(ctx, v, d):
     if "bindings" not in v and "sort" not in v:
         return
@@ -516,6 +544,7 @@ def apply_query(ctx, v, d):
             if fparams:
                 qs[role]["fieldParameters"] = [{"parameterExpr": f["parameterExpr"], "index": f["index"],
                                                 "length": f["length"]} for f in fparams]
+        unique_native_refs(qs)
         vis.setdefault("query", {})["queryState"] = qs
     if "sort" in v:
         srt = v["sort"] if isinstance(v["sort"], list) else [v["sort"]]
