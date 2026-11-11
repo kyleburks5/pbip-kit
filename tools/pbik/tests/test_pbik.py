@@ -2877,20 +2877,21 @@ class PbikTests(unittest.TestCase):
     def test_142_bookmark_display_modes(self):
         """Gap 28: spotlight, elevation and focus (maximize with the accessible data table) in a bookmark."""
         def edit(lay):
-            lay["pages"]["P1"]["bookmarks"] = [{"name": "story", "spotlight": ["P1-V04"], "elevate": ["P1-V03"],
+            lay["pages"]["P1"]["bookmarks"] = [{"name": "story", "spotlight": ["P1-V04"],
                                                 "focus": {"visual": "P1-V05", "table": "accessible"}}]
         work, rep, lf = self._batch1("b142", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 28)", r.stdout)
+        self.assertNotIn("roadmap gap 28)", r.stdout)                # confirmed in Desktop (2026-11-11)
         bd = json.loads(next((rep / "definition" / "bookmarks").glob("*.bookmark.json")).read_text(encoding="utf-8"))
         sec = next(iter(bd["explorationState"]["sections"].values()))["visualContainers"]
         mode = {k.split("_")[0]: v["singleVisual"].get("display") for k, v in sec.items()}
         self.assertEqual(mode["P1-V04"], {"mode": "spotlight"})
-        self.assertEqual(mode["P1-V03"], {"mode": "elevation"})
         self.assertEqual(mode["P1-V05"], {"mode": "maximize", "maximizedOptions": {"dataTable": "accessible"}})
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
         self._relayout(lf, lambda lay: lay["pages"]["P1"]["bookmarks"][0].update(hide=["P1-V04"]))
         self.assertIn("gives ['P1-V04'] two display modes", pbik("build", rep, lf, ok=(1,)).stdout)
+        self._relayout(lf, lambda lay: lay["pages"]["P1"]["bookmarks"][0].update(hide=[], elevate=["P1-V03"]))
+        self.assertIn("elevate isn't supported", pbik("build", rep, lf, ok=(1,)).stdout)
 
     def test_144_cross_report_drillthrough(self):
         """Gap 29: crossReport adds referenceScope CrossReport and warns until the report setting is on."""

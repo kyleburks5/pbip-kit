@@ -73,6 +73,9 @@ def check(layout):
             both = set(b.get("show", [])) & set(b.get("hide", []))
             if both:
                 errors.append(f"page {k}: bookmark {b['name']!r} both shows and hides {sorted(both)}")
+            if b.get("elevate"):
+                errors.append(f"page {k}: bookmark {b['name']!r}: elevate isn't supported: Desktop dropped the "
+                              "elevation mode on save (pbik-smoke-bulk, 2026-11-11)")
             fid, tbl = focus_of(b)
             if b.get("focus") and not fid:
                 errors.append(f"page {k}: bookmark {b['name']!r}: focus needs a visual ID")
@@ -113,7 +116,7 @@ def focus_of(b):
 
 
 def display_ids(b):
-    return list(b.get("spotlight") or []) + list(b.get("elevate") or []) + ([focus_of(b)[0]] if b.get("focus") else [])
+    return list(b.get("spotlight") or []) + ([focus_of(b)[0]] if b.get("focus") else [])
 
 
 def bookmark_doc(rep, b, page_name, vnames, vtypes):
@@ -134,8 +137,6 @@ def bookmark_doc(rep, b, page_name, vnames, vtypes):
             sv["display"] = {"mode": "hidden"}
         elif vid in (b.get("spotlight") or []):      # roadmap gap 28 (UNVERIFIED in Desktop)
             sv["display"] = {"mode": "spotlight"}
-        elif vid in (b.get("elevate") or []):
-            sv["display"] = {"mode": "elevation"}
         elif vid == focus_of(b)[0]:
             sv["display"] = {"mode": "maximize"}
             if focus_of(b)[1]:
