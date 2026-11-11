@@ -267,6 +267,9 @@ found by diffing every cached schema definition against the coverage map. Some r
 
 ## Batch 2 status (bulk run 2026-11-10, design/reviews/pbik-roadmap-batch2.md)
 
+Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order the run took them. The smoke report
+`..\pbik-smoke-bulk` and its Desktop checklist (batch 2 notes, last section) cover every UNVERIFIED and blocked item.
+
 | # | Status | Note |
 |---|---|---|
 | 21 | Partial: check done; writing "hidden from tab order" blocked | `decorative: true` layout key and validate warning; the PBIR form needs one Desktop save (checklist) |

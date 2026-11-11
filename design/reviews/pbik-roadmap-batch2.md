@@ -385,3 +385,74 @@ ask about before building, and docs/it-security.md treats such visuals as uncert
 should write them at all, and under which check, is a policy decision. The schema forms are known (S:report 3.3.0
 `organizationCustomVisuals`, #OrganizationCustomVisual, #ResourcePackageType CustomVisual /
 OrganizationalStoreCustomVisual), so it is a small gap once decided.
+## Desktop checklist (pbik-smoke-bulk)
+
+`..\pbik-smoke-bulk\Smoke.pbip` (beside the kit folder) is the smoke report for this batch. It uses synthetic data only:
+`Sales` holds 216 inline rows (`#table`: 4 regions x 3 categories x 18 months to November 2026), with no file or
+connection. `Date`, `Month` and a `Calendar` hierarchy (Year > Month) were added to the batch 1 smoke model. There is
+one page per gap, named after its gap number. It was built with `pbik build --strict` against Microsoft's cached schemas,
+and `pbik validate --strict` reports 0 errors. Page 19, "17 Copied page", was made with `pbik copy page`.
+`_pbik-built\` holds the report exactly as pbik wrote it, for roundtrip. `..\pbik-smoke-bulk-draft\` is a first attempt
+from before the gap 17 fix, kept only because nothing gets deleted without asking; it can be deleted.
+
+Before you start: open `Smoke.pbip` in Desktop 2.159.883.0 and click **Refresh**. Refresh reads only the inline rows.
+The report opens on "12 Page settings" (the landing page).
+
+1. **Gap 12, landing page and page props:** the report opens on "12 Page settings". That page's content is vertically
+   centred (`displayArea` Middle).
+2. **Gap 13, annotations:** nothing to see. After the save, roundtrip should list no change to `annotations`.
+3. **Gap 21, tab order:** on "21-22 Accessibility", go to View > Selection > Tab order and hide `P1-V02_band` from the
+   tab order. The save shows the hidden form, which pbik's `decorative` key will then write.
+4. **Gap 3, images:** on "3 Images" the teal square shows (registered PNG). Then set any image as that page's
+   **canvas background** (Format page > Canvas background > Image). This is the page-image form that isn't known yet.
+5. **Gap 25, registered resources:** the theme's colours and font apply on every page, and the image in step 4 loads.
+6. **Gap 4, filters:** open the filter pane. On "4 Filters", the page filters show in this order: "Years 2025-2026"
+   (Range), Category (Advanced: starts with "Al" or contains "mm"), and Date (relative: last 12 months). The report
+   filter on Region is hidden. Only Alpha and Gamma bars from Dec 2025 to Nov 2026 show.
+7. **Gap 2, per-member colours:** on "2 Per-member colours" the donut slices are teal, slate, light teal and gold, and
+   the column chart's North bar is red.
+8. **Gaps 5 and 28, bookmarks:** on "5 28 Bookmarks":
+   - Alpha selects Alpha in the slicer and sorts the chart ascending.
+   - Spotlight dims everything but the chart and lifts the slicer (elevation).
+   - Focus opens the table in focus mode with the accessible data table.
+   Leave the page as you found it before saving.
+9. **Gap 6, tooltip page:** on "6 Tooltip source", hover a bar. If the default tooltip shows instead of the "6 Tooltip
+   page" card, set the chart's Format > General > Tooltips > Type to Report page, Page "6 Tooltip page". The save then
+   shows visualTooltip `type`.
+10. **Gaps 7 and 29, drill-through:** on "6 Tooltip source", right-click a bar > Drill through > "7 29 Drill-through",
+    and also try the "Drill to detail" button. The detail table filters to that region. In File > Options > Current
+    file > Report settings, cross-report drill-through is on.
+11. **Gap 8, hierarchy:** on "8 Hierarchy" the matrix shows Year with Month expanded under it.
+12. **Gap 9, aggregations:** on "9 Aggregations" the table shows Average, Max, Count, Count (Distinct), Median,
+    Standard deviation, Variance and the 90th percentile of Amount per region.
+13. **Gap 10, visual calculations and sparklines:** on "10 Visual calcs and sparklines" the table has a "Running total"
+    column and a sparkline of Total Amount by Month.
+14. **Gap 11, mobile layout:** go to View > Mobile layout on "11 Mobile layout": the card sits top-left at 320x160.
+15. **Gap 14, shape map:** on "14 Shape map", in Format > Map settings, pick the uploaded `regions.topo.json`
+    (registered by pbik). The save shows the binding.
+16. **Gap 16, rotation and query options:** on "16 Rotation and query options" the text box is rotated 90 degrees,
+    and the line chart draws.
+17. **Gap 27, group formatting:** on "27 Group" the two cards sit on a light grey group background. In the Selection
+    pane, the group's alt text is "Two headline cards".
+18. **Gap 17, copied page:** "17 Copied page" opens like "5 28 Bookmarks", and its three buttons apply their own copied
+    bookmarks.
+19. **Gap 26, new visuals:** "26 New visuals" shows a bare list slicer, or an error tile if `listSlicer` isn't the type
+    id. Separately, for the templates: add a list slicer, an input slicer, an Azure map and a Gantt chart to the
+    Patterns page in `..\pbip-patterns`, save, then run `pbik templates harvest` and `pbik catalog refresh`
+    (docs/UPDATE-ROUTINE.md step 4).
+20. Save once (Ctrl+S) and close Desktop. Then, from `..\pbik-smoke-bulk`, run the roundtrip command below.
+
+Note anything that didn't render in step 1-19 next to its step number; together with the roundtrip output that is
+what the follow-up needs.
+
+**Roundtrip, after you save** (run from `..\pbik-smoke-bulk`):
+
+```bat
+python ..\pbip-kit-export\tools\pbik\pbik.py roundtrip Smoke.Report --before _pbik-built\Smoke.Report --out roundtrip.md
+```
+
+Reading it:
+- Anything under "Proposed pbik fixes" on a gap's page is a form to correct.
+- An "added" line on steps 3, 4, 9 and 15 is the missing form those gaps need.
+- The "Registered resources" section should say Desktop kept the theme, the PNG and the map.
+- Pane-dependent lines are expected.
