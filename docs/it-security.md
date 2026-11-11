@@ -52,7 +52,7 @@ The visual-method ladder (CLAUDE.md "Native first") allows custom visuals at ste
 
 | Visual | Status | Recorded |
 | --- | --- | --- |
-| Deneb (Vega / Vega-Lite), AppSource | Certified AppSource visual; confirmed working in Kyle's work tenant (as reported by Kyle) | 2026-10-24 |
+| Deneb (Vega / Vega-Lite), AppSource | Certified AppSource visual; confirmed working in the work tenant (as reported by the maintainer) | 2026-10-24 |
 | Any other custom visual (.pbiviz from AppSource uncertified, from GitHub, or built in-house; HTML Content) | Uncertified: needs a separate check with IT before use (tenant admin setting for uncertified / organisational visuals, the visual's network calls, its licence) | none cleared |
 
 - Deneb is step 3. Every Deneb visual names a native or SVG fallback in layout.json (`fallback`), so the report can be

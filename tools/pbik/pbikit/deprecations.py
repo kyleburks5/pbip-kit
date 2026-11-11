@@ -14,7 +14,7 @@ Provenance (roadmap batch 1, item c; Microsoft Learn read 2026-11-10, schemas fr
 - visualType ids: `map` and `azureMap` are in Desktop's own base themes (Fluent2-CY26SU09 and CY24SU10 visualStyles,
   in the Rep 4, 5 and 8 fixtures). `filledMap` and `qnaVisual` are not in any file Desktop saved for the kit and Learn
   doesn't print type ids: unconfirmed until a Desktop save shows them (matched case-insensitively).
-- The Q&A visual can't be confirmed from a save: Kyle found it in neither Visualizations nor Insert in Desktop
+- The Q&A visual can't be confirmed from a save: the maintainer found it in neither Visualizations nor Insert in Desktop
   2.159.883.0 (2026-11-10). Its type id stays unconfirmed, and its warning is validate-only (VALIDATE_ONLY): pbik build
   can't place one from a template anyway, so it only matters on files someone else made.
 """

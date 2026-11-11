@@ -50,4 +50,4 @@ changes then need the Modeling MCP from a mirror or the VS Code extension; no De
 manual reload; no pip: the kit runs without packages. No Python, PowerShell scripts, Power BI Desktop or Git: the
 kit can't run.
 
-Contact: Kyle Burks.
+Contact: <your name>.
