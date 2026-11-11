@@ -312,3 +312,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 11 | Done, confirmed in Desktop | the card sits on the phone canvas (2026-11-11); mobile.json gets `tabOrder: 0` as Desktop saves it (Desktop also moves it to 2.9.0, unpublished) |
 | 12 | Done, confirmed in Desktop | landing page and displayArea Middle work and were kept (2026-11-11) |
 | 13 | Done, confirmed in Desktop | Desktop kept every annotation on save (2026-11-11) |
+| 5 | Done, confirmed in Desktop | the bookmark ticks the slicer and sorts the chart (2026-11-11) |

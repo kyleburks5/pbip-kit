@@ -2535,7 +2535,7 @@ class PbikTests(unittest.TestCase):
                                                 "sort": {"P1-V04": {"field": "[Revenue]", "direction": "Ascending"}}}]
         work, rep, lf = self._batch1("b129", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 5)", r.stdout)
+        self.assertNotIn("roadmap gap 5)", r.stdout)                 # confirmed in Desktop (2026-11-11)
         bd = json.loads(next((rep / "definition" / "bookmarks").glob("*.bookmark.json")).read_text(encoding="utf-8"))
         self.assertNotIn("suppressData", bd["options"])
         sec = next(iter(bd["explorationState"]["sections"].values()))["visualContainers"]
@@ -2547,7 +2547,7 @@ class PbikTests(unittest.TestCase):
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
         v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
         self.assertIn("0 error(s)", v)
-        self.assertIn("roadmap gap 5", v)
+        self.assertNotIn("roadmap gap 5", v)
         self._relayout(lf, lambda lay: lay["pages"]["P1"]["bookmarks"][0].update(data=False))
         self.assertIn("saves a selection or sort, which needs data", pbik("build", rep, lf, ok=(1,)).stdout)
 
