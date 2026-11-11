@@ -80,7 +80,7 @@ The layout keys are below; `tests/sample/layout.json` uses all of them except th
 names; font sizes are points or `tokens.fontPt` names; paddings and radii can name `tokens.container` values.
 Fields use the layout notation: `[Measure]`, `Table[Column]`, `'Table name'[Column]`, `Sum(Table[Column])` (also `Median`,
 `StDev`, `Variance` and `Percentile(Table[Column], 0.9)`, number columns only: Aggregation Function 6-8 and
-Percentile, **UNVERIFIED in Desktop**, roadmap gap 9; two fields with one name in a visual get unique
+Percentile, confirmed in Desktop 2026-11-11, roadmap gap 9; two fields with one name in a visual get unique
 `nativeQueryRef`s, "Median of Amount", since Desktop refuses duplicates), checked
 against the model's TMDL and `reportExtensions.json`.
 

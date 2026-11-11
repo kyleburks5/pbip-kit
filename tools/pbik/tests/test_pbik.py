@@ -2734,7 +2734,7 @@ class PbikTests(unittest.TestCase):
         work, rep, lf = self._batch1("b137", lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V04")[
             "bindings"].update(Y=["Median(sales[Units])"]))
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 9)", r.stdout)
+        self.assertNotIn("roadmap gap 9)", r.stdout)                 # confirmed in Desktop (2026-11-11)
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
         self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V05")["bindings"].update(
             Values=["stores[Store]", "Avg(sales[Units])", "Median(sales[Units])", "Percentile(sales[Units], 0.9)",
