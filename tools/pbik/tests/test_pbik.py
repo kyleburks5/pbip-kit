@@ -2741,6 +2741,22 @@ class PbikTests(unittest.TestCase):
             {"sparkline": "[Revenue]", "by": "Date[Year Month]"}))
         self.assertIn("sparklines are for tables and matrices", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_139_mobile_layout(self):
+        """Gap 11: visual `mobile` writes mobile.json (position only), removed when the key goes."""
+        work, rep, lf = self._batch1("b139", lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V03").update(
+            mobile={"x": 0, "y": 0, "w": 320, "h": 120}))
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 11)", r.stdout)
+        mf = next(rep.glob("definition/pages/*/visuals/P1-V03_*/mobile.json"))
+        md = json.loads(mf.read_text(encoding="utf-8"))
+        self.assertIn("visualContainerMobileState/2.8.0", md["$schema"])
+        self.assertEqual(md["position"], {"x": 0, "y": 0, "z": 0, "width": 320, "height": 120})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self.assertIn("roadmap gap 11", pbik("validate", rep, "--no-catalog", "--no-a11y").stdout)
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V03").pop("mobile"))
+        pbik("build", rep, lf)
+        self.assertFalse(mf.exists())
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

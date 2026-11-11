@@ -299,3 +299,17 @@ formatting (line colour, markers) stays with `props` until a Desktop save shows 
 **Provenance**: S:semanticQuery 1.4.0 #QueryNativeVisualCalc (`Language` dax, `Expression`, `Name`, `DataType` enum),
 #QuerySparklineDataExpression (`Measure`, `Groupings`, `PointsPerSparkline` const 52); S:visualConfiguration 2.8.0
 #ProjectionState; pbik's build.py (projection shape).
+## Gap 11: mobile layout (position done, UNVERIFIED in Desktop)
+
+**What pbik does now**: visual `mobile: {x, y, w, h, z}` writes `mobile.json` in the visual's folder (`$schema`
+visualContainerMobileState 2.8.0, `position`), schema-checked; pbik owns the files it wrote (visual-map `mobile`)
+and removes one when the key goes. Mobile-only formatting (`objects`, `visualContainerObjects` in mobile.json) isn't
+written: no layout key yet. Test 139.
+
+**UNVERIFIED in Desktop**: whether Desktop shows the phone layout from mobile.json alone. Learn lists the report's
+own `mobileState.json` as not supported for external editing (roadmap: Out), and pbik doesn't write it; Desktop
+may need the page's mobile layout opened once. The checklist opens View > Mobile layout and saves.
+
+**Provenance**: S:visualContainerMobileState 2.8.0 (`objects`, `visualContainerObjects`, `position`
+#VisualContainerPosition); [L1] "PBIR folder and files" (mobile.json per visual); [L3] "Considerations and
+limitations" (mobileState.json not supported externally).

@@ -25,7 +25,10 @@ from . import unverified as UV
 from . import versions
 from .objects import (b, chrome_off, colour_expr, drop_shadow, ex, i, load, n, native_ref, navigator_states, qref,
                       ref_labels, s, save, shape_objects, solid, solid_ex, theme_colour)
-from .report import ID_RE, Report, fail, stable_name
+from .report import ID_RE, SCHEMA, Report, fail, stable_name
+
+# roadmap gap 11: Microsoft's CHANGELOG for this kind isn't in schema-support.json, so targetDesktop doesn't cap it
+MOBILE_SCHEMA = SCHEMA.format("visualContainerMobileState", "2.8.0")
 
 TEXT_FIT = {"textbox": (-6, 12)}       # text boxes get 6px headroom and 12px extra height (audit_layout.py matches)
 AXES = {"x": "xAxisReferenceLine", "category": "xAxisReferenceLine", "y": "y1AxisReferenceLine",
@@ -1867,6 +1870,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
 
     # write
     pages_kept = {}
+    mobile_owned, mobile_docs = [], []
     for a_, b2 in moves:
         b2.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(a_), str(b2))
@@ -1874,6 +1878,28 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     for key, (d, folder) in page_docs.items():
         rep.write(folder / "page.json", d)
     rep.write(rep.defn / "pages" / "pages.json", meta)
+    for vid, v in ((v["id"], v) for v in visuals):             # roadmap gap 11: mobile layout (mobile.json)
+        if vid not in vfiles:
+            continue
+        mf = vfiles[vid][0].parent / "mobile.json"
+        mob = v.get("mobile")
+        if not mob:
+            if mf.exists() and vid in (old_map.get("mobile") or []):
+                mf.unlink()
+                rep.changed.append(str(mf.relative_to(rep.path.parent)).replace("\\", "/") + " (removed)")
+            continue
+        try:
+            md = load(mf) if mf.exists() else {"$schema": MOBILE_SCHEMA}
+            md["position"] = {"x": round(mob["x"]), "y": round(mob["y"]), "z": int(mob.get("z", 0)),
+                              "width": round(mob["w"]), "height": round(mob["h"])}
+        except (KeyError, TypeError) as e:
+            fail(f"{vid}: mobile needs x, y, w, h ({e})")
+        tree_gate(ctx, vid, md["$schema"], [], md)
+        ctx.unverified.add("mobile")
+        mobile_owned.append(vid)
+        mobile_docs.append((mf, md))
+    for mf, md in mobile_docs:
+        rep.write(mf, md)
     for vid, (f, d) in vfiles.items():
         rep.write(f, d)
         if len(str(pathlib.Path(f).resolve())) >= versions.PATH_LIMIT:   # roadmap gap 23
@@ -1954,6 +1980,8 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                "bookmarks": bm_owned}
     if landing:
         out_map["landing"] = page_ids[landing[0]]
+    if mobile_owned:
+        out_map["mobile"] = mobile_owned
     orders = sorted(([f"page:{k}" for k, sp in pages_spec.items() if sp.get("filterOrder")] +
                      [v["id"] for v in visuals if v.get("filterOrder")] +
                      (["report"] if (layout.get("report") or {}).get("filterOrder") else [])))
@@ -1972,6 +2000,9 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     if not quiet:
         if rep.target.pinned:
             print(f"target Desktop {rep.target.desktop}: $schema versions capped to {rep.target.note}")
+        if mobile_owned:
+            print("note: mobile.json written: the mobile layout of a page appears in Desktop only once the page has a "
+                  "mobile layout (View > Mobile layout)")
         for key in sorted(ctx.unverified, key=lambda k: UV.FEATURES[k][0]):
             print(f"warning: {UV.message(key)}")
         for w in ctx.res.warnings:

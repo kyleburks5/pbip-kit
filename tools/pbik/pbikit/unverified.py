@@ -149,6 +149,9 @@ feature("visual-calcs", 10, "visual calculations (binding `calc`) and sparklines
                                                    for k in ('"NativeVisualCalculation"', '"SparklineData"')))
 
 
+feature("mobile", 11, "the mobile layout (visual `mobile`: mobile.json position)", lambda kind, doc: kind == "mobile")
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]
