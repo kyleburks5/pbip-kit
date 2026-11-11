@@ -84,6 +84,20 @@ feature("page-props", 12, "page settings through page `props` (pageSize, display
         "pageRefresh, personalizeVisual)",
         lambda kind, doc: kind == "page" and bool(set(doc.get("objects") or {}) & {
             "pageSize", "displayArea", "pageInformation", "outspace", "pageRefresh", "personalizeVisual"}))
+def _members_other(kind, doc):
+    if kind != "visual":
+        return False
+    for obj, entries in ((doc.get("visual") or {}).get("objects") or {}).items():
+        for e in entries:
+            if "scopeId" in json.dumps(e.get("selector") or {}) and (obj, set(e.get("properties") or {})) != (
+                    "dataPoint", {"fill"}):
+                return True
+    return False
+
+
+feature("members", 2, "per-member formatting on objects other than dataPoint.fill (layout `members`)", _members_other)
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

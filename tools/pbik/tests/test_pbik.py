@@ -2483,6 +2483,37 @@ class PbikTests(unittest.TestCase):
                                                                       "last": 2, "unit": "fortnights"}]}))
         self.assertIn("relative date unit 'fortnights'", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_128_per_member_formatting(self):
+        """Gap 2: members writes one scopeId selector per member, as Desktop saved the Rep 5 donut."""
+        def edit(lay):
+            next(x for x in lay["visuals"] if x["id"] == "P1-V04")["members"] = {
+                "field": "stores[City]", "values": {"Austin": "primary", "Boston": "#5D6B8A"}}
+        work, rep, lf = self._batch1("b128", edit)
+        r = pbik("build", rep, lf)
+        self.assertNotIn("roadmap gap 2)", r.stdout)                 # dataPoint.fill: Desktop's own form
+        dp = visual(rep, "P1-V04")["visual"]["objects"]["dataPoint"]
+        sels = {e["selector"]["data"][0]["scopeId"]["Comparison"]["Right"]["Literal"]["Value"]: e for e in dp
+                if "scopeId" in json.dumps(e.get("selector"))}
+        self.assertEqual(set(sels), {"'Austin'", "'Boston'"})
+        left = sels["'Boston'"]["selector"]["data"][0]["scopeId"]["Comparison"]["Left"]
+        self.assertEqual(left, {"Column": {"Expression": {"SourceRef": {"Entity": "stores"}}, "Property": "City"}})
+        self.assertEqual(sels["'Boston'"]["properties"]["fill"]["solid"]["color"]["expr"]["Literal"]["Value"], "'#5D6B8A'")
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        rep5 = KIT / "tools" / "fixtures" / "rep5" / "HR OVERVIEW.Report"
+        saved = json.loads(next(rep5.glob("definition/pages/*/visuals/mix-chart-gender/visual.json")).read_text(
+            encoding="utf-8"))["visual"]["objects"]["dataPoint"][1]["selector"]
+        self.assertEqual(set(saved["data"][0]["scopeId"]["Comparison"]), set(sels["'Boston'"]["selector"]["data"][0][
+            "scopeId"]["Comparison"]), "same shape as Desktop's save")
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V04").update(members=[
+            {"field": "stores[City]", "object": "labels", "property": "color", "values": {"Austin": "#000000"}}]))
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 2)", r.stdout)
+        dp = visual(rep, "P1-V04")["visual"]["objects"].get("dataPoint", [])
+        self.assertFalse([e for e in dp if "scopeId" in json.dumps(e.get("selector"))], "members owned: removed")
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V04").update(
+            members={"field": "[Revenue]", "values": {"a": "#000000"}}))
+        self.assertIn("must be a column", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

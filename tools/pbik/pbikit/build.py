@@ -879,6 +879,36 @@ def apply_navigator(ctx, vid, v, d):
         set_entries(ctx, vid, d, "objects", key, entries)
 
 
+def member_selector(ctx, fld, value):
+    """A per-member selector as Desktop saved it on the Rep 5 donut (mix-chart-gender): data [{scopeId: Comparison
+    (=) of the column, Entity in SourceRef, no From alias) and the member as a literal typed like the column]."""
+    return {"data": [{"scopeId": {"Comparison": {"ComparisonKind": 0, "Left": fld,
+                                                 "Right": F.typed_literal(value, ctx.res.column_type(fld))}}}]}
+
+
+def apply_members(ctx, vid, v, d):
+    """members (roadmap gap 2): one formatting value per category member, e.g. a colour per slice or series.
+    [{field: "T[C]", object: "dataPoint", property: "fill", values: {member: value}}] (or one such dict)."""
+    spec = v.get("members")
+    if not spec:
+        return
+    for m in spec if isinstance(spec, list) else [spec]:
+        fld = ctx.field(m["field"])
+        if "Column" not in fld:
+            raise BuildError(f"{vid}: members field {m['field']!r} must be a column (the members are its values)")
+        obj, prop = m.get("object", "dataPoint"), m.get("property", "fill")
+        vals = m.get("values") or {}
+        if not isinstance(vals, dict) or not vals:
+            raise BuildError(f"{vid}: members needs values {{member: value}}")
+        try:
+            for member, val in vals.items():
+                set_prop(ctx, vid, d, "objects", obj, member_selector(ctx, fld, member), prop, prop_value(ctx, prop, val))
+        except F.FieldError as e:
+            raise BuildError(f"{vid}: members {m['field']}: {e}")
+        if (obj, prop) != ("dataPoint", "fill"):
+            ctx.unverified.add("members")
+
+
 def apply_props(ctx, vid, v, d):
     for key, val in (v.get("props") or {}).items():
         where = "objects"
@@ -1528,6 +1558,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_sync(ctx, vid, v, d)
             apply_navigator(ctx, vid, v, d)
             apply_image(ctx, vid, v, d)
+            apply_members(ctx, vid, v, d)
             apply_props(ctx, vid, v, d)
             check_props_schema(ctx, vid, v, d["$schema"])
             retiring = DEP.visual_issue(v["type"], in_build=True) or DEP.link_issue(

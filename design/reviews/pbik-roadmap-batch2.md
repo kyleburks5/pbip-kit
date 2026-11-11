@@ -144,3 +144,18 @@ S:report 3.3.0 `filterConfig`; S:semanticQuery 1.4.0 #QueryBetweenExpression, #Q
 #QueryStartsWithExpression, #QueryNotExpression, #QueryComparisonExpression, #QueryDateSpanExpression,
 #QueryDateAddExpression, #QueryNowExpression, #TimeUnit; pbik's fields.py (the From / Where shape Desktop saved for
 Categorical and Top N filters).
+## Gap 2: per-member formatting (done; objects other than dataPoint.fill UNVERIFIED in Desktop)
+
+**What pbik does now**: layout `members` writes one entry per member on selector
+`{"data": [{"scopeId": {"Comparison": {"ComparisonKind": 0, "Left": <column, Entity SourceRef>, "Right": <literal>}}}]}`,
+the literal typed like the column (`'Female'`, `2024L`). Values use the `props` notation (colours, tokens, theme
+colours). Entries are owned per member and removed when they leave the layout. Test 128 compares the shape with the
+Desktop-saved file.
+
+**Verified form**: `dataPoint.fill` per category member is exactly what Desktop saved on the Rep 5 donut
+(`tools/fixtures/rep5/.../mix-chart-gender/visual.json`, three slices). Series colours on a legend field, markers,
+labels or small-multiple headers use the same selector in the schema but have no Desktop-saved example in the kit:
+those are **UNVERIFIED in Desktop** and flagged by build and validate.
+
+**Provenance**: S:formattingObjectDefinitions 1.5.0 #Selector, #DataRepetitionSelector (`scopeId`); S:semanticQuery
+1.4.0 #QueryComparisonExpression, #QueryLiteralExpression; the Rep 5 fixture; pbik's fields.py (`typed_literal`).
