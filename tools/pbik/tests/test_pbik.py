@@ -2253,9 +2253,9 @@ class PbikTests(unittest.TestCase):
         m = json.loads((work / "design" / "specs" / "visual-map.json").read_text(encoding="utf-8"))
         self.assertTrue(m["visuals"]["P1-V01"]["decorative"])
         v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
-        self.assertNotIn("P1-V01_band)", v.split("decorative visual(s) still have")[0])
-        self.assertIn("decorative visual(s) still have a tab stop", v)
-        self.assertIn("pbik sales/P1-V01_band", v)
+        self.assertNotIn("P1-V01_band", v)
+        self.assertEqual(visual(rep, "P1-V01")["position"]["tabOrder"], -9999000)    # Desktop's hidden tab stop
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
         self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V01").update(
             container={"altText": "band"}))
         self.assertIn("decorative and altText both set", pbik("build", rep, lf, ok=(2,)).stderr)

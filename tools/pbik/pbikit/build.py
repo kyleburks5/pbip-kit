@@ -65,6 +65,11 @@ THEME_RE = re.compile(r"theme:(\d+)(?::(-?\d+(?:\.\d+)?))?")
 NEW_VISUALS = "the list slicer, the input slicer, Azure Maps (azureMap) and the Gantt chart"
 
 
+# A tab stop hidden in Desktop's Selection pane (Tab order) is saved as this tabOrder (pbik-smoke-bulk save, Desktop
+# 2.159.883.0, 2026-11-11; roadmap gap 21).
+HIDDEN_TAB = -9999000
+
+
 class BuildError(Exception):
     pass
 
@@ -2035,7 +2040,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         if mobile_owned:
             print("note: mobile.json written: the mobile layout of a page appears in Desktop only once the page has a "
                   "mobile layout (View > Mobile layout)")
-        for key in sorted(ctx.unverified, key=lambda k: UV.FEATURES[k][0]):
+        for key in sorted((k for k in ctx.unverified if k in UV.FEATURES), key=lambda k: UV.FEATURES[k][0]):
             print(f"warning: {UV.message(key)}")
         for w in ctx.res.warnings:
             print(f"warning: {w}")
@@ -2067,7 +2072,9 @@ def set_position(d, vid, v, bx, parent, box, vnames, ctx):
         ctx.owned_new.setdefault(vid, []).append(["top", "parentGroupName", None, None])
     idx = int(vid.rsplit("V", 1)[1])
     tab = v.get("tabOrder", idx * 100)      # default: visual number x 100 (number IDs in reading order, CLAUDE.md)
-    if isinstance(tab, bool) or not isinstance(tab, int) or tab < 0:
+    if v.get("decorative") and "tabOrder" not in v:
+        tab = HIDDEN_TAB                    # roadmap gap 21: hidden from the tab order, as Desktop saves it
+    if isinstance(tab, bool) or not isinstance(tab, int) or (tab < 0 and tab != HIDDEN_TAB):
         raise BuildError(f"{vid}: tabOrder {tab!r} must be a whole number (the default is the visual number x 100)")
     d.setdefault("position", {}).update({"x": round(x), "y": round(y), "z": v.get("z", 1) * 1000 + idx,
                                          "height": round(h), "width": round(w), "tabOrder": tab})

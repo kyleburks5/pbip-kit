@@ -14,7 +14,8 @@
   (Microsoft Learn, "Design Power BI reports for accessibility", updated 2026-09-29: decorative shapes and images are
   hidden from the tab order; the rest need alt text). One warning per page. The PBIR form of "hidden from tab order"
   isn't in Microsoft's schema (visualContainer 2.13.0 #VisualContainerPosition `tabOrder` is a number with no hidden
-  value), so pbik doesn't write it yet: validate prints a note listing the decorative visuals to hide in Desktop;
+  value); Desktop saves a tab stop hidden in its Selection pane as `tabOrder: -9999000` (pbik-smoke-bulk save,
+  2026-11-11), which `decorative` writes. A decorative visual that still has a tab stop (built before) is noted;
 - Learn's checklist (roadmap gap 22): alt text longer than 250 characters (Power BI's limit); a text box whose text
   isn't in its alt text (a screen reader reads the alt text); data visuals with no sort order of their own
   (query.sortDefinition: the accessible Show data table follows the visual's sort), one warning per page.
@@ -243,7 +244,7 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
             if bound and vt not in NO_SORT and not hidden and not (vis.get("query") or {}).get("sortDefinition"):
                 unsorted.append(f.parent.name)
             if name in decorative:
-                if not hidden:
+                if not hidden and (d.get("position") or {}).get("tabOrder", 0) >= 0:
                     to_hide.append(f"{page}/{f.parent.name}")
             elif (bound and vt not in SLICERS) or vt == "image" and not bound:
                 if no_alt:
@@ -281,7 +282,7 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
                              sel["id"] in ("default", "hover", "selected", "disabled", "press", "selection:selected")
                              else "")
                     fd.warn(where, f"a11y: {prop}{state} {colour} on {bg} is {ratio:.2f}:1, below {need:g}:1 (WCAG AA)")
-            if not hidden and vt not in DECOR and name not in decorative and "tabOrder" in d.get("position", {}):
+            if not hidden and vt not in DECOR and name not in decorative and d.get("position", {}).get("tabOrder", -1) >= 0:
                 tab.append((name, x, y, w, h, d["position"]["tabOrder"]))
         if undeclared:
             fd.warn(f"{page}", f"a11y: {len(undeclared)} shape(s) with no alt text and not marked `decorative: true` "
@@ -300,7 +301,7 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
             fd.warn(f"{page}", f"a11y: tab order doesn't follow reading order: tab stop {k + 1} is {got[k]}, "
                                f"reading order expects {want[k]}")
     if to_hide:
-        print(f"note    {len(to_hide)} decorative visual(s) still have a tab stop: pbik can't write \"hidden from tab "
+        print(f"note    {len(to_hide)} decorative visual(s) still have a tab stop (rebuild: `decorative` writes Desktop's \"hidden from tab "
               f"order\" yet (its PBIR form isn't in Microsoft's schema; roadmap gap 21). In Desktop: View > Selection, "
               f"Tab order, hide {', '.join(to_hide[:6])}{' ...' if len(to_hide) > 6 else ''}")
 
