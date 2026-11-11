@@ -395,7 +395,8 @@ def hierarchy_level(ctx, spec):
             raise BuildError(f"{spec['hierarchy']!r}: no level {spec['level']!r} ({', '.join(hs[hname])})")
     fld = {"HierarchyLevel": {"Expression": {"Hierarchy": {"Expression": {"SourceRef": {"Entity": table}},
                                                             "Hierarchy": hname}}, "Level": spec["level"]}}
-    ctx.unverified.add("hierarchies")
+    # Desktop marks the first level active and every other level of the hierarchy active: false (pbik-smoke-bulk save,
+    # 2026-11-11); apply_query sets them
     return {"field": fld, "queryRef": f"{table}.{hname}.{spec['level']}", "nativeQueryRef": spec["level"]}
 
 
@@ -456,6 +457,9 @@ def apply_expand(ctx, vid, v, d):
     #ExpansionState: roles, levels with queryRefs and isCollapsed, root isToggled). Owned."""
     if not v.get("expand"):
         return
+    raise BuildError(f"{vid}: expand isn't supported yet: Desktop kept the expansion state pbik wrote but drew the "
+                     "matrix collapsed (pbik-smoke-bulk, 2026-11-11); expand it in Desktop, save, and `pbik roundtrip` "
+                     "shows the form (roadmap gap 8)")
     if v.get("expand") != "all" or v["type"] != "pivotTable":
         raise BuildError(f"{vid}: expand takes \"all\" on a matrix (pivotTable)")
     rows = d["visual"].get("query", {}).get("queryState", {}).get("Rows", {}).get("projections", [])
@@ -489,7 +493,9 @@ def apply_query(ctx, v, d):
                     projs.append(sparkline(ctx, spec))
                     continue
                 if "hierarchy" in spec:                     # roadmap gap 8
-                    projs.append(hierarchy_level(ctx, spec))
+                    p = hierarchy_level(ctx, spec)
+                    p["active"] = not any("HierarchyLevel" in x["field"] for x in projs)
+                    projs.append(p)
                     continue
                 if "fieldParameter" in spec:
                     fp_projs, fp = field_parameter(ctx, spec)

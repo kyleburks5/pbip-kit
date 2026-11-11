@@ -2624,31 +2624,31 @@ class PbikTests(unittest.TestCase):
         self.assertIn("is not a page with `drillthrough`", pbik("build", rep, lf, ok=(1,)).stdout)
 
     def test_132_hierarchies_and_expand(self):
-        """Gap 8: a hierarchy level as a field (checked against the TMDL) and expand: all on a matrix."""
+        """Gap 8: a hierarchy level as a field (checked against the TMDL, active flags as Desktop saves them); expand is
+        an error until Desktop shows its form."""
         def edit(lay):
             lay["visuals"].append({"id": "P2-V10", "name": "by-period", "page": "P2", "type": "pivotTable",
                                    "x": 32, "y": 700, "w": 600, "h": 300, "sort": {"field": "[Revenue]"},
                                    "bindings": {"Rows": [{"hierarchy": "Date[Calendar]", "level": "Year"},
                                                          {"hierarchy": "Date[Calendar]", "level": "Month"}],
-                                                "Values": ["[Revenue]"]}, "expand": "all"})
+                                                "Values": ["[Revenue]"]}})
         work, rep, lf = self._batch1("b132", edit)
         tm = next((work / self.model.name).glob("definition/tables/Date.tmdl"))
         hier = "\n\n\thierarchy Calendar\n\n\t\tlevel Year\n\t\t\tcolumn: Year\n\n\t\tlevel Month\n\t\t\tcolumn: Month\n"
         tm.write_text(tm.read_text(encoding="utf-8").rstrip() + hier, encoding="utf-8")
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 8)", r.stdout)
-        vis = visual(rep, "P2-V10")["visual"]
-        p0 = vis["query"]["queryState"]["Rows"]["projections"][0]
-        self.assertEqual(p0["field"]["HierarchyLevel"]["Level"], "Year")
-        self.assertEqual(p0["field"]["HierarchyLevel"]["Expression"]["Hierarchy"]["Hierarchy"], "Calendar")
-        self.assertEqual(p0["queryRef"], "Date.Calendar.Year")
-        self.assertEqual(vis["expansionStates"][0]["levels"], [{"queryRefs": ["Date.Calendar.Year"], "isCollapsed": False}])
+        self.assertNotIn("roadmap gap 8)", r.stdout)                 # confirmed in Desktop (2026-11-11)
+        projs = visual(rep, "P2-V10")["visual"]["query"]["queryState"]["Rows"]["projections"]
+        self.assertEqual(projs[0]["field"]["HierarchyLevel"]["Level"], "Year")
+        self.assertEqual(projs[0]["field"]["HierarchyLevel"]["Expression"]["Hierarchy"]["Hierarchy"], "Calendar")
+        self.assertEqual(projs[0]["queryRef"], "Date.Calendar.Year")
+        self.assertEqual([p["active"] for p in projs], [True, False])
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
         self.assertIn("0 error(s)", pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout)
-        self._relayout(lf, lambda lay: lay["visuals"][-1].pop("expand"))
-        pbik("build", rep, lf)
-        self.assertNotIn("expansionStates", visual(rep, "P2-V10")["visual"])
-        self._relayout(lf, lambda lay: lay["visuals"][-1]["bindings"]["Rows"][1].update(level="Week"))
+        self._relayout(lf, lambda lay: lay["visuals"][-1].update(expand="all"))
+        self.assertIn("expand isn't supported yet", pbik("build", rep, lf, ok=(1,)).stdout)
+        self._relayout(lf, lambda lay: (lay["visuals"][-1].pop("expand"),
+                                        lay["visuals"][-1]["bindings"]["Rows"][1].update(level="Week")))
         self.assertIn("no level 'Week'", pbik("build", rep, lf, ok=(1,)).stdout)
 
     def test_133_group_formatting(self):
