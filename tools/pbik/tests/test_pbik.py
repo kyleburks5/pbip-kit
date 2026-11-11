@@ -2752,6 +2752,9 @@ class PbikTests(unittest.TestCase):
                                                                   "Name": "Running revenue", "DataType": "Double"})
         sp = next(p for p in projs if "SparklineData" in p["field"])["field"]["SparklineData"]
         self.assertEqual(sp["PointsPerSparkline"], 52)
+        refs = [p["nativeQueryRef"] for p in projs]
+        self.assertEqual(len(refs), len(set(refs)), "Desktop refuses duplicate native reference names")
+        self.assertIn("Revenue by Year Month", refs)
         self.assertEqual(sp["Groupings"][0]["Column"]["Property"], "Year Month")
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
         self.assertIn("0 error(s)", pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout)

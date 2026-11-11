@@ -431,7 +431,8 @@ def sparkline(ctx, spec):
         raise BuildError(f"sparkline {spec['sparkline']!r}: `by` must be a column (the x axis, e.g. a month)")
     ctx.unverified.add("visual-calcs")
     return {"field": {"SparklineData": {"Measure": m, "Groupings": [by], "PointsPerSparkline": 52}},
-            "queryRef": f"SparklineData({qref(m)}_[{qref(by)}])", "nativeQueryRef": m["Measure"]["Property"]}
+            "queryRef": f"SparklineData({qref(m)}_[{qref(by)}])",
+            "nativeQueryRef": f"{m['Measure']['Property']} by {by['Column']['Property']}"}   # Desktop's well label
 
 
 QUERY_OPTIONS = {"binnedLineSample": "allowBinnedLineSample", "overlappingPointsSample": "allowOverlappingPointsSample"}
