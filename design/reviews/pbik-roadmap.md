@@ -295,3 +295,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 17 | Done (pages and their bookmarks); copying one visual left out | `pbik copy page`; check in Desktop that a copied page opens |
 | 28 | Done, UNVERIFIED in Desktop | bookmark `spotlight`, `elevate`, `focus` (maximize, with `maximizedOptions.dataTable`) |
 | 29 | Done, UNVERIFIED in Desktop | drillthrough `crossReport` (referenceScope CrossReport) with a build warning when `useCrossReportDrillthrough` isn't on |
+| 15 | Needs your decision (skipped) | private `.pbiviz` and organization-store visuals are ladder step 4 (CLAUDE.md: ask first) and an IT-security question (docs/it-security.md: uncertified until checked); whether pbik should register them at all is yours to decide |

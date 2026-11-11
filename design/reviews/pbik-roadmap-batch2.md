@@ -377,3 +377,11 @@ survive a save.
 
 **Provenance**: S:page 2.1.0 #PageBinding (`referenceScope`: Default, CrossReport, "for cross-report drillthrough");
 S:report 3.3.0 #ExplorationSettings (`useCrossReportDrillthrough`).
+## Gap 15: other custom visuals (skipped: needs your decision)
+
+Not built. Registering an organization-store visual (`organizationCustomVisuals`) or embedding a private `.pbiviz`
+(`CustomVisuals/`, `CustomVisualJavascript` resource items) is visual-method ladder step 4, which CLAUDE.md says to
+ask about before building, and docs/it-security.md treats such visuals as uncertified until checked. Whether pbik
+should write them at all, and under which check, is a policy decision. The schema forms are known (S:report 3.3.0
+`organizationCustomVisuals`, #OrganizationCustomVisual, #ResourcePackageType CustomVisual /
+OrganizationalStoreCustomVisual), so it is a small gap once decided.
