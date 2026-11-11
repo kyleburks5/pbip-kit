@@ -1226,7 +1226,7 @@ def apply_page_binding(ctx, key, spec, d):
 
 
 def apply_drillthrough(ctx, key, spec, d):
-    """Page `drillthrough: {fields: [...], keepFilters}` (roadmap gap 7): page `type: Drillthrough`,
+    """Page `drillthrough: {fields: [...], keepFilters, crossReport}` (roadmap gap 7): page `type: Drillthrough`,
     `pageBinding {name, type: Drillthrough, parameters [{name, boundFilter, fieldExpr}], acceptsFilterContext}` and, per
     field, a page filter `howCreated: Drillthrough` (no condition: the drill sets it) that the parameter's boundFilter
     names. Filters are named pbik_dt_* (owned with pbik's other filters); type and pageBinding are owned."""
@@ -1253,6 +1253,14 @@ def apply_drillthrough(ctx, key, spec, d):
         flts.append({"name": fname, "field": fld, "type": "Categorical", "howCreated": "Drillthrough"})
         params.append({"name": stable_name("dtparam", key, text), "boundFilter": fname, "fieldExpr": fld})
     binding = {"name": stable_name("drillthrough", key), "type": "Drillthrough", "parameters": params}
+    if dt.get("crossReport"):                       # roadmap gap 29 (UNVERIFIED in Desktop)
+        binding["referenceScope"] = "CrossReport"
+        ctx.unverified.add("cross-report")
+        setting = (ctx.layout.get("report") or {}).get("settings", {}).get("useCrossReportDrillthrough")
+        if setting is not True and load(ctx.report.defn / "report.json").get("settings", {}).get(
+                "useCrossReportDrillthrough") is not True:
+            ctx.res.warnings.append(f"{owner}: crossReport drill-through needs the report setting "
+                                    "useCrossReportDrillthrough: set `report.settings.useCrossReportDrillthrough: true`")
     binding["acceptsFilterContext"] = "Default" if dt.get("keepFilters", True) else "None"
     d["type"] = "Drillthrough"
     d["pageBinding"] = binding

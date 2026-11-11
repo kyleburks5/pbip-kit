@@ -367,3 +367,13 @@ describes). Those visuals join the targets. A visual given two modes, or a bad `
 **Provenance**: S:bookmark 2.1.0 #VisualContainerDisplayState (`mode`, `maximizedOptions.dataTable` enum accessible /
 normal), #VisualContainerDisplayMode (maximize, spotlight, elevation, hidden); [L7] "Focus mode", "Show data table";
 pbik's bookmarks.py (`hidden`, as Desktop saved it in Rep 5).
+## Gap 29: cross-report drill-through (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: page `drillthrough: {..., crossReport: true}` adds `referenceScope: "CrossReport"` to the
+page's pageBinding. The report setting `useCrossReportDrillthrough` is gap 1's `report.settings` key; `pbik build`
+warns when neither layout.json nor report.json turns it on. Test 144. Testing it needs two reports published to one
+workspace in the Service, which the kit doesn't do, so the Desktop checklist only checks the setting and the page
+survive a save.
+
+**Provenance**: S:page 2.1.0 #PageBinding (`referenceScope`: Default, CrossReport, "for cross-report drillthrough");
+S:report 3.3.0 #ExplorationSettings (`useCrossReportDrillthrough`).

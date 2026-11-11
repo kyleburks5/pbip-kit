@@ -294,3 +294,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 16 | Partial: `angle`, `queryOptions` done, UNVERIFIED in Desktop; `dataFunction` blocked | the dataFunction link runs a Fabric user data function (Fabric-only, outside the kit) and its value form isn't in the schema |
 | 17 | Done (pages and their bookmarks); copying one visual left out | `pbik copy page`; check in Desktop that a copied page opens |
 | 28 | Done, UNVERIFIED in Desktop | bookmark `spotlight`, `elevate`, `focus` (maximize, with `maximizedOptions.dataTable`) |
+| 29 | Done, UNVERIFIED in Desktop | drillthrough `crossReport` (referenceScope CrossReport) with a build warning when `useCrossReportDrillthrough` isn't on |

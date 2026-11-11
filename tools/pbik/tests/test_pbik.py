@@ -2861,6 +2861,20 @@ class PbikTests(unittest.TestCase):
         self._relayout(lf, lambda lay: lay["pages"]["P1"]["bookmarks"][0].update(hide=["P1-V04"]))
         self.assertIn("gives ['P1-V04'] two display modes", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_144_cross_report_drillthrough(self):
+        """Gap 29: crossReport adds referenceScope CrossReport and warns until the report setting is on."""
+        work, rep, lf = self._batch1("b144", lambda lay: lay["pages"].update(P3={
+            "displayName": "pbik detail", "drillthrough": {"fields": ["stores[City]"], "crossReport": True}}))
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 29)", r.stdout)
+        self.assertIn("needs the report setting useCrossReportDrillthrough", r.stdout)
+        self.assertEqual(Report(rep).page_by("pbik detail")[1]["pageBinding"]["referenceScope"], "CrossReport")
+        self._relayout(lf, lambda lay: lay.update(report={"settings": {"useCrossReportDrillthrough": True}}))
+        r = pbik("build", rep, lf)
+        self.assertNotIn("needs the report setting", r.stdout)
+        self.assertIs(json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))["settings"][
+            "useCrossReportDrillthrough"], True)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

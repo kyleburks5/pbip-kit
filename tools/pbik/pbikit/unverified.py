@@ -175,6 +175,11 @@ feature("display-modes", 28, "bookmark display modes spotlight, elevation and fo
         "data table)", _display_modes)
 
 
+feature("cross-report", 29, "cross-report drill-through (drillthrough `crossReport`: pageBinding referenceScope "
+        "CrossReport)", lambda kind, doc: kind == "page" and (doc.get("pageBinding") or {}).get(
+            "referenceScope") == "CrossReport")
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]
