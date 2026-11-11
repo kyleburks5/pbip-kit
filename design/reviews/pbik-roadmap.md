@@ -311,3 +311,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 4 | Partial after the Desktop check | Advanced text, RelativeDate, report filters, displayName / ordinal / order confirmed (2026-11-11); Range rewritten as Advanced >= And <=, UNVERIFIED again |
 | 11 | Done, confirmed in Desktop | the card sits on the phone canvas (2026-11-11); mobile.json gets `tabOrder: 0` as Desktop saves it (Desktop also moves it to 2.9.0, unpublished) |
 | 12 | Done, confirmed in Desktop | landing page and displayArea Middle work and were kept (2026-11-11) |
+| 13 | Done, confirmed in Desktop | Desktop kept every annotation on save (2026-11-11) |

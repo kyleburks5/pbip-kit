@@ -2289,7 +2289,7 @@ class PbikTests(unittest.TestCase):
             lay["report"] = {"annotations": {"kit": "pbip-kit"}}
         work, rep, lf = self._batch1("b121", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 13): annotations", r.stdout)
+        self.assertNotIn("roadmap gap 13)", r.stdout)                # confirmed in Desktop (2026-11-11)
         ann = {a["name"]: a["value"] for a in visual(rep, "P1-V04")["annotations"]}
         self.assertEqual(ann["pbik.id"], "P1-V04")
         self.assertEqual(ann["owner"], "sales team")
@@ -2301,7 +2301,7 @@ class PbikTests(unittest.TestCase):
         self.assertEqual(rd["annotations"], [{"name": "kit", "value": "pbip-kit"}])
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
         v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
-        self.assertIn("warning unverified: UNVERIFIED in Desktop (roadmap gap 13)", v)
+        self.assertNotIn("roadmap gap 13", v)
         f = next(rep.glob("definition/pages/*/visuals/P1-V05_*/visual.json"))     # a copy keeps the other's ID
         d = json.loads(f.read_text(encoding="utf-8"))
         d["annotations"] = [{"name": "pbik.id", "value": "P1-V04"}, {"name": "x", "value": "1"},
