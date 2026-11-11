@@ -84,5 +84,21 @@ feature("page-props", 12, "page settings through page `props` (pageSize, display
         "pageRefresh, personalizeVisual)",
         lambda kind, doc: kind == "page" and bool(set(doc.get("objects") or {}) & {
             "pageSize", "displayArea", "pageInformation", "outspace", "pageRefresh", "personalizeVisual"}))
+def _new_filters(kind, doc):
+    fc = doc.get("filterConfig") or {}
+    mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]
+    if fc.get("filterSortOrder") or (kind == "report" and mine):
+        return True
+    for f in mine:
+        if f.get("type") in ("Range", "RelativeDate") or "displayName" in f or "ordinal" in f:
+            return True
+        txt = json.dumps(f.get("filter", {}))
+        if f.get("type") == "Advanced" and ('"Contains"' in txt or '"StartsWith"' in txt or '"null"' in txt):
+            return True
+    return False
+
+
+feature("filters", 4, "filter types Range, RelativeDate and Advanced text conditions, report-level filters, filter "
+        "displayName / ordinal and filterSortOrder", _new_filters)
 feature("annotations", 13, "annotations on report.json, pages and visuals (layout `annotate`, `annotations`)",
         _pbik_annotations)

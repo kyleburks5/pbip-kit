@@ -204,6 +204,78 @@ def measure_filter(name, field, kind, value):
             "howCreated": "User"}
 
 
+# ---------------------------------------------------------------- roadmap gap 4: filter types from the schema only
+# (filterConfiguration 1.3.0 #FilterContainer `type`; semanticQuery 1.4.0 #QueryBetweenExpression,
+# #QueryContainsExpression, #QueryStartsWithExpression, #QueryNotExpression, #QueryDateSpanExpression,
+# #QueryDateAddExpression, #QueryNowExpression, #TimeUnit). UNVERIFIED in Desktop: no Desktop-saved file in the kit has one.
+TIME_UNITS = {"day": 0, "days": 0, "week": 1, "weeks": 1, "month": 2, "months": 2, "year": 3, "years": 3}
+TEXT_OPS = ("contains", "doesNotContain", "startsWith", "doesNotStartWith", "is", "isNot", "isBlank", "isNotBlank")
+
+
+def _where(field, cond_of):
+    entity, schema = _entity(field)
+    a = _alias(entity, set())
+    return {"Version": 2, "From": [_from(entity, schema, a)], "Where": [{"Condition": cond_of(_src(field, a))}]}
+
+
+def range_filter(name, field, data_type, low, high):
+    """Values between low and high, both included: a Range filter with one Between condition."""
+    if low is None or high is None:
+        raise FieldError("a Range filter needs min and max")
+    return {"name": name, "field": field, "type": "Range",
+            "filter": _where(field, lambda col: {"Between": {"Expression": col,
+                                                             "LowerBound": typed_literal(low, data_type),
+                                                             "UpperBound": typed_literal(high, data_type)}}),
+            "howCreated": "User"}
+
+
+def _text_cond(col, op, value, data_type):
+    if op not in TEXT_OPS:
+        raise FieldError(f"text condition {op!r} ({', '.join(TEXT_OPS)})")
+    if op in ("isBlank", "isNotBlank"):
+        c = {"Comparison": {"ComparisonKind": 0, "Left": col, "Right": {"Literal": {"Value": "null"}}}}
+        return c if op == "isBlank" else {"Not": {"Expression": c}}
+    if value is None:
+        raise FieldError(f"text condition {op} needs a value")
+    if op in ("is", "isNot"):
+        c = {"Comparison": {"ComparisonKind": 0, "Left": col, "Right": typed_literal(value, data_type)}}
+        return c if op == "is" else {"Not": {"Expression": c}}
+    kind = "Contains" if "ontain" in op else "StartsWith"
+    c = {kind: {"Left": col, "Right": typed_literal(str(value), None)}}
+    return {"Not": {"Expression": c}} if op.startswith("doesNot") else c
+
+
+def advanced_filter(name, field, data_type, conditions, join="and"):
+    """The filter pane's Advanced mode on a column: one or two conditions (Contains, StartsWith, is, blank, and their
+    negations) joined by And / Or."""
+    if not 1 <= len(conditions) <= 2:
+        raise FieldError("an Advanced filter takes one or two conditions")
+    if join not in ("and", "or"):
+        raise FieldError(f"join {join!r} (and, or)")
+
+    def cond(col):
+        cs = [_text_cond(col, c.get("op"), c.get("value"), data_type) for c in conditions]
+        return cs[0] if len(cs) == 1 else {join.capitalize(): {"Left": cs[0], "Right": cs[1]}}
+    return {"name": name, "field": field, "type": "Advanced", "filter": _where(field, cond), "howCreated": "User"}
+
+
+def relative_date_filter(name, field, last, unit):
+    """In the last <last> <unit>s, today included: Between( DateSpan(DateAdd(DateAdd(Now, 1 day), -last unit), day),
+    DateSpan(Now, day) ). Built from the schema's date expressions; Desktop's own form unconfirmed."""
+    u = TIME_UNITS.get(str(unit).lower())
+    if u is None:
+        raise FieldError(f"relative date unit {unit!r} (days, weeks, months, years)")
+    if not isinstance(last, int) or isinstance(last, bool) or last < 1:
+        raise FieldError(f"relative date `last` must be a whole number of {unit} (1 or more)")
+    start = {"DateSpan": {"Expression": {"DateAdd": {"Expression": {"DateAdd": {"Expression": {"Now": {}}, "Amount": 1,
+                                                                                  "TimeUnit": 0}},
+                                                     "Amount": -last, "TimeUnit": u}}, "TimeUnit": 0}}
+    end = {"DateSpan": {"Expression": {"Now": {}}, "TimeUnit": 0}}
+    return {"name": name, "field": field, "type": "RelativeDate",
+            "filter": _where(field, lambda col: {"Between": {"Expression": col, "LowerBound": start, "UpperBound": end}}),
+            "howCreated": "User"}
+
+
 def selection_filter(field, data_type, values):
     """Slicer default selection (objects.general.filter), as Desktop saves a clicked value."""
     entity, schema = _entity(field)

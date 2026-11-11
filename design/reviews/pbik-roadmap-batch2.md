@@ -123,3 +123,24 @@ output change. Covered by the existing theme and resource tests and test 124.
 **Provenance**: [L1] *Power BI Desktop project report folder*, "RegisteredResources\": "Edits to RegisteredResources
 files are only supported for already loaded resources"; .claude/rules/svg.md (the PNG route tested in Desktop, Reps
 6-7); pbik's theme.py.
+## Gap 4: filters beyond Categorical and Top N (done, UNVERIFIED in Desktop)
+
+**What pbik does now** (`pbikit/fields.py`, `build.build_filter`): filter `type` Range (`min`, `max`: one Between),
+Advanced with one or two text conditions (Contains, StartsWith, `is`, blank via a null Comparison, each negatable with
+Not, joined by And / Or), and RelativeDate (`last` N `unit`s, today included). `displayName` and `ordinal` on any
+filter; `filterOrder` (ascending, descending, custom) writes `filterSortOrder` on the visual, page or report. Top-level
+`report.filters` writes report-level filters into report.json `filterConfig` (pbik's `pbik_` filters only; a measure
+there is an error, as on a page). Each new filter is schema-checked as it is written. Test 127.
+
+**UNVERIFIED in Desktop**: none of these forms is in a Desktop-saved file in the kit. The relative-date expression in
+particular is assembled from the schema's DateSpan / DateAdd / Now building blocks; Desktop may write a different
+(equivalent) tree, which the checklist's roundtrip will show.
+
+**Left out**: Include, Exclude and Tuple (made by Desktop when you include or exclude data points), Passthrough
+(a restatement only), VisualTopN, and RelativeTime (minutes and hours; DirectQuery). Not needed by a BRD so far.
+
+**Provenance**: S:filterConfiguration 1.3.0 #FilterContainer (`type`, `displayName`, `ordinal`), `filterSortOrder`;
+S:report 3.3.0 `filterConfig`; S:semanticQuery 1.4.0 #QueryBetweenExpression, #QueryContainsExpression,
+#QueryStartsWithExpression, #QueryNotExpression, #QueryComparisonExpression, #QueryDateSpanExpression,
+#QueryDateAddExpression, #QueryNowExpression, #TimeUnit; pbik's fields.py (the From / Where shape Desktop saved for
+Categorical and Top N filters).

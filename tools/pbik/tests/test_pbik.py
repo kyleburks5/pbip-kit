@@ -2435,6 +2435,54 @@ class PbikTests(unittest.TestCase):
         self.assertIn("roadmap gap 25", pbik("resource", "add", rep, png).stdout)
         self.assertNotIn("roadmap gap 25", pbik("resource", "add", rep, png).stdout)
 
+    def test_127_more_filter_types(self):
+        """Gap 4: Range, Advanced text conditions, RelativeDate, report-level filters, displayName / ordinal / order."""
+        def edit(lay):
+            lay["pages"]["P1"]["filters"] += [
+                {"field": "'Date'[Month No]", "type": "Range", "min": 1, "max": 6, "displayName": "First half",
+                 "ordinal": 2},
+                {"field": "stores[City]", "type": "Advanced", "join": "or",
+                 "conditions": [{"op": "contains", "value": "ville"}, {"op": "isBlank"}], "ordinal": 1},
+                {"field": "'Date'[Date]", "type": "RelativeDate", "last": 12, "unit": "months"}]
+            lay["pages"]["P1"]["filterOrder"] = "custom"
+            lay["report"] = {"filters": [{"field": "products[Product_Category]", "values": ["Toys"], "hidden": True}]}
+        work, rep, lf = self._batch1("b127", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 4)", r.stdout)
+        pg = Report(rep).page_by("pbik sales")[1]
+        fs = {f["type"]: f for f in pg["filterConfig"]["filters"]}
+        self.assertEqual(pg["filterConfig"]["filterSortOrder"], "Custom")
+        rng = fs["Range"]
+        self.assertEqual((rng["displayName"], rng["ordinal"]), ("First half", 2))
+        btw = rng["filter"]["Where"][0]["Condition"]["Between"]
+        self.assertEqual((btw["LowerBound"], btw["UpperBound"]), ({"Literal": {"Value": "1L"}}, {"Literal": {"Value": "6L"}}))
+        orc = fs["Advanced"]["filter"]["Where"][0]["Condition"]["Or"]
+        self.assertEqual(orc["Left"]["Contains"]["Right"], {"Literal": {"Value": "'ville'"}})
+        self.assertEqual(orc["Right"]["Comparison"]["Right"], {"Literal": {"Value": "null"}})
+        low = fs["RelativeDate"]["filter"]["Where"][0]["Condition"]["Between"]["LowerBound"]["DateSpan"]
+        self.assertEqual((low["Expression"]["DateAdd"]["Amount"], low["Expression"]["DateAdd"]["TimeUnit"]), (-12, 2))
+        rd = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        rf = [f for f in rd["filterConfig"]["filters"] if f["name"].startswith("pbik_")]
+        self.assertEqual(len(rf), 1)
+        self.assertTrue(rf[0]["isHiddenInViewMode"])
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertIn("0 error(s)", v)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 4)", v)
+        def drop(lay):
+            lay.pop("report"), lay["pages"]["P1"].pop("filterOrder")
+            lay["pages"]["P1"]["filters"] = lay["pages"]["P1"]["filters"][:1]
+        self._relayout(lf, drop)
+        pbik("build", rep, lf)
+        rd = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        self.assertFalse([f for f in (rd.get("filterConfig") or {}).get("filters", []) if f["name"].startswith("pbik_")])
+        self.assertNotIn("filterSortOrder", Report(rep).page_by("pbik sales")[1]["filterConfig"])
+        self._relayout(lf, lambda lay: lay.update(report={"filters": [{"field": "[Revenue]", "op": ">", "value": 1}]}))
+        self.assertIn("filters on a measure only at visual level", pbik("build", rep, lf, ok=(1,)).stdout)
+        self._relayout(lf, lambda lay: lay.update(report={"filters": [{"field": "'Date'[Date]", "type": "RelativeDate",
+                                                                      "last": 2, "unit": "fortnights"}]}))
+        self.assertIn("relative date unit 'fortnights'", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

@@ -277,3 +277,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 3 | Partial: image visuals done (Desktop-saved form); page background and wallpaper images blocked | layout `image`; the page image form needs one Desktop save (checklist) |
 | 12 | Done, UNVERIFIED in Desktop | page `landing` (landingPageName), page `props` (schema-checked), `--prune` removes pages pbik made |
 | 25 | Done (docs and notes) | support risk recorded (theme.py note, known-gaps, UPDATE-ROUTINE), /smoke step 5 rechecks registered resources |
+| 4 | Done, UNVERIFIED in Desktop | Range, Advanced text conditions, RelativeDate, report-level filters, displayName / ordinal / filterOrder; Include, Exclude, Tuple, Passthrough, VisualTopN and RelativeTime left out (made by Desktop from data-point actions or DirectQuery) |

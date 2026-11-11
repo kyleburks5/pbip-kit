@@ -67,6 +67,7 @@ class Ctx:
         self.owned_new = {}        # vid -> [[where, key, selector, prop]]
         self.strict = False        # --strict: a property outside Microsoft's schema is an error, not a warning
         self.unverified = set()    # roadmap batch 2 features this build writes (pbikit/unverified.py)
+        self.layout_orders = set()  # owners whose filterSortOrder pbik set on the last build (visual-map filterOrders)
 
     # tokens
     def colour(self, v):
@@ -367,8 +368,9 @@ def apply_query(ctx, v, d):
 def build_filter(ctx, owner, k, spec):
     name = "pbik_" + stable_name(owner, k, spec.get("field"), length=16)
     fld = ctx.field(spec["field"])
+    typ = str(spec.get("type", "Categorical")).lower()
     if "Measure" in fld:
-        if owner.startswith("page:"):
+        if owner.startswith("page:") or owner == "report":
             raise BuildError(f"{owner}: {spec['field']} is a measure: Power BI filters on a measure only at visual "
                              "level; move the filter to each visual's `filters`")
         if spec.get("op") not in OPS or "value" not in spec:
@@ -379,10 +381,27 @@ def build_filter(ctx, owner, k, spec):
     elif spec.get("type", "Categorical").lower() == "topn":
         f = F.topn_filter(name, fld, ctx.field(spec["by"]), spec.get("n", 5),
                           bottom=spec.get("direction", "Top").lower() == "bottom")
-    elif spec.get("type", "Categorical").lower() == "categorical":
+    elif typ == "categorical":
         f = F.categorical_filter(name, fld, ctx.res.column_type(fld), spec.get("values", []), spec.get("invert", False))
+    elif typ == "range":                                         # roadmap gap 4 (UNVERIFIED in Desktop)
+        f = F.range_filter(name, fld, ctx.res.column_type(fld), spec.get("min"), spec.get("max"))
+    elif typ == "advanced":
+        f = F.advanced_filter(name, fld, ctx.res.column_type(fld), spec.get("conditions") or [], spec.get("join", "and"))
+    elif typ == "relativedate":
+        f = F.relative_date_filter(name, fld, spec.get("last"), spec.get("unit", "days"))
     else:
-        raise BuildError(f"{owner}: filter type {spec['type']!r} not supported (Categorical, TopN; a measure: op, value)")
+        raise BuildError(f"{owner}: filter type {spec['type']!r} not supported (Categorical, TopN, Range, Advanced, "
+                         "RelativeDate; a measure: op, value)")
+    if typ in ("range", "advanced", "relativedate"):
+        ctx.unverified.add("filters")
+    if spec.get("displayName"):
+        f["displayName"] = str(spec["displayName"])
+        ctx.unverified.add("filters")
+    if spec.get("ordinal") is not None:
+        if isinstance(spec["ordinal"], bool) or not isinstance(spec["ordinal"], int):
+            raise BuildError(f"{owner}: filter ordinal must be a whole number")
+        f["ordinal"] = spec["ordinal"]
+        ctx.unverified.add("filters")
     if spec.get("hidden"):
         f["isHiddenInViewMode"] = True
     if spec.get("locked"):
@@ -390,10 +409,25 @@ def build_filter(ctx, owner, k, spec):
     return f
 
 
-def apply_filters(ctx, owner, d, specs):
-    """Replace pbik's own filters (name pbik_*) in place; keep filters made in Desktop."""
+FILTER_ORDER = {"ascending": "Ascending", "descending": "Descending", "custom": "Custom"}
+
+
+def apply_filters(ctx, owner, d, specs, order=None):
+    """Replace pbik's own filters (name pbik_*) in place; keep filters made in Desktop. order: filterSortOrder
+    (ascending, descending, custom = by each filter's ordinal; roadmap gap 4)."""
     fc = d.setdefault("filterConfig", {}).setdefault("filters", [])
-    new = [build_filter(ctx, owner, k, sp) for k, sp in enumerate(specs or [])]
+    try:
+        new = [build_filter(ctx, owner, k, sp) for k, sp in enumerate(specs or [])]
+    except F.FieldError as e:
+        raise BuildError(f"{owner}: {e}")
+    if order is not None:
+        o = FILTER_ORDER.get(str(order).lower())
+        if not o:
+            raise BuildError(f"{owner}: filterOrder {order!r} ({', '.join(FILTER_ORDER)})")
+        d["filterConfig"]["filterSortOrder"] = o
+        ctx.unverified.add("filters")
+    for f in new:
+        tree_gate(ctx, owner, d.get("$schema", ""), ["filterConfig", "filters"], f)
     names = {f["name"] for f in new}
     for f in new:
         pos = next((k for k, x in enumerate(fc) if x.get("name") == f["name"]), None)
@@ -406,6 +440,8 @@ def apply_filters(ctx, owner, d, specs):
         del d["filterConfig"]["filters"]
         if not d["filterConfig"]:
             del d["filterConfig"]
+    elif order is None and fc and d["filterConfig"].get("filterSortOrder") and owner in ctx.layout_orders:
+        d["filterConfig"].pop("filterSortOrder")              # pbik set it on an earlier build; the key went
 
 
 def apply_reference_lines(ctx, vid, v, d):
@@ -1009,7 +1045,9 @@ def apply_report(ctx, rep, layout, old_map):
     back to it when the key leaves layout.json. Returns (report.json dict or None, owned dict for visual-map.json)."""
     spec = layout.get("report") or {}
     old = (old_map.get("reportOwned") or {})
-    if not spec and not old:
+    ctx.layout_orders = set(old_map.get("filterOrders") or [])
+    if not spec and not old and not any(f_.get("name", "").startswith("pbik_") for f_ in (load(
+            rep.defn / "report.json").get("filterConfig") or {}).get("filters", [])):
         return None, {}
     rf = rep.defn / "report.json"
     d = load(rf)
@@ -1032,6 +1070,11 @@ def apply_report(ctx, rep, layout, old_map):
         was = (old.get("objects") or {}).get(f"outspacePane.{prop}", {"was": e["properties"].get(prop)})
         owned["objects"][f"outspacePane.{prop}"] = was
         e["properties"][prop] = b(val)
+    if spec.get("filters") or spec.get("filterOrder") or any(
+            f_.get("name", "").startswith("pbik_") for f_ in (d.get("filterConfig") or {}).get("filters", [])):
+        apply_filters(ctx, "report", d, spec.get("filters", []), spec.get("filterOrder"))      # roadmap gap 4
+        if spec.get("filters"):
+            ctx.unverified.add("filters")
     ann = spec.get("annotations") or {}
     lst = d.setdefault("annotations", [])
     set_annotations(lst, ann, "report")
@@ -1322,9 +1365,9 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     for key, spec in pages_spec.items():
         d, _ = page_docs[key]
         try:
-            if spec.get("filters") or any(f.get("name", "").startswith("pbik_")
-                                          for f in d.get("filterConfig", {}).get("filters", [])):
-                apply_filters(ctx, f"page:{key}", d, spec.get("filters", []))
+            if spec.get("filters") or spec.get("filterOrder") or any(
+                    f.get("name", "").startswith("pbik_") for f in d.get("filterConfig", {}).get("filters", [])):
+                apply_filters(ctx, f"page:{key}", d, spec.get("filters", []), spec.get("filterOrder"))
         except BuildError as e:
             errors.append(f"page {key}: {e}")
 
@@ -1469,9 +1512,9 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             d["name"] = vnames[vid]
             set_position(d, vid, v, box(vid), parent, box, vnames, ctx)
             apply_query(ctx, v, d)
-            if v.get("filters") or any(x.get("name", "").startswith("pbik_")
-                                       for x in d.get("filterConfig", {}).get("filters", [])):
-                apply_filters(ctx, vid, d, v.get("filters", []))
+            if v.get("filters") or v.get("filterOrder") or any(
+                    x.get("name", "").startswith("pbik_") for x in d.get("filterConfig", {}).get("filters", [])):
+                apply_filters(ctx, vid, d, v.get("filters", []), v.get("filterOrder"))
             apply_style(ctx, vid, v, d)
             apply_container(ctx, vid, v, d)
             apply_text(ctx, vid, v, d)
@@ -1613,6 +1656,11 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                "bookmarks": bm_owned}
     if landing:
         out_map["landing"] = page_ids[landing[0]]
+    orders = sorted(([f"page:{k}" for k, sp in pages_spec.items() if sp.get("filterOrder")] +
+                     [v["id"] for v in visuals if v.get("filterOrder")] +
+                     (["report"] if (layout.get("report") or {}).get("filterOrder") else [])))
+    if orders:
+        out_map["filterOrders"] = orders
     if report_owned:                    # report.json keys pbik set, with the value Desktop had before
         out_map["reportOwned"] = report_owned
     if rep.target.pinned:              # files Desktop owns: only their $schema goes down to the target's version
