@@ -1107,6 +1107,9 @@ def apply_selection(ctx, vid, v, d):
 
 # ---------------------------------------------------------------- pages
 def page_background(ctx, spec):
+    """Page `background`: a colour, {color, transparency}, and (roadmap gap 3) {image, scaling}: the image as Desktop
+    saved a canvas background image (pbik-smoke-bulk, 2026-11-11): background.image.image {name, url:
+    ResourcePackageItem, scaling}. build() registers the file first."""
     bg = spec.get("background")
     if bg is None:
         return None
@@ -1114,7 +1117,20 @@ def page_background(ctx, spec):
         colour, tr = bg.get("color"), bg.get("transparency", 0)
     else:
         colour, tr = bg, spec.get("backgroundTransparency", 0)
-    return [{"properties": {"color": solid(ctx.colour(colour)), "transparency": n(tr)}}]
+    props = {}
+    if colour is not None:
+        props["color"] = solid(ctx.colour(colour))
+    props["transparency"] = n(tr)
+    if isinstance(bg, dict) and bg.get("image"):
+        sc = IMAGE_SCALING.get(str(bg.get("scaling", "fit")).lower())
+        if not sc:
+            raise BuildError(f"page background scaling {bg.get('scaling')!r} ({', '.join(IMAGE_SCALING)})")
+        item = ctx.images[f"page:{spec['_key']}"]
+        props["image"] = {"image": {"name": s(pathlib.Path(bg["image"]).name),
+                                    "url": {"expr": {"ResourcePackageItem": {"PackageName": "RegisteredResources",
+                                                                             "PackageType": 1, "ItemName": item}}},
+                                    "scaling": s(sc)}}
+    return [{"properties": props}]
 
 
 PANE_CARDS = {"applied": "Applied", "available": "Available"}
@@ -1540,6 +1556,14 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         from .theme import apply as apply_theme
         theme_changed = apply_theme(report_path, tf, quiet=True, project=project)
     images, image_changed = {}, []
+    for key, sp in (layout.get("pages") or {}).items():       # roadmap gap 3: page background images
+        bg = sp.get("background")
+        if isinstance(bg, dict) and bg.get("image"):
+            src = pathlib.Path(bg["image"])
+            src = src if src.is_absolute() else design.parent / src
+            from .theme import register_image
+            images[f"page:{key}"], ch = register_image(report_path, src, project)
+            image_changed += [c for c in ch if c not in image_changed]
     for v in layout.get("visuals", []):        # roadmap gap 3: register each image visual's file first
         if "image" not in v:
             continue
@@ -1619,7 +1643,12 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         dep = DEP.display_issue(d["displayOption"], SP.deprecated(d["$schema"], ["displayOption"]))
         if dep:
             ctx.res.warnings.append(f"page {key}: {dep}")
-        bg = page_background(ctx, spec)
+        spec["_key"] = key
+        try:
+            bg = page_background(ctx, spec)
+        except (BuildError, KeyError) as e:
+            errors.append(f"page {key}: {e}")
+            bg = None
         if bg:
             d.setdefault("objects", {})["background"] = bg
         try:

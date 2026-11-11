@@ -2388,6 +2388,15 @@ class PbikTests(unittest.TestCase):
         items = next(p_ for p_ in rd["resourcePackages"] if p_["name"] == "RegisteredResources")["items"]
         self.assertIn({"name": "logo.png", "path": "logo.png", "type": "Image"}, items)
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self._relayout(lf, lambda lay: lay["pages"]["P2"].update(background={"color": "background",
+                                                                               "image": "design/images/logo.png",
+                                                                               "scaling": "normal"}))
+        pbik("build", rep, lf)
+        bg = Report(rep).page_by("pbik stock")[1]["objects"]["background"][0]["properties"]
+        self.assertEqual(bg["image"]["image"]["url"]["expr"]["ResourcePackageItem"]["ItemName"], "logo.png")
+        self.assertEqual(bg["image"]["image"]["scaling"], {"expr": {"Literal": {"Value": "'Normal'"}}})
+        self.assertEqual(bg["image"]["image"]["name"], {"expr": {"Literal": {"Value": "'logo.png'"}}})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
         self._relayout(lf, lambda lay: lay["visuals"].append(dict(lay["visuals"][-1], id="P1-V21", type="shape")))
         self.assertIn("image is for image visuals", pbik("build", rep, lf, ok=(1,)).stdout)
 
