@@ -159,3 +159,22 @@ those are **UNVERIFIED in Desktop** and flagged by build and validate.
 
 **Provenance**: S:formattingObjectDefinitions 1.5.0 #Selector, #DataRepetitionSelector (`scopeId`); S:semanticQuery
 1.4.0 #QueryComparisonExpression, #QueryLiteralExpression; the Rep 5 fixture; pbik's fields.py (`typed_literal`).
+## Gap 5: data bookmarks that save a state (selection and sort done, UNVERIFIED in Desktop)
+
+**What pbik does now** (`pbikit/bookmarks.py`): a layout bookmark's `select: {ID: {field, values}}` saves that slicer's
+selection as `singleVisual.objects.merge.general[0].properties.filter.filter` (the same Version 2 filter pbik writes
+for a slicer's `selection`), and `sort: {ID: {field, direction}}` saves `singleVisual.orderBy` (QuerySortClause,
+Direction 1 / 2). Those visuals become targets, and the bookmark captures data unless `data: false`, which is then a
+layout error. Test 129.
+
+**Left out**: filter states (`explorationState.filters`, a section's `filters` by name), `activeProjections`,
+`expansionStates` and cross-highlights (`highlight`): their state shapes (FiltersState byName / byExpr, Decomposed
+selectors) are deep and nothing in the kit shows Desktop's form. Rep 7's 3 bookmarks saved slicer states, which
+`select` covers.
+
+**UNVERIFIED in Desktop**: whether Desktop reads the slicer state from `objects.merge` exactly this way. The
+checklist's roundtrip after applying the bookmark and saving shows it.
+
+**Provenance**: S:bookmark 2.1.0 #ExplorationState, #SectionState, #VisualContainerState, #SingleVisualConfigState
+(`objects`, `orderBy`), #DataViewObjectDefinitionUpdates (`merge`), #BookmarkOptions; S:semanticQuery 1.4.0
+#QuerySortClause; pbik's bookmarks.py (Rep 5's saved form for display bookmarks) and fields.py (`selection_filter`).

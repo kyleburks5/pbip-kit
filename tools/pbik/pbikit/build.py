@@ -1630,6 +1630,19 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         register_custom_visual(rep, DN.TYPE)
     for hc in sorted({v["type"] for v in visuals if HC.is_html_content(v["type"])}):
         register_custom_visual(rep, hc)
+    for key, sp in pages_spec.items():          # roadmap gap 5: the state data bookmarks save, resolved here
+        for b in sp.get("bookmarks", []):
+            try:
+                b["_select"] = {vid: F.selection_filter(ctx.field(s_["field"]), ctx.res.column_type(ctx.field(s_["field"])),
+                                                        s_["values"] if isinstance(s_.get("values"), list) else [s_.get("value")])
+                                for vid, s_ in (b.get("select") or {}).items()}
+                b["_sort"] = {vid: [{"Direction": 1 if str(x.get("direction", "Descending")).lower().startswith("asc") else 2,
+                                     "Expression": ctx.field(x["field"])} for x in (s_ if isinstance(s_, list) else [s_])]
+                              for vid, s_ in (b.get("sort") or {}).items()}
+            except (F.FieldError, BuildError, KeyError) as e:
+                fail(f"page {key}: bookmark {b.get('name')!r}: {e}")
+            if b["_select"] or b["_sort"]:
+                ctx.unverified.add("data-bookmarks")
     bm_owned = BM.write(rep, layout, page_ids, vnames, {v["id"]: v["type"] for v in visuals}, old_map, prune, log)
 
     # prune

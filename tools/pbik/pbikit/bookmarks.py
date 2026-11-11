@@ -64,7 +64,8 @@ def check(layout):
                 errors.append(f"page {k}: a bookmark has no name")
                 continue
             all_names.add((k, b["name"]))
-            for vid in list(b.get("show", [])) + list(b.get("hide", [])) + list(b.get("targets", [])):
+            for vid in (list(b.get("show", [])) + list(b.get("hide", [])) + list(b.get("targets", [])) +
+                        list(b.get("select") or {}) + list(b.get("sort") or {})):
                 if vid not in page_of:
                     errors.append(f"page {k}: bookmark {b['name']!r} lists {vid}, which is not in layout.json")
                 elif page_of[vid] != k:
@@ -72,6 +73,8 @@ def check(layout):
             both = set(b.get("show", [])) & set(b.get("hide", []))
             if both:
                 errors.append(f"page {k}: bookmark {b['name']!r} both shows and hides {sorted(both)}")
+            if (b.get("select") or b.get("sort")) and b.get("data") is False:
+                errors.append(f"page {k}: bookmark {b['name']!r} saves a selection or sort, which needs data")
             if b.get("data") is False and b.get("display") is False:
                 errors.append(f"page {k}: bookmark {b['name']!r} captures neither data nor display")
     groups = [g.get("name") for p in layout.get("pages", {}).values() for g in p.get("bookmarkGroups", [])]
@@ -93,13 +96,18 @@ def check(layout):
 
 def bookmark_doc(rep, b, page_name, vnames, vtypes):
     show, hide = list(b.get("show", [])), list(b.get("hide", []))
-    targets = list(dict.fromkeys(show + hide + list(b.get("targets", []))))
+    targets = list(dict.fromkeys(show + hide + list(b.get("targets", [])) + list(b.get("select") or {}) +
+                                 list(b.get("sort") or {})))
     containers, groups = {}, {}
     for vid in targets:
         if vtypes[vid] == "group":            # groups: visualContainerGroups {name: {isHidden}}, as Desktop saved Rep 7
             groups[vnames[vid]] = {"isHidden": vid in hide}
             continue
         sv = {"visualType": vtypes[vid], "objects": {}}
+        if vid in (b.get("_select") or {}):          # roadmap gap 5: the slicer selection this bookmark saves
+            sv["objects"] = {"merge": {"general": [{"properties": {"filter": {"filter": b["_select"][vid]}}}]}}
+        if vid in (b.get("_sort") or {}):
+            sv["orderBy"] = b["_sort"][vid]
         if vid in hide:
             sv["display"] = {"mode": "hidden"}
         containers[vnames[vid]] = {"singleVisual": sv}
@@ -112,7 +120,7 @@ def bookmark_doc(rep, b, page_name, vnames, vtypes):
         options["targetVisualNames"] = [vnames[v] for v in targets]
     if not b.get("changesPage", False):
         options["suppressActiveSection"] = True
-    if not b.get("data", False):
+    if not b.get("data", bool(b.get("select") or b.get("sort"))):
         options["suppressData"] = True
     if b.get("display", True) is False:
         options["suppressDisplay"] = True

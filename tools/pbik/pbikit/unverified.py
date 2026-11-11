@@ -98,6 +98,21 @@ def _members_other(kind, doc):
 feature("members", 2, "per-member formatting on objects other than dataPoint.fill (layout `members`)", _members_other)
 
 
+def _data_bookmark(kind, doc):
+    if kind != "bookmark":
+        return False
+    for sec in ((doc.get("explorationState") or {}).get("sections") or {}).values():
+        for vc in (sec.get("visualContainers") or {}).values():
+            sv = vc.get("singleVisual") or {}
+            if (sv.get("objects") or {}).get("merge") or sv.get("orderBy"):
+                return True
+    return False
+
+
+feature("data-bookmarks", 5, "data bookmarks that save a slicer selection or a sort (bookmark `select`, `sort`)",
+        _data_bookmark)
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

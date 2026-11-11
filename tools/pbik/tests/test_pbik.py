@@ -2514,6 +2514,31 @@ class PbikTests(unittest.TestCase):
             members={"field": "[Revenue]", "values": {"a": "#000000"}}))
         self.assertIn("must be a column", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_129_data_bookmarks_save_state(self):
+        """Gap 5: a bookmark saves a slicer selection (objects.merge.general.filter) and a sort (orderBy)."""
+        def edit(lay):
+            lay["pages"]["P1"]["bookmarks"] = [{"name": "toys", "displayName": "Toys only",
+                                                "select": {"P1-V09": {"field": "products[Product_Category]",
+                                                                      "values": ["Toys"]}},
+                                                "sort": {"P1-V04": {"field": "[Revenue]", "direction": "Ascending"}}}]
+        work, rep, lf = self._batch1("b129", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 5)", r.stdout)
+        bd = json.loads(next((rep / "definition" / "bookmarks").glob("*.bookmark.json")).read_text(encoding="utf-8"))
+        self.assertNotIn("suppressData", bd["options"])
+        sec = next(iter(bd["explorationState"]["sections"].values()))["visualContainers"]
+        sl = next(v for k, v in sec.items() if k.startswith("P1-V09"))["singleVisual"]
+        flt = sl["objects"]["merge"]["general"][0]["properties"]["filter"]["filter"]
+        self.assertEqual(flt["Where"][0]["Condition"]["In"]["Values"], [[{"Literal": {"Value": "'Toys'"}}]])
+        ch = next(v for k, v in sec.items() if k.startswith("P1-V04"))["singleVisual"]
+        self.assertEqual(ch["orderBy"][0]["Direction"], 1)
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertIn("0 error(s)", v)
+        self.assertIn("roadmap gap 5", v)
+        self._relayout(lf, lambda lay: lay["pages"]["P1"]["bookmarks"][0].update(data=False))
+        self.assertIn("saves a selection or sort, which needs data", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

@@ -98,6 +98,7 @@ saves them) = Microsoft's #ExplorationSettings (`exportDataMode`, `hideVisualCon
 | page | `filters` | page-level filters (as for visuals, below) |
 | page | `interactions: [{source, targets: [IDs] or "*", type}]` | `visualInteractions` (`NoFilter`, `DataFilter`, `HighlightFilter`) |
 | page | `bookmarks: [{name, displayName, show: [IDs], hide: [IDs], targets: [IDs], data, display, changesPage}]` | `definition/bookmarks/<id>.bookmark.json` + `bookmarks.json`, as Desktop saved them in Rep 5. Applies only to the listed visuals; `data: false` (default) is display only (filters and slicer selections unchanged); `data: true, display: false` resets the targets' selections; `changesPage: false` (default) doesn't switch page. Ids are stable (page key + name); pbik's bookmarks are owned like its visuals (`--prune` removes dropped ones); Desktop's are never touched |
+| page | bookmark `select: {ID: {field, values}}`, `sort: {ID: {field, direction}}` (or a list) | a data bookmark that saves a slicer selection (the visual's `singleVisual.objects.merge.general` `filter`, the same filter as `selection`) and a sort (`singleVisual.orderBy`, Direction 1 ascending / 2 descending); those visuals join the targets and `data` defaults to true (`data: false` with them is an error). Page and report filter states aren't written. **UNVERIFIED in Desktop** (roadmap gap 5) |
 | page | `bookmarkGroups: [{name, displayName, bookmarks: [names]}]` | a group item in `bookmarks.json` (a grouped bookmark isn't also listed on its own) |
 | visual | `id`, `name`, `page`, `type`, `x`, `y`, `w`, `h`, `z` | folder and name `<ID>_<name>`; z = layer × 1000 + visual number; tab order = visual number × 100 (number IDs in reading order) |
 | visual | `tabOrder: <whole number>` | `position.tabOrder` when reading order can't follow the IDs (Rep 9: a header slicer before an earlier-numbered subtitle); keep the × 100 scale, e.g. 350 between V03 and V04 |
@@ -407,7 +408,7 @@ validate and model check, and break copies on purpose to check each rule fires.
 ## Not yet
 
 See "pbik can't write it yet" in the kit's `design/known-gaps.md` for the full list with workarounds. In short:
-data bookmarks that save a selection, advanced and report-level filters, drill-through and tooltip pages, mobile
+filter states in data bookmarks, drill-through and tooltip pages, mobile
 layout, shape maps with an uploaded map file, a page background or wallpaper image, new card small multiples (`pbik_helpers.small_multiples_grid`), and custom, Python, R or Deneb visuals.
 
 Checked in Desktop: the smoke page (card, button slicer, table, 2026-10-18), Rep 5 parity (filter pane, Clear, sync
