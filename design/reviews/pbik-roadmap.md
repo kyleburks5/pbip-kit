@@ -313,3 +313,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 12 | Done, confirmed in Desktop | landing page and displayArea Middle work and were kept (2026-11-11) |
 | 13 | Done, confirmed in Desktop | Desktop kept every annotation on save (2026-11-11) |
 | 5 | Done, confirmed in Desktop | the bookmark ticks the slicer and sorts the chart (2026-11-11) |
+| 16 | Partial after the Desktop check | `queryOptions` confirmed (2026-11-11); `angle` is a build error: Desktop kept position.angle but didn't draw or select the visual |

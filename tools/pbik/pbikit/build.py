@@ -449,7 +449,6 @@ def apply_query_options(ctx, vid, v, d):
         raise BuildError(f"{vid}: queryOptions {sorted(unknown)} ({', '.join(QUERY_OPTIONS)})")
     d["visual"].setdefault("query", {"queryState": {}})["options"] = {QUERY_OPTIONS[k]: bool(x) for k, x in qo.items()}
     ctx.owned_new.setdefault(vid, []).append(["query", "options", None, None])
-    ctx.unverified.add("visual-options")
     tree_gate(ctx, vid, d.get("$schema", ""), ["visual", "query", "options"], d["visual"]["query"]["options"])
 
 
@@ -2172,13 +2171,11 @@ def set_position(d, vid, v, bx, parent, box, vnames, ctx):
         raise BuildError(f"{vid}: tabOrder {tab!r} must be a whole number (the default is the visual number x 100)")
     d.setdefault("position", {}).update({"x": round(x), "y": round(y), "z": v.get("z", 1) * 1000 + idx,
                                          "height": round(h), "width": round(w), "tabOrder": tab})
-    if v.get("angle") is not None:                   # roadmap gap 16: rotation (UNVERIFIED in Desktop)
-        if isinstance(v["angle"], bool) or not isinstance(v["angle"], (int, float)):
-            raise BuildError(f"{vid}: angle must be a number of degrees")
-        d["position"]["angle"] = v["angle"]
-        ctx.unverified.add("visual-options")
-    else:
-        d["position"].pop("angle", None)
+    if v.get("angle") is not None:                   # roadmap gap 16
+        raise BuildError(f"{vid}: angle isn't supported: Desktop kept position.angle but neither drew nor selected the "
+                         "visual (pbik-smoke-bulk, 2026-11-11). Shapes rotate through their own Rotation format "
+                         "settings (`props`)")
+    d["position"].pop("angle", None)
     if v.get("hidden") is not None:
         if v["hidden"]:
             d["isHidden"] = True

@@ -2809,25 +2809,20 @@ class PbikTests(unittest.TestCase):
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
 
     def test_141_angle_and_query_options(self):
-        """Gap 16: position.angle and query.options, both owned."""
-        def edit(lay):
-            v = next(x for x in lay["visuals"] if x["id"] == "P2-V03")
-            v.update(angle=90, queryOptions={"binnedLineSample": True})
-        work, rep, lf = self._batch1("b141", edit)
+        """Gap 16: query.options (owned, confirmed in Desktop); angle is an error (Desktop didn't draw the visual)."""
+        work, rep, lf = self._batch1("b141", lambda lay: next(x for x in lay["visuals"] if x["id"] == "P2-V03").update(
+            queryOptions={"binnedLineSample": True}))
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 16)", r.stdout)
-        d = visual(rep, "P2-V03")
-        self.assertEqual(d["position"]["angle"], 90)
-        self.assertEqual(d["visual"]["query"]["options"], {"allowBinnedLineSample": True})
+        self.assertNotIn("roadmap gap 16)", r.stdout)
+        self.assertEqual(visual(rep, "P2-V03")["visual"]["query"]["options"], {"allowBinnedLineSample": True})
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
-        self._relayout(lf, lambda lay: [next(x for x in lay["visuals"] if x["id"] == "P2-V03").pop(k)
-                                        for k in ("angle", "queryOptions")])
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P2-V03").pop("queryOptions"))
         pbik("build", rep, lf)
-        d = visual(rep, "P2-V03")
-        self.assertNotIn("angle", d["position"])
-        self.assertNotIn("options", d["visual"]["query"])
+        self.assertNotIn("options", visual(rep, "P2-V03")["visual"]["query"])
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P2-V03").update(angle=90))
+        self.assertIn("angle isn't supported", pbik("build", rep, lf, ok=(1,)).stdout)
         self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P2-V03").update(
-            queryOptions={"fast": True}))
+            queryOptions={"fast": True}, angle=None))
         self.assertIn("queryOptions ['fast']", pbik("build", rep, lf, ok=(1,)).stdout)
 
     def test_143_copy_page_between_reports(self):
