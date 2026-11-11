@@ -2407,8 +2407,7 @@ class PbikTests(unittest.TestCase):
             lay["pages"]["P2"]["props"] = {"pageRefresh.show": True, "displayArea.verticalAlignment": "Middle"}
         work, rep, lf = self._batch1("b125", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 12): the landing page", r.stdout)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 12): page settings", r.stdout)
+        self.assertNotIn("roadmap gap 12)", r.stdout)                # confirmed in Desktop (2026-11-11)
         meta = json.loads((rep / "definition" / "pages" / "pages.json").read_text(encoding="utf-8"))
         p2 = Report(rep).page_by("pbik stock")
         self.assertEqual(meta["landingPageName"], p2[0])
