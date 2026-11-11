@@ -2672,6 +2672,18 @@ class PbikTests(unittest.TestCase):
                     "registered resources are", "report definition files are"):
             self.assertIn(bit, text)
 
+    def test_135_values_for_privacy_review(self):
+        """Gap 19: pbik values lists filter, slicer and selector literals by field, not formatting literals."""
+        work, rep, lf = self._batch1("b135", lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V04").update(
+            members={"field": "stores[City]", "values": {"Austin": "#000000"}}))
+        pbik("build", rep, lf)
+        out = work / "values.md"
+        r = pbik("values", rep, "--out", out).stdout
+        self.assertIn("page filters, products[Product_Category]: 'Art & Crafts', 'Electronics'", r)
+        self.assertIn("selector (dataPoint), stores[City]: 'Austin'", r)
+        self.assertNotIn("#000000", r)
+        self.assertTrue(out.exists())
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

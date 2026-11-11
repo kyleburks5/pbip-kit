@@ -285,3 +285,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 8 | Done, UNVERIFIED in Desktop | hierarchy-level bindings (TMDL-checked), matrix `expand: all`; automatic date hierarchies and `isDrillDisabled` (custom visuals only, per the schema) left out |
 | 27 | Done, UNVERIFIED in Desktop | group `background`, `altText`, `lockAspect`; Desktop's group formatting now kept on rebuild |
 | 18 | Done (check only) | validate errors past the service limits (pages, visuals per page, resource files, 300 MB resources, 300 MB report files) |
+| 19 | Done (check only) | new read-only command `pbik values` lists filter, slicer, selector and bookmark literals by file and field |

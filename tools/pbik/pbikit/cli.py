@@ -99,6 +99,10 @@ def main(argv=None):
     rt.add_argument("--before", help="pbik's files from a copy of the report folder instead of git")
     rt.add_argument("--out", help="also write the list to this .md file")
 
+    va = sub.add_parser("values", help="model values written into the report files, for a privacy review (read-only)")
+    va.add_argument("report")
+    va.add_argument("--out", help="also write the list to this .md file")
+
     i = sub.add_parser("info", help="pages and visuals by ID")
     i.add_argument("report")
     i.add_argument("--json", action="store_true")
@@ -186,6 +190,9 @@ def main(argv=None):
     elif c == "roundtrip":
         from .roundtrip import roundtrip
         roundtrip(args.report, args.rev, args.to, args.before, args.out)
+    elif c == "values":
+        from .values import values
+        values(args.report, args.out)
     elif c == "info":
         from .info import info
         info(args.report, args.json)

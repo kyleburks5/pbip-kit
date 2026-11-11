@@ -246,3 +246,13 @@ definition files. Never hit at kit scale; a cheap guard. Test 134 (limits lowere
 
 **Provenance**: [L1] *Power BI Desktop project report folder*, "PBIR considerations and limitations" (the five
 limits).
+## Gap 19: data values in report files (done, check only)
+
+**What pbik does now**: `pbik values <Report> [--out <md>]` (new, `pbikit/values.py`) lists every literal in report,
+page and visual filters, slicer selections (`objects.*.filter`), per-member selectors (`scopeId`) and bookmark states,
+grouped by file, kind and the field it is compared with. Formatting literals (colours, sizes, text) aren't listed.
+Read-only; meant for the privacy review in docs/it-security.md before a commit. Test 135.
+
+**Provenance**: [L1] *Power BI Desktop project report folder*, "PBIR folder and files" (Important note: filter and
+slicer values are saved in the files); S:semanticQuery 1.4.0 (#QueryInExpression, #QueryComparisonExpression,
+#QueryBetweenExpression, #QueryLiteralExpression); pbik's validate.py (`walk_in_filters`).

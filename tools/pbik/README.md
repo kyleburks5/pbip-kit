@@ -359,6 +359,16 @@ pbik project check
 pbik schemas lower "..\pbip-patterns-work\HR Overview.Report"
 ```
 
+### `values <Report> [--out <md>]`
+Lists the model values written into the report files, for a privacy review (roadmap gap 19; Microsoft Learn warns that
+filter and slicer values are saved in the files): every literal in report, page and visual filters, slicer selections,
+per-member selectors (`scopeId`) and bookmark states, by file and field. Formatting literals aren't listed. Read-only.
+Check the list against docs/it-security.md before committing.
+
+```bat
+pbik values "Sales.Report" --out design\reviews\values.md
+```
+
 ### `info <Report> [--json]`
 Pages, and visuals by ID, type, position, z and fields.
 
