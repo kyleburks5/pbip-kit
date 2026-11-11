@@ -456,3 +456,32 @@ Reading it:
 - An "added" line on steps 3, 4, 9 and 15 is the missing form those gaps need.
 - The "Registered resources" section should say Desktop kept the theme, the PNG and the map.
 - Pane-dependent lines are expected.
+## Desktop check results (Desktop 2.159.883.0, 2026-11-11)
+
+Kyle went through the checklist on `..\pbik-smoke-bulk` with Claude: Claude screenshotted each page through the
+Desktop Bridge, Kyle did the clicks and the five "set it in Desktop" steps, saved once, and Claude ran
+`pbik roundtrip Smoke.Report --before _pbik-built\Smoke.Report` (`..\pbik-smoke-bulk\roundtrip.md`).
+
+| Gap | Result in Desktop | What the save showed | Follow-up |
+|---|---|---|---|
+| 2 | Pass: donut slices and the column chart's North bar take their member colours | kept | none |
+| 3 | Pass (image visual). Page background image set by hand | `objects.background.image.image {name, url: ResourcePackageItem, scaling}` | write it (layout page `background.image`) |
+| 4 | Partial. Advanced text conditions, RelativeDate, displayName, ordinal, custom order and the hidden report filter pass (the chart matches Alpha + Gamma over the last 12 months to the unit). **Range fails**: the pane reads it as Basic filtering "is (All)" | Desktop rewrote `type: Range` to `Categorical`, keeping the Between | write a range as Advanced with two comparisons |
+| 5 | Pass: Alpha ticks the slicer and sorts the chart ascending | kept | none |
+| 6 | Pass: hovering shows the tooltip page, without visualTooltip `type` | Desktop adds `pageBinding.parameters: []` | write `parameters: []` |
+| 7 | Pass: right-click drill-through and the button (greyed until a bar is selected) pass the region; the page has no Back button | Desktop drops `acceptsFilterContext: Default` | stop writing Default; warn when a drill-through page has no Back button |
+| 8 | Partial: hierarchy-level fields render; **expand all doesn't expand** | `active` true / false on the level projections; `isCollapsed` dropped; Desktop keeps the rest but draws it collapsed | write `active`; make `expand` an error until a Desktop-expanded save shows the form |
+| 9 | **Fail**: "two expressions with identical native reference name 'Amount'" | aggregations otherwise recognised (Median, Standard deviation, Variance, Percentile.Inc) | unique nativeQueryRef per projection |
+| 10 | **Fail**: the same error ('Total Amount': the sparkline and the measure) | | the same fix |
+| 11 | Pass: the card sits top-left at the phone's width | Desktop adds `position.tabOrder: 0` and moves mobile.json to 2.9.0 | write `tabOrder: 0` |
+| 12 | Pass: opens on the landing page; displayArea Middle centres the canvas | kept | none |
+| 13 | Pass: annotations kept | kept | none |
+| 14 | Map picked in Desktop | `objects.shape {datasourceType 'file_upload', map.geoJson {type 'packaged', name, content: ResourcePackageItem}, projectionEnum}`; Desktop registered its own copy (`regions.topo<digits>.json`, type ShapeMap) and dropped pbik's unused one | write the binding (layout `shapeMap`) |
+| 16 | Partial: query options pass; **`angle` fails**: the rotated text box neither draws nor selects (Desktop kept `position.angle`) | | make `angle` an error |
+| 17 | Pass: the copied page renders and its buttons apply its own bookmarks | kept | none |
+| 21 | Tab stop hidden by hand | `position.tabOrder: -9999000` (Desktop also renumbered the others x 1000) | `decorative` writes -9999000 |
+| 25 | Pass: theme and registered PNG load | | none |
+| 26 | Pass: `listSlicer` is the type id (a bare list slicer renders); templates not harvested yet | Desktop adds `active: true` on its Values field | write `active`; templates stay a Patterns-page task |
+| 27 | **Fail (background)**: no group background draws in edit view | Desktop kept background, altText and lockAspect as written | keep unverified; check in reading view |
+| 28 | Spotlight and focus (with the accessible table) pass; **elevation fails** | Desktop dropped `display: {mode: elevation}` from the saved bookmark | make `elevate` an error |
+| 29 | Pass: the page's Cross-report toggle is On and the report setting is ticked | kept | none |
