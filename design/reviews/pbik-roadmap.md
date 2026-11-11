@@ -317,3 +317,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 26 | Partial after the Desktop check | `listSlicer` confirmed as the list slicer's type id; its first field gets `active: true` as Desktop saves it; templates still need a Patterns page save |
 | 28 | Partial after the Desktop check | spotlight and focus (accessible table) confirmed (2026-11-11); `elevate` is a layout error: Desktop dropped elevation on save |
 | 27 | Kept by Desktop, background not drawn: still UNVERIFIED | Desktop kept background, altText and lockAspect on save (2026-11-11) but drew no group background in edit view; check Reading view next pass |
+| 4 | Done, confirmed in Desktop (second pass) | the range now shows as Advanced "is greater than or equal to 2025 ..." (2026-11-11); every filter form of gap 4 confirmed |

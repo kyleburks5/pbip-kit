@@ -2456,7 +2456,7 @@ class PbikTests(unittest.TestCase):
             lay["report"] = {"filters": [{"field": "products[Product_Category]", "values": ["Toys"], "hidden": True}]}
         work, rep, lf = self._batch1("b127", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 4)", r.stdout)
+        self.assertNotIn("roadmap gap 4)", r.stdout)                 # confirmed in Desktop (2026-11-11)
         pg = Report(rep).page_by("pbik sales")[1]
         fs = {f["type"]: f for f in pg["filterConfig"]["filters"]}
         self.assertEqual(pg["filterConfig"]["filterSortOrder"], "Custom")
@@ -2480,7 +2480,7 @@ class PbikTests(unittest.TestCase):
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
         v = pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
         self.assertIn("0 error(s)", v)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 4)", v)
+        self.assertNotIn("roadmap gap 4)", v)
         def drop(lay):
             lay.pop("report"), lay["pages"]["P1"].pop("filterOrder")
             lay["pages"]["P1"]["filters"] = lay["pages"]["P1"]["filters"][:1]
