@@ -2556,8 +2556,9 @@ class PbikTests(unittest.TestCase):
             next(x for x in lay["visuals"] if x["id"] == "P1-V04")["tooltipPage"] = "P3"
         work, rep, lf = self._batch1("b130", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 6)", r.stdout)
+        self.assertNotIn("roadmap gap 6)", r.stdout)                 # confirmed in Desktop (2026-11-11)
         name, pg, _ = Report(rep).page_by("pbik tip")
+        self.assertEqual(pg["pageBinding"]["parameters"], [])
         self.assertEqual(pg["type"], "Tooltip")
         self.assertEqual(pg["pageBinding"]["type"], "Tooltip")
         vt = visual(rep, "P1-V04")["visual"]["visualContainerObjects"]["visualTooltip"][0]["properties"]

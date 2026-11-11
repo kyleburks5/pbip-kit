@@ -194,3 +194,11 @@ feature("filters", 4, "filter types Range, RelativeDate and Advanced text condit
         "displayName / ordinal and filterSortOrder", _new_filters)
 feature("annotations", 13, "annotations on report.json, pages and visuals (layout `annotate`, `annotations`)",
         _pbik_annotations)
+
+
+# ---------------------------------------------------------------- confirmed in Desktop, no longer listed
+# Desktop 2.159.883.0 rendered these and kept them on save (pbik-smoke-bulk, 2026-11-11; pbik-roadmap-batch2.md,
+# "Desktop check results").
+CONFIRMED = ("tooltip-pages",)
+for _k in CONFIRMED:
+    FEATURES.pop(_k, None)

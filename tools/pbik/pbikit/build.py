@@ -1239,7 +1239,7 @@ def apply_page_binding(ctx, key, spec, d):
     if not spec.get("tooltip"):
         return
     d["type"] = "Tooltip"
-    d["pageBinding"] = {"name": stable_name("tooltip", key), "type": "Tooltip"}
+    d["pageBinding"] = {"name": stable_name("tooltip", key), "type": "Tooltip", "parameters": []}  # as Desktop saves it
     for k_ in ("type", "pageBinding"):
         ctx.owned_new.setdefault(owner, []).append(["top", k_, None, None])
     ctx.unverified.add("tooltip-pages")

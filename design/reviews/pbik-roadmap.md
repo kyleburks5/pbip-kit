@@ -302,3 +302,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 21 | Done after the Desktop check | `decorative` writes `tabOrder: -9999000`, Desktop's hidden tab stop (2026-11-11) |
 | 3 | Done after the Desktop check | page `background.image` in the form Desktop saved (2026-11-11); wallpaper (`outspace`) still not written |
 | 14 | Done after the Desktop check | layout `shapeMap` writes the uploaded-map binding Desktop saved (2026-11-11) |
+| 6 | Done, confirmed in Desktop | the tooltip page shows on hover with visualTooltip `section` only; pbik adds `parameters: []` as Desktop saves it (2026-11-11) |
