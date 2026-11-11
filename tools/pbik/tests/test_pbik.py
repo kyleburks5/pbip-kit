@@ -2775,6 +2775,28 @@ class PbikTests(unittest.TestCase):
         self.assertIn("a shape map is a TopoJSON file", pbik("resource", "add", rep, work / "x.png", "--type",
                                                              "ShapeMap", ok=(2,)).stderr)
 
+    def test_141_angle_and_query_options(self):
+        """Gap 16: position.angle and query.options, both owned."""
+        def edit(lay):
+            v = next(x for x in lay["visuals"] if x["id"] == "P2-V03")
+            v.update(angle=90, queryOptions={"binnedLineSample": True})
+        work, rep, lf = self._batch1("b141", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 16)", r.stdout)
+        d = visual(rep, "P2-V03")
+        self.assertEqual(d["position"]["angle"], 90)
+        self.assertEqual(d["visual"]["query"]["options"], {"allowBinnedLineSample": True})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self._relayout(lf, lambda lay: [next(x for x in lay["visuals"] if x["id"] == "P2-V03").pop(k)
+                                        for k in ("angle", "queryOptions")])
+        pbik("build", rep, lf)
+        d = visual(rep, "P2-V03")
+        self.assertNotIn("angle", d["position"])
+        self.assertNotIn("options", d["visual"]["query"])
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P2-V03").update(
+            queryOptions={"fast": True}))
+        self.assertIn("queryOptions ['fast']", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

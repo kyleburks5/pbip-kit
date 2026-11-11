@@ -327,3 +327,15 @@ used a built-in map from SharedResources (`Shapemaps/usa.states.topo.json`), not
 **Provenance**: S:report 3.3.0 #ResourcePackage, #ResourcePackageItem, #ResourcePackageItemType (ShapeMap),
 #ResourcePackageType (RegisteredResources, SharedResources); pbik-roadmap-batch1.md (the SharedResources ShapeMap item
 Desktop saved); pbik's theme.py.
+## Gap 16: other visual options (angle and query options done, UNVERIFIED in Desktop; dataFunction blocked)
+
+**What pbik does now**: visual `angle` writes `position.angle` (removed when the key goes); `queryOptions:
+{binnedLineSample, overlappingPointsSample}` writes `query.options` (`allowBinnedLineSample`,
+`allowOverlappingPointsSample`), owned and schema-checked. Test 141.
+
+**Blocked**: the `dataFunction` visual link. It runs a Fabric user data function (translytical task flows); the kit
+ignores Fabric-only tools (CLAUDE.md), and the schema lists the property without its value's shape. Q&A links stay a
+validate warning (gap 20).
+
+**Provenance**: S:visualContainer 2.13.0 #VisualContainerPosition (`angle`); S:visualConfiguration 2.8.0 #Query
+(`options`), #VisualQueryOptions, #VisualLink (`dataFunction`).

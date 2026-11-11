@@ -158,6 +158,11 @@ feature("shape-map-resource", 14, "a shape map registered as a ShapeMap resource
             if p.get("type") == "RegisteredResources" for it in p.get("items") or []))
 
 
+feature("visual-options", 16, "visual rotation (`angle`: position.angle) and query sampling options (`queryOptions`)",
+        lambda kind, doc: kind == "visual" and ("angle" in (doc.get("position") or {}) or
+                                                "options" in ((doc.get("visual") or {}).get("query") or {})))
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

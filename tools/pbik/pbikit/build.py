@@ -162,6 +162,9 @@ def release(d, where, key, sel_key, prop):
     if where == "top":                          # a top-level key pbik owns (parentGroupName)
         d.pop(key, None)
         return
+    if where == "query":                        # a query key pbik owns (options, roadmap gap 16)
+        d.get("visual", {}).get("query", {}).pop(key, None)
+        return
     if where == "group":                        # a group formatting property pbik wrote (roadmap gap 27)
         objs = (d.get("visualGroup") or {}).get("objects") or {}
         for e in list(objs.get(key, [])):
@@ -423,6 +426,24 @@ def sparkline(ctx, spec):
     ctx.unverified.add("visual-calcs")
     return {"field": {"SparklineData": {"Measure": m, "Groupings": [by], "PointsPerSparkline": 52}},
             "queryRef": f"SparklineData({qref(m)}_[{qref(by)}])", "nativeQueryRef": m["Measure"]["Property"]}
+
+
+QUERY_OPTIONS = {"binnedLineSample": "allowBinnedLineSample", "overlappingPointsSample": "allowOverlappingPointsSample"}
+
+
+def apply_query_options(ctx, vid, v, d):
+    """queryOptions (roadmap gap 16): {binnedLineSample, overlappingPointsSample} -> query.options (better sampling
+    for line and scatter charts). Owned."""
+    qo = v.get("queryOptions")
+    if not qo:
+        return
+    unknown = set(qo) - set(QUERY_OPTIONS)
+    if unknown:
+        raise BuildError(f"{vid}: queryOptions {sorted(unknown)} ({', '.join(QUERY_OPTIONS)})")
+    d["visual"].setdefault("query", {"queryState": {}})["options"] = {QUERY_OPTIONS[k]: bool(x) for k, x in qo.items()}
+    ctx.owned_new.setdefault(vid, []).append(["query", "options", None, None])
+    ctx.unverified.add("visual-options")
+    tree_gate(ctx, vid, d.get("$schema", ""), ["visual", "query", "options"], d["visual"]["query"]["options"])
 
 
 def apply_expand(ctx, vid, v, d):
@@ -1798,6 +1819,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             set_position(d, vid, v, box(vid), parent, box, vnames, ctx)
             apply_query(ctx, v, d)
             apply_expand(ctx, vid, v, d)
+            apply_query_options(ctx, vid, v, d)
             if v.get("filters") or v.get("filterOrder") or any(
                     x.get("name", "").startswith("pbik_") for x in d.get("filterConfig", {}).get("filters", [])):
                 apply_filters(ctx, vid, d, v.get("filters", []), v.get("filterOrder"))
@@ -2039,6 +2061,13 @@ def set_position(d, vid, v, bx, parent, box, vnames, ctx):
         raise BuildError(f"{vid}: tabOrder {tab!r} must be a whole number (the default is the visual number x 100)")
     d.setdefault("position", {}).update({"x": round(x), "y": round(y), "z": v.get("z", 1) * 1000 + idx,
                                          "height": round(h), "width": round(w), "tabOrder": tab})
+    if v.get("angle") is not None:                   # roadmap gap 16: rotation (UNVERIFIED in Desktop)
+        if isinstance(v["angle"], bool) or not isinstance(v["angle"], (int, float)):
+            raise BuildError(f"{vid}: angle must be a number of degrees")
+        d["position"]["angle"] = v["angle"]
+        ctx.unverified.add("visual-options")
+    else:
+        d["position"].pop("angle", None)
     if v.get("hidden") is not None:
         if v["hidden"]:
             d["isHidden"] = True
