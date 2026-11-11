@@ -127,6 +127,11 @@ feature("drillthrough", 7, "drill-through pages (page `drillthrough`: type Drill
                 "visualContainerObjects") or {}).get("visualLink", []))))
 
 
+feature("hierarchies", 8, "hierarchy-level fields (binding `hierarchy`, `level`) and expanded matrix rows (`expand`)",
+        lambda kind, doc: kind == "visual" and ('"HierarchyLevel"' in json.dumps((doc.get("visual") or {}).get("query"))
+                                                 or bool((doc.get("visual") or {}).get("expansionStates"))))
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

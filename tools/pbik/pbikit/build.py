@@ -327,6 +327,67 @@ def field_parameter(ctx, spec):
     return projs, {"parameterExpr": par, "length": len(projs)}
 
 
+def tmdl_hierarchies(model, table):
+    """{hierarchy: [levels]} read from the table's TMDL file (hierarchy <name> / level <name> lines)."""
+    t = model.tables.get(table) if model else None
+    if t is None or not t.file:
+        return {}
+    out, cur = {}, None
+    f = pathlib.Path(t.file)
+    f = f if f.is_absolute() or f.exists() else model.folder.parent / f if (model.folder.parent / f).exists() else model.folder / f
+    if not f.exists():
+        return {}
+    for line in open(f, encoding="utf-8-sig"):
+        m = re.match(r"^\t(hierarchy)\s+('(?:[^']|'')+'|\S+)", line) or re.match(r"^\t\t(level)\s+('(?:[^']|'')+'|\S+)", line)
+        if not m:
+            if re.match(r"^\t\S", line):
+                cur = None
+            continue
+        name = m.group(2).strip("'").replace("''", "'")
+        if m.group(1) == "hierarchy":
+            cur = name
+            out[cur] = []
+        elif cur:
+            out[cur].append(name)
+    return out
+
+
+def hierarchy_level(ctx, spec):
+    """A binding {hierarchy: "Table[Hierarchy]", level: "Year"} -> a HierarchyLevel projection (roadmap gap 8), the
+    hierarchy and level checked against the TMDL."""
+    _, table, hname = ctx.res.parse(spec["hierarchy"])
+    if not table:
+        raise BuildError(f"hierarchy {spec['hierarchy']!r}: write Table[Hierarchy]")
+    if ctx.res.model:
+        hs = tmdl_hierarchies(ctx.res.model, table)
+        if hname not in hs:
+            raise BuildError(f"{spec['hierarchy']!r}: no hierarchy {hname!r} in {table} ({', '.join(hs) or 'none'})")
+        if spec["level"] not in hs[hname]:
+            raise BuildError(f"{spec['hierarchy']!r}: no level {spec['level']!r} ({', '.join(hs[hname])})")
+    fld = {"HierarchyLevel": {"Expression": {"Hierarchy": {"Expression": {"SourceRef": {"Entity": table}},
+                                                            "Hierarchy": hname}}, "Level": spec["level"]}}
+    ctx.unverified.add("hierarchies")
+    return {"field": fld, "queryRef": f"{table}.{hname}.{spec['level']}", "nativeQueryRef": spec["level"]}
+
+
+def apply_expand(ctx, vid, v, d):
+    """expand: "all" (matrix): every Rows level but the last expanded, as expansionStates (roadmap gap 8; schema
+    #ExpansionState: roles, levels with queryRefs and isCollapsed, root isToggled). Owned."""
+    if not v.get("expand"):
+        return
+    if v.get("expand") != "all" or v["type"] != "pivotTable":
+        raise BuildError(f"{vid}: expand takes \"all\" on a matrix (pivotTable)")
+    rows = d["visual"].get("query", {}).get("queryState", {}).get("Rows", {}).get("projections", [])
+    if len(rows) < 2:
+        raise BuildError(f"{vid}: expand needs two or more Rows fields")
+    d["visual"]["expansionStates"] = [{"roles": ["Rows"],
+                                        "levels": [{"queryRefs": [p["queryRef"]], "isCollapsed": False} for p in rows[:-1]],
+                                        "root": {"isToggled": True}}]
+    ctx.owned_new.setdefault(vid, []).append(["visual", "expansionStates", None, None])
+    ctx.unverified.add("hierarchies")
+    tree_gate(ctx, vid, d.get("$schema", ""), ["visual", "expansionStates"], d["visual"]["expansionStates"])
+
+
 def apply_query(ctx, v, d):
     if "bindings" not in v and "sort" not in v:
         return
@@ -338,6 +399,9 @@ def apply_query(ctx, v, d):
             fparams = []
             for it in (items if isinstance(items, list) else [items]):
                 spec = it if isinstance(it, dict) else {"field": it}
+                if "hierarchy" in spec:                     # roadmap gap 8
+                    projs.append(hierarchy_level(ctx, spec))
+                    continue
                 if "fieldParameter" in spec:
                     fp_projs, fp = field_parameter(ctx, spec)
                     fparams.append({**fp, "index": len(projs)})
@@ -1630,6 +1694,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             d["name"] = vnames[vid]
             set_position(d, vid, v, box(vid), parent, box, vnames, ctx)
             apply_query(ctx, v, d)
+            apply_expand(ctx, vid, v, d)
             if v.get("filters") or v.get("filterOrder") or any(
                     x.get("name", "").startswith("pbik_") for x in d.get("filterConfig", {}).get("filters", [])):
                 apply_filters(ctx, vid, d, v.get("filters", []), v.get("filterOrder"))

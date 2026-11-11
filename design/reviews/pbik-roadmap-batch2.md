@@ -211,3 +211,20 @@ roundtrip shows what Desktop keeps.
 (`boundFilter`, `fieldExpr`); S:filterConfiguration 1.3.0 #FilterContainer `howCreated` (Drillthrough: "Created by
 drill context that is applied to the page when using drill-through action"); S:visualConfiguration 2.8.0 #VisualLink
 (`drillthroughSection`); [L1] "Common PBIR errors".
+## Gap 8: hierarchies and drill (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: a binding item `{hierarchy: "Table[Hierarchy]", level}` projects
+`{"HierarchyLevel": {"Expression": {"Hierarchy": {"Expression": {"SourceRef": {"Entity": T}}, "Hierarchy": H}},
+"Level": L}}` with queryRef `T.H.L`; the hierarchy and level must exist in the table's TMDL (`hierarchy` / `level`
+lines). `expand: "all"` on a matrix writes `expansionStates` with every Rows level but the last expanded. Test 132.
+
+**Left out**: the automatic date hierarchy (`PropertyVariationSource`: needs the column's variation name from a
+model with auto date/time, which the kit's models turn off), per-member expansion (`identityValues`), and
+`isDrillDisabled`, which the schema says only specific custom visuals use.
+
+**UNVERIFIED in Desktop**: the queryRef form and the expansion state. The checklist's roundtrip after a save shows
+both (Desktop may add `active` or rewrite the queryRef).
+
+**Provenance**: S:semanticQuery 1.4.0 #QueryHierarchyExpression, #QueryHierarchyLevelExpression; S:visualConfiguration
+2.8.0 #ExpansionState, #RootExpansionState, #LevelExpansionState, #Query (`isDrillDisabled`); TMDL `hierarchy` /
+`level` as in the Rep 5 fixture's Date table; pbik's build.py (projection shape).
