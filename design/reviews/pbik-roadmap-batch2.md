@@ -458,8 +458,8 @@ Reading it:
 - Pane-dependent lines are expected.
 ## Desktop check results (Desktop 2.159.883.0, 2026-11-11)
 
-Kyle went through the checklist on `..\pbik-smoke-bulk` with Claude: Claude screenshotted each page through the
-Desktop Bridge, Kyle did the clicks and the five "set it in Desktop" steps, saved once, and Claude ran
+The maintainer went through the checklist on `..\pbik-smoke-bulk` with Claude: Claude screenshotted each page through the
+Desktop Bridge, the maintainer did the clicks and the five "set it in Desktop" steps, saved once, and Claude ran
 `pbik roundtrip Smoke.Report --before _pbik-built\Smoke.Report` (`..\pbik-smoke-bulk\roundtrip.md`).
 
 | Gap | Result in Desktop | What the save showed | Follow-up |

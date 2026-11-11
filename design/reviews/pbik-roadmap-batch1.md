@@ -104,7 +104,7 @@ report 3.3.0, all from pbik's cache (git-ignored). The tests use small hand-writ
 - Type ids: `map` and `azureMap` appear in Desktop's base themes in the fixtures. **`qnaVisual` and `filledMap` are
   unconfirmed**: Learn prints no type ids and no kit file Desktop saved has them. Confirm `filledMap` from one Desktop save
   (insert it on a scratch page, save, read `visualType`). The Q&A visual can't be confirmed that way: on 2026-11-10
-  Kyle found it in neither Visualizations nor Insert in Desktop 2.159.883.0. Its id stays unconfirmed and its warning
+  the maintainer found it in neither Visualizations nor Insert in Desktop 2.159.883.0. Its id stays unconfirmed and its warning
   stays in `pbik validate` only (for files made elsewhere or in an older Desktop); `pbik build` doesn't warn on it.
 
 ## Gap 23: which Desktop first reloads external changes (report only, nothing changed)
@@ -143,12 +143,12 @@ pbik built them is in `_pbik-built/` for `pbik roundtrip --before`.
 
 ## Desktop check results (Desktop 2.159.883.0, 2026-11-10)
 
-Kyle opened pbik-smoke-013, saved once, and ran `pbik roundtrip --before _pbik-built\Smoke.Report`.
+The maintainer opened pbik-smoke-013, saved once, and ran `pbik roundtrip --before _pbik-built\Smoke.Report`.
 
 - **Kept on save, nothing rewritten**: report.json `outspacePane` (`expanded: false`, `visible: true`), the three
   settings pbik set (`exportDataMode`, `hideVisualContainerHeader`, `useEnhancedTooltips`), page `outspacePane` (all
   ten properties, no selector) and page `filterCard` on `{id: Applied}` / `{id: Available}`. Desktop accepted every
-  form pbik writes for gap 1, and Kyle checked the filter pane formatting renders as intended (2026-11-10).
+  form pbik writes for gap 1, and the maintainer checked the filter pane formatting renders as intended (2026-11-10).
 - **Automatic filters, as Desktop saves them**: after the pane was opened, Desktop added two to the table (P1-V06),
   one per field it shows (Sales[Category]: `Categorical`; [Total Amount]: `Advanced`), with **no `howCreated` and no
   condition**, not the schema's `howCreated: "Auto"`. Roundtrip first listed them as "added" proposals.
