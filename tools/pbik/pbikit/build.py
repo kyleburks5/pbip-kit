@@ -388,6 +388,40 @@ def hierarchy_level(ctx, spec):
     return {"field": fld, "queryRef": f"{table}.{hname}.{spec['level']}", "nativeQueryRef": spec["level"]}
 
 
+VC_TYPES = {"Binary", "Boolean", "Date", "DateTime", "DateTimeZone", "Decimal", "Double", "Duration", "Integer", "Json",
+            "None", "Null", "Text", "Time", "Variant"}
+
+
+def visual_calc(ctx, spec):
+    """A binding {calc: "<name>", expression: "<DAX>", dataType} -> a visual calculation projection (roadmap gap 10):
+    field {NativeVisualCalculation: {Language: dax, Expression, Name[, DataType]}}, queryRef and nativeQueryRef the
+    name. The DAX isn't checked here (it runs on the visual's own matrix)."""
+    name, expr = spec["calc"], spec.get("expression")
+    if not name or not expr:
+        raise BuildError(f"visual calculation {name!r} needs a name (calc) and an expression")
+    vc = {"Language": "dax", "Expression": expr, "Name": name}
+    if spec.get("dataType"):
+        if spec["dataType"] not in VC_TYPES:
+            raise BuildError(f"visual calculation {name!r}: dataType {spec['dataType']!r} ({', '.join(sorted(VC_TYPES))})")
+        vc["DataType"] = spec["dataType"]
+    ctx.unverified.add("visual-calcs")
+    return {"field": {"NativeVisualCalculation": vc}, "queryRef": name, "nativeQueryRef": name}
+
+
+def sparkline(ctx, spec):
+    """A binding {sparkline: "[Measure]", by: "T[C]"} (tables and matrices) -> field {SparklineData: {Measure,
+    Groupings: [column], PointsPerSparkline: 52}} (roadmap gap 10; 52 is the only value the schema allows)."""
+    m = ctx.field(spec["sparkline"])
+    if "Measure" not in m:
+        raise BuildError(f"sparkline {spec['sparkline']!r} must be a measure")
+    by = ctx.field(spec.get("by", ""))
+    if "Column" not in by:
+        raise BuildError(f"sparkline {spec['sparkline']!r}: `by` must be a column (the x axis, e.g. a month)")
+    ctx.unverified.add("visual-calcs")
+    return {"field": {"SparklineData": {"Measure": m, "Groupings": [by], "PointsPerSparkline": 52}},
+            "queryRef": f"SparklineData({qref(m)}_[{qref(by)}])", "nativeQueryRef": m["Measure"]["Property"]}
+
+
 def apply_expand(ctx, vid, v, d):
     """expand: "all" (matrix): every Rows level but the last expanded, as expansionStates (roadmap gap 8; schema
     #ExpansionState: roles, levels with queryRefs and isCollapsed, root isToggled). Owned."""
@@ -417,6 +451,14 @@ def apply_query(ctx, v, d):
             fparams = []
             for it in (items if isinstance(items, list) else [items]):
                 spec = it if isinstance(it, dict) else {"field": it}
+                if "calc" in spec:                          # roadmap gap 10
+                    projs.append(visual_calc(ctx, spec))
+                    continue
+                if "sparkline" in spec:
+                    if v["type"] not in TABLES:
+                        raise BuildError(f"{v['id']}: sparklines are for tables and matrices")
+                    projs.append(sparkline(ctx, spec))
+                    continue
                 if "hierarchy" in spec:                     # roadmap gap 8
                     projs.append(hierarchy_level(ctx, spec))
                     continue

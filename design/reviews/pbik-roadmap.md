@@ -288,3 +288,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 19 | Done (check only) | new read-only command `pbik values` lists filter, slicer, selector and bookmark literals by file and field |
 | 26 | Partial: warning done; templates blocked | build warns on a visual type with no template; the list slicer, input slicer, Azure Maps and Gantt templates need a Patterns page save in Desktop and a harvest |
 | 9 | Done, UNVERIFIED in Desktop | `Median`, `StDev`, `Variance` (Function 6-8) and `Percentile(T[C], k)`; Desktop check of Avg, Max, CountNonNull, DistinctCount added to the checklist |
+| 10 | Done, UNVERIFIED in Desktop | binding items `calc` (visual calculations) and `sparkline` (tables, matrices); sparkline formatting objects left to `props` |

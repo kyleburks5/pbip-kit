@@ -144,6 +144,11 @@ def _new_aggregations(kind, doc):
 feature("aggregations", 9, "Median, StandardDeviation, Variance and Percentile fields", _new_aggregations)
 
 
+feature("visual-calcs", 10, "visual calculations (binding `calc`) and sparklines (binding `sparkline`)",
+        lambda kind, doc: kind == "visual" and any(k in json.dumps((doc.get("visual") or {}).get("query") or {})
+                                                   for k in ('"NativeVisualCalculation"', '"SparklineData"')))
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

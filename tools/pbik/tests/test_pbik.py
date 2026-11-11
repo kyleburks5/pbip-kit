@@ -2719,6 +2719,28 @@ class PbikTests(unittest.TestCase):
         self.assertIn("UNVERIFIED in Desktop (roadmap gap 9)", r.stdout)
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
 
+    def test_138_visual_calcs_and_sparklines(self):
+        """Gap 10: a visual calculation and a sparkline column as binding items."""
+        def edit(lay):
+            vals = next(x for x in lay["visuals"] if x["id"] == "P1-V05")["bindings"]["Values"]
+            vals.append({"calc": "Running revenue", "expression": "RUNNINGSUM([Revenue])", "dataType": "Double"})
+            vals.append({"sparkline": "[Revenue]", "by": "Date[Year Month]"})
+        work, rep, lf = self._batch1("b138", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 10)", r.stdout)
+        projs = visual(rep, "P1-V05")["visual"]["query"]["queryState"]["Values"]["projections"]
+        vc = next(p for p in projs if "NativeVisualCalculation" in p["field"])
+        self.assertEqual(vc["field"]["NativeVisualCalculation"], {"Language": "dax", "Expression": "RUNNINGSUM([Revenue])",
+                                                                  "Name": "Running revenue", "DataType": "Double"})
+        sp = next(p for p in projs if "SparklineData" in p["field"])["field"]["SparklineData"]
+        self.assertEqual(sp["PointsPerSparkline"], 52)
+        self.assertEqual(sp["Groupings"][0]["Column"]["Property"], "Year Month")
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self.assertIn("0 error(s)", pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout)
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V04")["bindings"]["Y"].append(
+            {"sparkline": "[Revenue]", "by": "Date[Year Month]"}))
+        self.assertIn("sparklines are for tables and matrices", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

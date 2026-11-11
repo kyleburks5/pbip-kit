@@ -285,3 +285,17 @@ CountNonNull and DistinctCount (Function 1, 4, 5, 2) were already written but no
 **Provenance**: S:semanticQuery 1.4.0 #QueryAggregationExpression, #QueryAggregateFunction (6 Median,
 7 StandardDeviation, 8 Variance), #QueryPercentileExpression (`K`, `Exclusive`); pbik's objects.py (`AGG_NAMES`,
 `qref`) and fields.py.
+## Gap 10: visual calculations and sparklines (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: a binding item `{calc, expression, dataType}` projects a visual calculation
+(`NativeVisualCalculation`, Language `dax`, queryRef = its name); `{sparkline: "[Measure]", by: "T[C]"}` in a table
+or matrix projects `SparklineData` with one grouping and `PointsPerSparkline` 52 (the schema's only value). The
+calculation's DAX isn't parsed (it runs over the visual's own matrix, not the model). Test 138.
+
+**UNVERIFIED in Desktop**: both forms and their queryRefs (pbik names a sparkline
+`SparklineData(<measure>_[<column>])`, a guess at Desktop's naming; roundtrip will show the real one). Sparkline
+formatting (line colour, markers) stays with `props` until a Desktop save shows its objects.
+
+**Provenance**: S:semanticQuery 1.4.0 #QueryNativeVisualCalc (`Language` dax, `Expression`, `Name`, `DataType` enum),
+#QuerySparklineDataExpression (`Measure`, `Groupings`, `PointsPerSparkline` const 52); S:visualConfiguration 2.8.0
+#ProjectionState; pbik's build.py (projection shape).
