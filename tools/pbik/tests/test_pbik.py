@@ -2709,6 +2709,9 @@ class PbikTests(unittest.TestCase):
         self.assertIn("P2-V11: no template for listSlicer in templates/: built bare", r.stdout)
         self.assertIn("still missing: the list slicer, the input slicer, Azure Maps", r.stdout)
         self.assertEqual(visual(rep, "P2-V11")["visual"]["visualType"], "listSlicer")
+        self._relayout(lf, lambda lay: lay["visuals"][-1].update(bindings={"Values": ["stores[City]"]}))
+        pbik("build", rep, lf)
+        self.assertTrue(visual(rep, "P2-V11")["visual"]["query"]["queryState"]["Values"]["projections"][0]["active"])
 
     def test_137_more_aggregations(self):
         """Gap 9: Median / StDev / Variance (Function 6-8) and Percentile in the field notation."""

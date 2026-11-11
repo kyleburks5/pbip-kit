@@ -537,7 +537,8 @@ def apply_query(ctx, v, d):
                 p = {"field": f, "queryRef": q, "nativeQueryRef": native_ref(f)}   # the field's name, not displayName
                 if spec.get("displayName"):
                     p["displayName"] = spec["displayName"]
-                if spec.get("active") or (not projs and (role == "Category" or (role == "Values" and v["type"] == "slicer"))):
+                if spec.get("active") or (not projs and (role == "Category" or (role == "Values" and v["type"] in (
+                        "slicer", "listSlicer")))):     # listSlicer: as Desktop saved it (pbik-smoke-bulk, 2026-11-11)
                     p["active"] = True          # Desktop marks the first category (and classic slicer) field active
                 projs.append(p)
             qs[role] = {"projections": projs}
