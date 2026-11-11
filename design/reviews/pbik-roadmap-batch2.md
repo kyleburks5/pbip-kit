@@ -485,3 +485,9 @@ Desktop Bridge, Kyle did the clicks and the five "set it in Desktop" steps, save
 | 27 | **Fail (background)**: no group background draws in edit view | Desktop kept background, altText and lockAspect as written | keep unverified; check in reading view |
 | 28 | Spotlight and focus (with the accessible table) pass; **elevation fails** | Desktop dropped `display: {mode: elevation}` from the saved bookmark | make `elevate` an error |
 | 29 | Pass: the page's Cross-report toggle is On and the report setting is ticked | kept | none |
+## Second Desktop pass (2026-11-11)
+
+Range filter (gap 4), aggregations (gap 9) and visual calculations and sparklines (gap 10) pass after the fixes and
+are no longer listed as unverified. The group background (gap 27) still doesn't draw, though Desktop keeps it: it
+stays UNVERIFIED. Released as pbik 0.14.0 (kit v1.4). Left for later: gap 15 (a decision) and the gap 26 templates (a
+Patterns page save in ..\pbip-patterns).
