@@ -286,3 +286,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 27 | Done, UNVERIFIED in Desktop | group `background`, `altText`, `lockAspect`; Desktop's group formatting now kept on rebuild |
 | 18 | Done (check only) | validate errors past the service limits (pages, visuals per page, resource files, 300 MB resources, 300 MB report files) |
 | 19 | Done (check only) | new read-only command `pbik values` lists filter, slicer, selector and bookmark literals by file and field |
+| 26 | Partial: warning done; templates blocked | build warns on a visual type with no template; the list slicer, input slicer, Azure Maps and Gantt templates need a Patterns page save in Desktop and a harvest |

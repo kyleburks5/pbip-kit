@@ -2684,6 +2684,17 @@ class PbikTests(unittest.TestCase):
         self.assertNotIn("#000000", r)
         self.assertTrue(out.exists())
 
+    def test_136_no_template_warning(self):
+        """Gap 26: a visual type without a template is built bare, with a warning naming the harvest route."""
+        work, rep, lf = self._batch1("b136", lambda lay: lay["visuals"].append(
+            {"id": "P2-V11", "name": "new-slicer", "page": "P2", "type": "listSlicer", "x": 32, "y": 900, "w": 300,
+             "h": 100}))
+        (work / "design" / "templates").mkdir()
+        r = pbik("build", rep, lf)
+        self.assertIn("P2-V11: no template for listSlicer in templates/: built bare", r.stdout)
+        self.assertIn("still missing: the list slicer, the input slicer, Azure Maps", r.stdout)
+        self.assertEqual(visual(rep, "P2-V11")["visual"]["visualType"], "listSlicer")
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

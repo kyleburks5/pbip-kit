@@ -256,3 +256,17 @@ Read-only; meant for the privacy review in docs/it-security.md before a commit. 
 **Provenance**: [L1] *Power BI Desktop project report folder*, "PBIR folder and files" (Important note: filter and
 slicer values are saved in the files); S:semanticQuery 1.4.0 (#QueryInExpression, #QueryComparisonExpression,
 #QueryBetweenExpression, #QueryLiteralExpression); pbik's validate.py (`walk_in_filters`).
+## Gap 26: newer native visuals without a template (warning done; templates blocked)
+
+**What pbik does now**: `pbik build` warns when a visual's type has no template in `design/templates/` (it builds
+the bare visual with Desktop's defaults), naming the harvest route and the newer visuals still missing: the list
+slicer, the input slicer, Azure Maps (the replacement gap 20 points to) and the Gantt chart. Test 136.
+
+**Blocked**: the templates themselves. pbik builds only types with a harvested template, and a template must come
+from a Desktop save (the kit's rule: Desktop-saved files, never hand-written). Their `visualType` ids aren't in any
+Desktop-saved file in the kit. Next step (Desktop checklist): add the four visuals to the Patterns page, save,
+`pbik templates harvest` and `pbik catalog refresh`. The plot area background (October 2026) reaches the catalog the
+same way.
+
+**Provenance**: [L4] *What's new in the October 2026 Power BI update*, "Reporting" (Gantt preview, list slicer
+dropdown, plot area background); [L6] (Azure Maps); `design/templates/` listing; pbik's build.py and templates.py.

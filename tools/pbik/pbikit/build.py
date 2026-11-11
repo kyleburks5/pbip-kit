@@ -56,6 +56,12 @@ COLOUR_PROPS = re.compile(r"(color|colour|fill|fillcolor)$", re.I)
 THEME_RE = re.compile(r"theme:(\d+)(?::(-?\d+(?:\.\d+)?))?")
 
 
+# Roadmap gap 26: newer native visuals Microsoft Learn lists (What's new, October 2026; Azure Maps) that the kit's
+# templates don't have yet. Their visualType ids aren't in any Desktop-saved file in the kit, so these are the names to
+# look for once the Patterns page has them; the build warning below fires for any type without a template.
+NEW_VISUALS = "the list slicer, the input slicer, Azure Maps (azureMap) and the Gantt chart"
+
+
 class BuildError(Exception):
     pass
 
@@ -1689,6 +1695,11 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             if v.get("template") and tpl is None:
                 errors.append(f"{vid}: template {tf} not found")
                 continue
+            if tpl is None and templates.is_dir() and v["type"] != "group":      # roadmap gap 26
+                ctx.res.warnings.append(
+                    f"{vid}: no template for {v['type']} in {templates.name}/: built bare (Desktop's defaults, no kit "
+                    f"formatting). Add it to the Patterns page, save in Desktop and run `pbik templates harvest` "
+                    f"(docs/UPDATE-ROUTINE.md step 4); still missing: {NEW_VISUALS}")
         try:
             if src.exists() and not reset and not swap:
                 d = load(src)
