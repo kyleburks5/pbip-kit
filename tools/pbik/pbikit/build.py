@@ -2020,7 +2020,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         try:
             md = load(mf) if mf.exists() else {"$schema": MOBILE_SCHEMA}
             md["position"] = {"x": round(mob["x"]), "y": round(mob["y"]), "z": int(mob.get("z", 0)),
-                              "width": round(mob["w"]), "height": round(mob["h"])}
+                              "width": round(mob["w"]), "height": round(mob["h"]), "tabOrder": 0}   # as Desktop saves it
         except (KeyError, TypeError) as e:
             fail(f"{vid}: mobile needs x, y, w, h ({e})")
         tree_gate(ctx, vid, md["$schema"], [], md)
