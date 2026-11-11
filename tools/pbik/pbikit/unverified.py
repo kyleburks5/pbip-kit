@@ -120,6 +120,13 @@ feature("tooltip-pages", 6, "report-page tooltips (page `tooltip`: type Tooltip 
                                                               or {}).get("visualTooltip", []))))
 
 
+feature("drillthrough", 7, "drill-through pages (page `drillthrough`: type Drillthrough, pageBinding parameters, "
+        "Drillthrough page filters) and Drillthrough button actions",
+        lambda kind, doc: (kind == "page" and doc.get("type") == "Drillthrough") or (kind == "visual" and any(
+            "drillthroughSection" in (e.get("properties") or {}) for e in ((doc.get("visual") or {}).get(
+                "visualContainerObjects") or {}).get("visualLink", []))))
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

@@ -525,6 +525,9 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
                 bm = p.get("bookmark", {}).get("expr", {}).get("Literal", {}).get("Value")
                 if "Bookmark" in typ and bm:
                     links.append((name, where, bm.strip("'")))
+                dts = p.get("drillthroughSection", {}).get("expr", {}).get("Literal", {}).get("Value")
+                if dts and dts.strip("'") not in {n for n, p_, _ in pages if p_.get("type") == "Drillthrough"}:
+                    fd.err(where, f"drill-through button targets {dts}, which is not a Drillthrough page (gap 7)")
                 if "PageNavigation" in typ and tgt:
                     t = tgt.strip("'")
                     if t not in page_names:

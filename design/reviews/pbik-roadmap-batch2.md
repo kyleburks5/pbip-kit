@@ -193,3 +193,21 @@ roadmap shows `type`'s value, and pbik writes it next.
 
 **Provenance**: S:page 2.1.0 `type` (Tooltip), #PageBinding, #BindingType; S:visualConfiguration 2.8.0 #VisualTooltip
 (`show`, `type`, `section`); [L1] "Common PBIR errors" (pageBinding.name must be unique across the report).
+## Gap 7: drill-through pages (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: page `drillthrough: {fields, keepFilters}` writes `type: "Drillthrough"`, a `pageBinding`
+(stable name, `type: Drillthrough`, one parameter per field with `boundFilter` and `fieldExpr`,
+`acceptsFilterContext` Default or None) and one page filter per field (`howCreated: Drillthrough`, no condition,
+named `pbik_dt_*`) that the parameter binds. Page `filters` live beside them. Button `action: {type: Drillthrough,
+page}` writes `visualLink` type `Drillthrough` and `drillthroughSection`. Everything is owned and removed when the key
+goes. `pbik validate` errors on a drill-through button whose target isn't a Drillthrough page (and, from gap 6, on a
+`pageBinding.name` used twice). Test 131.
+
+**UNVERIFIED in Desktop**: the parameter / filter pairing and the visualLink `type` value `Drillthrough` (the schema
+lists `drillthroughSection` but not the type's values). The checklist right-clicks a bar, drills through, saves, and
+roundtrip shows what Desktop keeps.
+
+**Provenance**: S:page 2.1.0 `type` (Drillthrough), #PageBinding (`parameters`, `acceptsFilterContext`), #BindingParameter
+(`boundFilter`, `fieldExpr`); S:filterConfiguration 1.3.0 #FilterContainer `howCreated` (Drillthrough: "Created by
+drill context that is applied to the page when using drill-through action"); S:visualConfiguration 2.8.0 #VisualLink
+(`drillthroughSection`); [L1] "Common PBIR errors".

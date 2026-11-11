@@ -281,3 +281,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 2 | Done (dataPoint.fill in Desktop's saved form); other objects UNVERIFIED in Desktop | layout `members` |
 | 5 | Done (selection and sort), UNVERIFIED in Desktop | bookmark `select`, `sort`; filter states (explorationState / section `filters`), projections and highlights left out |
 | 6 | Done, UNVERIFIED in Desktop | page `tooltip`, visual `tooltipPage` (visualTooltip `section`; `type` not written, value unknown); validate: unique pageBinding.name, tooltip section names a Tooltip page |
+| 7 | Done, UNVERIFIED in Desktop | page `drillthrough` (type, pageBinding parameters, Drillthrough filters), action Drillthrough; validate checks the target is a Drillthrough page |

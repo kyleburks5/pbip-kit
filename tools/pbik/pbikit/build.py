@@ -435,7 +435,8 @@ def apply_filters(ctx, owner, d, specs, order=None):
             fc.append(f)
         else:
             fc[pos] = f
-    fc[:] = [x for x in fc if not (x.get("name", "").startswith("pbik_") and x["name"] not in names)]
+    fc[:] = [x for x in fc if not (x.get("name", "").startswith("pbik_") and not x["name"].startswith("pbik_dt_")
+                                   and x["name"] not in names)]
     if not fc:
         del d["filterConfig"]["filters"]
         if not d["filterConfig"]:
@@ -609,8 +610,16 @@ def apply_action(ctx, vid, v, d, page_ids):
         props["bookmark"] = s(bid)
     elif t == "WebUrl":
         props["webUrl"] = s(a["url"])
+    elif t == "Drillthrough":                       # roadmap gap 7 (UNVERIFIED in Desktop)
+        target = a.get("page")
+        spec = ctx.layout.get("pages", {}).get(target) or {}
+        if target not in page_ids or not spec.get("drillthrough"):
+            raise BuildError(f"{vid}: drill-through target {target!r} is not a page with `drillthrough` in layout.json")
+        props["drillthroughSection"] = s(page_ids[target])
+        ctx.unverified.add("drillthrough")
     elif t not in ("ClearAllSlicers", "Back", "ApplyAllSlicers"):
-        raise BuildError(f"{vid}: action {t!r} not supported (PageNavigation, ClearAllSlicers, Back, Bookmark, WebUrl)")
+        raise BuildError(f"{vid}: action {t!r} not supported (PageNavigation, ClearAllSlicers, Back, Bookmark, WebUrl, "
+                         "Drillthrough)")
     for prop, val in props.items():
         set_prop(ctx, vid, d, "visualContainerObjects", "visualLink", None, prop, val)
 
@@ -1053,6 +1062,9 @@ def apply_page_binding(ctx, key, spec, d):
     owner = f"page:{key}"
     if spec.get("tooltip") and spec.get("drillthrough"):
         raise BuildError(f"{owner}: a page is a tooltip page or a drill-through page, not both")
+    if spec.get("drillthrough"):             # written later by apply_drillthrough (after page filters); owned here,
+        for k_ in ("type", "pageBinding"):     # before old ownership is released, so they stay in place
+            ctx.owned_new.setdefault(owner, []).append(["top", k_, None, None])
     if not spec.get("tooltip"):
         return
     d["type"] = "Tooltip"
@@ -1061,6 +1073,44 @@ def apply_page_binding(ctx, key, spec, d):
         ctx.owned_new.setdefault(owner, []).append(["top", k_, None, None])
     ctx.unverified.add("tooltip-pages")
     tree_gate(ctx, owner, d.get("$schema", ""), ["pageBinding"], d["pageBinding"])
+
+
+def apply_drillthrough(ctx, key, spec, d):
+    """Page `drillthrough: {fields: [...], keepFilters}` (roadmap gap 7): page `type: Drillthrough`,
+    `pageBinding {name, type: Drillthrough, parameters [{name, boundFilter, fieldExpr}], acceptsFilterContext}` and, per
+    field, a page filter `howCreated: Drillthrough` (no condition: the drill sets it) that the parameter's boundFilter
+    names. Filters are named pbik_dt_* (owned with pbik's other filters); type and pageBinding are owned."""
+    owner = f"page:{key}"
+    dt = spec.get("drillthrough")
+    fc = d.get("filterConfig", {}).get("filters", [])
+    fc[:] = [f_ for f_ in fc if not f_.get("name", "").startswith("pbik_dt_")]
+    if not dt:
+        if "filterConfig" in d and not fc:
+            d["filterConfig"].pop("filters", None)
+            if not d["filterConfig"]:
+                d.pop("filterConfig")
+        return
+    dt = {"fields": dt} if isinstance(dt, list) else dt
+    fields = dt.get("fields") or []
+    if not fields:
+        raise BuildError(f"{owner}: drillthrough needs fields (the columns the drill passes)")
+    params, flts = [], []
+    for k, text in enumerate(fields):
+        fld = ctx.field(text)
+        if "Column" not in fld:
+            raise BuildError(f"{owner}: drill-through field {text!r} must be a column")
+        fname = "pbik_dt_" + stable_name(owner, "drillthrough", text, length=13)
+        flts.append({"name": fname, "field": fld, "type": "Categorical", "howCreated": "Drillthrough"})
+        params.append({"name": stable_name("dtparam", key, text), "boundFilter": fname, "fieldExpr": fld})
+    binding = {"name": stable_name("drillthrough", key), "type": "Drillthrough", "parameters": params}
+    binding["acceptsFilterContext"] = "Default" if dt.get("keepFilters", True) else "None"
+    d["type"] = "Drillthrough"
+    d["pageBinding"] = binding
+    d.setdefault("filterConfig", {}).setdefault("filters", []).extend(flts)
+    ctx.unverified.add("drillthrough")
+    tree_gate(ctx, owner, d.get("$schema", ""), ["pageBinding"], binding)
+    for f_ in flts:
+        tree_gate(ctx, owner, d.get("$schema", ""), ["filterConfig", "filters"], f_)
 
 
 def apply_tooltip(ctx, vid, v, d, page_ids):
@@ -1429,9 +1479,13 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     for key, spec in pages_spec.items():
         d, _ = page_docs[key]
         try:
+            dts = [f for f in d.get("filterConfig", {}).get("filters", []) if f.get("name", "").startswith("pbik_dt_")]
             if spec.get("filters") or spec.get("filterOrder") or any(
-                    f.get("name", "").startswith("pbik_") for f in d.get("filterConfig", {}).get("filters", [])):
+                    f.get("name", "").startswith("pbik_") and not f["name"].startswith("pbik_dt_")
+                    for f in d.get("filterConfig", {}).get("filters", [])):
                 apply_filters(ctx, f"page:{key}", d, spec.get("filters", []), spec.get("filterOrder"))
+            if spec.get("drillthrough") or dts:
+                apply_drillthrough(ctx, key, spec, d)
         except BuildError as e:
             errors.append(f"page {key}: {e}")
 

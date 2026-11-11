@@ -2574,6 +2574,43 @@ class PbikTests(unittest.TestCase):
         self.assertNotIn("type", pg)
         self.assertNotIn("pageBinding", pg)
 
+    def test_131_drillthrough_pages(self):
+        """Gap 7: a drill-through page (type, pageBinding parameters bound to Drillthrough filters) and a button."""
+        def edit(lay):
+            lay["pages"]["P3"] = {"displayName": "pbik store detail", "drillthrough": {"fields": ["stores[City]"],
+                                                                                     "keepFilters": False}}
+            next(x for x in lay["visuals"] if x["id"] == "P1-V06")["action"] = {"type": "Drillthrough", "page": "P3"}
+        work, rep, lf = self._batch1("b131", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 7)", r.stdout)
+        name, pg, _ = Report(rep).page_by("pbik store detail")
+        self.assertEqual(pg["type"], "Drillthrough")
+        pb = pg["pageBinding"]
+        self.assertEqual((pb["type"], pb["acceptsFilterContext"]), ("Drillthrough", "None"))
+        flt = pg["filterConfig"]["filters"][0]
+        self.assertEqual((flt["howCreated"], pb["parameters"][0]["boundFilter"]), ("Drillthrough", flt["name"]))
+        self.assertEqual(pb["parameters"][0]["fieldExpr"], flt["field"])
+        link = visual(rep, "P1-V06")["visual"]["visualContainerObjects"]["visualLink"][0]["properties"]
+        self.assertEqual(link["drillthroughSection"], {"expr": {"Literal": {"Value": f"'{name}'"}}})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self.assertIn("0 error(s)", pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout)
+        self._relayout(lf, lambda lay: lay["pages"]["P3"].update(filters=[{"field": "products[Product_Category]",
+                                                                             "values": ["Toys"]}]))
+        pbik("build", rep, lf)
+        types = sorted(f["howCreated"] for f in Report(rep).page_by("pbik store detail")[1]["filterConfig"]["filters"])
+        self.assertEqual(types, ["Drillthrough", "User"], "page filters and drill-through filters live side by side")
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        def drop(lay):
+            lay["pages"]["P3"].pop("drillthrough"), lay["pages"]["P3"].pop("filters")
+            next(x for x in lay["visuals"] if x["id"] == "P1-V06")["action"] = {"type": "PageNavigation", "page": "P2"}
+        self._relayout(lf, drop)
+        pbik("build", rep, lf)
+        pg = Report(rep).page_by("pbik store detail")[1]
+        self.assertFalse({"type", "pageBinding", "filterConfig"} & set(pg))
+        self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V06").update(
+            action={"type": "Drillthrough", "page": "P2"}))
+        self.assertIn("is not a page with `drillthrough`", pbik("build", rep, lf, ok=(1,)).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""
