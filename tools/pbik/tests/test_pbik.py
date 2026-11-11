@@ -2772,17 +2772,26 @@ class PbikTests(unittest.TestCase):
         topo = work / "regions.topo.json"
         topo.write_text(json.dumps({"type": "Topology", "objects": {}, "arcs": []}), encoding="utf-8")
         r = pbik("resource", "add", rep, topo, "--type", "ShapeMap").stdout
-        self.assertIn("as a ShapeMap resource. UNVERIFIED in Desktop (roadmap gap 14)", r)
+        self.assertIn("as a ShapeMap resource; bind it with layout `shapeMap`", r)
         rd = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
         items = next(p_ for p_ in rd["resourcePackages"] if p_["name"] == "RegisteredResources")["items"]
         self.assertIn({"name": "regions.topo.json", "path": "regions.topo.json", "type": "ShapeMap"}, items)
-        v = pbik("validate", rep, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
-        self.assertIn("roadmap gap 14", v)
         (rep / "StaticResources" / "RegisteredResources" / "regions.topo.json").unlink()
         v = pbik("validate", rep, "--no-catalog", "--no-a11y", ok=(1,)).stdout
         self.assertIn("resource 'regions.topo.json' (ShapeMap) has no file", v)
         self.assertIn("a shape map is a TopoJSON file", pbik("resource", "add", rep, work / "x.png", "--type",
                                                              "ShapeMap", ok=(2,)).stderr)
+        self._relayout(lf, lambda lay: lay["visuals"].append(
+            {"id": "P2-V12", "name": "map", "page": "P2", "type": "shapeMap", "x": 32, "y": 700, "w": 400, "h": 300,
+             "bindings": {"Category": ["stores[City]"]}, "shapeMap": {"file": "regions.topo.json"}}))
+        pbik("build", rep, lf)
+        sh = visual(rep, "P2-V12")["visual"]["objects"]["shape"][0]["properties"]
+        self.assertEqual(sh["datasourceType"], {"expr": {"Literal": {"Value": "'file_upload'"}}})
+        gj = sh["map"]["geoJson"]
+        self.assertEqual(gj["content"]["expr"]["ResourcePackageItem"]["ItemName"], "regions.topo.json")
+        self.assertEqual(gj["type"], {"expr": {"Literal": {"Value": "'packaged'"}}})
+        self.assertEqual(sh["projectionEnum"], {"expr": {"Literal": {"Value": "'albersUsa'"}}})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
 
     def test_141_angle_and_query_options(self):
         """Gap 16: position.angle and query.options, both owned."""

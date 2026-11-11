@@ -1493,6 +1493,25 @@ def apply_image(ctx, vid, v, d):
     set_prop(ctx, vid, d, "objects", "imageScaling", None, "imageScalingType", s(sc))
 
 
+def apply_shape_map(ctx, vid, v, d):
+    """shapeMap (roadmap gap 14): {file, projection} on a shape map visual -> objects.shape as Desktop saved an uploaded
+    map (pbik-smoke-bulk, 2026-11-11): datasourceType 'file_upload', map.geoJson {type 'packaged', name, content:
+    ResourcePackageItem of the ShapeMap item}, projectionEnum. build() registers the file first."""
+    sm = v.get("shapeMap")
+    if not sm:
+        return
+    if v["type"] != "shapeMap":
+        raise BuildError(f"{vid}: shapeMap is for shape map visuals (type shapeMap)")
+    sm = {"file": sm} if isinstance(sm, str) else sm
+    item = ctx.images[vid]
+    set_prop(ctx, vid, d, "objects", "shape", None, "datasourceType", s("file_upload"))
+    set_prop(ctx, vid, d, "objects", "shape", None, "map", {"geoJson": {
+        "type": s("packaged"), "name": s(pathlib.Path(sm["file"]).name),
+        "content": {"expr": {"ResourcePackageItem": {"PackageName": "RegisteredResources", "PackageType": 1,
+                                                    "ItemName": item}}}}})
+    set_prop(ctx, vid, d, "objects", "shape", None, "projectionEnum", s(sm.get("projection", "albersUsa")))
+
+
 def apply_html_content(ctx, vid, v, d):
     """HTML Content visuals render with legacy rendering on (pbikit/htmlcontent.py); warn under 43px tall."""
     if not HC.is_html_content(v["type"]):
@@ -1563,6 +1582,14 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             src = src if src.is_absolute() else design.parent / src
             from .theme import register_image
             images[f"page:{key}"], ch = register_image(report_path, src, project)
+            image_changed += [c for c in ch if c not in image_changed]
+    for v in layout.get("visuals", []):        # roadmap gap 14: shape map files
+        sm = v.get("shapeMap")
+        if sm:
+            src = pathlib.Path(sm if isinstance(sm, str) else sm.get("file", ""))
+            src = src if src.is_absolute() else design.parent / src
+            from .theme import register_map
+            images[v["id"]], ch = register_map(report_path, src, project)
             image_changed += [c for c in ch if c not in image_changed]
     for v in layout.get("visuals", []):        # roadmap gap 3: register each image visual's file first
         if "image" not in v:
@@ -1879,6 +1906,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_sync(ctx, vid, v, d)
             apply_navigator(ctx, vid, v, d)
             apply_image(ctx, vid, v, d)
+            apply_shape_map(ctx, vid, v, d)
             apply_members(ctx, vid, v, d)
             apply_props(ctx, vid, v, d)
             check_props_schema(ctx, vid, v, d["$schema"])

@@ -301,3 +301,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 15 | Needs your decision (skipped) | private `.pbiviz` and organization-store visuals are ladder step 4 (CLAUDE.md: ask first) and an IT-security question (docs/it-security.md: uncertified until checked); whether pbik should register them at all is yours to decide |
 | 21 | Done after the Desktop check | `decorative` writes `tabOrder: -9999000`, Desktop's hidden tab stop (2026-11-11) |
 | 3 | Done after the Desktop check | page `background.image` in the form Desktop saved (2026-11-11); wallpaper (`outspace`) still not written |
+| 14 | Done after the Desktop check | layout `shapeMap` writes the uploaded-map binding Desktop saved (2026-11-11) |
