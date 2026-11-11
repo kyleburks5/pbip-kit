@@ -293,3 +293,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 14 | Partial: registration done, UNVERIFIED in Desktop; binding to the visual blocked | `pbik resource add --type ShapeMap`; validate checks registered files exist; the shape map visual's map binding needs one Desktop save |
 | 16 | Partial: `angle`, `queryOptions` done, UNVERIFIED in Desktop; `dataFunction` blocked | the dataFunction link runs a Fabric user data function (Fabric-only, outside the kit) and its value form isn't in the schema |
 | 17 | Done (pages and their bookmarks); copying one visual left out | `pbik copy page`; check in Desktop that a copied page opens |
+| 28 | Done, UNVERIFIED in Desktop | bookmark `spotlight`, `elevate`, `focus` (maximize, with `maximizedOptions.dataTable`) |

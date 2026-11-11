@@ -357,3 +357,13 @@ and a layout entry with a template does that job.
 **Provenance**: [L1] "PBIR format" (copying pages and bookmarks between reports as a scenario), "Common PBIR errors"
 (pageBinding.name unique; a copied bookmark keeps its configuration only with its visuals); [L2]; pbik's report.py
 (`stable_name`, page naming) and build.py.
+## Gap 28: bookmark display modes beyond hidden (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: a layout bookmark's `spotlight: [IDs]`, `elevate: [IDs]` and `focus: ID` (or `{visual, table:
+accessible / normal}`) write `singleVisual.display.mode` `spotlight`, `elevation` and `maximize` (with
+`maximizedOptions.dataTable` for the data table; `accessible` is the screen-reader table Learn's focus-mode section
+describes). Those visuals join the targets. A visual given two modes, or a bad `table`, is a layout error. Test 142.
+
+**Provenance**: S:bookmark 2.1.0 #VisualContainerDisplayState (`mode`, `maximizedOptions.dataTable` enum accessible /
+normal), #VisualContainerDisplayMode (maximize, spotlight, elevation, hidden); [L7] "Focus mode", "Show data table";
+pbik's bookmarks.py (`hidden`, as Desktop saved it in Rep 5).

@@ -65,7 +65,7 @@ def check(layout):
                 continue
             all_names.add((k, b["name"]))
             for vid in (list(b.get("show", [])) + list(b.get("hide", [])) + list(b.get("targets", [])) +
-                        list(b.get("select") or {}) + list(b.get("sort") or {})):
+                        list(b.get("select") or {}) + list(b.get("sort") or {}) + display_ids(b)):
                 if vid not in page_of:
                     errors.append(f"page {k}: bookmark {b['name']!r} lists {vid}, which is not in layout.json")
                 elif page_of[vid] != k:
@@ -73,6 +73,16 @@ def check(layout):
             both = set(b.get("show", [])) & set(b.get("hide", []))
             if both:
                 errors.append(f"page {k}: bookmark {b['name']!r} both shows and hides {sorted(both)}")
+            fid, tbl = focus_of(b)
+            if b.get("focus") and not fid:
+                errors.append(f"page {k}: bookmark {b['name']!r}: focus needs a visual ID")
+            if tbl not in (None, "accessible", "normal"):
+                errors.append(f"page {k}: bookmark {b['name']!r}: focus table {tbl!r} (accessible, normal)")
+            modes = [set(b.get("hide", [])), set(b.get("spotlight") or []), set(b.get("elevate") or []),
+                     {fid} if fid else set()]
+            clash = set().union(*[m & n for i_, m in enumerate(modes) for n in modes[i_ + 1:]])
+            if clash:
+                errors.append(f"page {k}: bookmark {b['name']!r} gives {sorted(clash)} two display modes")
             if (b.get("select") or b.get("sort")) and b.get("data") is False:
                 errors.append(f"page {k}: bookmark {b['name']!r} saves a selection or sort, which needs data")
             if b.get("data") is False and b.get("display") is False:
@@ -94,10 +104,22 @@ def check(layout):
     return errors
 
 
+def focus_of(b):
+    """bookmark `focus`: "ID" or {visual: ID, table: accessible / normal} -> (ID, dataTable or None)."""
+    f = b.get("focus")
+    if not f:
+        return None, None
+    return (f, None) if isinstance(f, str) else (f.get("visual"), f.get("table"))
+
+
+def display_ids(b):
+    return list(b.get("spotlight") or []) + list(b.get("elevate") or []) + ([focus_of(b)[0]] if b.get("focus") else [])
+
+
 def bookmark_doc(rep, b, page_name, vnames, vtypes):
     show, hide = list(b.get("show", [])), list(b.get("hide", []))
     targets = list(dict.fromkeys(show + hide + list(b.get("targets", [])) + list(b.get("select") or {}) +
-                                 list(b.get("sort") or {})))
+                                 list(b.get("sort") or {}) + display_ids(b)))
     containers, groups = {}, {}
     for vid in targets:
         if vtypes[vid] == "group":            # groups: visualContainerGroups {name: {isHidden}}, as Desktop saved Rep 7
@@ -110,6 +132,14 @@ def bookmark_doc(rep, b, page_name, vnames, vtypes):
             sv["orderBy"] = b["_sort"][vid]
         if vid in hide:
             sv["display"] = {"mode": "hidden"}
+        elif vid in (b.get("spotlight") or []):      # roadmap gap 28 (UNVERIFIED in Desktop)
+            sv["display"] = {"mode": "spotlight"}
+        elif vid in (b.get("elevate") or []):
+            sv["display"] = {"mode": "elevation"}
+        elif vid == focus_of(b)[0]:
+            sv["display"] = {"mode": "maximize"}
+            if focus_of(b)[1]:
+                sv["display"]["maximizedOptions"] = {"dataTable": focus_of(b)[1]}
         containers[vnames[vid]] = {"singleVisual": sv}
     section = {"visualContainers": containers}
     if groups:

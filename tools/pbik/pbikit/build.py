@@ -1945,6 +1945,8 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                 fail(f"page {key}: bookmark {b.get('name')!r}: {e}")
             if b["_select"] or b["_sort"]:
                 ctx.unverified.add("data-bookmarks")
+            if b.get("spotlight") or b.get("elevate") or b.get("focus"):
+                ctx.unverified.add("display-modes")
     bm_owned = BM.write(rep, layout, page_ids, vnames, {v["id"]: v["type"] for v in visuals}, old_map, prune, log)
 
     # prune

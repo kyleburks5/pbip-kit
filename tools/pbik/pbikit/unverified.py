@@ -163,6 +163,18 @@ feature("visual-options", 16, "visual rotation (`angle`: position.angle) and que
                                                 "options" in ((doc.get("visual") or {}).get("query") or {})))
 
 
+def _display_modes(kind, doc):
+    if kind != "bookmark":
+        return False
+    return any(((vc.get("singleVisual") or {}).get("display") or {}).get("mode") in ("spotlight", "maximize", "elevation")
+               for sec in ((doc.get("explorationState") or {}).get("sections") or {}).values()
+               for vc in (sec.get("visualContainers") or {}).values())
+
+
+feature("display-modes", 28, "bookmark display modes spotlight, elevation and focus (maximize, with the accessible "
+        "data table)", _display_modes)
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]
