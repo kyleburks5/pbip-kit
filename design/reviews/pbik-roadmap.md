@@ -304,3 +304,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 14 | Done after the Desktop check | layout `shapeMap` writes the uploaded-map binding Desktop saved (2026-11-11) |
 | 6 | Done, confirmed in Desktop | the tooltip page shows on hover with visualTooltip `section` only; pbik adds `parameters: []` as Desktop saves it (2026-11-11) |
 | 7 | Done, confirmed in Desktop | right-click and button drill-through work (2026-11-11); Default acceptsFilterContext no longer written; validate warns on a drill-through page with no Back button |
+| 29 | Done, confirmed in Desktop | the page's Cross-report toggle is On and the report setting ticked (2026-11-11); cross-workspace drilling itself needs the Service |

@@ -2887,7 +2887,7 @@ class PbikTests(unittest.TestCase):
         work, rep, lf = self._batch1("b144", lambda lay: lay["pages"].update(P3={
             "displayName": "pbik detail", "drillthrough": {"fields": ["stores[City]"], "crossReport": True}}))
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 29)", r.stdout)
+        self.assertNotIn("roadmap gap 29)", r.stdout)                # confirmed in Desktop (2026-11-11)
         self.assertIn("needs the report setting useCrossReportDrillthrough", r.stdout)
         self.assertEqual(Report(rep).page_by("pbik detail")[1]["pageBinding"]["referenceScope"], "CrossReport")
         self._relayout(lf, lambda lay: lay.update(report={"settings": {"useCrossReportDrillthrough": True}}))
