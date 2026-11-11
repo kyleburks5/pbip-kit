@@ -550,6 +550,22 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     for vid, wheres in sorted(ids.items()):
         if len(wheres) > 1:
             fd.err(vid, f"duplicate visual ID: {wheres}")
+    bindings = {}                                   # Learn, Common PBIR errors: pageBinding.name unique (gaps 6, 7)
+    for name, pd, _ in pages:
+        bn = (pd.get("pageBinding") or {}).get("name")
+        if bn:
+            bindings.setdefault(bn, []).append(pd.get("displayName"))
+    for bn, ps in sorted(bindings.items()):
+        if len(ps) > 1:
+            fd.err("pages", f"pageBinding.name {bn} is on {len(ps)} pages ({', '.join(map(str, ps))}): it must be "
+                            "unique across the report (a copied page keeps it; give each its own)")
+    for name, pd, pfolder in pages:                 # a visual's report-page tooltip names a Tooltip page
+        for d, f in rep.visuals(pfolder):
+            for e in (d.get("visual", {}).get("visualContainerObjects", {}).get("visualTooltip") or []):
+                sec = ((e.get("properties") or {}).get("section") or {}).get("expr", {}).get("Literal", {}).get("Value")
+                if sec and sec.strip("'") not in {n for n, p_, _ in pages if p_.get("type") == "Tooltip"}:
+                    fd.err(f"{pd.get('displayName')}/{f.parent.name}", f"tooltip page {sec} is not a page of type "
+                                                                       "Tooltip in this report")
 
     # ---- bookmarks
     bdir = rep.defn / "bookmarks"

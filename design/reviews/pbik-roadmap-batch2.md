@@ -178,3 +178,18 @@ checklist's roundtrip after applying the bookmark and saving shows it.
 **Provenance**: S:bookmark 2.1.0 #ExplorationState, #SectionState, #VisualContainerState, #SingleVisualConfigState
 (`objects`, `orderBy`), #DataViewObjectDefinitionUpdates (`merge`), #BookmarkOptions; S:semanticQuery 1.4.0
 #QuerySortClause; pbik's bookmarks.py (Rep 5's saved form for display bookmarks) and fields.py (`selection_filter`).
+## Gap 6: report-page tooltips (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: page `tooltip: true` writes `type: "Tooltip"` and `pageBinding: {name, type: "Tooltip"}` (a
+stable name from the page key; both owned and removed when the key goes). Visual `tooltipPage: <page key>` writes
+`visualContainerObjects.visualTooltip` `show: true` and `section: '<page name>'`; the target must be a tooltip page.
+`pbik validate` errors when two pages share a `pageBinding.name` and when a visual's tooltip `section` isn't a Tooltip
+page. Test 130.
+
+**UNVERIFIED in Desktop, and one value missing**: visualTooltip `type` (default tooltip or report page) is an open
+property in the schema with no values listed, and no Desktop-saved file in the kit has it, so pbik doesn't write it.
+Desktop may then show the default tooltip. The checklist sets the tooltip to the report page in Desktop and saves:
+roadmap shows `type`'s value, and pbik writes it next.
+
+**Provenance**: S:page 2.1.0 `type` (Tooltip), #PageBinding, #BindingType; S:visualConfiguration 2.8.0 #VisualTooltip
+(`show`, `type`, `section`); [L1] "Common PBIR errors" (pageBinding.name must be unique across the report).

@@ -2539,6 +2539,41 @@ class PbikTests(unittest.TestCase):
         self._relayout(lf, lambda lay: lay["pages"]["P1"]["bookmarks"][0].update(data=False))
         self.assertIn("saves a selection or sort, which needs data", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_130_tooltip_pages(self):
+        """Gap 6: a tooltip page (type Tooltip, pageBinding) and a visual pointing at it (visualTooltip section)."""
+        def edit(lay):
+            lay["pages"]["P3"] = {"displayName": "pbik tip", "width": 320, "height": 240, "tooltip": True,
+                                  "hidden": True}
+            next(x for x in lay["visuals"] if x["id"] == "P1-V04")["tooltipPage"] = "P3"
+        work, rep, lf = self._batch1("b130", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 6)", r.stdout)
+        name, pg, _ = Report(rep).page_by("pbik tip")
+        self.assertEqual(pg["type"], "Tooltip")
+        self.assertEqual(pg["pageBinding"]["type"], "Tooltip")
+        vt = visual(rep, "P1-V04")["visual"]["visualContainerObjects"]["visualTooltip"][0]["properties"]
+        self.assertEqual(vt["section"], {"expr": {"Literal": {"Value": f"'{name}'"}}})
+        self.assertNotIn("type", vt)
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self.assertIn("0 error(s)", pbik("validate", rep, "--layout", lf, "--no-catalog", "--no-a11y").stdout)
+        pd_file = next(f for f in rep.glob("definition/pages/*/page.json")
+                       if json.loads(f.read_text(encoding="utf-8"))["displayName"] == "pbik sales")
+        d = json.loads(pd_file.read_text(encoding="utf-8"))
+        d["pageBinding"] = dict(pg["pageBinding"])                 # a copied page keeps the binding name
+        pd_file.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        self.assertIn("must be unique across the report", pbik("validate", rep, "--no-catalog", "--no-a11y", ok=(1,)).stdout)
+        d.pop("pageBinding")
+        pd_file.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        self._relayout(lf, lambda lay: lay["pages"]["P3"].pop("tooltip"))
+        self.assertIn("is not a page with `tooltip: true`", pbik("build", rep, lf, ok=(1,)).stdout)
+        def drop(lay):
+            next(x for x in lay["visuals"] if x["id"] == "P1-V04").pop("tooltipPage")
+        self._relayout(lf, drop)
+        pbik("build", rep, lf)
+        pg = Report(rep).page_by("pbik tip")[1]
+        self.assertNotIn("type", pg)
+        self.assertNotIn("pageBinding", pg)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

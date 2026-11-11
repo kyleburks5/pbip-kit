@@ -280,3 +280,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 4 | Done, UNVERIFIED in Desktop | Range, Advanced text conditions, RelativeDate, report-level filters, displayName / ordinal / filterOrder; Include, Exclude, Tuple, Passthrough, VisualTopN and RelativeTime left out (made by Desktop from data-point actions or DirectQuery) |
 | 2 | Done (dataPoint.fill in Desktop's saved form); other objects UNVERIFIED in Desktop | layout `members` |
 | 5 | Done (selection and sort), UNVERIFIED in Desktop | bookmark `select`, `sort`; filter states (explorationState / section `filters`), projections and highlights left out |
+| 6 | Done, UNVERIFIED in Desktop | page `tooltip`, visual `tooltipPage` (visualTooltip `section`; `type` not written, value unknown); validate: unique pageBinding.name, tooltip section names a Tooltip page |

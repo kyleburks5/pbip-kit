@@ -113,6 +113,13 @@ feature("data-bookmarks", 5, "data bookmarks that save a slicer selection or a s
         _data_bookmark)
 
 
+feature("tooltip-pages", 6, "report-page tooltips (page `tooltip`: type Tooltip and pageBinding; visual `tooltipPage`: "
+        "visualTooltip section, without `type`)",
+        lambda kind, doc: (kind == "page" and doc.get("type") == "Tooltip") or (kind == "visual" and any(
+            "section" in (e.get("properties") or {}) for e in ((doc.get("visual") or {}).get("visualContainerObjects")
+                                                              or {}).get("visualTooltip", []))))
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

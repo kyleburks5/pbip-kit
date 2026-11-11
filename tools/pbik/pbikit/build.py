@@ -1046,6 +1046,39 @@ def apply_page_props(ctx, key, spec, d):
             ctx.unverified.add("page-props")
 
 
+def apply_page_binding(ctx, key, spec, d):
+    """Page `tooltip: true` (roadmap gap 6): page `type: Tooltip` and `pageBinding {name, type: Tooltip}`, the binding
+    name unique across the report (Learn, Common PBIR errors). Owned: they go when the key leaves layout.json. The
+    drill-through binding (gap 7) is written by apply_drillthrough."""
+    owner = f"page:{key}"
+    if spec.get("tooltip") and spec.get("drillthrough"):
+        raise BuildError(f"{owner}: a page is a tooltip page or a drill-through page, not both")
+    if not spec.get("tooltip"):
+        return
+    d["type"] = "Tooltip"
+    d["pageBinding"] = {"name": stable_name("tooltip", key), "type": "Tooltip"}
+    for k_ in ("type", "pageBinding"):
+        ctx.owned_new.setdefault(owner, []).append(["top", k_, None, None])
+    ctx.unverified.add("tooltip-pages")
+    tree_gate(ctx, owner, d.get("$schema", ""), ["pageBinding"], d["pageBinding"])
+
+
+def apply_tooltip(ctx, vid, v, d, page_ids):
+    """Visual `tooltipPage: <page key>` (roadmap gap 6): visualContainerObjects.visualTooltip `show` and `section`
+    (the tooltip page's name). The schema leaves visualTooltip `type` open (no values listed) and no Desktop-saved file
+    in the kit has one, so pbik doesn't write `type` until a Desktop save shows its value (batch 2 checklist)."""
+    tp = v.get("tooltipPage")
+    if not tp:
+        return
+    pid = page_ids.get(tp)
+    spec = ctx.layout.get("pages", {}).get(tp) or {}
+    if not pid or not spec.get("tooltip"):
+        raise BuildError(f"{vid}: tooltipPage {tp!r} is not a page with `tooltip: true` in layout.json")
+    set_prop(ctx, vid, d, "visualContainerObjects", "visualTooltip", None, "show", b(True))
+    set_prop(ctx, vid, d, "visualContainerObjects", "visualTooltip", None, "section", s(pid))
+    ctx.unverified.add("tooltip-pages")
+
+
 def schema_gate(ctx, owner, status, msg):
     """A property Microsoft's schema doesn't have: a warning, or (strict) an error."""
     if status not in (SP.UNKNOWN, SP.NEAREST):
@@ -1350,6 +1383,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         try:
             apply_page_pane(ctx, key, spec, d, d["$schema"])
             apply_page_props(ctx, key, spec, d)
+            apply_page_binding(ctx, key, spec, d)
             ann = dict(spec.get("annotations") or {})
             if layout.get("annotate"):
                 ann.setdefault("pbik.page", key)
@@ -1549,6 +1583,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_container(ctx, vid, v, d)
             apply_text(ctx, vid, v, d)
             apply_action(ctx, vid, v, d, page_ids)
+            apply_tooltip(ctx, vid, v, d, page_ids)
             apply_reference_lines(ctx, vid, v, d)
             apply_selection(ctx, vid, v, d)
             apply_cf(ctx, vid, v, d)
