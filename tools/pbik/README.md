@@ -227,6 +227,8 @@ Schema checks against each file's `$schema`, plus the kit rules:
   in Desktop); and Learn's checklist (roadmap gap 22): alt text over 250 characters, a text box whose text isn't in
   its alt text, data visuals without a sort order of their own (one warning per page). `--no-a11y` skips them.
 - target Desktop (project.json `targetDesktop`): a file whose `$schema` version is newer than that Desktop supports;
+- service limits (errors, roadmap gap 18): more than 1,000 pages, 1,000 visuals on a page or 1,000 registered
+  resource files, or more than 300 MB of resources or of report files (Learn, PBIR considerations and limitations);
 - paths (roadmap gap 23): a report or model file whose full path is 260 characters or longer (Desktop can't reload
   or open it; Learn, external editing). `pbik build` warns on each visual.json it writes past the limit;
 - Microsoft's schema, property by property (warnings; errors with `--strict`, `pbikit/schemaprops.py`): a container,

@@ -238,3 +238,11 @@ which dropped formatting set in Desktop; it now keeps `objects` and changes only
 **Provenance**: S:visualContainer 2.13.0 #VisualGroupConfig, #VisualGroupFormattingObjects,
 #VisualGroupGeneralFormattingObjects (`altText`); S:visualConfiguration 2.8.0 #Background, #LockAspect; [L7] (a group
 can be announced as one item with alt text); pbik's build.py (groups, `build.py:1094-1095` in the roadmap).
+## Gap 18: service size limits (done, check only)
+
+**What pbik does now**: `pbik validate` errors when a report has more than 1,000 pages, a page more than 1,000
+visuals, more than 1,000 registered resource files, or more than 300 MB of registered resources or of report
+definition files. Never hit at kit scale; a cheap guard. Test 134 (limits lowered through `check_limits`).
+
+**Provenance**: [L1] *Power BI Desktop project report folder*, "PBIR considerations and limitations" (the five
+limits).

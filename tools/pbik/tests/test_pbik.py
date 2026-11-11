@@ -2657,6 +2657,21 @@ class PbikTests(unittest.TestCase):
         pbik("build", rep, lf)
         self.assertNotIn("objects", visual(rep, "P1-V30")["visualGroup"])
 
+    def test_134_service_limits(self):
+        """Gap 18: the service limits fire (lowered here, since real reports never reach them)."""
+        from pbikit import validate as VA
+        rep = Report(self.report)
+        fd = VA.Findings()
+        VA.check_limits(fd, rep, rep.pages())
+        self.assertEqual(fd.errors, [])
+        fd = VA.Findings()
+        VA.check_limits(fd, rep, rep.pages(), {"pages": 1, "visuals per page": 3, "resource files": 0,
+                                               "resource MB": -1, "report files MB": -1})
+        text = "\n".join(fd.errors)
+        for bit in ("2 pages; a PBIR report holds at most 1", "visuals; at most 3 a page", "registered resource files",
+                    "registered resources are", "report definition files are"):
+            self.assertIn(bit, text)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

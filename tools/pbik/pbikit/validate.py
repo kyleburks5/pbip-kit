@@ -409,6 +409,30 @@ def check_annotations(fd, rep, pages):
             fd.err(where, f"annotation name(s) {dup} used twice (each name must be unique)")
 
 
+# Microsoft Learn, "Power BI Desktop project report folder", PBIR considerations and limitations (roadmap gap 18)
+LIMITS = {"pages": 1000, "visuals per page": 1000, "resource files": 1000, "resource MB": 300, "report files MB": 300}
+
+
+def check_limits(fd, rep, pages, limits=None):
+    """Service size limits for a PBIR report: errors, since the service refuses a report past them."""
+    lim = dict(LIMITS, **(limits or {}))
+    if len(pages) > lim["pages"]:
+        fd.err("limits", f"{len(pages)} pages; a PBIR report holds at most {lim['pages']}")
+    for _, pd, pfolder in pages:
+        nv = len(list((pfolder / "visuals").glob("*/visual.json")))
+        if nv > lim["visuals per page"]:
+            fd.err("limits", f"page {pd.get('displayName')!r} has {nv} visuals; at most {lim['visuals per page']} a page")
+    res = [f for f in (rep.path / "StaticResources" / "RegisteredResources").glob("**/*") if f.is_file()]
+    if len(res) > lim["resource files"]:
+        fd.err("limits", f"{len(res)} registered resource files; at most {lim['resource files']}")
+    mb = sum(f.stat().st_size for f in res) / 2 ** 20
+    if mb > lim["resource MB"]:
+        fd.err("limits", f"registered resources are {mb:.0f} MB; at most {lim['resource MB']} MB")
+    rmb = sum(f.stat().st_size for f in rep.defn.rglob("*") if f.is_file()) / 2 ** 20
+    if rmb > lim["report files MB"]:
+        fd.err("limits", f"report definition files are {rmb:.0f} MB; at most {lim['report files MB']} MB")
+
+
 def check_target(fd, rep, files, rel):
     t = rep.target
     if not t.pinned:
@@ -640,6 +664,7 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     check_schema_props(fd, rep, pages, layout, strict_schema)
     check_filter_pane(fd, rep, pages)
     check_annotations(fd, rep, pages)
+    check_limits(fd, rep, pages)
     UV.check(fd, rep)
 
     # ---- settings catalog
