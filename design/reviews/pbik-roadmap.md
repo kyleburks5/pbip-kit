@@ -316,3 +316,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 16 | Partial after the Desktop check | `queryOptions` confirmed (2026-11-11); `angle` is a build error: Desktop kept position.angle but didn't draw or select the visual |
 | 26 | Partial after the Desktop check | `listSlicer` confirmed as the list slicer's type id; its first field gets `active: true` as Desktop saves it; templates still need a Patterns page save |
 | 28 | Partial after the Desktop check | spotlight and focus (accessible table) confirmed (2026-11-11); `elevate` is a layout error: Desktop dropped elevation on save |
+| 27 | Kept by Desktop, background not drawn: still UNVERIFIED | Desktop kept background, altText and lockAspect on save (2026-11-11) but drew no group background in edit view; check Reading view next pass |

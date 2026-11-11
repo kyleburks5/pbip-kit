@@ -132,7 +132,8 @@ feature("hierarchies", 8, "hierarchy-level fields (binding `hierarchy`, `level`)
                                                  or bool((doc.get("visual") or {}).get("expansionStates"))))
 
 
-feature("group-objects", 27, "visual group formatting (group `background`, `altText`, `lockAspect`)",
+feature("group-objects", 27, "visual group formatting (group `background`, `altText`, `lockAspect`): Desktop kept "
+        "all three on save (2026-11-11) but drew no group background in edit view",
         lambda kind, doc: kind == "visual" and bool((doc.get("visualGroup") or {}).get("objects")))
 
 
