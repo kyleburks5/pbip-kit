@@ -313,3 +313,17 @@ may need the page's mobile layout opened once. The checklist opens View > Mobile
 **Provenance**: S:visualContainerMobileState 2.8.0 (`objects`, `visualContainerObjects`, `position`
 #VisualContainerPosition); [L1] "PBIR folder and files" (mobile.json per visual); [L3] "Considerations and
 limitations" (mobileState.json not supported externally).
+## Gap 14: shape maps with an uploaded map (registration done, UNVERIFIED in Desktop; binding blocked)
+
+**What pbik does now**: `pbik resource add <Report> <map.topo.json> --type ShapeMap` registers a TopoJSON file as an
+item of type ShapeMap in RegisteredResources (same idempotent `_register` as images; warns when the file isn't a
+Topology). `pbik validate` now errors on any RegisteredResources item whose file is missing. Test 140.
+
+**Blocked**: binding the registered map to a shape map visual. The schema has no shape-map object (a visual's
+`objects` are open) and the only Desktop-saved shape map the kit has seen (pbik-smoke-013 scratch page, batch 1 notes)
+used a built-in map from SharedResources (`Shapemaps/usa.states.topo.json`), not an uploaded one. Next step
+(checklist): pick the uploaded map in Desktop, save, roundtrip.
+
+**Provenance**: S:report 3.3.0 #ResourcePackage, #ResourcePackageItem, #ResourcePackageItemType (ShapeMap),
+#ResourcePackageType (RegisteredResources, SharedResources); pbik-roadmap-batch1.md (the SharedResources ShapeMap item
+Desktop saved); pbik's theme.py.

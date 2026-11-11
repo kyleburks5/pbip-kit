@@ -152,6 +152,12 @@ feature("visual-calcs", 10, "visual calculations (binding `calc`) and sparklines
 feature("mobile", 11, "the mobile layout (visual `mobile`: mobile.json position)", lambda kind, doc: kind == "mobile")
 
 
+feature("shape-map-resource", 14, "a shape map registered as a ShapeMap resource (`pbik resource add --type ShapeMap`)",
+        lambda kind, doc: kind == "report" and any(
+            it.get("type") == "ShapeMap" for p in doc.get("resourcePackages") or []
+            if p.get("type") == "RegisteredResources" for it in p.get("items") or []))
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

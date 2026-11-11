@@ -66,6 +66,8 @@ def main(argv=None):
     ra.add_argument("report")
     ra.add_argument("file")
     ra.add_argument("--name")
+    ra.add_argument("--type", default="Image", choices=["Image", "ShapeMap"],
+                    help="Image (default) or ShapeMap (a TopoJSON map for the shape map visual; unverified in Desktop)")
 
     v = sub.add_parser("validate", help="schema checks and kit rules")
     v.add_argument("report")
@@ -173,7 +175,7 @@ def main(argv=None):
         apply(args.report, args.theme)
     elif c == "resource":
         from .theme import resource_add
-        resource_add(args.report, args.file, args.name)
+        resource_add(args.report, args.file, args.name, args.type)
     elif c == "validate":
         from .validate import validate
         return 1 if validate(args.report, args.layout, port=args.port, catalog=args.catalog,

@@ -413,6 +413,19 @@ def check_annotations(fd, rep, pages):
 LIMITS = {"pages": 1000, "visuals per page": 1000, "resource files": 1000, "resource MB": 300, "report files MB": 300}
 
 
+def check_resources(fd, rep):
+    """Every RegisteredResources item report.json lists has its file (a missing image or shape map draws nothing)."""
+    rd = load(rep.defn / "report.json") if (rep.defn / "report.json").exists() else {}
+    base = rep.path / "StaticResources" / "RegisteredResources"
+    for pkg in rd.get("resourcePackages") or []:
+        if pkg.get("type") != "RegisteredResources":
+            continue
+        for it in pkg.get("items") or []:
+            if it.get("path") and not (base / it["path"]).exists():
+                fd.err("report.json", f"resource {it.get('name')!r} ({it.get('type')}) has no file "
+                                      f"StaticResources/RegisteredResources/{it['path']}")
+
+
 def check_limits(fd, rep, pages, limits=None):
     """Service size limits for a PBIR report: errors, since the service refuses a report past them."""
     lim = dict(LIMITS, **(limits or {}))
@@ -665,6 +678,7 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     check_filter_pane(fd, rep, pages)
     check_annotations(fd, rep, pages)
     check_limits(fd, rep, pages)
+    check_resources(fd, rep)
     UV.check(fd, rep)
 
     # ---- settings catalog

@@ -290,3 +290,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 9 | Done, UNVERIFIED in Desktop | `Median`, `StDev`, `Variance` (Function 6-8) and `Percentile(T[C], k)`; Desktop check of Avg, Max, CountNonNull, DistinctCount added to the checklist |
 | 10 | Done, UNVERIFIED in Desktop | binding items `calc` (visual calculations) and `sparkline` (tables, matrices); sparkline formatting objects left to `props` |
 | 11 | Done (position), UNVERIFIED in Desktop | visual `mobile` writes mobile.json; mobile-only formatting left out; page-level mobileState.json stays Out (Learn) |
+| 14 | Partial: registration done, UNVERIFIED in Desktop; binding to the visual blocked | `pbik resource add --type ShapeMap`; validate checks registered files exist; the shape map visual's map binding needs one Desktop save |

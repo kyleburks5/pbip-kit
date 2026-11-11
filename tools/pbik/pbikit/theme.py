@@ -96,9 +96,34 @@ def register_image(report_path, file, project=None):
     return item, rep.changed
 
 
-def resource_add(report_path, file, name=None):
+MAP_EXT = {".json", ".topojson", ".geojson"}
+
+
+def resource_add(report_path, file, name=None, kind="Image"):
+    """kind Image (default) or ShapeMap (roadmap gap 14: an uploaded shape map, a TopoJSON file, registered as item
+    type ShapeMap in RegisteredResources from the report schema's #ResourcePackageItemType; UNVERIFIED in Desktop)."""
     rep = Report(report_path)
     p = pathlib.Path(file)
+    if kind == "ShapeMap":
+        if p.suffix.lower() not in MAP_EXT:
+            fail(f"a shape map is a TopoJSON file ({', '.join(sorted(MAP_EXT))})")
+        import json as _json
+        try:
+            doc = _json.loads(p.read_text(encoding="utf-8-sig"))
+        except (ValueError, UnicodeDecodeError) as e:
+            fail(f"{p}: not valid JSON ({e})")
+        if doc.get("type") != "Topology":
+            print("warning: the shape map visual takes TopoJSON (type Topology); convert GeoJSON first")
+        d, rf, item = _register(rep, p, "ShapeMap", name)
+        rep.write(rf, d)
+        print(f"{'registered' if rep.changed else 'already registered'}: {item} as a ShapeMap resource. UNVERIFIED in "
+              "Desktop (roadmap gap 14): pbik can't bind it to a shape map visual yet (that form isn't known); pick "
+              "it in Desktop (Format > Map settings) and save, then `pbik roundtrip` shows the binding")
+        if getattr(rep, "new_resource", False):
+            print(SUPPORT_NOTE)
+        return
+    if kind != "Image":
+        fail(f"resource type {kind!r} (Image, ShapeMap)")
     if p.suffix.lower() not in IMAGE_EXT:
         fail(f"resource add takes images ({', '.join(sorted(IMAGE_EXT))})")
     if p.suffix.lower() == ".svg":

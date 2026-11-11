@@ -2757,6 +2757,24 @@ class PbikTests(unittest.TestCase):
         pbik("build", rep, lf)
         self.assertFalse(mf.exists())
 
+    def test_140_shape_map_resource(self):
+        """Gap 14: a TopoJSON registered as a ShapeMap resource; validate errors on a registered file that's missing."""
+        work, rep, lf = self._batch1("b140")
+        topo = work / "regions.topo.json"
+        topo.write_text(json.dumps({"type": "Topology", "objects": {}, "arcs": []}), encoding="utf-8")
+        r = pbik("resource", "add", rep, topo, "--type", "ShapeMap").stdout
+        self.assertIn("as a ShapeMap resource. UNVERIFIED in Desktop (roadmap gap 14)", r)
+        rd = json.loads((rep / "definition" / "report.json").read_text(encoding="utf-8"))
+        items = next(p_ for p_ in rd["resourcePackages"] if p_["name"] == "RegisteredResources")["items"]
+        self.assertIn({"name": "regions.topo.json", "path": "regions.topo.json", "type": "ShapeMap"}, items)
+        v = pbik("validate", rep, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertIn("roadmap gap 14", v)
+        (rep / "StaticResources" / "RegisteredResources" / "regions.topo.json").unlink()
+        v = pbik("validate", rep, "--no-catalog", "--no-a11y", ok=(1,)).stdout
+        self.assertIn("resource 'regions.topo.json' (ShapeMap) has no file", v)
+        self.assertIn("a shape map is a TopoJSON file", pbik("resource", "add", rep, work / "x.png", "--type",
+                                                             "ShapeMap", ok=(2,)).stderr)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

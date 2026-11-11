@@ -190,8 +190,13 @@ pbik theme apply "Sales.Report" design\themes\pbip-polish.json
 Registers an image once (the same name is reused, never copied as `<name>_2.png`). Bind it as a
 `ResourcePackageItem` (`objects.image_objects` in pbikit).
 
+`--type ShapeMap` registers a TopoJSON map for the shape map visual instead (item type ShapeMap, roadmap gap 14,
+**UNVERIFIED in Desktop**): pbik can't bind it to the visual yet, so pick it in Desktop (Format > Map settings) and
+save. `pbik validate` errors on a registered resource whose file is missing.
+
 ```bat
 pbik resource add "Sales.Report" design\images\court.png
+pbik resource add "Sales.Report" design\maps\regions.topo.json --type ShapeMap
 ```
 
 ### `validate <Report> [--layout design/specs/layout.json]`
