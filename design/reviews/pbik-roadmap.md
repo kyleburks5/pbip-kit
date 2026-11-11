@@ -319,3 +319,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 27 | Kept by Desktop, background not drawn: still UNVERIFIED | Desktop kept background, altText and lockAspect on save (2026-11-11) but drew no group background in edit view; check Reading view next pass |
 | 4 | Done, confirmed in Desktop (second pass) | the range now shows as Advanced "is greater than or equal to 2025 ..." (2026-11-11); every filter form of gap 4 confirmed |
 | 9 | Done, confirmed in Desktop (second pass) | Average, Max, Count, Count of Category, Median, Standard deviation, Variance and Percentile.Inc render with unique native reference names (2026-11-11) |
+| 10 | Done, confirmed in Desktop (second pass) | the running total and the sparkline column render (2026-11-11) |

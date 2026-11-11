@@ -2751,7 +2751,7 @@ class PbikTests(unittest.TestCase):
             vals.append({"sparkline": "[Revenue]", "by": "Date[Year Month]"})
         work, rep, lf = self._batch1("b138", edit)
         r = pbik("build", rep, lf)
-        self.assertIn("UNVERIFIED in Desktop (roadmap gap 10)", r.stdout)
+        self.assertNotIn("roadmap gap 10)", r.stdout)                # confirmed in Desktop (2026-11-11)
         projs = visual(rep, "P1-V05")["visual"]["query"]["queryState"]["Values"]["projections"]
         vc = next(p for p in projs if "NativeVisualCalculation" in p["field"])
         self.assertEqual(vc["field"]["NativeVisualCalculation"], {"Language": "dax", "Expression": "RUNNINGSUM([Revenue])",
