@@ -371,6 +371,19 @@ pbik project check
 pbik schemas lower "..\pbip-patterns-work\HR Overview.Report"
 ```
 
+### `copy page <from Report> <page> <to Report> --key P<n> [--as <name>] [--bookmarks]`
+Copies a page into another report (roadmap gap 17; Microsoft Learn names copying pages between reports as a PBIR
+scenario): the page gets the name `pbik build` would give layout page `<key>`, visual IDs move to that page number
+(`P2-V04_x` -> `P5-V04_x`, with `parentGroupName` and `visualInteractions`), page and visual filter names, the
+`pageBinding` name and its parameters are renamed so they stay unique (Learn, Common PBIR errors), and `--bookmarks`
+brings the bookmarks that belong to that page alone, rewritten to the copy. Buttons pointing at pages the target
+lacks are listed. Fields aren't changed: run `pbik validate` on the target. The copy is Desktop's own JSON; check it
+opens in Desktop (batch 2 checklist).
+
+```bat
+pbik copy page "..\pbip-rep8\HR Overview.Report" "Workforce" "Sales.Report" --key P5 --bookmarks
+```
+
 ### `values <Report> [--out <md>]`
 Lists the model values written into the report files, for a privacy review (roadmap gap 19; Microsoft Learn warns that
 filter and slicer values are saved in the files): every literal in report, page and visual filters, slicer selections,

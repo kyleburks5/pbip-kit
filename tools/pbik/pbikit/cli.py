@@ -101,6 +101,15 @@ def main(argv=None):
     rt.add_argument("--before", help="pbik's files from a copy of the report folder instead of git")
     rt.add_argument("--out", help="also write the list to this .md file")
 
+    cp = sub.add_parser("copy", help="copy between reports").add_subparsers(dest="sub", required=True)
+    cpp = cp.add_parser("page", help="copy a page (visual IDs renumbered, filter and binding names made unique)")
+    cpp.add_argument("source")
+    cpp.add_argument("page", help="page name (id) or display name in the source report")
+    cpp.add_argument("target")
+    cpp.add_argument("--key", required=True, help="the layout page key the copy gets (P<n>): visual IDs move to it")
+    cpp.add_argument("--as", dest="as_name", help="display name in the target (default: the same)")
+    cpp.add_argument("--bookmarks", action="store_true", help="also copy the bookmarks that belong to that page alone")
+
     va = sub.add_parser("values", help="model values written into the report files, for a privacy review (read-only)")
     va.add_argument("report")
     va.add_argument("--out", help="also write the list to this .md file")
@@ -192,6 +201,9 @@ def main(argv=None):
     elif c == "roundtrip":
         from .roundtrip import roundtrip
         roundtrip(args.report, args.rev, args.to, args.before, args.out)
+    elif c == "copy":
+        from .copy import copy_page
+        copy_page(args.source, args.page, args.target, args.key, args.as_name, args.bookmarks)
     elif c == "values":
         from .values import values
         values(args.report, args.out)

@@ -2797,6 +2797,52 @@ class PbikTests(unittest.TestCase):
             queryOptions={"fast": True}))
         self.assertIn("queryOptions ['fast']", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_143_copy_page_between_reports(self):
+        """Gap 17: copy a page with its bookmark into another report; IDs, filter and binding names follow."""
+        def edit(lay):
+            lay["pages"]["P2"]["bookmarks"] = [{"name": "trend-only", "hide": ["P2-V01"]}]
+            lay["pages"]["P2"]["filters"] = [{"field": "products[Product_Category]", "values": ["Toys"]}]
+        work, rep, lf = self._batch1("b143", edit)
+        pbik("build", rep, lf)
+        dst_proj = self.tmp / "b143-target"
+        dst_proj.mkdir()
+        dst, _ = copy_project(dst_proj, keep_pages=False)
+        r = pbik("copy", "page", rep, "pbik stock", dst, "--key", "P5", "--as", "Stock copy", "--bookmarks").stdout
+        self.assertIn("3 visual(s) renumbered to P5", r)
+        self.assertIn("copied 1 bookmark(s)", r)
+        self.assertIn("P5-V02_back -> ", r)                            # its Back target isn't in the new report
+        name, pg, folder = Report(dst).page_by("Stock copy")
+        from pbikit.report import stable_name
+        self.assertEqual(name, stable_name("page", "P5", "Stock copy"))
+        self.assertEqual(sorted(f.name.split("_")[0] for f in (folder / "visuals").iterdir()), ["P5-V01", "P5-V02", "P5-V03"])
+        self.assertEqual(visual(dst, "P5-V03")["name"], "P5-V03_trend")
+        src_pg = Report(rep).page_by("pbik stock")[1]
+        self.assertNotEqual(pg["filterConfig"]["filters"][0]["name"], src_pg["filterConfig"]["filters"][0]["name"])
+        self.assertTrue(pg["filterConfig"]["filters"][0]["name"].startswith("pbik_"))
+        bd = json.loads(next((dst / "definition" / "bookmarks").glob("*.bookmark.json")).read_text(encoding="utf-8"))
+        self.assertEqual(list(bd["explorationState"]["sections"]), [name])
+        self.assertEqual(bd["options"]["targetVisualNames"], ["P5-V01_title"])
+        self.assertNotIn("bookmark", pbik("validate", dst, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout.split(
+            "warning")[0])
+        work2, rep2, lf2 = self._batch1("b143b", lambda lay: (lay.update(annotate=True), lay["pages"]["P2"].update(
+            bookmarks=[{"name": "b"}]), next(x for x in lay["visuals"] if x["id"] == "P2-V02").update(
+            action={"type": "Bookmark", "bookmark": "b"})))
+        pbik("build", rep2, lf2)
+        pbik("copy", "page", rep2, "pbik stock", rep2, "--key", "P7", "--as", "Copy", "--bookmarks")
+        link = visual(rep2, "P7-V02")["visual"]["visualContainerObjects"]["visualLink"][0]["properties"]["bookmark"]
+        src_link = visual(rep2, "P2-V02")["visual"]["visualContainerObjects"]["visualLink"][0]["properties"]["bookmark"]
+        self.assertNotEqual(link, src_link, "the copied button applies the copied bookmark")
+        ann = {a["name"]: a["value"] for a in visual(rep2, "P7-V02")["annotations"]}
+        self.assertEqual((ann["pbik.id"], ann.get("pbik.layout") is not None), ("P7-V02", True))
+        v = pbik("validate", rep2, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertNotIn("but the folder's ID is", v)
+        self.assertNotIn("which hides or shows visuals on page", v)
+        v = pbik("validate", dst, "--no-catalog", "--no-a11y", ok=(0, 1)).stdout
+        self.assertNotIn("duplicate visual ID", v)
+        self.assertNotIn("bookmark", v.split("error")[0] if "error   " not in v else "")
+        self.assertIn("already has a page", pbik("copy", "page", rep, "pbik stock", dst, "--key", "P5", "--as",
+                                                 "Stock copy", ok=(2,)).stderr)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

@@ -339,3 +339,21 @@ validate warning (gap 20).
 
 **Provenance**: S:visualContainer 2.13.0 #VisualContainerPosition (`angle`); S:visualConfiguration 2.8.0 #Query
 (`options`), #VisualQueryOptions, #VisualLink (`dataFunction`).
+## Gap 17: copy a page between reports (done; check in Desktop)
+
+**What pbik does now**: `pbik copy page <from> <page> <to> --key P<n> [--as <name>] [--bookmarks]` (new,
+`pbikit/copy.py`) copies a page folder into another report: the page takes the name `pbik build` would give layout
+page `<key>` (so a later layout entry adopts it), visual IDs move to the new page number (folders, `name`,
+`parentGroupName`, `visualInteractions`), page and visual filter names and the `pageBinding` name and parameters are
+renamed (stable, unique) with `boundFilter` following, and it is appended to `pageOrder`. `--bookmarks` copies each
+bookmark whose sections are that page alone, with visual names, targets, groups and active section rewritten, and
+lists it in bookmarks.json. Navigation or drill-through buttons pointing at pages the target lacks are warned.
+Fields aren't changed; `pbik validate` on the target catches any the model lacks. Test 143.
+
+**Not marked unverified** (it writes no new form: the copy is the source's own JSON with names changed), but the
+checklist opens a copied page in Desktop once. Copying a single visual is left out: `pbik build` owns visuals by ID,
+and a layout entry with a template does that job.
+
+**Provenance**: [L1] "PBIR format" (copying pages and bookmarks between reports as a scenario), "Common PBIR errors"
+(pageBinding.name unique; a copied bookmark keeps its configuration only with its visuals); [L2]; pbik's report.py
+(`stable_name`, page naming) and build.py.
