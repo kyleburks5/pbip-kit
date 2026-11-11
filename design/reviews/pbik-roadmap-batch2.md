@@ -228,3 +228,13 @@ both (Desktop may add `active` or rewrite the queryRef).
 **Provenance**: S:semanticQuery 1.4.0 #QueryHierarchyExpression, #QueryHierarchyLevelExpression; S:visualConfiguration
 2.8.0 #ExpansionState, #RootExpansionState, #LevelExpansionState, #Query (`isDrillDisabled`); TMDL `hierarchy` /
 `level` as in the Rep 5 fixture's Date table; pbik's build.py (projection shape).
+## Gap 27: visual group formatting (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: on a `type: "group"` visual, `background` ({color, transparency} or false), `altText` and
+`lockAspect` write `visualGroup.objects` (background `show` / `color` / `transparency`, general `altText`,
+lockAspect `show`), selector-less and owned per property. pbik used to rewrite `visualGroup` whole on every build,
+which dropped formatting set in Desktop; it now keeps `objects` and changes only its own properties. Test 133.
+
+**Provenance**: S:visualContainer 2.13.0 #VisualGroupConfig, #VisualGroupFormattingObjects,
+#VisualGroupGeneralFormattingObjects (`altText`); S:visualConfiguration 2.8.0 #Background, #LockAspect; [L7] (a group
+can be announced as one item with alt text); pbik's build.py (groups, `build.py:1094-1095` in the roadmap).

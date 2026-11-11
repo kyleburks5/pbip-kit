@@ -283,3 +283,4 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 6 | Done, UNVERIFIED in Desktop | page `tooltip`, visual `tooltipPage` (visualTooltip `section`; `type` not written, value unknown); validate: unique pageBinding.name, tooltip section names a Tooltip page |
 | 7 | Done, UNVERIFIED in Desktop | page `drillthrough` (type, pageBinding parameters, Drillthrough filters), action Drillthrough; validate checks the target is a Drillthrough page |
 | 8 | Done, UNVERIFIED in Desktop | hierarchy-level bindings (TMDL-checked), matrix `expand: all`; automatic date hierarchies and `isDrillDisabled` (custom visuals only, per the schema) left out |
+| 27 | Done, UNVERIFIED in Desktop | group `background`, `altText`, `lockAspect`; Desktop's group formatting now kept on rebuild |

@@ -132,6 +132,10 @@ feature("hierarchies", 8, "hierarchy-level fields (binding `hierarchy`, `level`)
                                                  or bool((doc.get("visual") or {}).get("expansionStates"))))
 
 
+feature("group-objects", 27, "visual group formatting (group `background`, `altText`, `lockAspect`)",
+        lambda kind, doc: kind == "visual" and bool((doc.get("visualGroup") or {}).get("objects")))
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

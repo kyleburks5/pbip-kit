@@ -153,6 +153,18 @@ def release(d, where, key, sel_key, prop):
     if where == "top":                          # a top-level key pbik owns (parentGroupName)
         d.pop(key, None)
         return
+    if where == "group":                        # a group formatting property pbik wrote (roadmap gap 27)
+        objs = (d.get("visualGroup") or {}).get("objects") or {}
+        for e in list(objs.get(key, [])):
+            if not e.get("selector"):
+                e.get("properties", {}).pop(prop, None)
+                if not e.get("properties"):
+                    objs[key].remove(e)
+        if key in objs and not objs[key]:
+            del objs[key]
+        if "objects" in d.get("visualGroup", {}) and not objs:
+            del d["visualGroup"]["objects"]
+        return
     if where == "annotations":                  # an annotation pbik wrote (roadmap gap 13)
         lst = d.get("annotations") or []
         lst[:] = [a for a in lst if a.get("name") != key]
@@ -1177,6 +1189,35 @@ def apply_drillthrough(ctx, key, spec, d):
         tree_gate(ctx, owner, d.get("$schema", ""), ["filterConfig", "filters"], f_)
 
 
+def apply_group_objects(ctx, vid, v, d):
+    """Group formatting (roadmap gap 27): `background` ({color, transparency} or false), `altText` (announced for the
+    group as one item) and `lockAspect` -> visualGroup.objects, selector-less, each property owned."""
+    props = {}
+    bg = v.get("background")
+    if bg is not None:
+        props["background"] = {"show": b(False)} if bg is False else {
+            "show": b(True), "color": solid(ctx.colour(bg.get("color", "card") if isinstance(bg, dict) else bg)),
+            "transparency": n(bg.get("transparency", 0) if isinstance(bg, dict) else 0)}
+    if v.get("altText"):
+        props["general"] = {"altText": s(v["altText"])}
+    if v.get("lockAspect") is not None:
+        props["lockAspect"] = {"show": b(bool(v["lockAspect"]))}
+    if not props:
+        return
+    objs = d["visualGroup"].setdefault("objects", {})
+    for key, pp in props.items():
+        lst = objs.setdefault(key, [])
+        e = next((x for x in lst if not x.get("selector")), None)
+        if e is None:
+            e = {"properties": {}}
+            lst.append(e)
+        for prop, val in pp.items():
+            e["properties"][prop] = val
+            ctx.owned_new.setdefault(vid, []).append(["group", key, None, prop])
+    ctx.unverified.add("group-objects")
+    tree_gate(ctx, vid, d.get("$schema", ""), ["visualGroup", "objects"], objs)
+
+
 def apply_tooltip(ctx, vid, v, d, page_ids):
     """Visual `tooltipPage: <page key>` (roadmap gap 6): visualContainerObjects.visualTooltip `show` and `section`
     (the tooltip page's name). The schema leaves visualTooltip `type` open (no values listed) and no Desktop-saved file
@@ -1622,8 +1663,12 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                     continue
                 d["name"] = vnames[vid]
                 set_position(d, vid, v, box(vid), parent, box, vnames, ctx)
+                kept = (d.get("visualGroup") or {}).get("objects")     # Desktop's group formatting stays
                 d["visualGroup"] = {"displayName": v.get("displayName", v["name"]),
                                     "groupMode": v.get("mode", "ScaleMode")}
+                if kept:
+                    d["visualGroup"]["objects"] = kept
+                apply_group_objects(ctx, vid, v, d)
                 apply_annotations(ctx, vid, d, visual_annotations(layout, v))
                 for item in old_owned.get(vid, []):
                     if json.dumps(item) not in {json.dumps(x) for x in ctx.owned_new.get(vid, [])}:

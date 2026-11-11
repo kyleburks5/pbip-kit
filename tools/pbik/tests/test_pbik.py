@@ -2639,6 +2639,24 @@ class PbikTests(unittest.TestCase):
         self._relayout(lf, lambda lay: lay["visuals"][-1]["bindings"]["Rows"][1].update(level="Week"))
         self.assertIn("no level 'Week'", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_133_group_formatting(self):
+        """Gap 27: a group's background, alt text and lock aspect go to visualGroup.objects, owned per property."""
+        def edit(lay):
+            lay["visuals"].append({"id": "P1-V30", "name": "nav-group", "page": "P1", "type": "group",
+                                   "members": ["P1-V06", "P1-V07"], "altText": "Navigation buttons",
+                                   "background": {"color": "card", "transparency": 10}, "lockAspect": True})
+        work, rep, lf = self._batch1("b133", edit)
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 27)", r.stdout)
+        objs = visual(rep, "P1-V30")["visualGroup"]["objects"]
+        self.assertEqual(objs["general"][0]["properties"]["altText"], {"expr": {"Literal": {"Value": "'Navigation buttons'"}}})
+        self.assertEqual(objs["lockAspect"][0]["properties"]["show"], {"expr": {"Literal": {"Value": "true"}}})
+        self.assertEqual(objs["background"][0]["properties"]["transparency"], {"expr": {"Literal": {"Value": "10D"}}})
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        self._relayout(lf, lambda lay: [lay["visuals"][-1].pop(k) for k in ("altText", "background", "lockAspect")])
+        pbik("build", rep, lf)
+        self.assertNotIn("objects", visual(rep, "P1-V30")["visualGroup"])
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""
