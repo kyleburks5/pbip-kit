@@ -270,3 +270,18 @@ same way.
 
 **Provenance**: [L4] *What's new in the October 2026 Power BI update*, "Reporting" (Gantt preview, list slicer
 dropdown, plot area background); [L6] (Azure Maps); `design/templates/` listing; pbik's build.py and templates.py.
+## Gap 9: aggregations (done, UNVERIFIED in Desktop)
+
+**What pbik does now**: the field notation takes `Median(T[C])`, `StDev(T[C])` / `StandardDeviation`,
+`Variance(T[C])` / `Var` (Aggregation Function 6, 7, 8; number columns only) and `Percentile(T[C], k)`
+(`{"Percentile": {"Expression": <column>, "K": k}}`, k from 0 to 1, Exclusive left at its default false). Their
+queryRefs follow pbik's `Function(Table.Column)` pattern (`Median(sales.Units)`, `Percentile(sales.Units, 0.9)`). Test
+137.
+
+**UNVERIFIED in Desktop**: the four new ones, and the queryRef names (Desktop may name them differently). Avg, Max,
+CountNonNull and DistinctCount (Function 1, 4, 5, 2) were already written but not yet seen in a Desktop save
+(known-gaps); the checklist covers them too.
+
+**Provenance**: S:semanticQuery 1.4.0 #QueryAggregationExpression, #QueryAggregateFunction (6 Median,
+7 StandardDeviation, 8 Variance), #QueryPercentileExpression (`K`, `Exclusive`); pbik's objects.py (`AGG_NAMES`,
+`qref`) and fields.py.

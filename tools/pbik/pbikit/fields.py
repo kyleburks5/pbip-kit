@@ -1,7 +1,7 @@
 """Layout field notation -> PBIR field expressions, checked against the model's TMDL and the report extensions.
 
 Notation: '[Measure]', 'Table[Column]', "'Table name'[Column]", 'Sum(Table[Column])' (Sum, Avg, Min, Max, First,
-Last, Count, DistinctCount). A trailing note in parentheses ('[Sales] (current year)') is ignored.
+Last, Count, DistinctCount; Median, StDev, Variance and 'Percentile(Table[Column], 0.9)' since roadmap gap 9). A trailing note in parentheses ('[Sales] (current year)') is ignored.
 Filters follow the shapes Desktop saves (semanticQuery Version 2 with a From list of source aliases).
 """
 import re
@@ -57,6 +57,15 @@ class Resolver:
         raise FieldError(f"[{name}]: no model found and no measureTable in layout.json")
 
     def field(self, text):
+        m = re.fullmatch(r"\s*Percentile\(\s*(.+?)\s*,\s*([0-9]*\.?[0-9]+)\s*\)\s*", text, re.I)
+        if m:                                       # roadmap gap 9: Percentile(T[C], 0.9), K between 0 and 1
+            k = float(m.group(2))
+            if not 0 <= k <= 1:
+                raise FieldError(f"{text!r}: the percentile is between 0 and 1 (0.9 for the 90th)")
+            col = self.field(m.group(1))
+            if "Column" not in col:
+                raise FieldError(f"{text!r}: Percentile takes a column")
+            return {"Percentile": {"Expression": col, "K": k}}
         agg, table, name = self.parse(text)
         if table is None:
             if agg:
@@ -76,6 +85,9 @@ class Resolver:
                 raise FieldError(f"{text!r}: no column or measure {name!r} in {table}")
         col = column(table, name)
         if agg:
+            if AGG_FUNCS[agg] >= 6 and self.model and self.model.column_type(table, name) not in (
+                    "int64", "double", "decimal", None):
+                raise FieldError(f"{text!r}: {agg} needs a number column")
             return {"Aggregation": {"Expression": col, "Function": AGG_FUNCS[agg]}}
         return col
 
@@ -140,7 +152,7 @@ def _src(field, alias):
 def _entity(field):
     kind = next(iter(field))
     inner = field[kind]
-    if kind == "Aggregation":
+    if kind in ("Aggregation", "Percentile"):
         return _entity(inner["Expression"])
     ref = inner["Expression"]["SourceRef"]
     return ref["Entity"], ref.get("Schema")

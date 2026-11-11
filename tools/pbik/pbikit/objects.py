@@ -101,6 +101,10 @@ def qref(field):
         return f"{field['Measure']['Expression']['SourceRef']['Entity']}.{field['Measure']['Property']}"
     if "Column" in field:
         return f"{field['Column']['Expression']['SourceRef']['Entity']}.{field['Column']['Property']}"
+    if "Percentile" in field:                 # roadmap gap 9 (UNVERIFIED in Desktop)
+        p = field["Percentile"]
+        c = p["Expression"]["Column"]
+        return f"Percentile({c['Expression']['SourceRef']['Entity']}.{c['Property']}, {p['K']:g})"
     c = field["Aggregation"]["Expression"]["Column"]
     fn = AGG_NAMES.get(field["Aggregation"].get("Function", 3), "Min")
     return f"{fn}({c['Expression']['SourceRef']['Entity']}.{c['Property']})"
@@ -108,16 +112,17 @@ def qref(field):
 
 # queryRef prefixes per aggregation function (semanticQuery QueryAggregateFunction). Sum and Min are seen in files
 # Desktop saved; the others follow the same pattern and are unverified.
-AGG_NAMES = {0: "Sum", 1: "Avg", 2: "DistinctCount", 3: "Min", 4: "Max", 5: "CountNonNull"}
+AGG_NAMES = {0: "Sum", 1: "Avg", 2: "DistinctCount", 3: "Min", 4: "Max", 5: "CountNonNull", 6: "Median",
+             7: "StandardDeviation", 8: "Variance"}      # 6-8: roadmap gap 9, from the schema only
 AGG_FUNCS = {"sum": 0, "avg": 1, "average": 1, "distinctcount": 2, "min": 3, "first": 3, "max": 4, "last": 4,
-             "count": 5}
+             "count": 5, "median": 6, "stdev": 7, "standarddeviation": 7, "var": 8, "variance": 8}
 
 
 def native_ref(field):
     """nativeQueryRef as Desktop saves it: the field's own name (the column inside an aggregation), even when the
     projection has a displayName."""
     k = next(iter(field))
-    if k == "Aggregation":
+    if k in ("Aggregation", "Percentile"):
         return native_ref(field[k]["Expression"])
     return field[k]["Property"]
 

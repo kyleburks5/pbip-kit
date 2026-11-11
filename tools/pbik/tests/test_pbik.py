@@ -2695,6 +2695,30 @@ class PbikTests(unittest.TestCase):
         self.assertIn("still missing: the list slicer, the input slicer, Azure Maps", r.stdout)
         self.assertEqual(visual(rep, "P2-V11")["visual"]["visualType"], "listSlicer")
 
+    def test_137_more_aggregations(self):
+        """Gap 9: Median / StDev / Variance (Function 6-8) and Percentile in the field notation."""
+        from pbikit import fields as F
+        res = F.Resolver(Report(self.report))
+        self.assertEqual(res.field("Median(sales[Units])")["Aggregation"]["Function"], 6)
+        self.assertEqual(res.field("StDev(sales[Units])")["Aggregation"]["Function"], 7)
+        self.assertEqual(res.field("Variance(sales[Units])")["Aggregation"]["Function"], 8)
+        p = res.field("Percentile(sales[Units], 0.9)")
+        self.assertEqual(p["Percentile"]["K"], 0.9)
+        from pbikit.objects import qref, native_ref
+        self.assertEqual(qref(p), "Percentile(sales.Units, 0.9)")
+        self.assertEqual(native_ref(p), "Units")
+        self.assertEqual(qref(res.field("Median(sales[Units])")), "Median(sales.Units)")
+        for bad, why in (("Percentile(sales[Units], 90)", "between 0 and 1"),
+                         ("Median(stores[City])", "needs a number column")):
+            with self.assertRaises(F.FieldError) as e:
+                res.field(bad)
+            self.assertIn(why, str(e.exception))
+        work, rep, lf = self._batch1("b137", lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V04")[
+            "bindings"].update(Y=["Median(sales[Units])"]))
+        r = pbik("build", rep, lf)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 9)", r.stdout)
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

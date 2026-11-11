@@ -136,6 +136,14 @@ feature("group-objects", 27, "visual group formatting (group `background`, `altT
         lambda kind, doc: kind == "visual" and bool((doc.get("visualGroup") or {}).get("objects")))
 
 
+def _new_aggregations(kind, doc):
+    txt = json.dumps((doc.get("visual") or {}).get("query") or {}) if kind == "visual" else ""
+    return '"Percentile"' in txt or any(f'"Function": {n}' in txt for n in (6, 7, 8))
+
+
+feature("aggregations", 9, "Median, StandardDeviation, Variance and Percentile fields", _new_aggregations)
+
+
 def _new_filters(kind, doc):
     fc = doc.get("filterConfig") or {}
     mine = [f for f in fc.get("filters", []) if str(f.get("name", "")).startswith("pbik_")]

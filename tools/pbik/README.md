@@ -78,7 +78,9 @@ log lists them. Visuals already built keep theirs until `--reset` (design/known-
 The layout keys are below; `tests/sample/layout.json` uses all of them except the 0.13 filter pane and report keys
 (`report`, page `filterPane` / `filterCards`), which tests 110-118 add to copies. Colours are hex values or `tokens.colors`
 names; font sizes are points or `tokens.fontPt` names; paddings and radii can name `tokens.container` values.
-Fields use the layout notation: `[Measure]`, `Table[Column]`, `'Table name'[Column]`, `Sum(Table[Column])`, checked
+Fields use the layout notation: `[Measure]`, `Table[Column]`, `'Table name'[Column]`, `Sum(Table[Column])` (also `Median`,
+`StDev`, `Variance` and `Percentile(Table[Column], 0.9)`, number columns only: Aggregation Function 6-8 and
+Percentile, **UNVERIFIED in Desktop**, roadmap gap 9), checked
 against the model's TMDL and `reportExtensions.json`.
 
 | Where | Key | Writes |

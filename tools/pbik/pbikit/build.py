@@ -426,6 +426,8 @@ def apply_query(ctx, v, d):
                     projs.extend(fp_projs)
                     continue
                 f = ctx.field(spec["field"])
+                if "Percentile" in f or (f.get("Aggregation") or {}).get("Function", 0) >= 6:
+                    ctx.unverified.add("aggregations")          # roadmap gap 9
                 q = qref(f)
                 p = {"field": f, "queryRef": q, "nativeQueryRef": native_ref(f)}   # the field's name, not displayName
                 if spec.get("displayName"):
