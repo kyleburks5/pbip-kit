@@ -6,6 +6,14 @@ the base theme. Registering is idempotent: the same file name is reused, never c
 """
 import pathlib, shutil
 
+# Roadmap gap 25: Microsoft Learn ("Power BI Desktop project report folder", RegisteredResources\) supports editing
+# RegisteredResources files only for resources Desktop already registered in report.json. pbik registers new ones
+# itself (themes, images): it works in Desktop 2.159.883.0 (Reps 6-7, every rep's theme) but isn't documented, so it is
+# a support risk, rechecked at every /update and /smoke.
+SUPPORT_NOTE = ("note: pbik registered a new resource itself, which Microsoft Learn doesn't document (it supports "
+                "edits only to resources Desktop already registered); it works in Desktop 2.159.883.0 and is rechecked "
+                "at every /update (roadmap gap 25)")
+
 from .objects import load
 from .report import Report, fail
 
@@ -19,7 +27,8 @@ def _register(rep, src, item_type, name=None):
     name = name or src.name
     dest = rep.path / "StaticResources" / "RegisteredResources" / name
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if not dest.exists() or dest.read_bytes() != src.read_bytes():
+    new = not dest.exists()
+    if new or dest.read_bytes() != src.read_bytes():
         shutil.copyfile(src, dest)
         rep.changed.append(str(dest.relative_to(rep.path.parent)).replace("\\", "/"))
     rf = rep.defn / "report.json"
@@ -33,8 +42,10 @@ def _register(rep, src, item_type, name=None):
     it = next((x for x in items if x.get("name") == name), None)
     if it is None:
         items.append({"name": name, "path": name, "type": item_type})
+        new = True
     else:
         it.update({"path": name, "type": item_type})
+    rep.new_resource = getattr(rep, "new_resource", False) or new
     return d, rf, name
 
 
@@ -64,6 +75,8 @@ def apply(report_path, theme_file, quiet=False, project=None):
     rep.write(rf, d)
     if not quiet:
         print(f"{'applied' if rep.changed else 'already applied'}: {name} as the custom theme of {rep.path.name}")
+        if getattr(rep, "new_resource", False):
+            print(SUPPORT_NOTE)
         for c in rep.changed:
             print(f"  {c}")
     return rep.changed
@@ -78,6 +91,8 @@ def register_image(report_path, file, project=None):
         fail(f"image {file}: not an image ({', '.join(sorted(IMAGE_EXT))})")
     d, rf, item = _register(rep, p, "Image")
     rep.write(rf, d)
+    if getattr(rep, "new_resource", False):
+        print(SUPPORT_NOTE)
     return item, rep.changed
 
 
@@ -92,3 +107,5 @@ def resource_add(report_path, file, name=None):
     rep.write(rf, d)
     print(f"{'registered' if rep.changed else 'already registered'}: {item}  (bind it as ResourcePackageItem "
           f"PackageName RegisteredResources, PackageType 1, ItemName {item!r})")
+    if getattr(rep, "new_resource", False):
+        print(SUPPORT_NOTE)

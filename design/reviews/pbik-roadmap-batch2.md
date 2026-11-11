@@ -112,3 +112,14 @@ schema (properties listed, values open); the checklist sets one and roundtrip sh
 **Provenance**: S:pagesMetadata 1.1.0 `landingPageName` ("takes precedence over activePageName", the page name);
 S:page 2.1.0 #PageFormattingObjects, #PageSize, #DisplayArea, #PageRefresh, #PageInformation, #Background; pbik's
 build.py (`set_prop`, `prop_value`, `--prune` for visuals).
+## Gap 25: registering new resources is outside what Microsoft documents (done: recorded, smoke item)
+
+**What changed**: `pbik theme apply`, `pbik resource add` and a build that registers a layout `image` print a note
+when they register a new resource; `/smoke` (and Copilot `/kit-smoke`) gains step 5, which rechecks on the reopened
+`_smoke` page that the theme pbik registered (and a registered image, when the rep has one) still load;
+docs/UPDATE-ROUTINE.md step 3 says so; design/known-gaps.md records the risk on the registered-images row. No report
+output change. Covered by the existing theme and resource tests and test 124.
+
+**Provenance**: [L1] *Power BI Desktop project report folder*, "RegisteredResources\": "Edits to RegisteredResources
+files are only supported for already loaded resources"; .claude/rules/svg.md (the PNG route tested in Desktop, Reps
+6-7); pbik's theme.py.

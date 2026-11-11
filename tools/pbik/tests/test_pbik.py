@@ -2427,6 +2427,14 @@ class PbikTests(unittest.TestCase):
         self._relayout(lf, lambda lay: lay["pages"]["P1"].update(props={"filterCard.textSize": 12}))
         self.assertIn("use the page's filterPane / filterCards keys", pbik("build", rep, lf, ok=(1,)).stdout)
 
+    def test_126_new_resource_support_note(self):
+        """Gap 25: registering a new resource prints the support-risk note; re-registering doesn't."""
+        work, rep, lf = self._batch1("b126")
+        png = work / "pin.png"
+        png.write_bytes(b"PNG stand-in")
+        self.assertIn("roadmap gap 25", pbik("resource", "add", rep, png).stdout)
+        self.assertNotIn("roadmap gap 25", pbik("resource", "add", rep, png).stdout)
+
 
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""

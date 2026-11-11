@@ -43,7 +43,8 @@ Freeze versions during a rep (VERSIONS.md "Update policy"): run this between rep
 2. **Regression suite.** Check Desktop has no unsaved changes, then `python tools/run_tests.py --regression`. A
    changed golden build means pbik's output changed: review the listed files and JSON paths before accepting them.
 3. **`/smoke`.** One card, one button slicer, one table on a `_smoke` page, checked in Desktop against
-   design/checks.md.
+   design/checks.md. It also rechecks that resources pbik registers itself (the theme, layout `image` files) still
+   load: Microsoft Learn supports editing RegisteredResources only for resources Desktop registered (roadmap gap 25).
 4. **New visuals or settings, through the Patterns page.** Add the visual or setting to
    `tools/patterns/patterns.json`, rebuild the page (`python tools/patterns/build_patterns.py --page-only --force`),
    open ..\pbip-patterns (beside the kit folder; run the commands here from the kit root) in Desktop, set what pbik can't write by hand, and save. `pbik roundtrip` lists
