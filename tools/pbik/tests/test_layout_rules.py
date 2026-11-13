@@ -11,6 +11,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(KIT / "design" / "scripts"))
 
 import bind_sample  # noqa: E402
+NL = chr(10)
 from pbikit import kpicards as KC  # noqa: E402
 
 
@@ -121,6 +122,37 @@ class KpiCardTests(unittest.TestCase):
         self.assertNotIn("referenceLabel", t["visual"]["objects"], "no field-bound entries in a template")
         idx = json.loads((KIT / "design/templates/index.json").read_text(encoding="utf-8"))
         self.assertIn("cardVisual.kpi-delta-card", idx["templates"])
+
+
+class PatternChoicesTests(unittest.TestCase):
+    """Item 14: audit_ids' Pattern choices check warns for older specs and fails new ones; canvas.height option."""
+    LAYOUT = {"pages": {"P1": {"displayName": "Overview"}, "P2": {"displayName": "Detail"}}}
+    GOOD = NL.join(["# Spec", "", "## Pattern choices", "", "| Page | Patterns | Style preset | Reason |",
+                    "| --- | --- | --- | --- |",
+                    "| Overview | range-band, freshness-line | clean | sample months have a usual range |",
+                    "| P2 | none | clean | a plain detail table |", "", "## Fallback register", ""])
+
+    def test_section(self):
+        import datetime, pattern_choices as PC
+        self.assertEqual(PC.check(self.GOOD, self.LAYOUT), ([], []))
+        missing = NL.join(["# Spec", "", "## Fallback register", ""])
+        issues, warns = PC.check(missing, self.LAYOUT, datetime.date(2026, 10, 1))
+        self.assertEqual(issues, [])
+        self.assertIn("before the section existed", warns[0])
+        issues, warns = PC.check(missing, self.LAYOUT, datetime.date(2026, 11, 20))
+        self.assertTrue(issues and not warns)
+        self.assertTrue(PC.check(missing, self.LAYOUT, None)[0], "a spec not committed yet is new")
+        bad = self.GOOD.replace("range-band", "spiral").replace("| P2 | none | clean |", "| P2 | none | neon |")
+        issues = PC.check(bad, self.LAYOUT)[0]
+        self.assertTrue(any("unknown pattern" in x for x in issues))
+        self.assertTrue(any("style preset 'neon'" in x for x in issues))
+        self.assertTrue(any("no row for page P2" in x for x in PC.check(self.GOOD.replace("| P2 |", "| P9 |"),
+                                                                         self.LAYOUT)[0]))
+
+    def test_canvas_height(self):
+        import ref_layout as RL
+        self.assertEqual(RL.canvas_height({"canvas": {"width": 1920}}), 1080)
+        self.assertEqual(RL.canvas_height({"canvas": {"height": 1440}}), 1440)
 
 
 if __name__ == "__main__":

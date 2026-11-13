@@ -32,6 +32,15 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 
 CANVAS_W, CANVAS_H, MARGIN, GUTTER, COLUMNS = 1920, 1080, 32, 24, 12
+
+
+def canvas_height(tokens=None):
+    """tokens.json canvas.height (batch 3 item 14); 1080 stays the default."""
+    try:
+        t = tokens if tokens is not None else json.loads((ROOT / "design" / "tokens.json").read_text(encoding="utf-8"))
+        return int((t.get("canvas") or {}).get("height") or 1080)
+    except (OSError, ValueError, AttributeError):
+        return 1080
 COL = (CANVAS_W - 2 * MARGIN - (COLUMNS - 1) * GUTTER) / COLUMNS
 FONTS_PBI = {"segoe ui", "segoe ui semibold", "segoe ui light", "arial", "arial black", "calibri", "cambria",
              "candara", "consolas", "constantia", "corbel", "courier new", "din", "georgia", "lucida sans unicode",
@@ -463,7 +472,10 @@ def main(argv=None):
     ap.add_argument("refs", nargs="+", help="HTML reference(s) (one page each) or a boxes .json file")
     ap.add_argument("--out", default=str(ROOT / "design" / "specs" / "layout.reference.json"))
     ap.add_argument("--report", default=str(ROOT / "design" / "specs" / "reference-map.md"))
+    ap.add_argument("--canvas-height", type=int, help="page height (default: tokens.json canvas.height, else 1080)")
     a = ap.parse_args(argv)
+    global CANVAS_H
+    CANVAS_H = a.canvas_height or canvas_height()
     sys.stdout.reconfigure(errors="replace")
     pages, width, height = [], None, None
     for r in a.refs:

@@ -28,7 +28,7 @@ build.py (pbik 0.6): what layout.json can't express is a pbik gap (design/known-
 | `theme` | optional: the theme file pbik build registers and applies first (`design/themes/pbip-polish.json`, from gen_theme.py) |
 | `vega` | optional: how the high-fidelity wireframe draws Deneb specs. `"cdn"` (default): Vega-Lite itself, from pinned scripts on cdn.jsdelivr.net loaded when the page opens, with the built-in subset renderer when they don't load; `"offline"`: a page that loads nothing, drawn by the subset renderer. Use `"offline"` at work (docs/it-security.md) |
 | `measureTable` | optional: home table for `[Measure]` when there is no model on disk (pbik finds it in the TMDL otherwise) |
-| `grid` | canvas, margin, columns, gutter (from `tokens.canvas`) |
+| `grid` | canvas, margin, columns, gutter (from `tokens.canvas`); the canvas height is `tokens.canvas.height`, 1080 by default (`ref_layout.py --canvas-height` for one reference) |
 | `retired` | IDs no longer in use, never reused |
 | `panels` | optional: `{"<key>": {"visuals": {"card": "<shape id>", "<role>": "<id>"}}}`; audit_layout checks z-order |
 | `visuals` | one entry per visual, below |

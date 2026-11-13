@@ -10,6 +10,8 @@ Checks (read-only):
 - wireframe (design/wireframes/wireframe.html): each layout ID appears as data-id="<id>"; no unknown data-id;
 - spec (design/specs/spec.md): each layout ID is mentioned; no unknown ID; every non-native ID has a row in the
   "Fallback register" section; a "Design ambition" section covers baseline, normal, exceptions and partial / stale;
+  a "Pattern choices" section names each page's patterns, style preset and reason (pattern_choices.py: a warning
+  for a spec created before the section existed, an issue for a newer one);
 - visual-map.json (written by build.py): the same IDs; an ID whose name changed since the map was written was reused;
 - review.md: every ID it names exists (or is retired).
 Files not created yet (before /plan or /build) are skipped with a note.
@@ -18,7 +20,7 @@ Usage: python design/scripts/audit_ids.py          (exit 1 on any issue)
 import json, pathlib, re, sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import ambition, ladder  # noqa: E402
+import ambition, ladder, pattern_choices  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SPECS = ROOT / "design" / "specs"
@@ -107,6 +109,9 @@ if spec.exists():
         if (v.get("build") or {}).get("method") not in (None, "native", "page-background") and v["id"] not in register:
             issues.append(f"spec: {v['id']} ({v['build']['method']}) has no fallback register row")
     issues.extend(ambition.spec_issues(text))
+    pc_issues, pc_warnings = pattern_choices.check(text, LAY, pattern_choices.created(spec))
+    issues.extend(pc_issues)
+    notes.extend(f"warning: {w}" for w in pc_warnings)
 else:
     notes.append("spec: not written yet")
 
