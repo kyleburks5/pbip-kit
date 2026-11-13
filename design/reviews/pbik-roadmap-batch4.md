@@ -58,3 +58,10 @@ python ..\pbip-kit-export\tools\pbik\pbik.py roundtrip Smoke.Report --before _pb
 ```
 
 Expect no proposals about button `general` paragraphs, matrix `active` or the card's `layout.verticalAlignment`.
+
+## Desktop check results (2026-11-13)
+
+- **Not confirmed in Desktop.** The smoke report's files are byte-identical to `_pbik-built` (nothing newer than the
+  build), so no Desktop save reached them: the roundtrip (`roundtrip.md`) compared identical files and found
+  nothing, and bookmarks.json has no Desktop-made group. Items 2, 4, 6, 7 and 8 still need a Desktop save
+  (checklist steps 1-6) to count as confirmed; "pbik leaves Desktop-made bookmark groups alone" stays unconfirmed.
