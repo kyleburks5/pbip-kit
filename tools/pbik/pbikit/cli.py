@@ -151,6 +151,22 @@ def main(argv=None):
     pcl.add_argument("--root", default=".", help="project folder (default: the current folder)")
     pcl.add_argument("--guard", choices=["dax", "screenshot"], help="exit 2 with the reason when this may not run")
 
+    sy = sub.add_parser("synth", help="synthetic model: contract, approval, slice, generate, verify")
+    sys_ = sy.add_subparsers(dest="sub", required=True)
+    syc = sys_.add_parser("contract", help="contract.json from a TMDL folder or a createOrReplace script")
+    syc.add_argument("source")
+    syc.add_argument("--root", default=".")
+    syc.add_argument("--out")
+    syr = sys_.add_parser("resolve", help="resolve a flag (or --every flag of a kind) and record the rule")
+    syr.add_argument("flag", help="flag ID (F3), or a kind with --every")
+    syr.add_argument("resolution")
+    syr.add_argument("--why")
+    syr.add_argument("--every", action="store_true")
+    syr.add_argument("--root", default=".")
+    sya = sys_.add_parser("approve", help="person-only: approve the contract and its resolutions")
+    sya.add_argument("--by", required=True)
+    sya.add_argument("--root", default=".")
+
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
     ds = dk.add_subparsers(dest="sub", required=True)
@@ -274,6 +290,8 @@ def main(argv=None):
         for x in failed:
             print(f"failed: {x}")
         return 1 if failed else 0
+    elif c == "synth":
+        return synth_cmd(args)
     elif c == "desktop":
         from . import desktop as D
         if args.sub == "state":
@@ -283,6 +301,32 @@ def main(argv=None):
         else:
             D.screenshot(args.page, args.out, args.report, args.region, args.scale, args.bridge)
     return 0
+
+
+def synth_cmd(args):
+    from . import dataclass_ as DC, synth as S
+    try:
+        if args.sub == "contract":
+            c, out = S.contract(args.source, args.root, args.out)
+            print(f"{out}: {len(c['tables'])} table(s), {len(c['relationships'])} relationship(s), "
+                  f"{len(c['flags'])} flag(s)")
+            for f in c["flags"]:
+                print(f"  {f['id']} {f['kind']:10} {f.get('table') or '(model)'}: {f['detail']}"
+                      + (f" -> {f['resolution']} (rule {f.get('rule')})" if f.get("resolution") else ""))
+            return 0
+        if args.sub == "resolve":
+            for f in S.resolve(args.root, args.flag, args.resolution, args.why, args.every):
+                print(f"{f['id']} -> {f['resolution']}")
+            print("Approval cleared: a person runs `pbik synth approve --by <name>`")
+            return 0
+        if args.sub == "approve":
+            S.approve(args.root, args.by)
+            print("Contract approved.")
+            return 0
+        return S.command(args)
+    except (S.ContractError, DC.Refused) as e:
+        print(f"pbik: {e}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

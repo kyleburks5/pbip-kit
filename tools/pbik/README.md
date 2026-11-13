@@ -440,6 +440,16 @@ project.json `dataClass` (default internal). Lowering it is person-only (typed c
 shell). Restricted: while the report is bound live, or with no synthetic model, `desktop screenshot` and
 run-dax.ps1 refuse; `--guard` prints why and exits 2.
 
+### `synth contract <TMDL folder | createOrReplace script> [--root .] [--out]`, `synth resolve`, `synth approve --by`
+
+The contract (design/specs/contract.json): tables, typed columns, sort-by, measures with DAX, relationships, and
+flags: `enter-data`, `m-code`, `connection` (also model parameters), `rls`, `entity` (account, member and similar
+tables). It never copies M code, connection strings, RLS filters or row values. Reads a TMDL folder, a TMDL
+`createOrReplace` script or a TMSL (JSON) script. `synth resolve F3 synthesize --why ...` (or `resolve <kind>
+<resolution> --every`) records a rule (`rules`: kind, table or `*`, resolution, why); a new contract from the same
+model is pre-filled from the rules. `synth approve --by <name>` is person-only: it prints every flag and its
+resolution, asks for the model name typed, and records by, date and a hash; any later change voids it.
+
 ## Python helpers
 
 `pbikit/objects.py` holds the pure-Python builders carried over from the kit's v0.2 helpers (literals,
