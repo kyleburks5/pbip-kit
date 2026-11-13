@@ -456,7 +456,7 @@ tables). It never copies M code, connection strings, RLS filters or row values. 
 <resolution> --every`) records a rule (`rules`: kind, table or `*`, resolution, why); a new contract from the same
 model is pre-filled from the rules. `synth approve --by <name>` is person-only: it prints every flag and its
 resolution, asks for the model name typed, and records by, date and a hash; any later change voids it.
-`keep rows: option labels` (Enter-data flags only, at most 50 rows, never a table marked `entity` or flagged as
+`keep rows: option labels` (Enter-data flags only; a warning above 200 rows, refused above 1000; never a table marked `entity` or flagged as
 entity data) keeps an option or toggle table's exact rows and order: approve prints every kept table's rows and asks
 for `KEEP <n>` (n = rows kept), then stores them in the contract (covered by the approval hash); `synth generate`
 writes them as they are.

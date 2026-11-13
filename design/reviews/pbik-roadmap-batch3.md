@@ -37,7 +37,7 @@ Blocked: none.
 
 - Person-only steps (`synth approve`, `bind map approve`, `bind live`, `model approve`, lowering the data class,
   `bind local --restore-backup`) refuse when stdin isn't a terminal or `CLAUDECODE` is set: an agent can't run them.
-- `KEEP <n>`: n is the number of rows kept (all kept tables together). Option tables: at most 50 rows.
+- `KEEP <n>`: n is the number of rows kept (all kept tables together). Option tables: a warning above 200 rows, refused above 1000 (raised from 50 on 2026-11-13).
 - Stale references fail `bind check` (exit 1) like map errors, but are listed apart.
 - Headers keep synthetic labels by adding `displayName` where bind live renames a field; `bind local` removes them.
 - Packs refuse any git repository unless `--allow-repo` (never the kit's or the project's own); `register` writes a

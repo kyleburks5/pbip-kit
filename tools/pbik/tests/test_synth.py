@@ -241,6 +241,23 @@ class KeepRowsTests(Tmp):
         with self.assertRaises(S.ContractError):
             G.generate(self.root, "Kept")
 
+    def test_row_cap_warns_above_200_and_refuses_above_1000(self):
+        cf = self.root / "design/specs/contract.json"
+        c = S.read_json(cf)
+        f = next(x for x in c["flags"] if x["id"] == self.flag)
+        for rows, allowed in ((200, True), (201, True), (1000, True), (1001, False)):
+            f["rows"] = rows
+            self.assertEqual(S.KEEP_ROWS in S.allowed_resolutions(c, f), allowed, rows)
+        f["rows"] = 350
+        S.write_json(cf, c)
+        said = []
+        S.resolve(self.root, self.flag, S.KEEP_ROWS, out=said.append)
+        self.assertTrue(any("over 200" in x for x in said))
+        f["rows"] = 1001
+        S.write_json(cf, c)
+        with self.assertRaises(S.ContractError):
+            S.resolve(self.root, self.flag, S.KEEP_ROWS, out=said.append)
+
     def test_never_for_entity_or_other_flags(self):
         cf = self.root / "design/specs/contract.json"
         with self.assertRaises(S.ContractError):

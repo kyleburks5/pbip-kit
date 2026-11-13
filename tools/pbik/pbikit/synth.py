@@ -226,7 +226,7 @@ def contract(source, root=".", out=None):
     return c, out
 
 
-def resolve(root, target, resolution, why=None, every=False, cfile=None):
+def resolve(root, target, resolution, why=None, every=False, cfile=None, out=print):
     """Resolve a flag (by ID) or every flag of a kind; record the rule behind it."""
     cfile = pathlib.Path(cfile) if cfile else specs(root) / "contract.json"
     c = read_json(cfile)
@@ -245,13 +245,17 @@ def resolve(root, target, resolution, why=None, every=False, cfile=None):
                                       "why": why or ""})
     for f in hits:
         f["resolution"], f["rule"] = resolution, rid
+        if resolution == KEEP_ROWS and f.get("rows", 0) > OPTION_WARN_ROWS:
+            out(f"warning: {f['table']} has {f['rows']} rows (over {OPTION_WARN_ROWS}); keeping them is allowed up to "
+                f"{OPTION_MAX_ROWS}, but is it really an option table?")
     c["approval"] = None
     write_json(cfile, c)
     return hits
 
 
 KEEP_ROWS = "keep rows: option labels"
-OPTION_MAX_ROWS = 50
+OPTION_WARN_ROWS = 200                   # kept rows: a warning above this
+OPTION_MAX_ROWS = 1000                   # and refused above this
 
 
 def is_entity(c, table):
@@ -339,6 +343,9 @@ def approve_hooks(c, root, ask, out):
         if KEEP_ROWS not in allowed_resolutions(c, f):
             raise ContractError(f"{f['table']}: rows can't be kept (entity data, or more than {OPTION_MAX_ROWS} rows)")
         found[f["table"]] = kept_rows(c, root, f["table"])
+        if len(found[f["table"]]["rows"]) > OPTION_WARN_ROWS:
+            out(f"warning: {f['table']} keeps {len(found[f['table']]['rows'])} rows (over {OPTION_WARN_ROWS}): is it "
+                "really an option table? Read every row before typing KEEP")
     n = sum(len(x["rows"]) for x in found.values())
     for t, x in found.items():
         out(f"Kept rows of {t} ({', '.join(x['columns'])}), in this order:")
