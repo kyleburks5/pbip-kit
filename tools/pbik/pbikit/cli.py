@@ -125,6 +125,15 @@ def main(argv=None):
     mc = mo.add_parser("check", help="TMDL checks: descriptions, format strings, references, relationships")
     mc.add_argument("model")
     mc.add_argument("--folder", help="only measures in this display folder (e.g. Model)")
+    mr = mo.add_parser("register", help="save the approved contract, synthetic model and bind map as a model pack")
+    mr.add_argument("project")
+    mr.add_argument("--to", required=True, help="the packs folder (outside the kit and any git repository)")
+    md = mo.add_parser("drift", help="what changed between a pack and a new TMDL (resolutions pre-filled)")
+    md.add_argument("pack")
+    md.add_argument("tmdl")
+    mp = mo.add_parser("approve", help="person-only: approve the drift, regenerate affected tables, bump the version")
+    mp.add_argument("pack")
+    mp.add_argument("--by", required=True)
 
     sc = sub.add_parser("schemas", help="schema cache").add_subparsers(dest="sub", required=True)
     sf = sc.add_parser("fetch", help="download the $schema files a report declares into tools/pbik/schemas/")
@@ -149,6 +158,9 @@ def main(argv=None):
     pc.add_argument("--project", default=str(versions_default()))
     pc.add_argument("--version", help="Desktop version (default: detected from the installed Desktop)")
 
+    pnw = pjs.add_parser("new", help="start a project at the plan step from a model pack")
+    pnw.add_argument("folder", nargs="?", default=".")
+    pnw.add_argument("--from-pack", required=True, help="the pack folder (<packs>/<model>)")
     pcl = pjs.add_parser("class", help="data class: public, internal (default) or restricted (synthetic model only)")
     pcl.add_argument("value", nargs="?", choices=["public", "internal", "restricted"])
     pcl.add_argument("--root", default=".", help="project folder (default: the current folder)")
@@ -276,11 +288,31 @@ def main(argv=None):
     elif c == "info":
         from .info import info
         info(args.report, args.json)
+    elif c == "model" and args.sub in ("register", "drift", "approve"):
+        from . import dataclass_ as DC, packs as PK, synth as S
+        try:
+            if args.sub == "register":
+                PK.register(args.project, args.to, pathlib.Path(__file__).resolve().parents[3])
+            elif args.sub == "drift":
+                PK.drift(args.pack, args.tmdl)
+            else:
+                PK.approve(args.pack, args.by)
+        except (PK.PackError, S.ContractError, DC.Refused) as e:
+            print(f"pbik: {e}", file=sys.stderr)
+            return 2
     elif c == "model":
         from .modelcheck import check
         return 1 if check(args.model, args.folder) else 0
     elif c == "project":
         from . import versions as V
+        if args.sub == "new":
+            from . import packs as PK
+            try:
+                PK.project_new(args.folder, args.from_pack)
+            except PK.PackError as e:
+                print(f"pbik: {e}", file=sys.stderr)
+                return 2
+            return 0
         if args.sub == "class":
             from . import dataclass_ as DC
             if args.guard:

@@ -517,6 +517,18 @@ smoke report opens on one.
 - `map approve --by`: person-only; reruns the check through the map, prints it, asks for the contract's model name
   typed. `bind live` refuses a map that isn't approved or changed since.
 
+### `model register <project> --to <packs>`, `project new [folder] --from-pack <pack>`, `model drift`, `model approve`
+
+Model packs reuse an approved contract (resolutions and the rules behind them), generate.json (settings and
+deviations), the synthetic model and any bind map across projects: `<packs>/<model>/pack.json` (versions with date
+and approver, the project's data class) and `v<N>/`. `register` refuses a folder inside the kit, the project or their
+git repository and writes a `.gitignore` of `*`: packs are never committed. `project new` copies the current version
+into a folder (refuses one that has a contract), sets project.json `dataClass` and `pack`, and the project starts at
+/plan. `drift <pack> <new TMDL>` writes `drift.json` and lists only what changed (tables, columns and types, measures,
+relationships, new flags pre-filled from the saved rules). `approve <pack> --by` (person-only, types the model name)
+approves the list, writes `v<N+1>` and regenerates only the affected tables (changed ones and the tables that draw
+keys from them); the other table files are copied byte for byte.
+
 ### KPI cards (`pbik validate`, lesson C-10)
 
 A KPI card (a cardVisual whose folder or layout name says `kpi`, layout `kpi: true`, or a `kpi` template) is its

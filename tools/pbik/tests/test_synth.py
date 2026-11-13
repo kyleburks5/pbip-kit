@@ -282,6 +282,87 @@ class ShapeHintTests(Tmp):
             G.month_weights({}, {"seasonality": [1, 2]})
 
 
+class PackTests(Tmp):
+    """Item 15: register, project new, drift and approve (only the affected tables regenerated)."""
+
+    def setUp(self):
+        super().setUp()
+        approved_project(self.root)
+        S.slice_(self.root, LAYOUT)
+        self.model = G.generate(self.root, "Example Synthetic")
+        DC.set_class(self.root, "restricted")
+        self.packs = pathlib.Path(tempfile.mkdtemp(prefix="pbik_packs_"))
+        self.quiet = lambda *a: None
+
+    def tearDown(self):
+        super().tearDown()
+        shutil.rmtree(self.packs, ignore_errors=True)
+
+    def test_register_and_new_project(self):
+        from pbikit import packs as PK
+        with self.assertRaises(PK.PackError):
+            PK.register(self.root, self.root / "packs", out=self.quiet)          # inside the project
+        with self.assertRaises(PK.PackError):
+            PK.register(self.root, KIT / "packs-here", KIT, out=self.quiet)      # inside the kit
+        with self.assertRaises(PK.PackError):                                     # in the kit's git repository
+            PK._outside(KIT / "tools" / "x", self.root, KIT / "design")
+        pack, v = PK.register(self.root, self.packs, out=self.quiet)
+        self.assertEqual(v, 1)
+        info = S.read_json(pack / "pack.json")
+        self.assertEqual((info["dataClass"], info["versions"][0]["approver"]), ("restricted", "Sample Person"))
+        self.assertEqual((self.packs / ".gitignore").read_text(encoding="utf-8"), "*\n")
+        self.assertTrue((pack / "v1" / "model" / "Example Synthetic.SemanticModel").is_dir())
+        c = S.read_json(pack / "v1" / "contract.json")
+        self.assertTrue(c["rules"] and all(f["resolution"] for f in c["flags"]), "resolutions and their rules")
+        new = pathlib.Path(tempfile.mkdtemp(prefix="pbik_new_"))
+        try:
+            PK.project_new(new, pack, out=self.quiet)
+            self.assertEqual(DC.data_class(new), "restricted")
+            self.assertTrue(S.approved(S.read_json(new / "design/specs/contract.json")))
+            self.assertTrue(DC.is_synthetic(new / "Example Synthetic.SemanticModel"))
+            self.assertEqual(G.verify(new, new / "Example Synthetic.SemanticModel")[0], [])
+            with self.assertRaises(PK.PackError):
+                PK.project_new(new, pack, out=self.quiet)
+        finally:
+            shutil.rmtree(new, ignore_errors=True)
+
+    def test_drift_and_approve(self):
+        from pbikit import packs as PK
+        pack, _ = PK.register(self.root, self.packs, out=self.quiet)
+        v1 = pack / "v1" / "model" / "Example Synthetic.SemanticModel" / "definition" / "tables"
+        changed = self.packs / "changed.SemanticModel"
+        shutil.copytree(LIVE, changed)
+        t = changed / "definition" / "tables"
+        (t / "Orders.tmdl").write_text((t / "Orders.tmdl").read_text(encoding="utf-8").replace(
+            "column Units\n\t\tdataType: int64", "column Units\n\t\tdataType: double"), encoding="utf-8")
+        (t / "Area.tmdl").write_text((t / "Area.tmdl").read_text(encoding="utf-8").replace(
+            "\tcolumn Region\n", "\tcolumn Zone\n\t\tdataType: string\n\t\tsourceColumn: Zone\n\n\tcolumn Region\n"),
+            encoding="utf-8")
+        (t / "Extra Choice.tmdl").write_text((t / "Unused Table.tmdl").read_text(encoding="utf-8").replace(
+            "'Unused Table'", "'Extra Choice'"), encoding="utf-8")
+        said = []
+        d = PK.drift(pack, changed, out=said.append)
+        whats = sorted((x["change"], x["what"]) for x in d["changes"])
+        self.assertEqual(whats, sorted([("changed", "Orders[Units]"), ("added", "Area[Zone]"),
+                                        ("added", "Extra Choice"), ("added", "Extra Choice[Note]")]))
+        new_flag = next(f for f in d["contract"]["flags"] if f["table"] == "Extra Choice")
+        self.assertEqual(new_flag["resolution"], "synthesize", "pre-filled from the saved enter-data rule")
+        self.assertIn(new_flag["id"], d["prefilled"])
+        with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}), self.assertRaises(DC.Refused):
+            PK.approve(pack, "Sample Person", out=self.quiet)
+        v, affected = PK.approve(pack, "Sample Person", ask=say("Example Live"), out=self.quiet)
+        self.assertEqual(v, 2)
+        self.assertEqual(affected, ["Area", "Orders"])
+        v2 = pack / "v2" / "model" / "Example Synthetic.SemanticModel" / "definition" / "tables"
+        for name in ("Calendar.tmdl", "_Measures.tmdl", "Plan Option.tmdl"):
+            self.assertEqual((v1 / name).read_bytes(), (v2 / name).read_bytes(), f"{name} not regenerated")
+        self.assertIn("dataType: double", (v2 / "Orders.tmdl").read_text(encoding="utf-8"))
+        info = S.read_json(pack / "pack.json")
+        self.assertEqual((info["current"], info["versions"][-1]["regenerated"]), (2, ["Area", "Orders"]))
+        self.assertFalse((pack / "drift.json").exists())
+        self.assertTrue(S.approved(S.read_json(pack / "v2" / "contract.json")))
+
+
 def c_measures(root):
     return S.read_json(root / "design/specs/contract.json")["tables"]["_Measures"]["measures"]
 
