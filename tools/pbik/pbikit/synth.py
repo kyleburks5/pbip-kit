@@ -178,6 +178,7 @@ def build_contract(source, root=None):
             continue                                   # a measures-only table: nothing to synthesize
         if rows is not None:
             flag("enter-data", t.name, f"{len(rows)} row(s) typed into the model (Enter data)")
+            flags[-1]["rows"] = len(rows)
         elif kind == "m":
             used = sorted(set(m.group(1) for m in CONNECTORS.finditer(srcx)))
             flag("m-code", t.name, "Power Query source" + (f" ({', '.join(used)})" if used else ""))
@@ -248,8 +249,21 @@ def resolve(root, target, resolution, why=None, every=False, cfile=None):
     return hits
 
 
+KEEP_ROWS = "keep rows: option labels"
+OPTION_MAX_ROWS = 50
+
+
+def is_entity(c, table):
+    t = N.find(c["tables"], table or "")
+    return bool(t and c["tables"][t].get("entity")) or any(
+        f["kind"] == "entity" and N.same(f.get("table"), table) for f in c["flags"])
+
+
 def allowed_resolutions(c, f):
-    return list(RESOLUTIONS.get(f["kind"], []))
+    out = list(RESOLUTIONS.get(f["kind"], []))
+    if f["kind"] == "enter-data" and not is_entity(c, f.get("table")) and f.get("rows", 0) <= OPTION_MAX_ROWS:
+        out.append(KEEP_ROWS)                    # small option / toggle tables only, never entity data
+    return out
 
 
 def approved(c):
@@ -281,10 +295,60 @@ def approve(root, by, ask=None, cfile=None, out=print):
     return c
 
 
+def type_header(source):
+    """Column names of an Enter-data partition, in order (its `type table [#"A" = _t, ...]`)."""
+    m = re.search(r"type table \[(.*?)\]\s*\)?\s*$", source or "", re.S)
+    return [x.strip().strip('#"') for x in re.findall(r'(#"[^"]+"|\w+)\s*=', m.group(1))] if m else None
+
+
+def kept_rows(c, root, table):
+    """{columns, rows} of an Enter-data table, read again from the contract's source, typed per the contract."""
+    model = read_model(pathlib.Path(root) / c["source"] if not pathlib.Path(c["source"]).is_absolute()
+                       else c["source"])[0]
+    t = N.find(model.tables, table)
+    src = model.tables[t].partitions[0][1] if t and model.tables[t].partitions else ""
+    rows = decode_enter_data(src)
+    if rows is None:
+        raise ContractError(f"{table}: no Enter-data rows found in {c['source']}")
+    cols = type_header(src) or list(c["tables"][table]["columns"])
+    types = {k: v["type"] for k, v in c["tables"][table]["columns"].items()}
+
+    def typed(v, col):
+        typ = types.get(col)
+        if v is None or typ not in ("int64", "double", "decimal"):
+            return v
+        try:
+            return int(v) if typ == "int64" else float(v)
+        except ValueError:
+            return v
+    return {"columns": cols, "rows": [[typed(v, cols[i]) for i, v in enumerate(r)] for r in rows]}
+
+
 def approve_hooks(c, root, ask, out):
-    """Extra person checks at approval (option-table rows, batch 3 item 7). Returns callables run after the main
-    confirmation."""
-    return []
+    """Option-table rows (resolution "keep rows: option labels"): print every kept table's rows and ask for
+    "KEEP <n>" (n = rows kept). Returns callables run after the main confirmation."""
+    keep = [f for f in c["flags"] if f.get("resolution") == KEEP_ROWS]
+    for t in list(c["tables"]):
+        if c["tables"][t].pop("rows", None) is not None and not any(N.same(f["table"], t) for f in keep):
+            pass                                  # rows no longer kept: dropped
+    if not keep:
+        return []
+    found = {}
+    for f in keep:
+        if KEEP_ROWS not in allowed_resolutions(c, f):
+            raise ContractError(f"{f['table']}: rows can't be kept (entity data, or more than {OPTION_MAX_ROWS} rows)")
+        found[f["table"]] = kept_rows(c, root, f["table"])
+    n = sum(len(x["rows"]) for x in found.values())
+    for t, x in found.items():
+        out(f"Kept rows of {t} ({', '.join(x['columns'])}), in this order:")
+        for r in x["rows"]:
+            out("    " + " | ".join(str(v) for v in r))
+
+    def keep_them():
+        DC.confirm(f"These {n} row(s) go into the synthetic model as they are.", f"KEEP {n}", ask)
+        for t, x in found.items():
+            c["tables"][t]["rows"] = x
+    return [keep_them]
 
 
 # ---------------------------------------------------------------- the slice

@@ -202,6 +202,53 @@ class GenerateTests(Tmp):
             G.generate(self.root, "X")
 
 
+class KeepRowsTests(Tmp):
+    """Item 7: an option table keeps its exact rows and order when the contract marks it and a person types KEEP n."""
+
+    def setUp(self):
+        super().setUp()
+        S.contract(LIVE, self.root)
+        resolve_all(self.root)
+        self.flag = next(f["id"] for f in S.read_json(self.root / "design/specs/contract.json")["flags"]
+                         if f["kind"] == "enter-data" and f["table"] == "Plan Option")
+
+    def test_keep_rows_needs_the_mark_and_a_typed_keep(self):
+        S.resolve(self.root, self.flag, S.KEEP_ROWS, why="option labels drive the slicer")
+        said = []
+        with self.assertRaises(DC.Refused):
+            S.approve(self.root, "Sample Person", ask=say("Example Live", "KEEP 2"), out=said.append)
+        self.assertIn("    Show all | 1", said, "approve prints the rows it keeps")
+        self.assertFalse(S.approved(S.read_json(self.root / "design/specs/contract.json")))
+        c = S.approve(self.root, "Sample Person", ask=say("Example Live", "KEEP 3"), out=lambda *a: None)
+        self.assertEqual(c["tables"]["Plan Option"]["rows"],
+                         {"columns": ["Option Label", "Option Order"],
+                          "rows": [["Show all", 1], ["Top ten", 2], ["Bottom ten", 3]]})
+        S.write_json(self.root / "design/specs/generate.json", {"seed": 3, "hints": {}, "plannedMeasures": PLANNED})
+        S.slice_(self.root, LAYOUT)
+        f = G.generate(self.root, "Kept")
+        src = (f / "definition/tables/Plan Option.tmdl").read_text(encoding="utf-8")
+        self.assertLess(src.index('"Show all"'), src.index('"Top ten"'))
+        self.assertLess(src.index('"Top ten"'), src.index('"Bottom ten"'))
+        # rows edited after the person's KEEP void the approval
+        c["tables"]["Plan Option"]["rows"]["rows"][0][0] = "Edited"
+        S.write_json(self.root / "design/specs/contract.json", c)
+        with self.assertRaises(S.ContractError):
+            G.generate(self.root, "Kept")
+
+    def test_never_for_entity_or_other_flags(self):
+        cf = self.root / "design/specs/contract.json"
+        with self.assertRaises(S.ContractError):
+            S.resolve(self.root, "m-code", S.KEEP_ROWS, every=True)
+        c = S.read_json(cf)
+        c["tables"]["Plan Option"]["entity"] = True
+        S.write_json(cf, c)
+        with self.assertRaises(S.ContractError):
+            S.resolve(self.root, self.flag, S.KEEP_ROWS)
+        c["tables"]["Plan Option"]["rows"] = {"columns": ["Option Label"], "rows": [["x"]]}
+        with self.assertRaises(S.ContractError):
+            G.check_kept_rows(c, {"slice": {"Plan Option": {}}})
+
+
 def c_measures(root):
     return S.read_json(root / "design/specs/contract.json")["tables"]["_Measures"]["measures"]
 

@@ -215,10 +215,15 @@ def write_text(f, text):
 
 
 def check_kept_rows(c, g):
-    """Item 7 allows kept option-table rows; until then a contract with kept rows can't generate."""
+    """Kept rows need the flag's resolution "keep rows: option labels", a person's KEEP at approval (the approval
+    hash covers them) and a table that isn't entity data."""
+    from .synth import KEEP_ROWS, is_entity
     for t, e in c["tables"].items():
-        if e.get("rows") and t in g["slice"]:
-            raise ContractError(f"{t}: kept rows are not supported")
+        if not e.get("rows"):
+            continue
+        marked = any(f.get("resolution") == KEEP_ROWS and N.same(f.get("table"), t) for f in c["flags"])
+        if not marked or is_entity(c, t):
+            raise ContractError(f"{t}: kept rows without a 'keep rows: option labels' resolution, or entity data")
 
 
 def generate(root, name, out_folder=None):
