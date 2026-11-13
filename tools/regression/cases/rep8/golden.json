@@ -360,6 +360,19 @@
       }
      }
     }
+   ],
+   "displayArea": [
+    {
+     "properties": {
+      "verticalAlignment": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      }
+     }
+    }
    ]
   },
   "visualInteractions": [
@@ -8388,6 +8401,19 @@
        "expr": {
         "Literal": {
          "Value": "0D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "displayArea": [
+    {
+     "properties": {
+      "verticalAlignment": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
         }
        }
       }
@@ -16444,6 +16470,19 @@
        "expr": {
         "Literal": {
          "Value": "0D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "displayArea": [
+    {
+     "properties": {
+      "verticalAlignment": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
         }
        }
       }
@@ -31295,6 +31334,30 @@
      "layout",
      null,
      "alignment"
+    ]
+   ],
+   "page:P1": [
+    [
+     "page",
+     "displayArea",
+     null,
+     "verticalAlignment"
+    ]
+   ],
+   "page:P2": [
+    [
+     "page",
+     "displayArea",
+     null,
+     "verticalAlignment"
+    ]
+   ],
+   "page:P3": [
+    [
+     "page",
+     "displayArea",
+     null,
+     "verticalAlignment"
     ]
    ]
   },

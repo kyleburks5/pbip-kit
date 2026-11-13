@@ -133,6 +133,32 @@ def header_on(page, visuals):
     return out
 
 
+def is_header(folder, layout_entry=None):
+    if layout_entry and layout_entry.get("header") is not None:
+        return bool(layout_entry["header"])
+    name = folder.split("_", 1)[-1].lower()
+    return name in ("header", "header-band", "page-header") or name.startswith("header-band")
+
+
+def header_band(page, visuals, page_w, layout=None):
+    """Batch 4 item 4: the header container sits at y 0, x 0, the full page width, with padding 0."""
+    out = []
+    lay = {v.get("id"): v for v in (layout or {}).get("visuals", [])}
+    for f, d in visuals:
+        if not is_header(f, lay.get(f.split("_", 1)[0])):
+            continue
+        x, y, w, h, _ = box(d)
+        if not (near(x, 0) and near(y, 0) and near(w, page_w)):
+            out.append(f"{page}/{f}: the header sits at x {x:g}, y {y:g}, width {w:g}; it belongs at 0, 0, full page "
+                       f"width {page_w:g}")
+        vco = (d.get("visual") or {}).get("visualContainerObjects", {})
+        pads = {k: _lit(vco, "padding", k) for k in ("top", "bottom", "left", "right")}
+        bad = {k: v for k, v in pads.items() if v is not None and float(str(v).rstrip("DL")) != 0}
+        if bad:
+            out.append(f"{page}/{f}: header padding {bad}; it belongs at 0")
+    return out
+
+
 def check(fd, rep, pages, layout=None, margin=None):
     """pbik validate: KPI card layout warnings, and background shapes' layer order, on every page."""
     if margin is None:
@@ -145,6 +171,8 @@ def check(fd, rep, pages, layout=None, margin=None):
             fd.warn("layers", w)
         for w in header_on(pd.get("displayName", name), vis):
             fd.warn("visual header", w)
+        for w in header_band(pd.get("displayName", name), vis, pd.get("width", 1920), layout):
+            fd.warn("header band", w)
 
 
 # ---------------------------------------------------------------- the screenshot check

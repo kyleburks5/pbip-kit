@@ -1251,7 +1251,10 @@ def apply_page_props(ctx, key, spec, d):
     each checked against the cached page schema (#PageFormattingObjects, closed per object). The page's own keys
     (background, filterPane, filterCards) stay the way to set those."""
     owner = f"page:{key}"
-    for k, val in (spec.get("props") or {}).items():
+    props = dict(spec.get("props") or {})
+    if not any(k.split("@")[0] == "displayArea.verticalAlignment" for k in props):
+        props["displayArea.verticalAlignment"] = "Top"   # batch 4 item 4: content starts at the top by default
+    for k, val in props.items():
         path, _, sel = k.partition("@")
         obj, _, prop = path.partition(".")
         if not prop:

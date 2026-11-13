@@ -2967,6 +2967,16 @@ class PbikTests(unittest.TestCase):
         self.assertNotIn("visual has no ID", pbik("validate", rep, ok=(0, 1)).stdout)
 
 
+    def test_146_pages_align_top_by_default(self):
+        """Batch 4 item 4: pages pbik builds get displayArea verticalAlignment Top unless the layout says otherwise."""
+        work, rep, lf = self._batch1("b146", lambda lay: lay["pages"]["P2"].update(
+            props={"displayArea.verticalAlignment": "Middle"}))
+        pbik("build", rep, lf)
+        va = {p[1]["displayName"]: p[1]["objects"]["displayArea"][0]["properties"]["verticalAlignment"]["expr"][
+            "Literal"]["Value"] for p in Report(rep).pages() if "displayArea" in p[1].get("objects", {})}
+        self.assertEqual(sorted(va.values()), ["'Middle'", "'Top'"])
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""
     CHANGELOG = ("# Visual Container Versions\n\n### 2.13.0\n\n<b>Released in: </b> September 2026 <br />\n"

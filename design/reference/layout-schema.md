@@ -44,6 +44,7 @@ build.py (pbik 0.6): what layout.json can't express is a pbik gap (design/known-
 | `bindings` entries can be `{"field": ..., "active": false}` (e.g. a matrix's saved second row level, as Desktop saved it) | |
 | `bindings`, `sort`, `filters` (columns: values or Top N; measures: `{field, op, value}`, visuals only), `referenceLines`, `action`, `container`, `text`, `cf`, `props`, `selection`, `template`, `navigator` |
 | `container.altText` | required on every data visual (bindings, not a slicer) and every image: one sentence on what it shows; /plan writes it, gen_wireframe_hf.py and `pbik validate` flag a missing one | what `pbik build` writes (tools/pbik/README.md) |
+| `header` | optional `true`: the page's header container (also a visual named `header-band` or `page-header`); `pbik validate` warns unless it sits at x 0, y 0, the full page width, padding 0. Pages pbik builds align their content Top (`displayArea.verticalAlignment`) unless page `props` say otherwise |
 | `members`, `displayName`, `mode` | groups (`type: "group"`): the member IDs (visuals or groups on the same page), the name in the Selection pane, `ScaleMode` (default); `x`/`y`/`w`/`h` optional (default: the members' box). Members keep page coordinates here; pbik writes them relative to the group |
 | `items` | button slicers: the item count or the list of labels, for `pbik validate`'s fit check when Desktop isn't open (`--port auto` reads them from the model) |
 | `style` | token names (`"fill": "card"`, `"transparency": "glass.panel"`, `"outline": "border"`, `"shadow": true`) |

@@ -366,6 +366,19 @@
       }
      }
     }
+   ],
+   "displayArea": [
+    {
+     "properties": {
+      "verticalAlignment": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      }
+     }
+    }
    ]
   },
   "visualInteractions": [
@@ -13887,6 +13900,14 @@
      "shape",
      "{\"id\": \"default\"}",
      "rectangleRoundedCurve"
+    ]
+   ],
+   "page:P2": [
+    [
+     "page",
+     "displayArea",
+     null,
+     "verticalAlignment"
     ]
    ]
   },

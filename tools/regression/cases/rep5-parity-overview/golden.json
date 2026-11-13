@@ -400,6 +400,19 @@
       }
      }
     }
+   ],
+   "displayArea": [
+    {
+     "properties": {
+      "verticalAlignment": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      }
+     }
+    }
    ]
   },
   "visualInteractions": [
@@ -21337,6 +21350,14 @@
      "background",
      null,
      "show"
+    ]
+   ],
+   "page:P1": [
+    [
+     "page",
+     "displayArea",
+     null,
+     "verticalAlignment"
     ]
    ]
   },

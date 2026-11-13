@@ -146,6 +146,23 @@ class VisualHeaderTests(unittest.TestCase):
         self.assertIn("P1-V01_chart", warns[0])
 
 
+class HeaderBandTests(unittest.TestCase):
+    """Batch 4 item 4: a header sits at 0, 0, full page width, padding 0."""
+
+    def test_header_band(self):
+        good = other("P1-V01_header-band", "shape", 0, 0, 1920, 120)
+        self.assertEqual(KC.header_band("Overview", [good], 1920), [])
+        off = other("P1-V01_header-band", "shape", 32, 16, 1856, 120)
+        self.assertEqual(len(KC.header_band("Overview", [off], 1920)), 1)
+        padded = other("P1-V01_page-header", "shape", 0, 0, 1920, 120)
+        padded[1]["visual"]["visualContainerObjects"] = {"padding": [{"properties": {"top": {"expr": {"Literal": {
+            "Value": "8D"}}}}}]}
+        self.assertIn("padding", KC.header_band("Overview", [padded], 1920)[0])
+        flagged = other("P1-V02_title", "textbox", 32, 16, 900, 60)
+        self.assertEqual(KC.header_band("Overview", [flagged], 1920), [], "not a header")
+        self.assertTrue(KC.header_band("Overview", [flagged], 1920, {"visuals": [{"id": "P1-V02", "header": True}]}))
+
+
 class PatternChoicesTests(unittest.TestCase):
     """Item 14: audit_ids' Pattern choices check warns for older specs and fails new ones; canvas.height option."""
     LAYOUT = {"pages": {"P1": {"displayName": "Overview"}, "P2": {"displayName": "Detail"}}}
