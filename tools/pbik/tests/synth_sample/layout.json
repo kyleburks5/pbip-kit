@@ -1,0 +1,16 @@
+{
+  "grid": {"canvas": [1920, 1080], "margin": 32, "columns": 12, "gutter": 24},
+  "pages": {"P1": {"displayName": "Sample", "active": true}},
+  "visuals": [
+    {"id": "P1-V01", "name": "amount-card", "page": "P1", "type": "cardVisual", "x": 32, "y": 32, "w": 444, "h": 160,
+     "bindings": {"Data": ["[Total Amount]"]}},
+    {"id": "P1-V02", "name": "share-card", "page": "P1", "type": "cardVisual", "x": 500, "y": 32, "w": 444, "h": 160,
+     "bindings": {"Data": ["[Amount Share]"]}},
+    {"id": "P1-V03", "name": "amount-by-month", "page": "P1", "type": "lineChart", "x": 32, "y": 216, "w": 912, "h": 400,
+     "bindings": {"Category": ["Calendar[Month]"], "Y": ["[Total Amount]", "[Amount LY]"]}},
+    {"id": "P1-V04", "name": "amount-by-area", "page": "P1", "type": "barChart", "x": 968, "y": 216, "w": 920, "h": 400,
+     "bindings": {"Category": ["Area[Area Name]"], "Y": ["[Avg Amount]"]}},
+    {"id": "P1-V05", "name": "option-slicer", "page": "P1", "type": "advancedSlicerVisual", "x": 32, "y": 640, "w": 444,
+     "h": 80, "bindings": {"Values": ["'Plan Option'[Option Label]"]}}
+  ]
+}

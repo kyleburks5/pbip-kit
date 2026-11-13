@@ -166,6 +166,15 @@ def main(argv=None):
     sya = sys_.add_parser("approve", help="person-only: approve the contract and its resolutions")
     sya.add_argument("--by", required=True)
     sya.add_argument("--root", default=".")
+    sysl = sys_.add_parser("slice", help="generate.json slice: the fields layout.json and planned measures need")
+    sysl.add_argument("layout")
+    sysl.add_argument("--root", default=".")
+    syg = sys_.add_parser("generate", help="write <name>.SemanticModel (inline DATATABLEs) from the approved contract")
+    syg.add_argument("name")
+    syg.add_argument("--root", default=".")
+    syv = sys_.add_parser("verify", help="the synthetic model against the contract slice")
+    syv.add_argument("model")
+    syv.add_argument("--root", default=".")
 
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
@@ -323,7 +332,25 @@ def synth_cmd(args):
             S.approve(args.root, args.by)
             print("Contract approved.")
             return 0
-        return S.command(args)
+        from . import synthgen as G
+        if args.sub == "slice":
+            g, missing = S.slice_(args.root, args.layout)
+            print(f"generate.json slice: {len(g['slice'])} table(s), "
+                  f"{sum(len(e['columns']) for e in g['slice'].values())} column(s), "
+                  f"{sum(len(e['measures']) for e in g['slice'].values())} measure(s)")
+            for x in missing:
+                print(f"  not in the contract or plannedMeasures: {x}")
+            return 1 if missing else 0
+        if args.sub == "generate":
+            print(f"wrote {G.generate(args.root, args.name)}")
+            return 0
+        errs, notes = G.verify(args.root, args.model)
+        for x in notes:
+            print(f"note  {x}")
+        for x in errs:
+            print(f"error {x}")
+        print(f"{len(errs)} error(s), {len(notes)} note(s)")
+        return 1 if errs else 0
     except (S.ContractError, DC.Refused) as e:
         print(f"pbik: {e}", file=sys.stderr)
         return 2

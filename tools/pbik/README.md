@@ -450,6 +450,18 @@ tables). It never copies M code, connection strings, RLS filters or row values. 
 model is pre-filled from the rules. `synth approve --by <name>` is person-only: it prints every flag and its
 resolution, asks for the model name typed, and records by, date and a hash; any later change voids it.
 
+### `synth slice <layout.json>`, `synth generate <Name>`, `synth verify <Name>.SemanticModel`
+
+`slice` (approved contract only) writes generate.json `slice`: every field layout.json names, the measures they need
+(DAX references, followed), relationship keys between kept tables and sort-by columns; `plannedMeasures`
+(`{name: {table, expression, formatString}}`) are measures the pages need that the live model doesn't have yet.
+Names used that are in neither are listed (exit 1). `generate` writes `<Name>.SemanticModel`: every table a
+calculated table with an inline DATATABLE, values from `seed` (same seed, same files), dimension keys unique, fact keys
+drawn from them, a date key covering `dateRange`, hints per table (`rows`, `fact`); `model.tmdl` carries
+`annotation PBIK_Synthetic`, planned measures `PBIK_Planned`. `verify` compares it with the contract slice (types,
+DAX, relationships); a type change listed in generate.json `deviations` is a note. UNVERIFIED in Desktop until the
+smoke report opens on one.
+
 ## Python helpers
 
 `pbikit/objects.py` holds the pure-Python builders carried over from the kit's v0.2 helpers (literals,

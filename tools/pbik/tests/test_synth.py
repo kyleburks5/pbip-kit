@@ -4,7 +4,7 @@
 
 The sample model (tests/synth_sample/Example Live.SemanticModel) is invented: no real names, IDs, values or colours.
 """
-import json, os, pathlib, shutil, sys, tempfile, unittest
+import json, os, pathlib, re, shutil, sys, tempfile, unittest
 from unittest import mock
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -13,7 +13,10 @@ SAMPLE = HERE / "synth_sample"
 LIVE = SAMPLE / "Example Live.SemanticModel"
 sys.path.insert(0, str(HERE.parent))
 
-from pbikit import dataclass_ as DC, synth as S  # noqa: E402
+from pbikit import dataclass_ as DC, synth as S, synthgen as G, tmdl  # noqa: E402
+LAYOUT = SAMPLE / "layout.json"
+PLANNED = {"Amount Share": {"table": "_Measures", "formatString": "0.0%",
+                            "expression": "DIVIDE ( [Total Amount], CALCULATE ( [Total Amount], ALL ( Area ) ) )"}}
 
 
 def say(*texts):
@@ -34,6 +37,16 @@ def resolve_all(root):
     for kind, res in (("m-code", "synthesize"), ("connection", "synthesize"), ("entity", "synthesize"),
                       ("rls", "not reproduced"), ("enter-data", "synthesize")):
         S.resolve(root, kind, res, why=f"{kind}: sample rule", every=True)
+
+
+def approved_project(root, planned=True):
+    """A project with an approved contract of the sample model and (optionally) the planned measure."""
+    S.contract(LIVE, root)
+    resolve_all(root)
+    S.approve(root, "Sample Person", ask=say("Example Live"), out=lambda *a: None)
+    if planned:
+        S.write_json(root / "design/specs/generate.json", {"seed": 7, "dateRange": ["2023-01-01", "2025-12-31"],
+                                                          "plannedMeasures": PLANNED, "hints": {}, "deviations": []})
 
 
 class Tmp(unittest.TestCase):
@@ -137,6 +150,60 @@ class ContractTests(Tmp):
         # a new contract from the same model keeps the rules and pre-fills every flag from them
         c2, _ = S.contract(LIVE, self.root)
         self.assertTrue(all(f["resolution"] for f in c2["flags"]))
+
+
+class GenerateTests(Tmp):
+    """0d: slice, generate (deterministic inline DATATABLEs) and verify against the contract."""
+
+    def test_slice_keeps_what_the_pages_need(self):
+        approved_project(self.root)
+        g, missing = S.slice_(self.root, LAYOUT)
+        sl = g["slice"]
+        self.assertEqual(missing, [])
+        self.assertNotIn("Unused Table", sl)
+        self.assertNotIn("Member", sl, "no visual or measure uses it")
+        self.assertIn("Unused Measure", c_measures(self.root), "still in the contract")
+        self.assertEqual(sorted(sl["_Measures"]["measures"]),
+                         sorted(["Total Amount", "Amount Share", "Amount LY", "Avg Amount", "Total Units"]))
+        self.assertEqual(sorted(sl["Orders"]["columns"]), sorted(["Amount", "Units", "OrderDate", "AreaKey"]))
+        self.assertIn("Month No", sl["Calendar"]["columns"], "sort-by column")
+        self.assertIn("Date", sl["Calendar"]["columns"], "relationship key and SAMEPERIODLASTYEAR")
+
+    def test_generate_is_deterministic_and_verifies(self):
+        approved_project(self.root)
+        S.slice_(self.root, LAYOUT)
+        f = G.generate(self.root, "Example Synthetic")
+        first = {p.name: p.read_bytes() for p in f.rglob("*.tmdl")}
+        G.generate(self.root, "Example Synthetic")
+        self.assertEqual(first, {p.name: p.read_bytes() for p in f.rglob("*.tmdl")}, "same seed, same files")
+        self.assertTrue(DC.is_synthetic(f))
+        errs, notes = G.verify(self.root, f)
+        self.assertEqual(errs, [])
+        m = tmdl.load(f)
+        self.assertEqual(m.tables["Orders"].columns["Amount"].data_type, "decimal")
+        self.assertIn("DATATABLE", m.tables["Orders"].partitions[0][1])
+        self.assertIn("PBIK_Planned", (f / "definition/tables/_Measures.tmdl").read_text(encoding="utf-8"))
+        text = "".join(x.decode() for x in first.values())
+        for secret in ("example-server", "Show all", "North"):
+            self.assertNotIn(secret, text)
+        # fact keys come from the dimension
+        src = m.tables["Orders"].partitions[0][1]
+        self.assertTrue(re.search(r'\{ "\d{4}-\d{2}-\d{2}", [1-8], [\d.]+, \d+ \}', src), src[:300])
+        # tampering is caught
+        t = f / "definition/tables/Orders.tmdl"
+        t.write_text(t.read_text(encoding="utf-8").replace("dataType: decimal", "dataType: double"), encoding="utf-8")
+        self.assertTrue(any("Amount" in e for e in G.verify(self.root, f)[0]))
+
+    def test_generate_needs_an_approved_contract_and_a_fresh_slice(self):
+        approved_project(self.root)
+        S.slice_(self.root, LAYOUT)
+        S.resolve(self.root, "F1", "drop")                       # clears the approval
+        with self.assertRaises(S.ContractError):
+            G.generate(self.root, "X")
+
+
+def c_measures(root):
+    return S.read_json(root / "design/specs/contract.json")["tables"]["_Measures"]["measures"]
 
 
 if __name__ == "__main__":

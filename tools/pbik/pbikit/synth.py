@@ -285,3 +285,160 @@ def approve_hooks(c, root, ask, out):
     """Extra person checks at approval (option-table rows, batch 3 item 7). Returns callables run after the main
     confirmation."""
     return []
+
+
+# ---------------------------------------------------------------- the slice
+REF_RE = re.compile(r"((?:'(?:[^']|'')+')|[^\[\]\(\),\"'{}:]*?)\[([^\[\]]+)\]")
+
+
+def layout_refs(layout):
+    """[(table or None, name)] named anywhere in layout.json strings (`Table[Column]`, `'T'[C]`, `[Measure]`)."""
+    out = []
+
+    def walk(x):
+        if isinstance(x, str):
+            for m in REF_RE.finditer(x):
+                t = m.group(1).strip()
+                t = t.split("(")[-1].strip() if t else t
+                out.append((tmdl.unquote(t) if t else None, m.group(2)))
+        elif isinstance(x, dict):
+            for v in x.values():
+                walk(v)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v)
+    walk(layout.get("visuals", []))
+    walk(layout.get("pages", {}))
+    return list(dict.fromkeys(out))
+
+
+class Index:
+    """Case-insensitive lookups over a contract (and planned measures)."""
+
+    def __init__(self, c, planned=None):
+        self.c, self.planned = c, planned or {}
+
+    def table(self, name):
+        return N.find(self.c["tables"], name)
+
+    def column(self, table, name):
+        t = self.table(table)
+        return (t, N.find(self.c["tables"][t]["columns"], name)) if t else (None, None)
+
+    def measure(self, name, table=None):
+        """(home table, measure name, planned?) or None."""
+        homes = [(t, N.find(tb["measures"], name)) for t, tb in self.c["tables"].items()]
+        homes = sorted((h for h in homes if h[1]), key=lambda h: not (table and N.same(h[0], table)))
+        if homes:                                     # the named table first
+            return homes[0][0], homes[0][1], False
+        p = N.find(self.planned, name)
+        if p:
+            return self.planned[p].get("table", "_Measures"), p, True
+        return None
+
+    def resolve(self, table, name):
+        """('column', table, name) / ('measure', table, name) / ('planned', table, name) / None."""
+        if table:
+            t, col = self.column(table, name)
+            if col:
+                return "column", t, col
+        m = self.measure(name)
+        if m:
+            return ("planned" if m[2] else "measure"), m[0], m[1]
+        return None
+
+
+def _expr_refs(ix, expr, slice_):
+    """Add what a DAX expression uses to the slice; return newly added measures (to follow)."""
+    refs, variables, strings = tmdl.references(expr)
+    new = []
+    code = tmdl.strip_dax(expr or "")[0]
+    for t in ix.c["tables"]:
+        pat = r"'" + re.escape(t.replace("'", "''")) + r"'" if not re.fullmatch(r"\w+", t) else r"\b" + re.escape(t) + r"\b"
+        if re.search(pat, code, re.I):
+            slice_.setdefault(t, {"columns": [], "measures": []})
+    for table, name in refs:
+        if table and N.ci_in(table, variables):
+            continue
+        hit = ix.resolve(table, name)
+        if not hit:
+            continue
+        kind, t, n = hit
+        entry = slice_.setdefault(t, {"columns": [], "measures": []})
+        key = "columns" if kind == "column" else "measures"
+        if n not in entry[key]:
+            entry[key].append(n)
+            if kind != "column":
+                new.append((t, n, kind == "planned"))
+    return new
+
+
+def slice_contract(c, layout, planned=None):
+    """{table: {columns, measures}}: the fields layout.json uses, the measures they need, keys and sort-by columns.
+    Also returns names layout.json uses that are in neither the contract nor the planned measures."""
+    ix, out, missing, todo = Index(c, planned), {}, [], []
+    for table, name in layout_refs(layout):
+        hit = ix.resolve(table, name)
+        if not hit:
+            missing.append(f"{table}[{name}]" if table else f"[{name}]")
+            continue
+        kind, t, n = hit
+        e = out.setdefault(t, {"columns": [], "measures": []})
+        key = "columns" if kind == "column" else "measures"
+        if n not in e[key]:
+            e[key].append(n)
+            if kind != "column":
+                todo.append((t, n, kind == "planned"))
+    while todo:
+        t, n, is_planned = todo.pop()
+        expr = (planned or {}).get(n, {}).get("expression") if is_planned else c["tables"][t]["measures"][n]["expression"]
+        todo += _expr_refs(ix, expr, out)
+    for col_owner in list(out):                     # calculated columns' own references, and sort-by columns
+        cols = c["tables"][col_owner]["columns"] if col_owner in c["tables"] else {}
+        for cn in list(out[col_owner]["columns"]):
+            if cols.get(cn, {}).get("expression"):
+                _expr_refs(ix, cols[cn]["expression"], out)
+            sb = cols.get(cn, {}).get("sortBy")
+            if sb and N.find(cols, sb) and N.find(cols, sb) not in out[col_owner]["columns"]:
+                out[col_owner]["columns"].append(N.find(cols, sb))
+    for r in c["relationships"]:
+        (ft, fc), (tt, tc) = split_field(r["from"]), split_field(r["to"])
+        if ft in out and tt in out:
+            for t, col in ((ft, fc), (tt, tc)):
+                if col not in out[t]["columns"]:
+                    out[t]["columns"].append(col)
+    for t, e in out.items():                         # a table referenced on its own needs one column
+        if not e["columns"] and c["tables"].get(t, {}).get("columns"):
+            e["columns"].append(next(iter(c["tables"][t]["columns"])))
+        order = list(c["tables"][t]["columns"]) + list(c["tables"][t]["measures"]) + list(planned or {})
+        for k in ("columns", "measures"):            # contract order, so files don't move between runs
+            e[k].sort(key=lambda x: order.index(x) if x in order else len(order))
+    return {t: out[t] for t in sorted(out)}, list(dict.fromkeys(missing))
+
+
+def split_field(text):
+    m = re.fullmatch(r"(.+)\[(.+)\]", text)
+    return (m.group(1), m.group(2)) if m else (None, text)
+
+
+def load_contract(root, need_approval=True):
+    c = read_json(specs(root) / "contract.json")
+    if c is None:
+        raise ContractError("no contract: run `pbik synth contract` first")
+    if need_approval and not approved(c):
+        raise ContractError("the contract isn't approved (or changed since): a person runs `pbik synth approve --by`")
+    return c
+
+
+def slice_(root, layout_path):
+    c = load_contract(root)
+    gf = specs(root) / "generate.json"
+    g = read_json(gf, {"seed": 1, "dateRange": ["2023-01-01", "2025-12-31"], "hints": {}, "plannedMeasures": {},
+                       "deviations": []})
+    sl, missing = slice_contract(c, read_json(layout_path), g.get("plannedMeasures"))
+    for f in c["flags"]:
+        if f.get("resolution") == "drop" and f.get("table") in sl:
+            sl.pop(f["table"])
+    g["slice"], g["contractHash"] = sl, content_hash(c)
+    write_json(gf, g)
+    return g, missing
