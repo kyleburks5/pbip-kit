@@ -478,8 +478,10 @@ def remap_doc(rel, doc, mapper, tables, keep_labels=True, labels=None, dax=None)
 
 
 # ---------------------------------------------------------------- local
-def local(report, root=None, out=print, desktop_open=None):
-    """Put the synthetic connection back. Refuses while Desktop is open."""
+def local(report, root=None, out=print, desktop_open=None, restore_backup=False, ask=None):
+    """Put the synthetic connection back. Refuses while Desktop is open. Files unchanged since bind live come back
+    from the backup byte for byte; files changed while live are mapped back. restore_backup: the whole backup, after
+    a typed "restore" (changes made while live are lost)."""
     from .desktop import desktop_open as _open
     rep = Report(report)
     root = pathlib.Path(root) if root else rep.path.parent
@@ -490,23 +492,68 @@ def local(report, root=None, out=print, desktop_open=None):
         raise BindError("Power BI Desktop is open: close it first (File > Close; save in Desktop beforehand if you "
                         "want its changes kept), then run `pbik bind local` again")
     backup = state_dir(root) / "backup"
-    restore_local(rep, root, state, backup, out)
+    if not (backup / "definition.pbir").exists():
+        raise BindError(f"no backup in {backup}: can't restore")
+    if restore_backup:
+        changed = [r for r in report_files(rep) if state["files"].get(r) != sha((rep.path / r).read_bytes())]
+        out(f"Restore the backup of {rep.path.name}: {len(changed)} file(s) changed while live are lost"
+            + (f" ({', '.join(changed[:5])}{', ...' if len(changed) > 5 else ''})" if changed else ""))
+        DC.confirm("Restore the whole backup?", "restore", ask)
+        for r in report_files(rep):
+            if not (backup / r).exists():
+                (rep.path / r).unlink()
+        for d in sorted((x for x in rep.path.rglob("*") if x.is_dir()), key=lambda x: -len(x.parts)):
+            if not any(d.iterdir()) and not (backup / d.relative_to(rep.path)).exists():
+                d.rmdir()                                  # folders made while live
+        for f in sorted(backup.rglob("*")):
+            if f.is_file():
+                dst = rep.path / f.relative_to(backup)
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, dst)
+        summary = {"restored": "all"}
+    else:
+        summary = restore_local(rep, root, state, backup, out)
     (state_dir(root) / "state.json").unlink()
     out("Local again: the report is on the synthetic model.")
+    return summary
 
 
 def restore_local(rep, root, state, backup, out):
-    """Part 0: definition.pbir from the backup; every other file reverse-mapped (batch 3 item 3 restores exactly)."""
+    """Unchanged files: the backup copy, byte for byte. Changed or new files: mapped back. definition.pbir: backup."""
     ctx_map = read_json(specs(root) / "bind-map.json", {})
     syn = tmdl.load(root / state["synthetic"]) if state.get("synthetic") else None
     measures = [(t.name, m) for t in (syn.tables.values() if syn else []) for m in t.measures]
-    rev = BR.Mapper.from_map(ctx_map, measures).reverse()
-    tables = [BR.Mapper.from_map(ctx_map).table(t) for t in (syn.tables if syn else [])]
-    for rel, doc in json_docs(rep):
-        if remap_doc(rel, doc, rev, tables, keep_labels=False):
-            BR.drop_labels(doc, state.get("labels", {}).get(rel, []))
-            rep.write(rep.path / rel, doc)
+    fwd = BR.Mapper.from_map(ctx_map, measures)
+    rev = fwd.reverse()
+    tables = [fwd.table(t) for t in (syn.tables if syn else [])]
+    restored, remapped, gone = [], [], []
+    for r in report_files(rep):
+        f = rep.path / r
+        if r == "definition.pbir":
+            continue
+        if state["files"].get(r) == sha(f.read_bytes()) and (backup / r).exists():
+            if f.read_bytes() != (backup / r).read_bytes():
+                shutil.copy2(backup / r, f)
+            restored.append(r)
+        elif r.endswith(".json") and r.startswith("definition/"):
+            try:
+                doc = load(f)
+            except json.JSONDecodeError:
+                continue
+            a = remap_doc(r, doc, rev, tables, keep_labels=False)
+            b = BR.drop_labels(doc, state.get("labels", {}).get(r, []))
+            if a or b:
+                rep.write(f, doc)
+            remapped.append(r)
+    for r in state["files"]:
+        if not (rep.path / r).exists():
+            gone.append(r)
     shutil.copy2(backup / "definition.pbir", rep.path / "definition.pbir")
+    out(f"{len(restored)} file(s) restored from the backup, {len(remapped)} changed while live mapped back"
+        + (f", {len(gone)} deleted while live stay deleted" if gone else ""))
+    for r in remapped:
+        out(f"  mapped back: {r}")
+    return {"restored": restored, "remapped": remapped, "gone": gone}
 
 
 # ---------------------------------------------------------------- bind map (batch 3 item 1)

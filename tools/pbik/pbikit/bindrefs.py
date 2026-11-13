@@ -204,7 +204,7 @@ def drop_labels(doc, paths):
                 cur = cur[int(part)] if isinstance(cur, list) else cur[part]
         except (KeyError, IndexError, ValueError, TypeError):
             continue
-        if isinstance(cur, dict) and "displayName" in cur:
+        if isinstance(cur, dict) and "displayName" in cur and cur["displayName"] == cur.get("nativeQueryRef"):
             del cur["displayName"]
             n += 1
     return n

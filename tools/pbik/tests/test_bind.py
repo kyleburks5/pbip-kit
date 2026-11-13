@@ -265,5 +265,62 @@ class BindMapTests(BindBase):
         self.assertNotIn("displayName", read(self.rep / "definition/pages/p1/visuals/P1-V02_amount-by-month/visual.json"))
 
 
+class LocalRestoreTests(BindBase):
+    """Item 3: live -> local through a renamed table and field restores the report byte for byte; files changed while
+    live are mapped back; --restore-backup restores everything after a typed confirmation."""
+
+    def setUp(self):
+        super().setUp()
+        rename_contract(self.root)
+        m = BD.map_draft(self.rep, self.root, out=self.quiet)
+        m["acceptDax"] = ["Per Unit"]
+        S.write_json(BD.map_file(self.root), m)
+        BD.map_approve(self.rep, "Sample Person", self.root, ask=TS.say("Example Live"), out=self.quiet)
+
+    def test_round_trip_byte_for_byte(self):
+        before = tree(self.rep)
+        slicer = "definition/pages/p1/visuals/P1-V03_option-slicer/visual.json"
+        self.assertIn('"Entity": "Plan Option"', before[slicer.replace("/", os.sep)].decode())
+        self.go_live()
+        self.assertIn('"Entity": "Option Picker"', read(self.rep / slicer), "stored slicer filter, renamed table")
+        out = BD.local(self.rep, self.root, out=self.quiet, desktop_open=CLOSED)
+        self.assertEqual(out["remapped"], [])
+        self.assertEqual(before, tree(self.rep))
+
+    def test_files_changed_while_live_are_mapped_back(self):
+        before = tree(self.rep)
+        self.go_live()
+        f = self.rep / "definition/pages/p1/visuals/P1-V02_amount-by-month/visual.json"
+        d = json.loads(read(f))
+        d["position"]["x"] = 40                                    # a hand polish in Desktop while live
+        f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        out = BD.local(self.rep, self.root, out=self.quiet, desktop_open=CLOSED)
+        self.assertEqual(out["remapped"], ["definition/pages/p1/visuals/P1-V02_amount-by-month/visual.json"])
+        back = json.loads(read(f))
+        self.assertEqual(back["position"]["x"], 40, "the polish is kept")
+        text = json.dumps(back)
+        for want in ('"Entity": "Orders"', '"Property": "Amount"', '"Sum(Orders.Amount)"', '"_Measures.Total Units"'):
+            self.assertIn(want, text)
+        self.assertNotIn("displayName", text, "the labels bind live added are gone")
+        after = tree(self.rep)
+        for k in before:
+            if not k.endswith("P1-V02_amount-by-month" + os.sep + "visual.json"):
+                self.assertEqual(before[k], after[k], k)
+
+    def test_restore_backup_needs_typed_restore(self):
+        before = tree(self.rep)
+        self.go_live()
+        f = self.rep / "definition/pages/p1/visuals/P1-V02_amount-by-month/visual.json"
+        f.write_text(read(f).replace('"x": 32', '"x": 48'), encoding="utf-8")
+        (self.rep / "definition/pages/p1/visuals/P1-V09_new").mkdir()
+        (self.rep / "definition/pages/p1/visuals/P1-V09_new/visual.json").write_text("{}", encoding="utf-8")
+        with self.assertRaises(DC.Refused):
+            BD.local(self.rep, self.root, out=self.quiet, desktop_open=CLOSED, restore_backup=True, ask=TS.say("yes"))
+        with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}), self.assertRaises(DC.Refused):
+            BD.local(self.rep, self.root, out=self.quiet, desktop_open=CLOSED, restore_backup=True)
+        BD.local(self.rep, self.root, out=self.quiet, desktop_open=CLOSED, restore_backup=True, ask=TS.say("restore"))
+        self.assertEqual(before, {k: v for k, v in tree(self.rep).items()})
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

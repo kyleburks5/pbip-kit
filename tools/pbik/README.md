@@ -478,7 +478,10 @@ smoke report opens on one.
   (`.pbik/bind/backup`, git-ignored), rewrites references per the map, writes definition.pbir `byConnection`
   (`Data Source="powerbi://api.powerbi.com/v1.0/myorg/<W>";initial catalog=<M>;...;semanticmodelid=<ID>`, UNVERIFIED in
   Desktop: `--from` copies Desktop's own string), and records `.pbik/bind/state.json` (the restricted lock).
-- `local`: refuses while Desktop is open; restores definition.pbir and maps references back.
+- `local [--restore-backup]`: refuses while Desktop is open. A file unchanged since `bind live` (hash in state.json)
+  comes back from the backup byte for byte; a file changed or added while live is mapped back (names, and the labels
+  live added) and listed; definition.pbir comes from the backup. `--restore-backup` puts the whole backup back
+  (files made while live removed) after a typed `restore`.
 - `map draft` writes design/specs/bind-map.json (optional; no map = names must match): every synthetic name the report
   uses that the contract lacks, matched to the most similar contract name (case, spaces, `_`/`-` ignored, shared
   words count; names the synthetic model already has aren't candidates), `unmatched` for the rest. Shape:

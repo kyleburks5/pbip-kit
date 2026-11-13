@@ -206,6 +206,8 @@ def main(argv=None):
     blo = bis.add_parser("local", help="back to the synthetic model (refuses while Desktop is open)")
     blo.add_argument("report")
     blo.add_argument("--root")
+    blo.add_argument("--restore-backup", action="store_true",
+                     help="put the whole pre-live backup back (typed 'restore'; changes made while live are lost)")
 
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
@@ -368,7 +370,7 @@ def bind_cmd(args):
             BD.live(args.report, args.by, args.workspace, args.model, args.id, args.from_, args.root)
             return 0
         if args.sub == "local":
-            BD.local(args.report, args.root)
+            BD.local(args.report, args.root, restore_backup=args.restore_backup)
             return 0
         if args.op == "draft":
             m = BD.map_draft(args.report, args.root)
