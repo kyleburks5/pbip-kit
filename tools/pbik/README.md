@@ -477,6 +477,15 @@ smoke report opens on one.
   (`Data Source="powerbi://api.powerbi.com/v1.0/myorg/<W>";initial catalog=<M>;...;semanticmodelid=<ID>`, UNVERIFIED in
   Desktop: `--from` copies Desktop's own string), and records `.pbik/bind/state.json` (the restricted lock).
 - `local`: refuses while Desktop is open; restores definition.pbir and maps references back.
+- `map draft` writes design/specs/bind-map.json (optional; no map = names must match): every synthetic name the report
+  uses that the contract lacks, matched to the most similar contract name (case, spaces, `_`/`-` ignored, shared
+  words count; names the synthetic model already has aren't candidates), `unmatched` for the rest. Shape:
+  `{"tables": {"Orders": "Order Lines"}, "fields": {"Orders[Amount]": "Net Amount", "_Measures[Total Units]":
+  "Units Sold"}, "acceptDax": ["Per Unit"], "liveLabels": false}`; a field value may name another table
+  (`"Table[Name]"`). A report-level measure whose DAX the map changes fails the check until listed in `acceptDax`.
+  Headers keep the synthetic labels (`displayName` added where a field is renamed) unless `liveLabels` is true.
+- `map approve --by`: person-only; reruns the check through the map, prints it, asks for the contract's model name
+  typed. `bind live` refuses a map that isn't approved or changed since.
 
 ## Python helpers
 

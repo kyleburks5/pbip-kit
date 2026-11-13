@@ -194,6 +194,15 @@ def main(argv=None):
                                   "/modeling/<id>/")
     bil.add_argument("--from", dest="from_", help="a Desktop-saved report connected to the model (safest)")
     bil.add_argument("--root")
+    bim = bis.add_parser("map", help="design/specs/bind-map.json: synthetic -> live names").add_subparsers(
+        dest="op", required=True)
+    bmd = bim.add_parser("draft", help="match names the contract lacks to similar contract names")
+    bmd.add_argument("report")
+    bmd.add_argument("--root")
+    bma = bim.add_parser("approve", help="person-only: rerun the check through the map and approve it")
+    bma.add_argument("report")
+    bma.add_argument("--by", required=True)
+    bma.add_argument("--root")
     blo = bis.add_parser("local", help="back to the synthetic model (refuses while Desktop is open)")
     blo.add_argument("report")
     blo.add_argument("--root")
@@ -361,7 +370,14 @@ def bind_cmd(args):
         if args.sub == "local":
             BD.local(args.report, args.root)
             return 0
-        return BD.command(args)
+        if args.op == "draft":
+            m = BD.map_draft(args.report, args.root)
+            print(f"bind-map.json drafted: {len(m['tables'])} table(s), {len(m['fields'])} field(s), "
+                  f"{len(m['unmatched'])} unmatched. Review it; a person runs `pbik bind map approve --by <name>`")
+            return 1 if m["unmatched"] else 0
+        BD.map_approve(args.report, args.by, args.root)
+        print("bind-map.json approved.")
+        return 0
     except (BD.BindError, S.ContractError, DC.Refused) as e:
         print(f"pbik: {e}", file=sys.stderr)
         return 2

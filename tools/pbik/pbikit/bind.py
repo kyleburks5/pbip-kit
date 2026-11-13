@@ -141,6 +141,11 @@ def check(report, root=None, ctx=None):
             check_field(ctx, res, where, kind, ent, prop, planned)
     for (t, n), m in ext.items():
         check_dax(ctx, res, f"reportExtensions.json {t}[{n}]", m.get("expression", ""), planned)
+    accepted = ctx.map.get("acceptDax", []) if not live else []
+    for n, old, new in ([] if live else dax_changes(ctx)):
+        if not N.ci_in(n, accepted):
+            res.errors.append(f"reportExtensions.json [{n}]: the map changes its DAX to {new!r}; check it, then "
+                              "list it in bind-map.json acceptDax")
         if not N.find(ctx.contract["tables"], ctx.mapper.table(t)):
             res.errors.append(f"reportExtensions.json: entity {t} (live {ctx.mapper.table(t)}) is not in the contract")
     return res
@@ -432,7 +437,9 @@ def live(report, by, workspace=None, model=None, mid=None, from_=None, root=None
 
 
 def pre_live_checks(ctx, out):
-    """Hook for the bind map's approval (item 1)."""
+    """A bind map must be approved, unchanged since."""
+    if ctx.map and not map_approved(ctx.map):
+        raise BindError("bind-map.json isn't approved (or changed since): a person runs `pbik bind map approve --by`")
 
 
 def known_workspaces(root):
@@ -488,3 +495,152 @@ def restore_local(rep, root, state, backup, out):
             BR.drop_labels(doc, state.get("labels", {}).get(rel, []))
             rep.write(rep.path / rel, doc)
     shutil.copy2(backup / "definition.pbir", rep.path / "definition.pbir")
+
+
+# ---------------------------------------------------------------- bind map (batch 3 item 1)
+def map_file(root):
+    return specs(root) / "bind-map.json"
+
+
+def _tokens(name):
+    return [t for t in re.split(r"[\s_\-\.]+", N.key(name)) if t]
+
+
+def similarity(a, b):
+    """0..1: how alike two names are (case, spaces, '_' and '-' ignored; shared words count)."""
+    import difflib
+    ca, cb = "".join(_tokens(a)), "".join(_tokens(b))
+    if not ca or not cb:
+        return 0.0
+    if ca == cb:
+        return 1.0
+    ta, tb = set(_tokens(a)), set(_tokens(b))
+    words = len(ta & tb) / min(len(ta), len(tb)) if ta and tb else 0
+    return max(difflib.SequenceMatcher(None, ca, cb).ratio(), words * 0.9)
+
+
+def best(name, candidates, taken=(), floor=0.5):
+    scored = sorted(((similarity(name, c), c) for c in candidates if c not in taken), key=lambda x: (-x[0], x[1]))
+    return scored[0] if scored and scored[0][0] >= floor else (None, None)
+
+
+def used_names(ctx):
+    """[(table, name)] the report uses: field sites and report-level measure DAX, synthetic names."""
+    out = []
+    ext = ctx.rep.extensions()
+    for rel, doc in json_docs(ctx.rep):
+        if rel.endswith("reportExtensions.json"):
+            continue
+        for kind, ent, prop, schema, path in BR.sites(doc, ctx.tables):
+            if prop is None or schema == "extension" or any(N.same(t, ent) and N.same(n, prop) for t, n in ext):
+                continue
+            out.append((ent, prop))
+    for (t, n), m in ext.items():
+        out.append((t, None))
+        refs, variables, _ = tmdl.references(m.get("expression", ""))
+        for rt, rn in refs:
+            if not (rt and N.ci_in(rt, variables)) and not virtual_name(rn):
+                out.append((rt, rn))
+    return list(dict.fromkeys(out))
+
+
+def virtual_name(name):
+    """Hook: names DAX defines itself (item 4)."""
+    return bool(re.fullmatch(r"Value\d*", name or ""))
+
+
+def map_draft(report, root=None, out=print):
+    """bind-map.json from similar names: every synthetic name the report uses that the contract lacks."""
+    ctx = Context(report, root)
+    c = ctx.contract
+    old = read_json(map_file(ctx.root), {})
+    tables, fields, unmatched = dict(old.get("tables", {})), dict(old.get("fields", {})), []
+    ctables = list(c["tables"])
+    for t, _ in used_names(ctx):
+        if t and not N.find(ctables, t) and not N.find(tables, t):
+            score, hit = best(t, ctables, set(tables.values()))
+            if hit:
+                tables[t] = hit
+                out(f"table  {t} -> {hit} ({score:.2f})")
+            else:
+                unmatched.append(t)
+    mapper = BR.Mapper.from_map({"tables": tables})
+    for t, n in used_names(ctx):
+        if n is None:
+            continue
+        key = f"{t}[{n}]" if t else f"[{n}]"
+        if N.find(fields, key) or (not t and any(N.same(BR.split(k)[1], n) for k in fields)):
+            continue                                  # [Measure] in DAX: its Table[Measure] entry covers it
+        lt = mapper.table(t) if t else None
+        if t and N.find(c["tables"], lt) and ctx.contract_has(lt, n):
+            continue
+        if not t and any(ctx.contract_has(x, n) for x in ctables):
+            continue
+        if not t and not any(ctx.synthetic_has(x, n) for x in ctx.tables):
+            continue                                  # a name DAX defines (row context, virtual table)
+        ct = N.find(c["tables"], lt) if lt else None
+        if ct:
+            pool = list(c["tables"][ct]["columns"]) + list(c["tables"][ct]["measures"])
+        else:
+            pool = [m for tb in c["tables"].values() for m in tb["measures"]]
+        # a contract name the synthetic model already has is that field's own match, not a candidate
+        own = {N.key(x) for st in (ctx.model.tables.values() if ctx.model else [])
+               for x in list(st.columns) + list(st.measures)}
+        taken = {x for x in pool if N.key(x) in own} | set(fields.values())
+        score, hit = best(n, pool, taken)
+        if hit:
+            fields[key] = hit
+            out(f"field  {key} -> {hit} ({score:.2f})")
+        else:
+            unmatched.append(key)
+    m = {"tables": tables, "fields": fields, "acceptDax": old.get("acceptDax", []),
+         "liveLabels": old.get("liveLabels", False), "draft": True, "unmatched": unmatched, "approval": None}
+    write_json(map_file(ctx.root), m)
+    for u in unmatched:
+        out(f"no match: {u} (edit bind-map.json by hand)")
+    return m
+
+
+def map_hash(m):
+    from .synth import content_hash
+    return content_hash(m, skip=("approval", "draft", "unmatched"))
+
+
+def map_approved(m):
+    return not m or (bool(m.get("approval")) and m["approval"].get("hash") == map_hash(m))
+
+
+def map_approve(report, by, root=None, ask=None, out=print):
+    """Person-only: rerun the check through the map, show it, ask for the contract's model name typed."""
+    ctx = Context(report, root)
+    st = DC.stamp(by)
+    if not ctx.map:
+        raise BindError("no bind-map.json: run `pbik bind map draft` (or bind without a map: names must match)")
+    if ctx.map.get("unmatched"):
+        raise BindError(f"unmatched names left: {', '.join(ctx.map['unmatched'])} (map them, or clear `unmatched`)")
+    res = check(report, ctx.root, ctx)
+    if not res.ok():
+        raise BindError("bind check fails through this map:\n  " + "\n  ".join(res.errors))
+    for k, v in ctx.map.get("tables", {}).items():
+        out(f"table {k} -> {v}")
+    for k, v in ctx.map.get("fields", {}).items():
+        out(f"field {k} -> {v}")
+    for n in ctx.map.get("acceptDax", []):
+        out(f"DAX change accepted: [{n}]")
+    DC.confirm(f"Approve this map as {st['by']}?", ctx.contract["model"], ask)
+    m = dict(ctx.map)
+    m.pop("draft", None)
+    m.pop("unmatched", None)
+    m["approval"] = dict(st, hash=map_hash(m))
+    write_json(map_file(ctx.root), m)
+    return m
+
+
+def dax_changes(ctx):
+    """[(measure, old, new)] report-level measures whose DAX the map changes."""
+    out = []
+    for (t, n), m in ctx.rep.extensions().items():
+        new = BR.rewrite_dax(m.get("expression", ""), ctx.mapper, ctx.tables)
+        if new != m.get("expression", ""):
+            out.append((n, m.get("expression", ""), new))
+    return out

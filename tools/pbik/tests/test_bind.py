@@ -29,6 +29,35 @@ def tree(folder):
     return {str(f.relative_to(folder)): f.read_bytes() for f in sorted(pathlib.Path(folder).rglob("*")) if f.is_file()}
 
 
+RENAMES = {"tables": {"Orders": "Order Lines", "Plan Option": "Option Picker"},
+           "fields": {("Order Lines", "Amount"): "Net Amount", ("_Measures", "Total Units"): "Units Sold",
+                      ("Option Picker", "Option Label"): "Label"}}
+
+
+def rename_contract(root):
+    """The live model, as the contract describes it, uses other names than the synthetic one (made-up renames)."""
+    f = root / "design/specs/contract.json"
+    c = json.loads(f.read_text(encoding="utf-8"))
+    for old, new in RENAMES["tables"].items():
+        c["tables"][new] = c["tables"].pop(old)
+        for r in c["relationships"]:
+            for k in ("from", "to"):
+                if r[k].startswith(old + "["):
+                    r[k] = new + r[k][len(old):]
+    for (t, old), new in RENAMES["fields"].items():
+        tb = c["tables"][t]
+        for part in ("columns", "measures"):
+            if old in tb[part]:
+                tb[part][new] = tb[part].pop(old)
+    c["approval"] = None
+    S.write_json(f, c)
+    S.approve(root, "Sample Person", ask=TS.say("Example Live"), out=lambda *a: None)
+
+
+def read(f):
+    return pathlib.Path(f).read_text(encoding="utf-8")
+
+
 class BindBase(unittest.TestCase):
     def setUp(self):
         self.root = pathlib.Path(tempfile.mkdtemp(prefix="pbik_bind_"))
@@ -127,6 +156,83 @@ class PartZeroTests(BindBase):
             "connectionString": BD.connection_string("Sample Workspace", "Example Live", MID)}}})
         st = self.go_live(workspace=None, model=None, mid=None, from_=other)
         self.assertEqual((st["workspace"], st["model"], st["id"]), ("Sample Workspace", "Example Live", MID))
+
+
+class BindMapTests(BindBase):
+    """Item 1: bind-map.json drafted from similar names, approved by a person, applied by bind live everywhere."""
+
+    def setUp(self):
+        super().setUp()
+        rename_contract(self.root)
+
+    def draft_and_approve(self):
+        m = BD.map_draft(self.rep, self.root, out=self.quiet)
+        m["acceptDax"] = ["Per Unit"]
+        S.write_json(BD.map_file(self.root), m)
+        return BD.map_approve(self.rep, "Sample Person", self.root, ask=TS.say("Example Live"), out=self.quiet)
+
+    def test_draft_matches_similar_names(self):
+        self.assertTrue(any("not in the contract" in e for e in self.check().errors), "names differ: no map, no bind")
+        m = BD.map_draft(self.rep, self.root, out=self.quiet)
+        self.assertEqual(m["tables"], {"Orders": "Order Lines", "Plan Option": "Option Picker"})
+        self.assertEqual(m["fields"]["Orders[Amount]"], "Net Amount")
+        self.assertEqual(m["fields"]["_Measures[Total Units]"], "Units Sold")
+        self.assertEqual(m["fields"]["Plan Option[Option Label]"], "Label")
+        self.assertEqual(m["unmatched"], [])
+        errs = self.check().errors
+        self.assertEqual(len(errs), 1, errs)
+        self.assertIn("acceptDax", errs[0], "changed DAX fails until it is accepted")
+
+    def test_approve_is_person_only_and_live_needs_it(self):
+        BD.map_draft(self.rep, self.root, out=self.quiet)
+        with self.assertRaises(BD.BindError):
+            self.go_live()                                         # draft, not approved
+        with self.assertRaises(BD.BindError):                      # the DAX change isn't accepted: check fails
+            BD.map_approve(self.rep, "Sample Person", self.root, ask=TS.say("Example Live"), out=self.quiet)
+        m = S.read_json(BD.map_file(self.root))
+        m["acceptDax"] = ["Per Unit"]
+        S.write_json(BD.map_file(self.root), m)
+        with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}), self.assertRaises(DC.Refused):
+            BD.map_approve(self.rep, "Sample Person", self.root, out=self.quiet)
+        with self.assertRaises(DC.Refused):
+            BD.map_approve(self.rep, "Sample Person", self.root, ask=TS.say("Example Synthetic"), out=self.quiet)
+        BD.map_approve(self.rep, "Sample Person", self.root, ask=TS.say("Example Live"), out=self.quiet)
+        m = S.read_json(BD.map_file(self.root))
+        m["fields"]["Orders[Status]"] = "Status"
+        S.write_json(BD.map_file(self.root), m)
+        with self.assertRaises(BD.BindError):
+            self.go_live()                                         # changed after approval
+
+    def test_live_rewrites_every_reference(self):
+        self.draft_and_approve()
+        self.go_live()
+        d = self.rep / "definition"
+        line = read(d / "pages/p1/visuals/P1-V02_amount-by-month/visual.json")
+        for want in ('"Entity": "Order Lines"', '"Property": "Net Amount"', '"Sum(Order Lines.Net Amount)"',
+                     '"displayName": "Sum of Amount"', '"_Measures.Units Sold"', '"displayName": "Total Units"'):
+            self.assertIn(want, line)
+        slicer = json.loads(read(d / "pages/p1/visuals/P1-V03_option-slicer/visual.json"))
+        flt = slicer["visual"]["objects"]["general"][0]["properties"]["filter"]["filter"]
+        self.assertEqual(flt["From"][0]["Entity"], "Option Picker")
+        self.assertEqual(flt["Where"][0]["Condition"]["In"]["Expressions"][0]["Column"]["Property"], "Label")
+        self.assertIn('"Option Picker.Label"', json.dumps(slicer))
+        self.assertIn('"Entity": "Order Lines"', read(d / "bookmarks/bm1.bookmark.json"))
+        ext = json.loads(read(d / "reportExtensions.json"))
+        self.assertEqual(ext["entities"][0]["measures"][0]["expression"],
+                         "DIVIDE ( SUM ( 'Order Lines'[Net Amount] ), [Units Sold] )")
+        for f in d.rglob("*.json"):
+            self.assertNotIn('"Entity": "Orders"', read(f), f)
+            self.assertNotIn('"Entity": "Plan Option"', read(f), f)
+        self.assertEqual(self.check().errors, [], "the live names are all in the contract")
+
+    def test_live_labels_option(self):
+        m = self.draft_and_approve()
+        m["liveLabels"] = True
+        m["approval"] = None
+        S.write_json(BD.map_file(self.root), m)
+        BD.map_approve(self.rep, "Sample Person", self.root, ask=TS.say("Example Live"), out=self.quiet)
+        self.go_live()
+        self.assertNotIn("displayName", read(self.rep / "definition/pages/p1/visuals/P1-V02_amount-by-month/visual.json"))
 
 
 if __name__ == "__main__":
