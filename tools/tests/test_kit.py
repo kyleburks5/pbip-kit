@@ -80,6 +80,34 @@ class PatternPageTests(unittest.TestCase):
             self.assertIn("Style preset", text, f.name)
 
 
+class FastTestModeTests(unittest.TestCase):
+    """Batch 3 item 16: run_tests.py runs only the related suites in a project; --all / --regression run everything."""
+
+    def test_related_suites(self):
+        sys.path.insert(0, str(KIT / "tools"))
+        import run_tests as RT
+        self.assertEqual(RT.related(["tools/pbik/pbikit/bind.py"]), ["bind"])
+        self.assertEqual(RT.related(["docs/lessons/cards.md"]), ["kit"])
+        self.assertEqual(RT.related(["tools/pbik/pbikit/build.py"]),
+                         ["pbik", "synth", "bind", "layout", "patterns", "wireframe", "design"])
+        self.assertEqual(RT.related(["design/scripts/gen_wireframe_hf.py", "tools/patterns/build_patterns.py"]),
+                         ["layout", "patterns", "wireframe", "design"])
+        self.assertEqual(RT.related(["tools/run_tests.py"]), RT.ALL)
+        self.assertEqual(RT.related([]), [])
+
+    def test_master_kit_or_project(self):
+        sys.path.insert(0, str(KIT / "tools"))
+        import run_tests as RT
+        tmp = pathlib.Path(tempfile.mkdtemp())
+        try:
+            self.assertFalse(RT.is_project(tmp))
+            (tmp / "Example.pbip").write_text("{}", encoding="utf-8")
+            self.assertTrue(RT.is_project(tmp))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        self.assertFalse(RT.is_project(), "the master kit runs every suite by default")
+
+
 class BudgetTests(unittest.TestCase):
     """The lean learning system (docs/lessons/README.md, tools/lessons.py): lesson format and indexes, budgets
     (CLAUDE.md 150 lines, a lesson file 120, a pattern entry 80: a warning at the budget, a failure 25% over), no

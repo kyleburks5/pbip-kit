@@ -566,6 +566,10 @@ into a temp folder, never editing the source; a missing source fails the run, ne
 measure, Top N filter, conditional formatting, navigation buttons), check that a second build changes nothing, run
 validate and model check, and break copies on purpose to check each rule fires.
 
+
+`python tools/run_tests.py` runs every suite in the master kit; in a report project (a kit copy with a `*.pbip` or
+design/specs/layout.json) it runs only the suites related to the files changed since the last commit (fast mode,
+`RELATED` in run_tests.py). `--all` and `--regression` run everything; `--changed` forces fast mode.
 ## Not yet
 
 See "pbik can't write it yet" in the kit's `design/known-gaps.md` for the full list with workarounds. In short:
