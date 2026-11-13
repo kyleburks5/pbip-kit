@@ -64,6 +64,23 @@ class TokensTests(unittest.TestCase):
     def base(self):
         return json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8"))
 
+    def test_muted_and_warning_text_and_pattern_pairs(self):
+        """Batch 4 item 3: textMuted and warningText pass 4.5:1 on white and on the page tint, and every pairing pattern
+        tables use (tags, status badges, text on each tint) passes 4.5:1, for the shipped tokens and every preset."""
+        palettes = [("shipped", self.base())] + [(p.stem, G.run(preset=p.stem, base=self.base())[0])
+                                                 for p in sorted((KIT / "design/themes/presets").glob("*.json"))]
+        for name, t in palettes:
+            c = t["colors"]
+            light = K.contrast(c["text"], "#FFFFFF") >= 4.5
+            for fg in ("textMuted", "warningText"):
+                if light:
+                    self.assertGreaterEqual(K.contrast(c[fg], "#FFFFFF"), 4.5, f"{name}: {fg} on white")
+                self.assertGreaterEqual(K.contrast(c[fg], c["background"]), 4.5, f"{name}: {fg} on the page tint")
+            pairs = [(v["text"], v["fill"]) for grp in ("tags", "badges") for k, v in t[grp].items() if k != "_note"]
+            pairs += [("text", tint) for tint in c if tint.endswith("Tint")]
+            for fg, bg in pairs:
+                self.assertGreaterEqual(K.contrast(c[fg], c[bg]), 4.5, f"{name}: {fg} on {bg}")
+
     def test_clean_preset_is_the_shipped_palette(self):
         t, changes, checks, failures, _, _ = G.run(preset="clean", base=self.base())
         shipped = json.loads((KIT / "design" / "themes" / "presets" / "clean.json").read_text())["colors"]

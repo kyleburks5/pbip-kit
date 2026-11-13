@@ -68,6 +68,11 @@ CHECKS = [
     ("warning", "card", 4.5, "fg", "secondary text on cards"),
     ("warning", "background", 4.5, "fg", "secondary text on the canvas"),
     ("warning", "secondTint", 4.5, "fg", "secondary text on secondary chips (native tag)"),
+    ("warningText", "card", 4.5, "fg", "warning text on cards (white)"),
+    ("warningText", "background", 4.5, "fg", "warning text on the page tint"),
+    ("warningText", "warningTint", 4.5, "fg", "warning text on warning badges"),
+    ("textMuted", "brandTint", 4.5, "fg", "muted text on brand tint (pattern tables)"),
+    ("textMuted", "secondTint", 4.5, "fg", "muted text on secondary tint (pattern tables)"),
     ("text", "brandTint", 4.5, "bg", "text on brand chips"),
     ("text", "secondTint", 4.5, "bg", "text on secondary chips"),
     ("text", "badLight", 4.5, "bg", "text on the darkest heat cell (bad light)"),
@@ -199,6 +204,9 @@ def derive(roles, mode, surfaces=None, pinned=None, extras=()):
     c["secondLight"] = light(second)
     c["secondTint"] = K.mix(second, card, 0.9)
     c["warning"] = second
+    # batch 4 item 3: a real warning colour for text (amber), with its own badge tint
+    c["warningText"] = K.from_oklch(0.48 if mode == "light" else 0.82, 0.10, 65)
+    c["warningTint"] = K.mix(c["warningText"], card, 0.9)
     c["neutralTint"] = c["background"]
     c["html"] = K.from_oklch(0.50 if mode == "light" else 0.78, 0.12, 305)
     c["htmlTint"] = K.mix(c["html"], card, 0.88)
@@ -303,6 +311,11 @@ def build_tokens(base, colors, mode, source, preset=None, ref=None, changes=(), 
                  "native": {"text": "warning", "fill": "secondTint"},
                  "svg": {"text": "brandText", "fill": "brandTint"},
                  "html": {"text": "html", "fill": "htmlTint"}}
+    t["badges"] = {"_note": "Status chips and tinted cells in pattern tables (text on its fill, 4.5:1; batch 4 item 3).",
+                   "good": {"text": "good", "fill": "goodTint"}, "bad": {"text": "bad", "fill": "badTint"},
+                   "warning": {"text": "warningText", "fill": "warningTint"},
+                   "neutral": {"text": "textMuted", "fill": "neutralTint"},
+                   "brand": {"text": "brandText", "fill": "brandTint"}}
     for src in (preset or {}, ref or {}):
         for key in ("font", "container", "control", "fontPt"):
             if isinstance(src.get(key), dict):
