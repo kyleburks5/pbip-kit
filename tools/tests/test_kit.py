@@ -150,6 +150,13 @@ class TidyRulesTests(unittest.TestCase):
                          "Flag them only", "apply only what I approve", "wait for my approval"):
                 self.assertIn(want, t, f"{f.name}: {want}")
 
+    def test_smoke_asks_for_a_bookmark_group(self):
+        """Batch 4 item 8: /smoke (and /kit-smoke) asks for a Desktop-made bookmark group, a save and a roundtrip."""
+        for f in (KIT / ".claude" / "commands" / "smoke.md", KIT / ".github" / "prompts" / "kit-smoke.prompt.md"):
+            t = f.read_text(encoding="utf-8")
+            for want in ("Bookmarks pane", "**Group**", "pbik roundtrip", "left alone"):
+                self.assertIn(want, t, f"{f.name}: {want}")
+
     def test_placement_order(self):
         t = (KIT / "docs" / "lessons" / "README.md").read_text(encoding="utf-8")
         order = [t.index(x) for x in ("1. **A check**", "2. **A template or token**", "3. **The command file**",
