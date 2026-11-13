@@ -59,9 +59,16 @@ python ..\pbip-kit-export\tools\pbik\pbik.py roundtrip Smoke.Report --before _pb
 
 Expect no proposals about button `general` paragraphs, matrix `active` or the card's `layout.verticalAlignment`.
 
-## Desktop check results (2026-11-13)
+## Desktop check results (2026-11-13, Desktop 2.159.883.0)
 
-- **Not confirmed in Desktop.** The smoke report's files are byte-identical to `_pbik-built` (nothing newer than the
-  build), so no Desktop save reached them: the roundtrip (`roundtrip.md`) compared identical files and found
-  nothing, and bookmarks.json has no Desktop-made group. Items 2, 4, 6, 7 and 8 still need a Desktop save
-  (checklist steps 1-6) to count as confirmed; "pbik leaves Desktop-made bookmark groups alone" stays unconfirmed.
+- **Saved in Desktop, forms confirmed.** After the save, `pbik roundtrip` lists only the final newline (32 files) and
+  the re-registered theme (`resourcePackages`, same content): Desktop kept everything else pbik wrote. That confirms
+  the batch 4 forms on save: page `displayArea.verticalAlignment` Top, the header band, the theme's visual headers
+  off and the one visual turning its own on, button labels as `objects.text.text` (no paragraphs dropped any more),
+  the matrix's first row `active: true`, and the kpi-delta-card without `layout.verticalAlignment`.
+- **Per-step visual notes:** not recorded (the report back had placeholders for header/KPIs, hover icons, tables and
+  buttons).
+- **Bookmark group: not confirmed.** Desktop's save reached the roundtrip with no group in bookmarks.json (no
+  bookmarks.json change but the final newline), so there was no Desktop-made group for the rebuild to leave alone;
+  the rebuild only put pbik's final newline back. "pbik leaves Desktop-made bookmark groups alone" stays unconfirmed
+  (smoke step 6, /smoke step 6): group both bookmarks, **save after grouping**, then roundtrip before rebuilding.
