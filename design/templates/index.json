@@ -57,6 +57,10 @@
       "visualType": "cardVisual",
       "source": "P4-V07_card-reference-labels"
     },
+    "cardVisual.kpi-delta-card": {
+      "visualType": "cardVisual",
+      "source": "written by hand (batch 3 item 10)"
+    },
     "cardVisual.pill-label": {
       "visualType": "cardVisual",
       "source": "P4-V06_pill-label"

@@ -708,6 +708,10 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
                 min_pt = load(tf).get("a11y", {}).get("minFontPt", 10)
         a11y.check(fd, pages, rep, page_background, min_pt, decorative_names(layout))
 
+    # ---- KPI cards: the card is the container; rows equal, spanning the content width (C-10)
+    from . import kpicards as KC
+    KC.check(fd, rep, pages, load(layout) if layout else None)
+
     # ---- button slicer fit
     check_slicers(fd, slicers, load(layout) if layout else None, port, rep.path)
 

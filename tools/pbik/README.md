@@ -510,6 +510,17 @@ smoke report opens on one.
 - `map approve --by`: person-only; reruns the check through the map, prints it, asks for the contract's model name
   typed. `bind live` refuses a map that isn't approved or changed since.
 
+### KPI cards (`pbik validate`, lesson C-10)
+
+A KPI card (a cardVisual whose folder or layout name says `kpi`, layout `kpi: true`, or a `kpi` template) is its
+own container: validate warns when its container background is off or a shape sits behind it (unless the shape
+matches the card within 1px), and per row of KPI cards when width, height or gaps differ by more than 1px, the row
+doesn't span the content width (page width minus the layout grid margin) or doesn't line up with the row below.
+`design/scripts/card_space.py <Report> --page <name> --png <screenshot>` (the polish loop, /review) flags a card
+whose largest empty band is over 35% of its height or width; it runs on synthetic or sample data only (pbik's
+synthetic model, or a public project). `template: "cardVisual.kpi-delta-card"` follows the rule (written by hand,
+not Desktop-saved yet).
+
 ### Names are case-insensitive
 
 As in DAX, table, column and measure names match whatever their case: the TMDL reader's tables, columns and
