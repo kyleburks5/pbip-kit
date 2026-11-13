@@ -40,8 +40,9 @@ Blocked: none.
 - `KEEP <n>`: n is the number of rows kept (all kept tables together). Option tables: at most 50 rows.
 - Stale references fail `bind check` (exit 1) like map errors, but are listed apart.
 - Headers keep synthetic labels by adding `displayName` where bind live renames a field; `bind local` removes them.
-- Packs may sit in a git repository that isn't the kit's or the project's (this machine's home folder is one);
-  `register` writes a `.gitignore` of `*` either way.
+- Packs refuse any git repository unless `--allow-repo` (never the kit's or the project's own); `register` writes a
+  `.gitignore` of `*` either way. (The home folder was an empty git repository, created 2026-10-19 with no commits
+  and no remote: backed up to `home-git-backup-2026-11-13.zip` beside it and removed on 2026-11-13.)
 - Fast mode: the master kit (no `*.pbip`, no design/specs/layout.json) still runs every suite by default.
 - Not done: no pbik version bump or tag (VERSIONS.md says new commands are a minor release: pbik 0.15.0, kit v1.5).
 
@@ -102,3 +103,20 @@ Drift and the bind map (no Desktop needed):
 14. Optional, only with a published model you can use: connect a new Desktop report to it (Get data > Power BI
     semantic models), save it as PBIP, and compare its `definition.pbir` connection string with
     `bind.connection_string` (bind live's UNVERIFIED part). `bind live --from <that report>` copies Desktop's own.
+
+## Desktop check results (2026-11-13, Desktop 2.159.883.0)
+
+- **Bookmarks: confirmed in Desktop.** The two display bookmarks on "Bind map" hide and show the slicer from the
+  bookmark buttons, the pane and Reading view; Desktop saved both bookmark files unchanged (final newline only).
+  The first try looked broken only because the page had no buttons and the bookmarks keep the current page
+  (`suppressActiveSection`): applied from another page they change nothing visible. No pbik change; test 90 pins
+  the form. Not checked: the saved bookmarks.json has no Desktop-made group, so "pbik leaves bookmarks in a Desktop
+  group alone" (item 11) is still unconfirmed in Desktop.
+- **Drift and bind map:** v2 contract approved, `bind map draft` matched all five renames, `bind map approve` done,
+  `bind check` 0 errors. No errors in any step.
+- **Roundtrip** (`roundtrip.md` in the smoke folder), proposals for a later pbik fix:
+  - `cardVisual.kpi-delta-card`: Desktop drops `layout.verticalAlignment` (4 cards): remove it from the template.
+  - Bookmark buttons: Desktop drops the `objects.general` paragraphs pbik writes for button text (P3-V03, P3-V04).
+  - Matrix rows: Desktop adds `active: true` on the first row field when a later one is `active: false` (P2-V03).
+  - Desktop moved six visuals to visualContainer 2.14.0 (not in Microsoft's published schemas yet).
+  - The rest is expected: the slicer selection you changed, the active page, the re-registered theme.
