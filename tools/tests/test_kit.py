@@ -108,6 +108,22 @@ class FastTestModeTests(unittest.TestCase):
         self.assertFalse(RT.is_project(), "the master kit runs every suite by default")
 
 
+class SampleDesignFileTests(unittest.TestCase):
+    """Batch 3 item 17: tests read the shipped sample tokens and theme, never the project's own (which /theme rewrites)."""
+
+    def test_samples_shipped_and_used(self):
+        sample = KIT / "tools" / "tests" / "sample"
+        tok = json.loads((sample / "tokens.json").read_text(encoding="utf-8"))
+        self.assertEqual(sorted(tok), sorted(json.loads((KIT / "design" / "tokens.json").read_text(encoding="utf-8"))),
+                         "the sample has the same token groups as the format")
+        self.assertTrue(json.loads((sample / "pbip-polish.json").read_text(encoding="utf-8")).get("dataColors"))
+        for f in (KIT / "tools" / "pbik" / "tests" / "test_pbik.py", KIT / "design" / "scripts" / "test_design.py",
+                  KIT / "design" / "scripts" / "test_wireframe.py"):
+            text = f.read_text(encoding="utf-8")
+            self.assertNotIn('KIT / "design" / "tokens.json"', text, f.name)
+            self.assertNotIn('KIT / "design" / "themes" / "pbip-polish.json"', text, f.name)
+
+
 class BudgetTests(unittest.TestCase):
     """The lean learning system (docs/lessons/README.md, tools/lessons.py): lesson format and indexes, budgets
     (CLAUDE.md 150 lines, a lesson file 120, a pattern entry 80: a warning at the budget, a failure 25% over), no

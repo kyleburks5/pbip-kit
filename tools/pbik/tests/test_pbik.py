@@ -11,6 +11,8 @@ import contextlib, hashlib, io, json, os, pathlib, shutil, subprocess, sys, temp
 HERE = pathlib.Path(__file__).resolve().parent
 PBIK = HERE.parent / "pbik.py"
 KIT = HERE.parents[2]
+SAMPLE_TOKENS = KIT / "tools" / "tests" / "sample" / "tokens.json"   # not the project's own (batch 3 item 17)
+SAMPLE_THEME = KIT / "tools" / "tests" / "sample" / "pbip-polish.json"
 sys.path.insert(0, str(HERE.parent))
 SOURCE = pathlib.Path(os.environ.get("PBIK_TEST_SOURCE", KIT / "tools" / "fixtures" / "rep4"))
 
@@ -60,8 +62,8 @@ def copy_project(dest, keep_pages=True):
     (dest / "design" / "specs").mkdir(parents=True)
     (dest / "design" / "themes").mkdir()
     shutil.copy(HERE / "sample" / "layout.json", dest / "design" / "specs" / "layout.json")
-    shutil.copy(KIT / "design" / "tokens.json", dest / "design" / "tokens.json")
-    shutil.copy(KIT / "design" / "themes" / "pbip-polish.json", dest / "design" / "themes" / "pbip-polish.json")
+    shutil.copy(SAMPLE_TOKENS, dest / "design" / "tokens.json")
+    shutil.copy(SAMPLE_THEME, dest / "design" / "themes" / "pbip-polish.json")
     return dest / rep.name, dest / mod.name
 
 
@@ -1139,7 +1141,7 @@ class PbikTests(unittest.TestCase):
         kit_tpl = KIT / "design" / "templates"
         if not (kit_tpl / "advancedSlicerVisual.json").exists():
             self.fail("kit templates missing from design/templates (pbik templates harvest)")
-        tokens = json.loads((KIT / "design" / "tokens.json").read_text(encoding="utf-8"))
+        tokens = json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8"))
         sel = tokens["colors"]["selected"].upper()
 
         def edit(lay):
@@ -1183,7 +1185,7 @@ class PbikTests(unittest.TestCase):
         sys.path.insert(0, str(KIT / "design" / "scripts"))
         import gen_tokens
         dark = gen_tokens.run(brand="#0E1A2B,#F2B705,#E4572E", mode="dark",
-                              base=json.loads((KIT / "design" / "tokens.json").read_text(encoding="utf-8")))[0]
+                              base=json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8")))[0]
         c = dark["colors"]
 
         def edit(lay):
@@ -1934,6 +1936,9 @@ class PbikTests(unittest.TestCase):
         self.assertIn("schema checks skipped", r.stdout)
 
     def test_51_desktop_bridge_missing(self):
+        from pbikit.desktop import desktop_open
+        if desktop_open():                       # an open Desktop answers through the real bridge (batch 3 item 17)
+            self.skipTest("Power BI Desktop is open")
         r = pbik("desktop", "--bridge", self.tmp / "no-such-bridge.ps1", "state", ok=(3,))
         self.assertIn("Desktop bridge not available", r.stdout)
 

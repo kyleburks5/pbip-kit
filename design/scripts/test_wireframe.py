@@ -9,6 +9,8 @@ import html.parser, json, pathlib, re, shutil, sys, tempfile, unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
 KIT = HERE.parents[1]
+SAMPLE_TOKENS = KIT / "tools" / "tests" / "sample" / "tokens.json"   # not the project's own (batch 3 item 17)
+SAMPLE_THEME = KIT / "tools" / "tests" / "sample" / "pbip-polish.json"
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(KIT / "tools" / "pbik"))
 
@@ -225,7 +227,7 @@ class WireframeTests(unittest.TestCase):
 
     def test_selected_token_passes_aa_with_white(self):
         from pbikit.a11y import contrast
-        tok = json.loads((KIT / "design" / "tokens.json").read_text(encoding="utf-8"))
+        tok = json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8"))
         self.assertGreaterEqual(contrast("#FFFFFF", tok["colors"]["selected"]), 4.5)   # a rep may change teal freely
 
     def test_define_makes_proposed_measures_known(self):
@@ -446,7 +448,7 @@ class PatternTests(unittest.TestCase):
 
     def gallery(self, vega="offline"):
         lay = json.loads(self.GALLERY.read_text(encoding="utf-8"))
-        tok = json.loads((KIT / "design" / "tokens.json").read_text(encoding="utf-8"))
+        tok = json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8"))
         out = G.build_html(lay, tok, None, None, vega=vega)
         return out, json.loads(out.split('id="spec">', 1)[1].split("</script>", 1)[0])
 
@@ -486,7 +488,7 @@ class PatternTests(unittest.TestCase):
         """W4 (Rep 10 P1-V09): Vega-Lite itself by default (online), the subset renderer when it didn't load, and
         vega "offline" loads nothing."""
         lay = json.loads(self.GALLERY.read_text(encoding="utf-8"))
-        tok = json.loads((KIT / "design" / "tokens.json").read_text(encoding="utf-8"))
+        tok = json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8"))
         out = G.build_html(lay, tok, None, None)
         for u in G.VEGA_CDN:
             self.assertIn(f'<script src="{u}"></script>', out)

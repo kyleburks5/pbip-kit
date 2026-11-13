@@ -11,6 +11,8 @@ import json, pathlib, shutil, subprocess, sys, tempfile, unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
 KIT = HERE.parents[1]
+SAMPLE_TOKENS = KIT / "tools" / "tests" / "sample" / "tokens.json"   # not the project's own (batch 3 item 17)
+SAMPLE_THEME = KIT / "tools" / "tests" / "sample" / "pbip-polish.json"
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(KIT / "tools" / "pbik"))
 
@@ -60,7 +62,7 @@ class ColourTests(unittest.TestCase):
 
 class TokensTests(unittest.TestCase):
     def base(self):
-        return json.loads((KIT / "design" / "tokens.json").read_text(encoding="utf-8"))
+        return json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8"))
 
     def test_clean_preset_is_the_shipped_palette(self):
         t, changes, checks, failures, _, _ = G.run(preset="clean", base=self.base())
@@ -250,7 +252,7 @@ class EdgeReadTests(unittest.TestCase):
         r = ref_palette.extract(png)
         self.assertEqual(r["mode"], "dark")
         self.assertTrue(r["brand"] and G.hue_band(r["brand"][0]) == "yellow", r["brand"])
-        t = G.run(ref=str(png), base=json.loads((KIT / "design" / "tokens.json").read_text()))
+        t = G.run(ref=str(png), base=json.loads((SAMPLE_TOKENS).read_text()))
         self.assertEqual(t[3], [])                                          # every check passes
 
     def test_layout_styles_from_html(self):
