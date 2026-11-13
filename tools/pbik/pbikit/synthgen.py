@@ -47,11 +47,50 @@ def table_order(sl, rels):
     return out
 
 
-def fact_dates(r, g, hint, n):
-    """n dates in the date range (uniform; batch 3 item 8 adds trend, seasonality and month-end)."""
+def month_end(d):
+    nxt = dt.date(d.year + (d.month == 12), d.month % 12 + 1, 1)
+    return nxt - dt.timedelta(days=1)
+
+
+def month_weights(g, hint):
+    """[(year, month, weight)] over the date range: trend = growth per year (0.1 = +10%), seasonality = 12 monthly
+    weights (Jan..Dec, any scale)."""
     a, b = date_range(g)
-    span = (b - a).days
-    return [a + dt.timedelta(days=r.randrange(span + 1)) for _ in range(n)]
+    trend = float(hint.get("trend") or 0)
+    season = hint.get("seasonality") or [1] * 12
+    if len(season) != 12:
+        raise ContractError("generate.json hints: seasonality needs 12 monthly weights (Jan..Dec)")
+    out, y, m = [], a.year, a.month
+    while (y, m) <= (b.year, b.month):
+        out.append((y, m, (1 + trend) ** (y - a.year) * float(season[m - 1])))
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return out
+
+
+def wants_month_end(hint, col):
+    me = hint.get("monthEnd")
+    return me is True or (isinstance(me, list) and N.ci_in(col, me))
+
+
+def shaped(hint):
+    return bool(hint.get("trend") or hint.get("seasonality"))
+
+
+def fact_dates(r, g, hint, n, col=None):
+    """n dates in the date range, shaped by the hints: more rows in later years (trend) and busier months
+    (seasonality); month-end dates when asked."""
+    a, b = date_range(g)
+    if not shaped(hint) and not wants_month_end(hint, col):
+        span = (b - a).days
+        return [a + dt.timedelta(days=r.randrange(span + 1)) for _ in range(n)]
+    months = month_weights(g, hint)
+    picks = r.choices(months, weights=[w for _, _, w in months], k=n)
+    out = []
+    for y, m, _ in picks:
+        first, last = dt.date(y, m, 1), month_end(dt.date(y, m, 1))
+        lo, hi = max(first, a), min(last, b)
+        out.append(hi if wants_month_end(hint, col) else lo + dt.timedelta(days=r.randrange((hi - lo).days + 1)))
+    return out
 
 
 def date_part(col, d):
@@ -101,8 +140,8 @@ def generate_values(c, g):
         if date_key:
             a, b = date_range(g)
             days = [a + dt.timedelta(days=k) for k in range((b - a).days + 1)]
-            if hint.get("monthEnd"):
-                days = [d for d in days if (d + dt.timedelta(days=1)).day == 1]
+            if wants_month_end(hint, date_key):
+                days = [d for d in days if d == month_end(d)]
             vals[date_key], n = days, len(days)
         else:
             n = int(hint.get("rows") or (500 if (hint.get("fact") or t in facts) else 8))
@@ -114,12 +153,12 @@ def generate_values(c, g):
                 vals[x] = [date_part(x, d) for d in days]
             elif (t, x) in keys_from and keys_from[(t, x)][0] in out:
                 pool = out[keys_from[(t, x)][0]].get(keys_from[(t, x)][1]) or [None]
-                vals[x] = fact_keys(r, g, hint, pool, n) if typ == "dateTime" else [r.choice(pool) for _ in range(n)]
+                vals[x] = fact_keys(r, g, hint, pool, n, x) if typ == "dateTime" else [r.choice(pool) for _ in range(n)]
             elif x in keys_to.get(t, ()):
                 vals[x] = list(range(1, n + 1)) if typ in ("int64", "double", "decimal") else \
                     [f"{x} {k}" for k in range(1, n + 1)]
             elif typ == "dateTime":
-                vals[x] = fact_dates(r, g, hint, n)
+                vals[x] = fact_dates(r, g, hint, n, x)
             elif typ == "int64":
                 vals[x] = [r.randint(1, 20) for _ in range(n)]
             elif typ in ("double", "decimal"):
@@ -138,9 +177,19 @@ def generate_values(c, g):
     return out
 
 
-def fact_keys(r, g, hint, pool, n):
-    """Fact dates drawn from a date dimension's keys (item 8 shapes them)."""
-    return [r.choice(pool) for _ in range(n)]
+def fact_keys(r, g, hint, pool, n, col=None):
+    """Fact dates drawn from a date dimension's keys, shaped like fact_dates."""
+    if not shaped(hint) and not wants_month_end(hint, col):
+        return [r.choice(pool) for _ in range(n)]
+    by_month = {}
+    for d in pool:
+        if d is not None and (not wants_month_end(hint, col) or d == month_end(d)):
+            by_month.setdefault((d.year, d.month), []).append(d)
+    months = [(y, m, w) for y, m, w in month_weights(g, hint) if (y, m) in by_month]
+    if not months:
+        return [r.choice(pool) for _ in range(n)]
+    picks = r.choices(months, weights=[w for _, _, w in months], k=n)
+    return [r.choice(by_month[(y, m)]) for y, m, _ in picks]
 
 
 def dax_value(v, typ):

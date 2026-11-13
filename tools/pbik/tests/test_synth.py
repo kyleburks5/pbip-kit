@@ -249,6 +249,39 @@ class KeepRowsTests(Tmp):
             G.check_kept_rows(c, {"slice": {"Plan Option": {}}})
 
 
+class ShapeHintTests(Tmp):
+    """Item 8: trend, seasonality and month-end dates."""
+
+    def dates(self, hints):
+        approved_project(self.root)
+        g = S.read_json(self.root / "design/specs/generate.json")
+        g["hints"] = hints
+        S.write_json(self.root / "design/specs/generate.json", g)
+        S.slice_(self.root, LAYOUT)
+        f = G.generate(self.root, "Shaped")
+        src = (f / "definition/tables/Orders.tmdl").read_text(encoding="utf-8")
+        import datetime as dt
+        return [dt.date.fromisoformat(x) for x in re.findall(r'\{ "(\d{4}-\d{2}-\d{2})"', src)]
+
+    def test_trend_and_seasonality(self):
+        d = self.dates({"Orders": {"rows": 3000, "trend": 0.4, "seasonality": [1] * 11 + [3]}})
+        self.assertEqual(len(d), 3000)
+        per_year = [sum(1 for x in d if x.year == y) for y in (2023, 2024, 2025)]
+        self.assertLess(per_year[0], per_year[1])
+        self.assertLess(per_year[1], per_year[2])
+        dec = sum(1 for x in d if x.month == 12)
+        self.assertGreater(dec, 2 * (len(d) - dec) / 11, "December is about three times a normal month")
+
+    def test_month_end(self):
+        d = self.dates({"Orders": {"rows": 200, "monthEnd": ["OrderDate"]}})
+        self.assertTrue(all(G.month_end(x) == x for x in d))
+        import random
+        plain = G.fact_dates(random.Random(1), {"dateRange": ["2024-01-01", "2024-12-31"]}, {"monthEnd": True}, 50)
+        self.assertTrue(all(G.month_end(x) == x for x in plain))
+        with self.assertRaises(S.ContractError):
+            G.month_weights({}, {"seasonality": [1, 2]})
+
+
 def c_measures(root):
     return S.read_json(root / "design/specs/contract.json")["tables"]["_Measures"]["measures"]
 

@@ -461,7 +461,11 @@ writes them as they are.
 (`{name: {table, expression, formatString}}`) are measures the pages need that the live model doesn't have yet.
 Names used that are in neither are listed (exit 1). `generate` writes `<Name>.SemanticModel`: every table a
 calculated table with an inline DATATABLE, values from `seed` (same seed, same files), dimension keys unique, fact keys
-drawn from them, a date key covering `dateRange`, hints per table (`rows`, `fact`); `model.tmdl` carries
+drawn from them, a date key covering `dateRange`, hints per table: `rows`, `fact`, and the shape of date columns so
+charts and year-over-year measures look real: `trend` (growth per year, 0.1 = +10% rows a year), `seasonality` (12
+monthly weights, Jan..Dec), `monthEnd` (true, or a list of date columns: month-end dates; on a date key it keeps only
+month ends), e.g. `"hints": {"Orders": {"rows": 3000, "trend": 0.1, "seasonality": [1,1,1,1,1,1,1,1,1,1,1,3]}}`;
+`model.tmdl` carries
 `annotation PBIK_Synthetic`, planned measures `PBIK_Planned`. `verify` compares it with the contract slice (types,
 DAX, relationships); a type change listed in generate.json `deviations` is a note. UNVERIFIED in Desktop until the
 smoke report opens on one.
