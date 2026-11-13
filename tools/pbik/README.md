@@ -1,4 +1,4 @@
-# pbik 0.14.0
+# pbik 0.15.0
 
 pbip-kit's own command line tool for PBIR reports and TMDL models. Python standard library only; `jsonschema` is
 optional (schema checks).
