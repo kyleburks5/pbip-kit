@@ -124,6 +124,26 @@ class SampleDesignFileTests(unittest.TestCase):
             self.assertNotIn('KIT / "design" / "themes" / "pbip-polish.json"', text, f.name)
 
 
+class TidyRulesTests(unittest.TestCase):
+    """Batch 4 item 1: /tidy (Copilot /kit-tidy) keeps its safety rules: tag first, propose and stop for approval,
+    merge duplicates, retire to _retired.md, flag stale items, never delete; the placement order stays in the README."""
+
+    def test_tidy_rules(self):
+        for f in (KIT / ".claude" / "commands" / "tidy.md", KIT / ".github" / "prompts" / "kit-tidy.prompt.md"):
+            t = f.read_text(encoding="utf-8")
+            for want in ("pre-tidy-", "Nothing is ever deleted", "_retired.md", "lessons.py similar", "stale",
+                         "Flag them only", "apply only what I approve", "wait for my approval"):
+                self.assertIn(want, t, f"{f.name}: {want}")
+
+    def test_placement_order(self):
+        t = (KIT / "docs" / "lessons" / "README.md").read_text(encoding="utf-8")
+        order = [t.index(x) for x in ("1. **A check**", "2. **A template or token**", "3. **The command file**",
+                                      "4. **docs/lessons/", "5. **CLAUDE.md**")]
+        self.assertEqual(order, sorted(order))
+        self.assertEqual(lessons.BUDGETS, {"CLAUDE.md": 150, "lesson file": 120, "pattern entry": 80})
+        self.assertEqual(lessons.OVER, 1.25)
+
+
 class BudgetTests(unittest.TestCase):
     """The lean learning system (docs/lessons/README.md, tools/lessons.py): lesson format and indexes, budgets
     (CLAUDE.md 150 lines, a lesson file 120, a pattern entry 80: a warning at the budget, a failure 25% over), no
