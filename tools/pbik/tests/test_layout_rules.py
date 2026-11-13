@@ -124,6 +124,28 @@ class KpiCardTests(unittest.TestCase):
         self.assertIn("cardVisual.kpi-delta-card", idx["templates"])
 
 
+class VisualHeaderTests(unittest.TestCase):
+    """Batch 4 item 2: the theme turns visual headers off on every visual type; validate flags a visual turning its
+    own back on."""
+
+    def test_theme_turns_headers_off(self):
+        for f in (KIT / "design/themes/pbip-polish.json", KIT / "tools/tests/sample/pbip-polish.json"):
+            styles = json.loads(f.read_text(encoding="utf-8"))["visualStyles"]
+            self.assertEqual(styles["*"]["*"]["visualHeader"], [{"show": False}], f.name)
+            for vtype, st in styles.items():
+                for e in st.get("*", {}).get("visualHeader", []):
+                    self.assertIs(e.get("show", False), False, f"{f.name}: {vtype} turns headers on")
+
+    def test_validate_flags_a_header_turned_on(self):
+        on = other("P1-V01_chart", "lineChart", 32, 32, 900, 400)
+        on[1]["visual"]["visualContainerObjects"] = {"visualHeader": [{"properties": {"show": {"expr": {"Literal": {
+            "Value": "true"}}}}}]}
+        off = other("P1-V02_chart", "lineChart", 956, 32, 900, 400)
+        warns = KC.header_on("Overview", [on, off])
+        self.assertEqual(len(warns), 1)
+        self.assertIn("P1-V01_chart", warns[0])
+
+
 class PatternChoicesTests(unittest.TestCase):
     """Item 14: audit_ids' Pattern choices check warns for older specs and fails new ones; canvas.height option."""
     LAYOUT = {"pages": {"P1": {"displayName": "Overview"}, "P2": {"displayName": "Detail"}}}

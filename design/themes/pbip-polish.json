@@ -93,6 +93,11 @@
             },
             "alignment": "left"
           }
+        ],
+        "visualHeader": [
+          {
+            "show": false
+          }
         ]
       }
     },

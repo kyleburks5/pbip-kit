@@ -99,6 +99,9 @@ theme = {
             "padding": [{"top": 0, "bottom": 0, "left": 0, "right": 0}],
             "title": [{"show": False, "fontFamily": SEMIBOLD, "fontSize": P["cardTitle"],
                        "fontColor": solid(C["text"]), "alignment": "left"}],
+            # batch 4 item 2: no visual header (the hover icons) on any visual type; validate flags a visual
+            # whose own formatting turns it back on
+            "visualHeader": [{"show": False}],
         }},
         # Region card backgrounds: white, 1px border, rounded corners, shadow token. The sidebar shape overrides
         # fill/outline/shadow per visual.

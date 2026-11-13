@@ -122,6 +122,17 @@ def layer_order(page, visuals):
     return out
 
 
+def header_on(page, visuals):
+    """Batch 4 item 2: the theme turns visual headers off; a visual turning its own back on is flagged."""
+    out = []
+    for f, d in visuals:
+        vco = (d.get("visual") or {}).get("visualContainerObjects", {})
+        if _lit(vco, "visualHeader", "show") == "true":
+            out.append(f"{page}/{f}: its own formatting turns the visual header on (the theme turns headers off on "
+                       "every visual): remove container.header, or note why this visual needs it")
+    return out
+
+
 def check(fd, rep, pages, layout=None, margin=None):
     """pbik validate: KPI card layout warnings, and background shapes' layer order, on every page."""
     if margin is None:
@@ -132,6 +143,8 @@ def check(fd, rep, pages, layout=None, margin=None):
             fd.warn("kpi cards", w)
         for w in layer_order(pd.get("displayName", name), vis):
             fd.warn("layers", w)
+        for w in header_on(pd.get("displayName", name), vis):
+            fd.warn("visual header", w)
 
 
 # ---------------------------------------------------------------- the screenshot check
