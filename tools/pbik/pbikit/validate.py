@@ -28,7 +28,7 @@ Exit 1 on errors. Without jsonschema, or with schemas not cached, schema checks 
 """
 import json, pathlib, re
 
-from . import a11y, catalog as CAT, schemas, slicerfit, tmdl, versions
+from . import filtertypes as FT, a11y, catalog as CAT, schemas, slicerfit, tmdl, versions
 from . import deneb as DN
 from . import deprecations as DEP
 from . import fields as F
@@ -744,13 +744,8 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
                         fd.err(rel(f), f"binds {ent}[{prop}]: table {ent!r} is not in the model")
                     elif not model.has_field(ent, prop):
                         fd.err(rel(f), f"binds column {ent}[{prop}], not in the model's TMDL")
-            for ent, col, vals in walk_in_filters(doc):
-                dt = model.column_type(ent, col)
-                if dt in tmdl.NUMERIC:
-                    texts = [v for v in vals if isinstance(v, str) and v.startswith("'")]
-                    if texts:
-                        fd.err(rel(f), f"filter on {ent}[{col}] ({dt}) has text values {texts[:3]}: "
-                                       f"write numbers as {texts[0].strip(chr(39))}{'L' if dt == 'int64' else 'D'}")
+            for msg in FT.issues(doc, FT.model_types(model)):
+                fd.err(rel(f), msg)
 
     # ---- SVG measures
     if model:

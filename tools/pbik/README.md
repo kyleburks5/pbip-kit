@@ -472,7 +472,9 @@ smoke report opens on one.
   report-level measures (names given as strings in ADDCOLUMNS, SELECTCOLUMNS, SUMMARIZE, ROW, DATATABLE; `[Value]`,
   `[Value1..n]` of GENERATESERIES and table constructors; `@` names; columns of VAR tables), report-level measures
   used as visual filters (`Schema: extension` on the filter's From entry), and a type difference generate.json
-  `deviations` records (a note).
+  `deviations` records (a note). Filter values are typed against the live column types (contract, through the
+  map) in every saved filter: text on a number column or a number on a text column is an error; `pbik validate`
+  does the same against the report's own model (In, Comparison and Between conditions, any level).
 - `prepare [--port auto]`: planned measures the report uses become report-level measures (reportExtensions.json),
   planned dependencies inlined as `CALCULATE ( ... )`, references marked `Schema: extension`; the synthetic model is
   regenerated without them. With `--port` the values before and after are compared first (nothing written when they

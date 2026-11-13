@@ -383,5 +383,35 @@ class FalseAlarmTests(BindBase):
         self.assertTrue(any("deviation: sample codes" in x for x in r.notes))
 
 
+class FilterTypeTests(BindBase):
+    """Item 5: text on a number column, or a number on a text column, in any saved filter."""
+
+    def test_wrong_literal_types_flagged_everywhere(self):
+        rf = self.rep / "definition/report.json"
+        d = json.loads(read(rf))
+        d["filterConfig"]["filters"][0]["filter"] = bind_sample.in_filter("c", "Calendar", "Year", ["'2024'"])
+        bind_sample.write(rf, d)
+        bm = self.rep / "definition/bookmarks/bm1.bookmark.json"
+        bind_sample.write(bm, json.loads(read(bm).replace("'Status 2'", "2L")))
+        sl = self.rep / "definition/pages/p1/visuals/P1-V03_option-slicer/visual.json"
+        bind_sample.write(sl, json.loads(read(sl).replace("'Option Label 1'", "1D")))
+        r = self.check()
+        msgs = " | ".join(r.errors)
+        self.assertIn("Calendar[Year] (int64) has text values [\"'2024'\"]: write numbers as 2024L", msgs)
+        self.assertIn("Orders[Status] (string) has number values ['2L']", msgs)
+        self.assertIn("Plan Option[Option Label] (string) has number values ['1D']", msgs)
+        import contextlib, io
+        from pbikit import validate as VAL
+        with contextlib.redirect_stdout(io.StringIO()):
+            fd = VAL.validate(self.rep, use_catalog=False, use_a11y=False)
+        joined = " | ".join(fd.errors)
+        for want in ("Calendar[Year] (int64) has text", "Orders[Status] (string) has number",
+                     "Plan Option[Option Label] (string) has number"):
+            self.assertIn(want, joined)
+
+    def test_correct_literals_pass(self):
+        self.assertEqual(self.check().errors, [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

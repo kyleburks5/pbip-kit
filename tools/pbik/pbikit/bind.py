@@ -147,6 +147,12 @@ def check(report, root=None, ctx=None):
                     res.errors.append(f"{where}: {ent}[{prop}] is not in the contract")
                 continue
             check_field(ctx, res, where, kind, ent, prop, planned)
+    from . import filtertypes as FT
+    # the live column types decide (contract, through the map): the filters are what goes live
+    types = (lambda e, col: ctx.contract_type(e, col)) if live else         (lambda e, col: ctx.contract_type(*ctx.mapper.field(e, col)))
+    for rel, doc in json_docs(ctx.rep):
+        for msg in FT.issues(doc, types):
+            res.errors.append(f"{rel}: {msg}")
     for (t, n), m in ext.items():
         check_dax(ctx, res, f"reportExtensions.json {t}[{n}]", m.get("expression", ""), planned)
     accepted = ctx.map.get("acceptDax", []) if not live else []
