@@ -413,5 +413,34 @@ class FilterTypeTests(BindBase):
         self.assertEqual(self.check().errors, [])
 
 
+class ModelIdTests(BindBase):
+    """Item 6: the model ID from a link or the bare ID; a mistyped workspace name warns and points to --from."""
+
+    def test_model_id_forms(self):
+        for text in (MID, MID.upper(), f"https://app.powerbi.com/groups/{'1' * 8}-1111-4111-8111-{'1' * 12}/datasets/{MID}/details",
+                     f"https://app.powerbi.com/groups/me/semanticmodels/{MID}?experience=power-bi",
+                     f"https://app.powerbi.com/groups/me/modeling/{MID}/modelView"):
+            self.assertEqual(BD.model_id(text), MID, text)
+        for bad in ("https://app.powerbi.com/groups/me/reports/" + MID, "not-an-id", ""):
+            with self.assertRaises(BD.BindError):
+                BD.model_id(bad)
+
+    def test_workspace_warnings(self):
+        self.assertEqual(BD.workspace_warnings("Sample Workspace"), [])
+        self.assertTrue(BD.workspace_warnings("Sample_Workspace-Dev"))           # mixed separators
+        self.assertTrue(BD.workspace_warnings(" Sample Workspace"))
+        self.assertTrue(BD.workspace_warnings("sample_workspace", ["Sample Workspace"]))
+        self.assertEqual(BD.workspace_warnings("Other Space", ["Sample Workspace"]), [])
+
+    def test_live_warns_and_recommends_desktop_route(self):
+        S.write_json(DC.project_file(self.root), {"workspaces": ["Sample-Workspace"]})
+        said = []
+        self.go_live(workspace="Sample_Workspace", out=said.append)
+        text = " ".join(said)
+        self.assertIn("looks like 'Sample-Workspace'", text)
+        self.assertIn("--from", text)
+        self.assertIn("Sample_Workspace", DC.read_project(self.root)["workspaces"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

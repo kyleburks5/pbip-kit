@@ -457,6 +457,7 @@ def live(report, by, workspace=None, model=None, mid=None, from_=None, root=None
              "report": ctx.rep.path.name, "labels": labels,
              "files": {rel: sha((ctx.rep.path / rel).read_bytes()) for rel in report_files(ctx.rep)}}
     write_json(sd / "state.json", state)
+    remember_workspace(ctx.root, workspace)
     out(f"Live. Backup in {backup}. Open the report in Desktop; `pbik bind local` goes back.")
     return state
 
@@ -465,6 +466,17 @@ def pre_live_checks(ctx, out):
     """A bind map must be approved, unchanged since."""
     if ctx.map and not map_approved(ctx.map):
         raise BindError("bind-map.json isn't approved (or changed since): a person runs `pbik bind map approve --by`")
+
+
+def remember_workspace(root, ws):
+    """project.json `workspaces`: names bound before, so a later typo is caught."""
+    if not ws:
+        return
+    d = DC.read_project(root)
+    lst = d.setdefault("workspaces", [])
+    if ws not in lst:
+        lst.append(ws)
+        write_json(DC.project_file(root), d)
 
 
 def known_workspaces(root):

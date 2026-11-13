@@ -483,7 +483,11 @@ smoke report opens on one.
   the model name). Refuses while Desktop is open, with an unapproved contract or a failing check. Backs up the report
   (`.pbik/bind/backup`, git-ignored), rewrites references per the map, writes definition.pbir `byConnection`
   (`Data Source="powerbi://api.powerbi.com/v1.0/myorg/<W>";initial catalog=<M>;...;semanticmodelid=<ID>`, UNVERIFIED in
-  Desktop: `--from` copies Desktop's own string), and records `.pbik/bind/state.json` (the restricted lock).
+  Desktop: `--from` copies Desktop's own string), and records `.pbik/bind/state.json` (the restricted lock). `--id`
+  takes the bare ID or a link with `/datasets/<id>/`, `/semanticmodels/<id>/` or `/modeling/<id>/` (a report or
+  workspace ID isn't taken). A workspace name with stray or double spaces, mixed `_`/`-`/space separators, or one
+  that differs from a workspace bound before (project.json `workspaces`) only in case or separators warns and
+  recommends the Desktop route (`--from` a report Desktop saved connected to the model).
 - `local [--restore-backup]`: refuses while Desktop is open. A file unchanged since `bind live` (hash in state.json)
   comes back from the backup byte for byte; a file changed or added while live is mapped back (names, and the labels
   live added) and listed; definition.pbir comes from the backup. `--restore-backup` puts the whole backup back
