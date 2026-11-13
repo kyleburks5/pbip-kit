@@ -543,6 +543,8 @@ def apply_query(ctx, v, d):
                 if spec.get("active") is False:  # batch 3 item 11: e.g. a matrix's saved second row level
                     p["active"] = False
                 projs.append(p)
+            if role == "Rows" and any(p.get("active") is False for p in projs[1:]) and "active" not in projs[0]:
+                projs[0]["active"] = True     # batch 4 item 7: Desktop marks the first row field active then
             qs[role] = {"projections": projs}
             if fparams:
                 qs[role]["fieldParameters"] = [{"parameterExpr": f["parameterExpr"], "index": f["index"],
@@ -754,8 +756,24 @@ def apply_container(ctx, vid, v, d):
             put("spacing", props)
 
 
+def button_text(v):
+    """The plain text of a layout `text` (string, runs or paragraphs), for a button's label."""
+    t = v["text"]
+    parts = t if isinstance(t, list) else [t]
+    out = []
+    for p in parts:
+        runs = p if isinstance(p, list) else (p.get("runs", []) if isinstance(p, dict) else [p])
+        out.append("".join(r if isinstance(r, str) else r.get("text", "") for r in runs))
+    return " ".join(x for x in out if x)
+
+
 def apply_text(ctx, vid, v, d):
     if "text" not in v:
+        return
+    if v.get("type") == "actionButton":
+        # batch 4 item 7: a button's label is objects.text.text on {id: default}, as Desktop saves it (rep 4 buttons);
+        # Desktop dropped the general.paragraphs pbik wrote before (batch 3 smoke roundtrip)
+        set_prop(ctx, vid, d, "objects", "text", {"id": "default"}, "text", s(button_text(v)))
         return
     paras = v["text"] if isinstance(v["text"], list) else [v["text"]]
     out = []

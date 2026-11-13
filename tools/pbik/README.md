@@ -170,6 +170,10 @@ Text boxes get 6px of headroom and 12px extra height (`textFit: false` turns it 
 Properties written by an earlier build and no longer in layout.json are removed on the next build (the ID map keeps
 the list).
 
+Batch 4 roundtrip fixes: a button's `text` becomes its label (`objects.text.text` on `{id: default}`, the form Desktop
+saves; `props: {"text.text": ...}` is the same), never text box paragraphs; a matrix's first `Rows` field is written
+`active: true` when a later one is `active: false`, as Desktop saves it.
+
 ### `measure ext add <Report> <name> --expression <DAX> --data-category ImageUrl`
 Adds or updates a report-level extension measure in `definition/reportExtensions.json`. Visuals bind it with
 `SourceRef.Schema = "extension"`. Use it for SVG measures a card image or table column shows.

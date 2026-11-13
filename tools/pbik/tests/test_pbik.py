@@ -2977,6 +2977,29 @@ class PbikTests(unittest.TestCase):
         self.assertEqual(sorted(va.values()), ["'Middle'", "'Top'"])
         self.assertIn("No changes", pbik("build", rep, lf).stdout)
 
+    def test_147_roundtrip_fixes_from_batch_3(self):
+        """Batch 4 item 7: button labels as objects.text.text on {id: default} (no general paragraphs); a matrix's
+        first row field active when a later one is active: false; no layout.verticalAlignment in kpi-delta-card."""
+        def edit(lay):
+            btn = next(v for v in lay["visuals"] if v["id"] == "P1-V06")
+            btn["props"].pop("text.text")            # the label from `text` alone (props text.text is the same form)
+            btn["text"] = "Go to stock"
+            lay["visuals"].append({"id": "P2-V09", "name": "matrix", "page": "P2", "type": "pivotTable", "x": 32,
+                                   "y": 700, "w": 600, "h": 300, "container": {"altText": "Revenue by city"},
+                                   "bindings": {"Rows": ["stores[City]", {"field": "stores[Store]", "active": False}],
+                                                "Values": ["[Revenue]"]}})
+        work, rep, lf = self._batch1("b147", edit)
+        pbik("build", rep, lf)
+        objs = visual(rep, "P1-V06")["visual"]["objects"]
+        self.assertNotIn("paragraphs", json.dumps(objs.get("general", [])))
+        label = [e for e in objs["text"] if e.get("selector") == {"id": "default"} and "text" in e["properties"]]
+        self.assertEqual(label[0]["properties"]["text"], {"expr": {"Literal": {"Value": "'Go to stock'"}}})
+        rows = visual(rep, "P2-V09")["visual"]["query"]["queryState"]["Rows"]["projections"]
+        self.assertEqual([r.get("active") for r in rows], [True, False])
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        tpl = json.loads((KIT / "design/templates/cardVisual.kpi-delta-card.json").read_text(encoding="utf-8"))
+        self.assertNotIn("verticalAlignment", tpl["visual"]["objects"]["layout"][0]["properties"])
+
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""
     CHANGELOG = ("# Visual Container Versions\n\n### 2.13.0\n\n<b>Released in: </b> September 2026 <br />\n"
