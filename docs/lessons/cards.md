@@ -13,9 +13,11 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 | C-04 | A reference label without detail needs its detail hidden | – |
 | C-05 | Reference-label settings go on the label's own entry | pbik build merges them into the `id`'d entry (`objects.ref_labels`) |
 | C-06 | Reference labels in the sentence style | – |
-| C-07 | A new card ignores its own padding | – |
+| C-07 | Card padding may be ignored: move content with the callout area | – |
 | C-08 | Small multiples grid settings | – |
 | C-09 | Colour small multiples through the header, not the accent bar | – |
+| C-10 | The KPI card is its own container | `pbik validate` warns (pbikit/kpicards.py); design/scripts/card_space.py flags empty space |
+| C-11 | Background shapes keep their layer order | `pbik validate` warns (pbikit/kpicards.py `layer_order`) |
 <!-- /lessons:index -->
 
 ## C-01 Shapes need their fill set explicitly
@@ -57,12 +59,13 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 - **Enforced by:** not enforced (card templates use it)
 - **Source:** Rep 7
 
-## C-07 A new card ignores its own padding
-- **Rule:** To place card content, make the card transparent, size and centre the visual itself, and put the glass on
-  a shape behind it.
-- **Why:** Desktop draws a new card's content from the top whatever its padding.
+## C-07 Card padding may be ignored: move content with the callout area
+- **Rule:** Don't place card content with card or container padding; move it with the callout area
+  (`layout.calloutSize`, alignment) and the reference-label insets and layout.
+- **Why:** Desktop drew a new card's content from the top whatever its padding (Rep 7); whether padding ever works is
+  still open (design/known-gaps.md).
 - **Enforced by:** not enforced (read at /plan and /build)
-- **Source:** Rep 7
+- **Source:** Rep 7; batch 3 (2026-11-13)
 
 ## C-08 Small multiples grid settings
 - **Rule:** Set `smallMultiplesLayout.orientation` 0 (Grid; 2 is one row, 1 vertical) and `style` "Cards" (one tile per
@@ -77,3 +80,17 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 - **Why:** `smallMultiplesAccentBar` coloured by a measure doesn't render.
 - **Enforced by:** not enforced (read at /build)
 - **Source:** Rep 7
+
+## C-10 The KPI card is its own container
+- **Rule:** Put background, radius, border and shadow on the KPI card's own container formatting, with no shape behind
+  it (unless it matches within 1px); label, value and change line fill the card; cards in a row have equal width,
+  height and gaps, span the content width and line up with the row below (template `cardVisual.kpi-delta-card`).
+- **Why:** a shape behind a card drifts from it on every polish, and uneven rows or empty cards read as unfinished.
+- **Enforced by:** `pbik validate` warns (pbikit/kpicards.py); design/scripts/card_space.py flags empty space
+- **Source:** batch 3 item 10 (2026-11-13)
+
+## C-11 Background shapes keep their layer order
+- **Rule:** Set `container.keepLayerOrder: true` on every shape that sits behind other visuals.
+- **Why:** without it, clicking the shape in the report brings it to the front over the visuals it backs.
+- **Enforced by:** `pbik validate` warns (pbikit/kpicards.py `layer_order`)
+- **Source:** batch 3 item 12 (2026-11-13)

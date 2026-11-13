@@ -18,6 +18,7 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 | B-10 | Record the build method of every visual | design/scripts/audit_ids.py flags a visual without one |
 | B-11 | Filter on a measure only at visual level | pbik build stops with an error on a page measure filter |
 | B-12 | HTML Content visuals use legacy rendering and room to draw | pbik build sets `compatibility.legacyRendering` and warns under 43px; `pbik validate` warns too |
+| B-13 | Roundtrip after every hand polish, then update layout.json | – |
 <!-- /lessons:index -->
 
 ## B-01 Build through the kit, never by hand
@@ -98,3 +99,10 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 - **Why:** shorter, the visual has no room to draw its content.
 - **Enforced by:** pbik build sets `compatibility.legacyRendering` and warns under 43px; `pbik validate` warns too
 - **Source:** kit v1.2 (not Desktop-tested yet)
+
+## B-13 Roundtrip after every hand polish, then update layout.json
+- **Rule:** After polishing in Desktop and saving, run `pbik roundtrip <Report>` and carry what it lists into
+  layout.json (`desktopPosition`, props, IDs for new visuals with `--name-new`) until a rebuild prints "No changes".
+- **Why:** a polish that only lives in the report files is undone or fought over by the next build.
+- **Enforced by:** not enforced (read after every hand polish; `pbik build` prints "No changes" when done)
+- **Source:** batch 3 item 12 (2026-11-13)

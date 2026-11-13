@@ -67,6 +67,18 @@ class KpiCardTests(unittest.TestCase):
         self.assertEqual(KC.check_page("Overview", [card("P1-V01_total", 32, 32, 900, 150, bg=False)], 1920), [],
                          "not a KPI card")
 
+    def test_background_shapes_keep_layer_order(self):
+        panel = other("P1-V09_panel", "shape", 16, 16, 1888, 300, z=0)
+        vis = kpi_row() + [panel]
+        self.assertTrue(any("without keepLayerOrder" in x for x in KC.layer_order("Overview", vis)))
+        panel[1]["visual"]["visualContainerObjects"] = {"general": [{"properties": {"keepLayerOrder": {"expr": {
+            "Literal": {"Value": "true"}}}}}]}
+        self.assertEqual(KC.layer_order("Overview", vis), [])
+        lessons = (KIT / "docs/lessons/cards.md").read_text(encoding="utf-8")
+        for lid in ("C-07", "C-10", "C-11"):
+            self.assertIn(f"## {lid} ", lessons)
+        self.assertIn("Open: does card padding work?", (KIT / "design/known-gaps.md").read_text(encoding="utf-8"))
+
     def test_empty_space_in_a_screenshot(self):
         tmp = pathlib.Path(tempfile.mkdtemp())
         try:

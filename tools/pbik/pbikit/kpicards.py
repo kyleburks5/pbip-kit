@@ -106,14 +106,32 @@ def check_page(page, visuals, page_w, margin=32, layout=None):
     return out
 
 
+def layer_order(page, visuals):
+    """Lesson C-11: a shape behind other visuals keeps its layer order (container.keepLayerOrder)."""
+    out = []
+    items = [(f, d, box(d)) for f, d in visuals]
+    for f, d, (x, y, w, h, z) in items:
+        if (d.get("visual") or {}).get("visualType") not in SHAPES:
+            continue
+        backs = [g for g, e, (gx, gy, gw, gh, gz) in items if g != f and gz > z and gx >= x - TOL and gy >= y - TOL
+                 and gx + gw <= x + w + TOL and gy + gh <= y + h + TOL]
+        vco = (d.get("visual") or {}).get("visualContainerObjects", {})
+        if backs and _lit(vco, "general", "keepLayerOrder") != "true":
+            out.append(f"{page}/{f}: background shape behind {', '.join(backs[:3])} without keepLayerOrder: set "
+                       "container.keepLayerOrder true, or a click brings it to the front (C-11)")
+    return out
+
+
 def check(fd, rep, pages, layout=None, margin=None):
-    """pbik validate: KPI card layout warnings on every page."""
+    """pbik validate: KPI card layout warnings, and background shapes' layer order, on every page."""
     if margin is None:
         margin = ((layout or {}).get("grid") or {}).get("margin", 32)
     for name, pd, folder in pages:
         vis = [(f.parent.name, d) for d, f in rep.visuals(folder)]
         for w in check_page(pd.get("displayName", name), vis, pd.get("width", 1920), margin, layout):
             fd.warn("kpi cards", w)
+        for w in layer_order(pd.get("displayName", name), vis):
+            fd.warn("layers", w)
 
 
 # ---------------------------------------------------------------- the screenshot check

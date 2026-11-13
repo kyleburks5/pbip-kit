@@ -21,15 +21,18 @@ enforces everything below.
 | B-10 | Record the build method of every visual | [build.md](build.md) | yes |
 | B-11 | Filter on a measure only at visual level | [build.md](build.md) | yes |
 | B-12 | HTML Content visuals use legacy rendering and room to draw | [build.md](build.md) | yes |
+| B-13 | Roundtrip after every hand polish, then update layout.json | [build.md](build.md) | – |
 | C-01 | Shapes need their fill set explicitly | [cards.md](cards.md) | – |
 | C-02 | A text card on a coloured background turns every layer off | [cards.md](cards.md) | – |
 | C-03 | Rounded new cards need tileShape rectangleRoundedByPixel | [cards.md](cards.md) | yes |
 | C-04 | A reference label without detail needs its detail hidden | [cards.md](cards.md) | – |
 | C-05 | Reference-label settings go on the label's own entry | [cards.md](cards.md) | yes |
 | C-06 | Reference labels in the sentence style | [cards.md](cards.md) | – |
-| C-07 | A new card ignores its own padding | [cards.md](cards.md) | – |
+| C-07 | Card padding may be ignored: move content with the callout area | [cards.md](cards.md) | – |
 | C-08 | Small multiples grid settings | [cards.md](cards.md) | – |
 | C-09 | Colour small multiples through the header, not the accent bar | [cards.md](cards.md) | – |
+| C-10 | The KPI card is its own container | [cards.md](cards.md) | yes |
+| C-11 | Background shapes keep their layer order | [cards.md](cards.md) | yes |
 | S-01 | Short button slicers need Custom padding | [slicers.md](slicers.md) | yes |
 | S-02 | Button slicers need a grid sized for their items | [slicers.md](slicers.md) | yes |
 | S-03 | Dropdown slicers with a header need 76px | [slicers.md](slicers.md) | yes |
