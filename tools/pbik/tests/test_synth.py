@@ -147,6 +147,12 @@ class ContractTests(Tmp):
         self.assertEqual(c["approval"]["by"], "Sample Person")
         c["tables"]["Orders"]["columns"]["Amount"]["type"] = "double"
         self.assertFalse(S.approved(c), "any change voids the approval")
+        # a table's own rule wins over a rule for every table of that kind
+        c3 = {"flags": [{"kind": "enter-data", "table": "Plan Option"}],
+              "rules": [{"id": "R1", "kind": "enter-data", "table": "*", "resolution": "synthesize"},
+                        {"id": "R2", "kind": "enter-data", "table": "plan option", "resolution": "drop"}]}
+        S.apply_rules(c3)
+        self.assertEqual(c3["flags"][0]["resolution"], "drop")
         # a new contract from the same model keeps the rules and pre-fills every flag from them
         c2, _ = S.contract(LIVE, self.root)
         self.assertTrue(all(f["resolution"] for f in c2["flags"]))

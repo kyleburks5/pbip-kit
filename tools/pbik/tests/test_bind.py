@@ -150,6 +150,22 @@ class PartZeroTests(BindBase):
         self.assertEqual(before, tree(self.rep), "local restores the report exactly")
         self.assertIsNone(DC.guard(self.root, "dax"))
 
+    def test_relative_root_and_rollback(self):
+        cwd = os.getcwd()
+        os.chdir(self.root)
+        try:
+            st = BD.live("Example.Report", "Sample Person", "Sample Workspace", "Example Live", MID, root=".",
+                         ask=TS.say("Example Live"), out=self.quiet, desktop_open=CLOSED)
+            self.assertEqual(st["synthetic"], "Example Synthetic.SemanticModel")
+            BD.local("Example.Report", ".", out=self.quiet, desktop_open=CLOSED)
+        finally:
+            os.chdir(cwd)
+        before = tree(self.rep)
+        with mock.patch.object(BD, "dumps", side_effect=RuntimeError("disk full")), self.assertRaises(RuntimeError):
+            self.go_live()
+        self.assertEqual(before, tree(self.rep), "a failed bind live leaves the report as it was")
+        self.assertIsNone(DC.bind_state(self.root))
+
     def test_live_from_a_desktop_saved_report(self):
         other = self.root / "Saved.Report"
         bind_sample.write(other / "definition.pbir", {"version": "4.0", "datasetReference": {"byConnection": {

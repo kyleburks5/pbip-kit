@@ -205,7 +205,8 @@ def apply_rules(contract):
     for f in contract["flags"]:
         if f.get("resolution"):
             continue
-        for r in contract.get("rules", []):
+        rules = sorted(contract.get("rules", []), key=lambda r: r.get("table") == "*")   # a table's own rule first
+        for r in rules:
             if r["kind"] == f["kind"] and (r.get("table") == "*" or N.same(r.get("table"), f.get("table"))):
                 f["resolution"], f["rule"] = r["resolution"], r["id"]
                 filled.append(f)

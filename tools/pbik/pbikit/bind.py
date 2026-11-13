@@ -52,7 +52,7 @@ def json_docs(rep):
 class Context:
     def __init__(self, report, root=None):
         self.rep = Report(report)
-        self.root = pathlib.Path(root) if root else self.rep.path.parent
+        self.root = (pathlib.Path(root) if root else self.rep.path.parent).resolve()
         self.contract = read_json(specs(self.root) / "contract.json")
         if self.contract is None:
             raise ContractError("no contract: run `pbik synth contract` first")
@@ -441,19 +441,30 @@ def live(report, by, workspace=None, model=None, mid=None, from_=None, root=None
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ctx.rep.path / rel, dst)
     (sd / ".gitignore").write_text("*\n", encoding="utf-8")
+    synthetic = None
+    if ctx.model_folder:
+        try:
+            synthetic = str(pathlib.Path(ctx.model_folder).resolve().relative_to(ctx.root)).replace("\\", "/")
+        except ValueError:
+            synthetic = str(pathlib.Path(ctx.model_folder).resolve())
     labels = {}
-    for rel, doc in json_docs(ctx.rep):
-        lab = []
-        if remap_doc(rel, doc, ctx.mapper, ctx.tables, ctx.map.get("liveLabels") is not True, lab):
-            ctx.rep.write(ctx.rep.path / rel, doc)
-        if lab:
-            labels[rel] = lab
-    pbir = ctx.rep.path / "definition.pbir"
-    d = load(pbir) if pbir.exists() else {"$schema": PBIR_SCHEMA, "version": "4.0"}
-    d["datasetReference"] = {"byConnection": {"connectionString": cs}}
-    pbir.write_text(dumps(d), encoding="utf-8")
-    state = {"mode": "live", "workspace": workspace, "model": model, "id": mid, **st,
-             "synthetic": str(ctx.model_folder.relative_to(ctx.root)).replace("\\", "/") if ctx.model_folder else None,
+    try:
+        for rel, doc in json_docs(ctx.rep):
+            lab = []
+            if remap_doc(rel, doc, ctx.mapper, ctx.tables, ctx.map.get("liveLabels") is not True, lab):
+                ctx.rep.write(ctx.rep.path / rel, doc)
+            if lab:
+                labels[rel] = lab
+        pbir = ctx.rep.path / "definition.pbir"
+        d = load(pbir) if pbir.exists() else {"$schema": PBIR_SCHEMA, "version": "4.0"}
+        d["datasetReference"] = {"byConnection": {"connectionString": cs}}
+        pbir.write_text(dumps(d), encoding="utf-8")
+    except Exception:                                  # nothing half-done: the backup goes back as it was
+        for f in sorted(backup.rglob("*")):
+            if f.is_file():
+                shutil.copy2(f, ctx.rep.path / f.relative_to(backup))
+        raise
+    state = {"mode": "live", "workspace": workspace, "model": model, "id": mid, **st, "synthetic": synthetic,
              "report": ctx.rep.path.name, "labels": labels,
              "files": {rel: sha((ctx.rep.path / rel).read_bytes()) for rel in report_files(ctx.rep)}}
     write_json(sd / "state.json", state)
@@ -509,7 +520,7 @@ def local(report, root=None, out=print, desktop_open=None, restore_backup=False,
     a typed "restore" (changes made while live are lost)."""
     from .desktop import desktop_open as _open
     rep = Report(report)
-    root = pathlib.Path(root) if root else rep.path.parent
+    root = (pathlib.Path(root) if root else rep.path.parent).resolve()
     state = DC.bind_state(root)
     if not state or state.get("mode") != "live":
         raise BindError("the report isn't bound live (no .pbik/bind/state.json)")
