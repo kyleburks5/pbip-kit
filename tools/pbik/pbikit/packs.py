@@ -9,8 +9,8 @@
                                                           affected tables, bump the version
 
 A pack is <packs>/<model>/{pack.json, v<N>/{contract.json, generate.json, bind-map.json, model/<Name>.SemanticModel},
-drift.json}. Packs live outside the kit and every git repository (register refuses otherwise) and are never
-committed (a .gitignore of "*" is written too).
+drift.json}. Packs live outside the kit and every git repository (register refuses otherwise; `--allow-repo` lets a
+repository that isn't the kit's or the project's hold one) and are never committed (a .gitignore of "*" is written).
 """
 import datetime, json, pathlib, shutil, subprocess, tempfile
 
@@ -33,19 +33,23 @@ def _git_top(path):
     return pathlib.Path(r.stdout.strip()).resolve() if r.returncode == 0 and r.stdout.strip() else None
 
 
-def _outside(to, project, kit=None):
-    """Packs live outside the kit and the project, and outside their git repositories."""
+def _outside(to, project, kit=None, allow_repo=False):
+    """Packs live outside the kit and the project, and outside every git repository unless allow_repo (--allow-repo);
+    never inside the kit's or the project's own repository."""
     to = pathlib.Path(to).resolve()
     roots = [pathlib.Path(project).resolve()] + ([pathlib.Path(kit).resolve()] if kit else [])
     for root in roots:
         if to == root or root in to.parents:
             raise PackError(f"{to} is inside {root}: packs live outside the kit and the project")
     top = _git_top(to)
-    # the kit's or the project's own repository (one holding the kit or a report), not e.g. a home folder repo
-    theirs = {t for t in (_git_top(r) for r in roots) if t and ((t / "tools" / "pbik").is_dir() or list(t.glob("*.pbip"))
-                                                                or t in roots)}
-    if top and top in theirs:
-        raise PackError(f"{to} is inside the git repository {top}: packs are never committed; pick a folder outside it")
+    if not top:
+        return
+    if top in {t for t in (_git_top(r) for r in roots) if t}:
+        raise PackError(f"{to} is inside the git repository {top} of the kit or the project: packs are never "
+                        "committed; pick a folder outside it")
+    if not allow_repo:
+        raise PackError(f"{to} is inside the git repository {top}: packs are never committed; pick a folder outside "
+                        "any repository, or pass --allow-repo if that repository is meant to hold it")
 
 
 def pack_info(pack):
@@ -65,13 +69,13 @@ def synthetic_folder(project):
     return found[0] if found else None
 
 
-def register(project, to, kit=None, out=print):
+def register(project, to, kit=None, out=print, allow_repo=False):
     """Save the project's approved contract, generate settings, synthetic model and bind map as a new version."""
     project = pathlib.Path(project)
     c = read_json(specs(project) / "contract.json")
     if not c or not approved(c):
         raise PackError("the contract isn't approved: a person runs `pbik synth approve --by` first")
-    _outside(to, project, kit)
+    _outside(to, project, kit, allow_repo)
     pack = pathlib.Path(to) / c["model"]
     info = read_json(pack / "pack.json") or {"name": c["model"], "versions": [], "current": 0}
     v = info["current"] + 1

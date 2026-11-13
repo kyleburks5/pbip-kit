@@ -4,7 +4,7 @@
 
 The sample model (tests/synth_sample/Example Live.SemanticModel) is invented: no real names, IDs, values or colours.
 """
-import json, os, pathlib, re, shutil, sys, tempfile, unittest
+import json, os, pathlib, re, shutil, subprocess, sys, tempfile, unittest
 from unittest import mock
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -312,6 +312,17 @@ class PackTests(Tmp):
             PK.register(self.root, KIT / "packs-here", KIT, out=self.quiet)      # inside the kit
         with self.assertRaises(PK.PackError):                                     # in the kit's git repository
             PK._outside(KIT / "tools" / "x", self.root, KIT / "design")
+        repo = pathlib.Path(tempfile.mkdtemp(prefix="pbik_repo_"))           # any other git repository
+        try:
+            subprocess.run(["git", "init", "-q", str(repo)], check=True)
+            with self.assertRaises(PK.PackError) as cm:
+                PK.register(self.root, repo / "packs", out=self.quiet)
+            self.assertIn("--allow-repo", str(cm.exception))
+            self.assertEqual(PK.register(self.root, repo / "packs", out=self.quiet, allow_repo=True)[1], 1)
+            with self.assertRaises(PK.PackError):                             # never the kit's own, even allowed
+                PK._outside(KIT / "tools" / "x", self.root, KIT / "design", True)
+        finally:
+            shutil.rmtree(repo, ignore_errors=True)
         pack, v = PK.register(self.root, self.packs, out=self.quiet)
         self.assertEqual(v, 1)
         info = S.read_json(pack / "pack.json")

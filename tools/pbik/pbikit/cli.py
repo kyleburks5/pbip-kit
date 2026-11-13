@@ -128,6 +128,8 @@ def main(argv=None):
     mr = mo.add_parser("register", help="save the approved contract, synthetic model and bind map as a model pack")
     mr.add_argument("project")
     mr.add_argument("--to", required=True, help="the packs folder (outside the kit and any git repository)")
+    mr.add_argument("--allow-repo", action="store_true",
+                    help="allow a git repository that isn't the kit's or the project's (the .gitignore still keeps it out)")
     md = mo.add_parser("drift", help="what changed between a pack and a new TMDL (resolutions pre-filled)")
     md.add_argument("pack")
     md.add_argument("tmdl")
@@ -292,7 +294,8 @@ def main(argv=None):
         from . import dataclass_ as DC, packs as PK, synth as S
         try:
             if args.sub == "register":
-                PK.register(args.project, args.to, pathlib.Path(__file__).resolve().parents[3])
+                PK.register(args.project, args.to, pathlib.Path(__file__).resolve().parents[3],
+                            allow_repo=args.allow_repo)
             elif args.sub == "drift":
                 PK.drift(args.pack, args.tmdl)
             else:
