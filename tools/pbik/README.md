@@ -300,6 +300,13 @@ The Patterns page save (2026-10-19) showed: whole-number positions written as `3
 empty `visualContainerObjects` Desktop drops, visualContainer 2.13.0 moved to 2.14.0 on buttons, and the final
 newline dropped on every file (pbik keeps it on purpose: it marks files Desktop hasn't saved).
 
+
+Visuals Desktop added without an ID are listed with a proposed ID (next free on the page, `retired` skipped), folder
+name and alt text from their fields; `--name-new` renames the folder, sets the name and alt text and renames every
+reference (interactions, bookmarks, groups), and prints the layout.json entries to add (with `desktopPosition`).
+After every hand polish: roundtrip, then update layout.json so a rebuild prints "No changes" (lesson B-13).
+Bookmarks pbik made that the author moves into a bookmark group made in Desktop are left alone from then on (file,
+place and membership); the build log says so.
 ### `catalog refresh <folders> [--name <name>] | catalog show | catalog list`
 The settings catalog (`tools/pbik/catalogs/home.json`, `pbikit/catalog.py`): every formatting property, value type
 (`bool`, `number`, `int`, `text`, `color:literal`, `color:theme`, `color:measure`, `measure`, `paragraphs`, ...) and

@@ -39,7 +39,9 @@ build.py (pbik 0.6): what layout.json can't express is a pbik gap (design/known-
 | --- | --- |
 | `id`, `name`, `page`, `type` | ID, kebab-case name, page key, PBIR visual type (`cardVisual`, `shape`, `textbox`, ...) |
 | `cols`, `x`, `y`, `w`, `h`, `z` | grid columns and the box computed from them; z = layer |
+| `desktopPosition` | optional: Desktop's exact position after a hand polish (`{"x": 40.25, "y": 96.5, "z": 7000, "width": 600.75, "height": 300, "tabOrder": 55}`, fractions kept), copied from roundtrip; it wins over the grid box, z and tabOrder |
 | `fields` | layout notation: `[Measure]`, `Table[Column]`, `First(Table[Column])` (for the wireframe and the spec) |
+| `bindings` entries can be `{"field": ..., "active": false}` (e.g. a matrix's saved second row level, as Desktop saved it) | |
 | `bindings`, `sort`, `filters` (columns: values or Top N; measures: `{field, op, value}`, visuals only), `referenceLines`, `action`, `container`, `text`, `cf`, `props`, `selection`, `template`, `navigator` |
 | `container.altText` | required on every data visual (bindings, not a slicer) and every image: one sentence on what it shows; /plan writes it, gen_wireframe_hf.py and `pbik validate` flag a missing one | what `pbik build` writes (tools/pbik/README.md) |
 | `members`, `displayName`, `mode` | groups (`type: "group"`): the member IDs (visuals or groups on the same page), the name in the Selection pane, `ScaleMode` (default); `x`/`y`/`w`/`h` optional (default: the members' box). Members keep page coordinates here; pbik writes them relative to the group |

@@ -181,14 +181,25 @@ def write(rep, layout, page_ids, vnames, vtypes, old_map, prune, log):
     if not wanted and not groups and not old_b and not old_g:
         return {"bookmarks": [], "groups": []}
     bdir.mkdir(exist_ok=True)
-    for bid, doc in wanted:
-        rep.write(bdir / f"{bid}.bookmark.json", doc)
     mf = bdir / "bookmarks.json"
     meta = load(mf) if mf.exists() else {"$schema": META_SCHEMA, "items": []}
     items = meta.setdefault("items", [])
+    # batch 3 item 11: a pbik bookmark moved into a group made in Desktop is the author's now: left alone
+    mine_g = old_g | {g["name"] for g in groups}
+    moved = {c: it.get("displayName", it["name"]) for it in items if "children" in it and it["name"] not in mine_g
+             for c in it["children"]}
+    all_wanted = {b for b, _ in wanted}
+    for bid in sorted(set(moved) & all_wanted):
+        log.append(f"bookmark {bid} sits in Desktop group {moved[bid]!r}: left alone")
+    wanted = [(bid, doc) for bid, doc in wanted if bid not in moved]
+    for g in groups:
+        g["children"] = [c for c in g["children"] if c not in moved]
+    for bid, doc in wanted:
+        rep.write(bdir / f"{bid}.bookmark.json", doc)
     want_ids = [bid for bid, _ in wanted]
     grouped = {c for g in groups for c in g["children"]}
-    gone_b = (old_b - set(want_ids))
+    moved_b = set(moved) & (old_b | all_wanted)       # pbik's own, still listed as pbik's (never Desktop's)
+    gone_b = (old_b - set(want_ids) - set(moved))
     gone_g = (old_g - {g["name"] for g in groups})
     if gone_b or gone_g:
         if prune:
@@ -233,5 +244,5 @@ def write(rep, layout, page_ids, vnames, vtypes, old_map, prune, log):
             new_items.insert(min(pos, len(new_items)), it)
     meta["items"] = new_items
     rep.write(mf, meta)
-    return {"bookmarks": [bid for bid, _ in wanted] + ([] if prune else sorted(gone_b)),
+    return {"bookmarks": [bid for bid, _ in wanted] + ([] if prune else sorted(gone_b - set(moved))) + sorted(moved_b),
             "groups": [g["name"] for g in groups] + sorted(keep_old_groups)}

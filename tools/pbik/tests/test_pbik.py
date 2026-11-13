@@ -2908,6 +2908,60 @@ class PbikTests(unittest.TestCase):
             "useCrossReportDrillthrough"], True)
 
 
+    def test_145_layout_fidelity(self):
+        """Batch 3 item 11: desktopPosition, inactive bindings, Desktop bookmark groups, naming visuals Desktop added."""
+        def edit(lay):
+            v4 = next(v for v in lay["visuals"] if v["id"] == "P1-V04")
+            v4["desktopPosition"] = {"x": 40.25, "y": 96.5, "z": 7000, "width": 600.75, "height": 300, "tabOrder": 55}
+            v4["bindings"]["Category"] = ["stores[City]", {"field": "stores[Store]", "active": False}]
+            lay["pages"]["P1"]["bookmarks"] = [{"name": "one", "hide": ["P1-V04"]}, {"name": "two", "show": ["P1-V04"]}]
+        work, rep, lf = self._batch1("b145", edit)
+        pbik("build", rep, lf)
+        f4 = Report(rep).visual_by_id("P1-V04")[0]
+        d = json.loads(f4.read_text(encoding="utf-8"))
+        self.assertEqual(d["position"], {"x": 40.25, "y": 96.5, "z": 7000, "height": 300, "width": 600.75,
+                                         "tabOrder": 55})
+        cats = d["visual"]["query"]["queryState"]["Category"]["projections"]
+        self.assertEqual([p.get("active") for p in cats], [True, False])
+        self.assertIn("No changes", pbik("build", rep, lf).stdout)
+        # the author moves bookmark "one" into a group made in Desktop: pbik leaves it alone from then on
+        bdir = rep / "definition" / "bookmarks"
+        meta = json.loads((bdir / "bookmarks.json").read_text(encoding="utf-8"))
+        one = meta["items"][0]["name"]
+        meta["items"] = [{"name": "aa11bb22cc33dd44ee55", "displayName": "Author group", "children": [one]}] +             meta["items"][1:]
+        (bdir / "bookmarks.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+        f1 = bdir / f"{one}.bookmark.json"
+        f1.write_text(f1.read_text(encoding="utf-8") + " ", encoding="utf-8")         # the author's own edit
+        before = f1.read_bytes()
+        self._relayout(lf, lambda lay: lay["pages"]["P1"]["bookmarks"][0].update(hide=["P1-V03"]))
+        r = pbik("build", rep, lf)
+        self.assertIn("sits in Desktop group 'Author group': left alone", r.stdout)
+        self.assertEqual(f1.read_bytes(), before)
+        meta = json.loads((bdir / "bookmarks.json").read_text(encoding="utf-8"))
+        self.assertEqual([it["name"] for it in meta["items"]].count(one), 0, "not listed twice")
+        self.assertEqual(meta["items"][0]["children"], [one])
+        # a visual Desktop added (no ID): roundtrip proposes an ID and alt text, --name-new applies them
+        src = Report(rep).visual_by_id("P1-V04")[0]
+        page = src.parent.parent.parent
+        new = page / "visuals" / "a1b2c3d4e5f6a7b8c9d0"
+        new.mkdir()
+        nd = json.loads(src.read_text(encoding="utf-8"))
+        nd["name"] = "a1b2c3d4e5f6a7b8c9d0"
+        nd["visual"].pop("visualContainerObjects", None)
+        (new / "visual.json").write_text(json.dumps(nd, indent=2), encoding="utf-8")
+        r = pbik("roundtrip", rep, "--before", rep, "--layout", lf)
+        self.assertIn("Visuals without an ID", r.stdout)
+        self.assertIn("Bar chart of Revenue by City, Store", r.stdout)
+        self.assertTrue(new.exists(), "read-only without --name-new")
+        r = pbik("roundtrip", rep, "--before", rep, "--layout", lf, "--name-new")
+        nid = r.stdout.split("| a1b2c3d4e5f6a7b8c9d0 | ")[1].split(" ")[0]
+        self.assertFalse(new.exists())
+        named = Report(rep).visual_by_id(nid)
+        self.assertEqual(len(named), 1)
+        self.assertIn("Bar chart of Revenue", named[0].read_text(encoding="utf-8"))
+        self.assertNotIn("visual has no ID", pbik("validate", rep, ok=(0, 1)).stdout)
+
+
 class VersionTests(unittest.TestCase):
     """Target Desktop resolution from Microsoft's published schema CHANGELOGs and Desktop update archive."""
     CHANGELOG = ("# Visual Container Versions\n\n### 2.13.0\n\n<b>Released in: </b> September 2026 <br />\n"

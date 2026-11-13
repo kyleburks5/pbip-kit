@@ -1,5 +1,5 @@
 """pbik roundtrip: after a report pbik built is saved once in Desktop, list what Desktop rewrote, by visual ID, as
-proposed pbik fixes. Read-only: nothing is changed.
+proposed pbik fixes. Read-only (except `--name-new`, which names visuals Desktop added).
 
     pbik roundtrip <Report>                         pbik's files = the last commit (HEAD), Desktop's = the working tree
     pbik roundtrip <Report> --rev HEAD~1 --to HEAD  any two revisions (the kit commits after every pbik build)
@@ -325,7 +325,15 @@ def report_text(found, newline, only, label, resources=None):
     return "\n".join(lines)
 
 
-def roundtrip(report_path, rev=None, to=None, before=None, out=None):
+def load_layout(path):
+    p = pathlib.Path(path) if path else pathlib.Path("design/specs/layout.json")
+    try:
+        return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def roundtrip(report_path, rev=None, to=None, before=None, out=None, name_new=False, layout=None):
     rep = Report(report_path)
     try:
         if before:
@@ -346,7 +354,13 @@ def roundtrip(report_path, rev=None, to=None, before=None, out=None):
     found, newline, only = compare(left, right)
     text = report_text(found, newline, only, f"{rep.path.name}, pbik = {label_a}, Desktop = {label_b}",
                        compare_resources(res_a, res_b))
+    from . import namenew as NN                     # batch 3 item 11: IDs and alt text for visuals Desktop added
+    props = NN.proposals(rep, load_layout(layout))
+    text += NN.text(props)
     print(text)
+    if name_new and props:
+        for f in NN.apply(rep, props):
+            print(f"named: {f}")
     if out:
         p = pathlib.Path(out)
         p.parent.mkdir(parents=True, exist_ok=True)

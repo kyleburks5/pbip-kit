@@ -100,6 +100,9 @@ def main(argv=None):
     rt.add_argument("--to", help="Desktop's files at this git revision (default: the working tree)")
     rt.add_argument("--before", help="pbik's files from a copy of the report folder instead of git")
     rt.add_argument("--out", help="also write the list to this .md file")
+    rt.add_argument("--name-new", action="store_true",
+                    help="give visuals Desktop added (no ID) their proposed ID, folder name and alt text (writes)")
+    rt.add_argument("--layout", help="layout.json, for retired IDs (default design/specs/layout.json)")
 
     cp = sub.add_parser("copy", help="copy between reports").add_subparsers(dest="sub", required=True)
     cpp = cp.add_parser("page", help="copy a page (visual IDs renumbered, filter and binding names made unique)")
@@ -263,7 +266,7 @@ def main(argv=None):
             CAT.show(CAT.catalog_path(args.name, args.catalog), args.type, args.object)
     elif c == "roundtrip":
         from .roundtrip import roundtrip
-        roundtrip(args.report, args.rev, args.to, args.before, args.out)
+        roundtrip(args.report, args.rev, args.to, args.before, args.out, args.name_new, args.layout)
     elif c == "copy":
         from .copy import copy_page
         copy_page(args.source, args.page, args.target, args.key, args.as_name, args.bookmarks)

@@ -540,6 +540,8 @@ def apply_query(ctx, v, d):
                 if spec.get("active") or (not projs and (role == "Category" or (role == "Values" and v["type"] in (
                         "slicer", "listSlicer")))):     # listSlicer: as Desktop saved it (pbik-smoke-bulk, 2026-11-11)
                     p["active"] = True          # Desktop marks the first category (and classic slicer) field active
+                if spec.get("active") is False:  # batch 3 item 11: e.g. a matrix's saved second row level
+                    p["active"] = False
                 projs.append(p)
             qs[role] = {"projections": projs}
             if fparams:
@@ -2168,8 +2170,16 @@ def set_position(d, vid, v, bx, parent, box, vnames, ctx):
         tab = HIDDEN_TAB                    # roadmap gap 21: hidden from the tab order, as Desktop saves it
     if isinstance(tab, bool) or not isinstance(tab, int) or (tab < 0 and tab != HIDDEN_TAB):
         raise BuildError(f"{vid}: tabOrder {tab!r} must be a whole number (the default is the visual number x 100)")
-    d.setdefault("position", {}).update({"x": round(x), "y": round(y), "z": v.get("z", 1) * 1000 + idx,
-                                         "height": round(h), "width": round(w), "tabOrder": tab})
+    pos = {"x": round(x), "y": round(y), "z": v.get("z", 1) * 1000 + idx, "height": round(h), "width": round(w),
+           "tabOrder": tab}
+    dp = v.get("desktopPosition")
+    if dp:                       # batch 3 item 11: Desktop's exact position (fractions, z-order, tab order) as saved
+        bad = {k: x_ for k, x_ in dp.items() if k not in ("x", "y", "z", "width", "height", "tabOrder")
+               or isinstance(x_, bool) or not isinstance(x_, (int, float))}
+        if bad:
+            raise BuildError(f"{vid}: desktopPosition takes numbers for x, y, z, width, height, tabOrder (got {bad})")
+        pos.update(dp)
+    d.setdefault("position", {}).update(pos)
     if v.get("angle") is not None:                   # roadmap gap 16
         raise BuildError(f"{vid}: angle isn't supported: Desktop kept position.angle but neither drew nor selected the "
                          "visual (pbik-smoke-bulk, 2026-11-11). Shapes rotate through their own Rotation format "
