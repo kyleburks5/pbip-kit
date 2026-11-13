@@ -432,6 +432,14 @@ pbik desktop reload                                           rem report only; r
 pbik desktop screenshot --report "Sales.Report" --page "Overview" --out _snapshots\p1.png --region 0,0,1920,1080
 ```
 
+## Synthetic to live (docs/design/synth-to-live.md)
+
+### `project class [public|internal|restricted] [--guard dax|screenshot]`
+
+project.json `dataClass` (default internal). Lowering it is person-only (typed confirmation; refused in an agent's
+shell). Restricted: while the report is bound live, or with no synthetic model, `desktop screenshot` and
+run-dax.ps1 refuse; `--guard` prints why and exits 2.
+
 ## Python helpers
 
 `pbikit/objects.py` holds the pure-Python builders carried over from the kit's v0.2 helpers (literals,

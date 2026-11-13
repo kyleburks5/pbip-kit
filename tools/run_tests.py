@@ -9,7 +9,8 @@ Exit 1 if any suite fails. Run it after every pbik change; run --regression also
 import argparse, pathlib, subprocess, sys, time
 
 KIT = pathlib.Path(__file__).resolve().parents[1]
-SUITES = [("pbik", "tools/pbik/tests/test_pbik.py"), ("patterns", "tools/patterns/test_patterns.py"),
+SUITES = [("pbik", "tools/pbik/tests/test_pbik.py"), ("synth", "tools/pbik/tests/test_synth.py"),
+          ("patterns", "tools/patterns/test_patterns.py"),
           ("wireframe", "design/scripts/test_wireframe.py"), ("design", "design/scripts/test_design.py"),
           ("kit", "tools/tests/test_kit.py")]
 

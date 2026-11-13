@@ -1,0 +1,9 @@
+table 'Unused Table'
+
+	column Note
+		dataType: string
+		sourceColumn: Note
+
+	partition 'Unused Table' = m
+		mode: import
+		source = #table({"Note"}, {{"a"}})

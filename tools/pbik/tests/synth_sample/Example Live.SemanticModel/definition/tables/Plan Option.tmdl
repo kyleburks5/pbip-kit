@@ -1,0 +1,13 @@
+table 'Plan Option'
+
+	column 'Option Label'
+		dataType: string
+		sourceColumn: Option Label
+
+	column 'Option Order'
+		dataType: int64
+		sourceColumn: Option Order
+
+	partition 'Plan Option' = m
+		mode: import
+		source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCs7IL1dIzMlR0lFQMlSK1VGIVgrJL1AoSc0DiRhBRJzyS0ryc2GCxkqxsQA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [#"Option Label" = _t, #"Option Order" = _t])

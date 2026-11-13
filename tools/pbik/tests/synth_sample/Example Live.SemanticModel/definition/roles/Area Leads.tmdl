@@ -1,0 +1,4 @@
+role 'Area Leads'
+	modelPermission: read
+
+	tablePermission Area = [Region] = "North"

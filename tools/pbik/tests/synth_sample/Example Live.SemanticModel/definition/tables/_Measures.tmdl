@@ -1,0 +1,19 @@
+table _Measures
+
+	measure 'Total Amount' = SUM ( Orders[Amount] )
+		formatString: #,0
+
+	measure 'Total Units' = SUM ( Orders[Units] )
+		formatString: #,0
+
+	measure 'Avg Amount' = DIVIDE ( [Total Amount], [Total Units] )
+		formatString: #,0.00
+
+	measure 'Amount LY' = CALCULATE ( [Total Amount], SAMEPERIODLASTYEAR ( 'Calendar'[Date] ) )
+		formatString: #,0
+
+	measure 'Unused Measure' = COUNTROWS ( 'Unused Table' )
+
+	partition _Measures = m
+		mode: import
+		source = #table({}, {})

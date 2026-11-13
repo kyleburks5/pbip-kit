@@ -1,0 +1,17 @@
+table Area
+
+	column AreaKey
+		dataType: int64
+		sourceColumn: AreaKey
+
+	column 'Area Name'
+		dataType: string
+		sourceColumn: Area Name
+
+	column Region
+		dataType: string
+		sourceColumn: Region
+
+	partition Area = m
+		mode: import
+		source = Csv.Document(File.Contents("C:\example\area.csv"))

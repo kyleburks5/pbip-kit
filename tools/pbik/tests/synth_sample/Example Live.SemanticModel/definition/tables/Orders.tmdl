@@ -1,0 +1,38 @@
+table Orders
+
+	column OrderKey
+		dataType: int64
+		sourceColumn: OrderKey
+
+	column OrderDate
+		dataType: dateTime
+		sourceColumn: OrderDate
+
+	column AreaKey
+		dataType: int64
+		sourceColumn: AreaKey
+
+	column MemberKey
+		dataType: int64
+		sourceColumn: MemberKey
+
+	column Amount
+		dataType: decimal
+		sourceColumn: Amount
+
+	column Units
+		dataType: int64
+		sourceColumn: Units
+
+	column Status
+		dataType: string
+		sourceColumn: Status
+
+	partition Orders = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(ServerName, "example-db"),
+				    Data = Source{[Schema="dbo",Item="orders"]}[Data]
+				in
+				    Data

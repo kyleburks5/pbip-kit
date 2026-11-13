@@ -1,0 +1,10 @@
+model Model
+	culture: en-US
+
+ref table Orders
+ref table Calendar
+ref table Area
+ref table Member
+ref table 'Plan Option'
+ref table 'Unused Table'
+ref table _Measures

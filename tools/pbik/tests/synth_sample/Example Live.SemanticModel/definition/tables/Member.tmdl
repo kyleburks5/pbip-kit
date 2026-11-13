@@ -1,0 +1,17 @@
+table Member
+
+	column MemberKey
+		dataType: int64
+		sourceColumn: MemberKey
+
+	column 'Member Name'
+		dataType: string
+		sourceColumn: Member Name
+
+	column Tier
+		dataType: string
+		sourceColumn: Tier
+
+	partition Member = m
+		mode: import
+		source = Sql.Database(ServerName, "example-db"){[Item="member"]}[Data]

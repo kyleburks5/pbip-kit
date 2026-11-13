@@ -4,6 +4,13 @@
 param([Parameter(Mandatory)][string]$File, [Parameter(Mandatory)][int]$Port)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8  # callers decode UTF-8
+# Restricted projects (design/specs/project.json dataClass): pbik decides whether a DAX query may run
+$root = Resolve-Path (Join-Path $PSScriptRoot '..\..')
+$proj = Join-Path $root 'design\specs\project.json'
+if ((Test-Path $proj) -and ((Get-Content $proj -Raw) -match '"dataClass"\s*:\s*"restricted"')) {
+    $why = & python (Join-Path $root 'tools\pbik\pbik.py') project class --guard dax --root $root
+    if ($LASTEXITCODE -ne 0) { Write-Output "ERROR: $why"; exit 1 }
+}
 $sep = ' ' + [char]0xA6 + ' '  # the file is read as ANSI by PowerShell 5.1, so no literal non-ASCII here
 $exe = (Get-Process PBIDesktop | Select-Object -First 1).Path
 Add-Type -Path (Join-Path (Split-Path $exe) 'Microsoft.PowerBI.AdomdClient.dll')

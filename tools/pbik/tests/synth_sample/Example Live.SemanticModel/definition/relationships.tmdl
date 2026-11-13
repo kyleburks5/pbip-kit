@@ -1,0 +1,11 @@
+relationship 0a000000-0000-4000-8000-000000000001
+	fromColumn: Orders.OrderDate
+	toColumn: Calendar.Date
+
+relationship 0a000000-0000-4000-8000-000000000002
+	fromColumn: Orders.AreaKey
+	toColumn: Area.AreaKey
+
+relationship 0a000000-0000-4000-8000-000000000003
+	fromColumn: Orders.MemberKey
+	toColumn: Member.MemberKey

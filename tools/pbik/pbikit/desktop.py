@@ -98,10 +98,30 @@ def reload(bridge=None, force=False):
           "a screenshot now shows the report's default state.")
 
 
+def desktop_open():
+    """True when Power BI Desktop is running (PBIK_DESKTOP_OPEN=1/0 overrides, for tests)."""
+    env = os.environ.get("PBIK_DESKTOP_OPEN")
+    if env in ("0", "1"):
+        return env == "1"
+    if os.name != "nt":
+        return False
+    try:
+        r = subprocess.run(["tasklist", "/FI", "IMAGENAME eq PBIDesktop.exe", "/NH"], capture_output=True, text=True,
+                           errors="replace", timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return "PBIDesktop.exe" in (r.stdout or "")
+
+
 def screenshot(page, out, report=None, region=None, scale=1, bridge=None):
+    from . import dataclass_ as DC
+    from .report import Report
+    why = DC.guard(Report(report).path.parent if report else pathlib.Path.cwd(), "screenshot")
+    if why:
+        print(f"pbik: {why}", file=sys.stderr)
+        sys.exit(2)
     page_id = page
     if report:
-        from .report import Report
         hit = Report(report).page_by(page)
         if not hit:
             print(f"pbik: no page {page!r} in {report}")

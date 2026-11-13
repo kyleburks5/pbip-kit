@@ -146,6 +146,11 @@ def main(argv=None):
     pc.add_argument("--project", default=str(versions_default()))
     pc.add_argument("--version", help="Desktop version (default: detected from the installed Desktop)")
 
+    pcl = pjs.add_parser("class", help="data class: public, internal (default) or restricted (synthetic model only)")
+    pcl.add_argument("value", nargs="?", choices=["public", "internal", "restricted"])
+    pcl.add_argument("--root", default=".", help="project folder (default: the current folder)")
+    pcl.add_argument("--guard", choices=["dax", "screenshot"], help="exit 2 with the reason when this may not run")
+
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
     ds = dk.add_subparsers(dest="sub", required=True)
@@ -215,6 +220,22 @@ def main(argv=None):
         return 1 if check(args.model, args.folder) else 0
     elif c == "project":
         from . import versions as V
+        if args.sub == "class":
+            from . import dataclass_ as DC
+            if args.guard:
+                why = DC.guard(args.root, args.guard)
+                print(why or "ok")
+                return 2 if why else 0
+            if args.value:
+                try:
+                    old = DC.set_class(args.root, args.value)
+                except DC.Refused as e:
+                    print(f"pbik: {e}", file=sys.stderr)
+                    return 2
+                print(f"data class: {old} -> {args.value}")
+            else:
+                print(f"data class: {DC.data_class(args.root)}")
+            return 0
         if args.sub == "show":
             V.show(args.project)
         elif args.sub == "check":
