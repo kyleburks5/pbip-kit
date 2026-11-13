@@ -41,8 +41,7 @@ Blocked: none.
 - Stale references fail `bind check` (exit 1) like map errors, but are listed apart.
 - Headers keep synthetic labels by adding `displayName` where bind live renames a field; `bind local` removes them.
 - Packs refuse any git repository unless `--allow-repo` (never the kit's or the project's own); `register` writes a
-  `.gitignore` of `*` either way. (The home folder was an empty git repository, created 2026-10-19 with no commits
-  and no remote: backed up to `home-git-backup-2026-11-13.zip` beside it and removed on 2026-11-13.)
+  `.gitignore` of `*` either way.
 - Fast mode: the master kit (no `*.pbip`, no design/specs/layout.json) still runs every suite by default.
 - Not done: no pbik version bump or tag (VERSIONS.md says new commands are a minor release: pbik 0.15.0, kit v1.5).
 
