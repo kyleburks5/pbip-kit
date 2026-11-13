@@ -4,6 +4,9 @@
 
 **Question it answers:** how current is this, and can I trust it today?
 
+- **Use when:** every page (one line near the title), and time charts whose axis runs past the last data date.
+- **Avoid when:** the page already shows a refresh date in a shared header (one line per page is enough).
+
 ## When to use
 - Every report page: one short line near the title, "Data to 30 Sep 2026 · refreshed 1 Oct 06:10".
 - On time charts, a vertical line at the last data date when the axis runs past it (a date table to year end).

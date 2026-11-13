@@ -17,7 +17,8 @@ number), then picks patterns from here and names them on each visual in layout.j
 
 ## How a pattern page is laid out
 
-- **When to use / when not**, and **the question it answers** (one sentence a reader would ask).
+- **The question it answers** (one sentence a reader would ask), then a **Use when** and an **Avoid when** line
+  (/plan quotes them as the reason for each pattern it picks), then **When to use** in more detail.
 - **Design**: what is drawn and what each mark means, with the colours as token names.
 - **Build**: the visual-method ladder for this pattern (CLAUDE.md "Visual-method ladder"): what each step draws, and
   the step `/plan` should normally pick. Record the step and reason in layout.json `build`.

@@ -4,13 +4,14 @@
 
 **Question it answers:** is this period inside its usual range, and where in it?
 
+- **Use when:** a measure with a seasonal or historical normal (at least three earlier periods).
+- **Avoid when:** fewer than three earlier periods (the band is noise), or when the reader needs the exact history of
+  each year (use a line per year instead).
+
 ## When to use
 - A measure with a seasonal or historical normal: the band is the range (min to max, or a percentile band) of the
   same period in earlier years, the dots are this year.
 - Over time (months on the x axis), or across members (one row per region, band = the region's own history).
-
-When not: fewer than three earlier periods (the band is noise), or when the reader needs the exact history of each
-year (use a line per year instead).
 
 ## Design
 - Band: `slateTint` fill (or two thin `slateLight` lines when the band can't be shaded), no labels.

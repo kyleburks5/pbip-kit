@@ -4,13 +4,14 @@
 
 **Question it answers:** which members need attention, worst first?
 
+- **Use when:** many members, mostly normal, with a written rule for which ones need attention.
+- **Avoid when:** every member matters equally (a full ranked table), or there are no rules for "normal" yet (write
+  them in the spec's design ambition first).
+
 ## When to use
 - Many members (stores, products, cases) where most are normal and a few are not. The list shows only the ones
   outside the normal rule (below target, outside the band, late), with how far out they are.
 - Next to a summary chart: the chart shows normal, the list names the exceptions.
-
-When not: every member matters equally (a full ranked table), or there are no rules for "normal" yet (write them in
-the spec's design ambition first).
 
 ## Design
 - Title from a measure with the count: "4 stores below target".

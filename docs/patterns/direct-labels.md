@@ -4,12 +4,13 @@
 
 **Question it answers:** which line or bar is which, without looking it up in a legend?
 
+- **Use when:** a chart with 2-5 series or labelled bars, so each mark carries its own name.
+- **Avoid when:** more than ~5 series (labels collide; highlight one or two and grey the rest, or use small multiples).
+
 ## When to use
 - Any chart with 2-5 series. The label sits on or at the end of its mark, in the series colour (or in `text` next to
   a coloured mark when the colour fails 4.5:1).
 - Bar charts: the category name above each bar (docs/lessons/charts.md, Rep 6) rather than an axis far away.
-
-When not: more than ~5 series (labels collide; highlight one or two and grey the rest, or use small multiples).
 
 ## Design
 - Legend off. Line charts: series name at the right end of each line. Bar charts: category above the bar, value at

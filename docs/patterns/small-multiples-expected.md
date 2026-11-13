@@ -4,13 +4,14 @@
 
 **Question it answers:** which members are off their expected path, and since when?
 
+- **Use when:** 4 to 16 members, each with a time series and its own expected path.
+- **Avoid when:** over ~16 members (use an exception list of the off-path ones), or when one shared reference is enough
+  (one line chart with a reference line).
+
 ## When to use
 - 4 to 16 members, each with a time series and an expected path (target, forecast, plan, last year, a seasonal
   baseline). Each panel's own expected line, not one shared average.
 - The shapes matter: a member that drifts away is visible at a glance.
-
-When not: over ~16 members (use an exception list of the off-path ones), or when one shared reference is enough
-(one line chart with a reference line).
 
 ## Design
 - Same y scale in every panel unless the members differ by size (then say "own scale" in the subtitle).

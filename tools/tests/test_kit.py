@@ -61,6 +61,25 @@ class AmbitionTests(unittest.TestCase):
         self.assertIn("partial", ambition.spec_issues("## Design ambition\nbaseline, normal, exceptions\n## X\n")[0])
 
 
+class PatternPageTests(unittest.TestCase):
+    """Batch 3 item 13: every pattern page has Use when / Avoid when lines; /plan (and Copilot /kit-plan) lists the
+    patterns and style preset chosen per page, with a reason each."""
+
+    def test_use_and_avoid_lines(self):
+        for f in sorted((KIT / "docs" / "patterns").glob("*.md")):
+            if f.name == "README.md":
+                continue
+            text = f.read_text(encoding="utf-8")
+            self.assertIn("- **Use when:** ", text, f.name)
+            self.assertIn("- **Avoid when:** ", text, f.name)
+
+    def test_plan_asks_for_pattern_choices(self):
+        for f in (KIT / ".claude" / "commands" / "plan.md", KIT / ".github" / "prompts" / "kit-plan.prompt.md"):
+            text = f.read_text(encoding="utf-8")
+            self.assertIn("Pattern choices", text, f.name)
+            self.assertIn("Style preset", text, f.name)
+
+
 class BudgetTests(unittest.TestCase):
     """The lean learning system (docs/lessons/README.md, tools/lessons.py): lesson format and indexes, budgets
     (CLAUDE.md 150 lines, a lesson file 120, a pattern entry 80: a warning at the budget, a failure 25% over), no

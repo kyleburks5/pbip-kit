@@ -4,11 +4,12 @@
 
 **Question it answers:** what happens in the period I pick, and how does it compare with the rest?
 
+- **Use when:** a long series (2+ years of days or weeks) whose readers explore sub-periods they pick.
+- **Avoid when:** the period choice is always a month, quarter or year (a button slicer is quicker and keyboard-friendly).
+
 ## When to use
 - A long time series (2+ years of days or weeks) where readers explore sub-periods: an incident, a campaign, a
   season. The selection filters the rest of the page.
-
-When not: the period choice is always a month, quarter or year (a button slicer is quicker and keyboard-friendly).
 
 ## Design
 - An overview strip (60-90px high) with the whole series, the selected range highlighted (`tealTint` behind it), and

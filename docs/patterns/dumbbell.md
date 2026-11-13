@@ -4,13 +4,12 @@
 
 **Question it answers:** how far did each member move between two points in time (or two scenarios), and which way?
 
-## When to use
-- One row per member (region, product, team), two values of the same measure: before and after, plan and actual,
-  last year and this year.
-- The change matters more than the level, and members should be compared on the change.
+- **Use when:** one row per member with two values of one measure (before/after, plan/actual) and the change matters.
+- **Avoid when:** more than two points per member (use small multiples), or members whose values differ by orders of
+  magnitude (use % change bars).
 
-When not: more than two points per member (use small multiples), or members whose values differ by orders of
-magnitude (use % change bars).
+## When to use
+- The change matters more than the level, and members should be compared on the change.
 
 ## Design
 - One row per member, sorted by the change (largest rise first, or worst first for an exception view).
@@ -46,9 +45,8 @@ RETURN IF ( ISBLANK ( [Value] ) || ISBLANK ( [Value Before] ), BLANK (),
   & "<circle cx='" & _x0 & "' cy='10' r='4' fill='white' stroke='%23B8C2D6' stroke-width='2'/>"
   & "<circle cx='" & _x1 & "' cy='10' r='5' fill='" & _c & "'/></svg>" )
 ```
-Colours come from tokens.json when /plan writes the measure (record the token names in the measure description).
-Write `%` as `%25` inside the SVG, test in every audit state (audit_svg.py), and put the change number drawn in the
-SVG (if any) in the numbers audit (`svg` entries).
+Colours from tokens.json (token names in the measure description). Write `%` as `%25` inside the SVG, test it in
+every audit state (audit_svg.py), and put any number the SVG draws in the numbers audit (`svg` entries).
 
 ## layout.json example
 ```json
@@ -69,14 +67,12 @@ SVG (if any) in the numbers audit (`svg` entries).
            "register": "F1"}}
 ```
 
-Set the table's image size to the SVG's own size (`grid.imageHeight` / `imageWidth`, as Desktop saved them in Rep 5)
-and a small `grid.rowPadding`: without them Desktop draws each image row about 75px tall with a small dumbbell in it
-(v0.4 Desktop check).
+Set `grid.imageHeight` / `imageWidth` to the SVG's own size and a small `grid.rowPadding` (as saved in Rep 5): without
+them Desktop draws each image row about 75px tall with a small dumbbell in it (v0.4 Desktop check).
 
 ## Wireframe
-Rows with a connector and two dots on a shared scale, the change label coloured by direction. Uses the first
-category binding for the row labels; with the data file, the two values come from `[Value Before]` / `[Value]` if
-bound, else sample values.
+Rows with a connector and two dots on a shared scale, the change label coloured by direction; row labels from the first
+category binding, values from `[Value Before]` / `[Value]` if bound (with the data file), else sample values.
 
 ## Audit
 `[Value]`, `[Value Before]` and `[Change]` per member (sampled mode: top 5, bottom 5, 5 random), the member with no

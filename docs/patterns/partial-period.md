@@ -4,11 +4,13 @@
 
 **Question it answers:** is the last point complete, or still filling up?
 
+- **Use when:** a time series whose latest period is still open or whose data arrives late.
+- **Avoid when:** the report always shows closed periods only (then filter the open period out and say so in the
+  subtitle).
+
 ## When to use
 - Any time series whose latest period is not over yet (month to date, the current week) or whose data arrives late.
   A partial month drawn like a full one reads as a fall.
-
-When not: the report always shows closed periods only (then filter the open period out and say so in the subtitle).
 
 ## Design
 - Complete periods: solid `teal` line with small dots.
