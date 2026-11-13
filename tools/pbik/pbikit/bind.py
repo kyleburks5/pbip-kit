@@ -106,7 +106,10 @@ class Result:
         self.errors, self.stale, self.notes = [], [], []
 
     def ok(self):
-        return not self.errors
+        return not self.errors and not self.stale
+
+    def lines(self):
+        return self.errors + [f"stale reference {x}" for x in self.stale]
 
 
 def check(report, root=None, ctx=None):
@@ -121,7 +124,12 @@ def check(report, root=None, ctx=None):
         if rel.endswith("reportExtensions.json"):
             continue
         for kind, ent, prop, schema, path in BR.sites(doc, ctx.tables):
-            if kind == "Entity" or prop is None:
+            if kind == "Entity":
+                if not live and schema != "extension" and ctx.model and not N.find(ctx.model.tables, ent)                         and ctx.mapper.table(ent) == ent and (rel, N.key(ent)) not in seen:
+                    seen.add((rel, N.key(ent)))
+                    res.stale.append(f"{rel} {path}: table {ent}")
+                continue
+            if prop is None:
                 continue
             key = (rel, kind, N.key(ent), N.key(prop), schema)
             if key in seen:
@@ -156,7 +164,7 @@ def check_field(ctx, res, where, kind, ent, prop, planned):
         res.errors.append(f"{where}: planned measure [{prop}] isn't in the live model: run `pbik bind prepare`")
         return
     if not ctx.synthetic_has(ent, prop) and not ctx.mapper.entry(ent, prop):
-        res.errors.append(f"{where}: {ent}[{prop}] is not in the synthetic model")
+        res.stale.append(f"{where}: {ent}[{prop}]")      # in neither the synthetic model nor the map
         return
     lt, ln = ctx.mapper.field(ent, prop)
     if not ctx.contract_has(lt, ln, kind if kind != "ref" else None):
@@ -180,10 +188,14 @@ def check_dax(ctx, res, where, expr, planned):
         if t is None:
             lt, ln = ctx.mapper.field(None, name)
             ok = any(ctx.contract_has(tt, ln) for tt in ctx.contract["tables"])
+            known = any(ctx.synthetic_has(tt, name) for tt in ctx.tables) or ctx.mapper.entry(None, name)
         else:
             lt, ln = ctx.mapper.field(t, name)
             ok = ctx.contract_has(lt, ln)
-        if N.ci_in(name, planned):
+            known = ctx.synthetic_has(t, name) or ctx.mapper.entry(t, name)
+        if not known and not N.ci_in(name, planned) and not ctx.state:
+            res.stale.append(f"{where}: {(t or '')}[{name}]")
+        elif N.ci_in(name, planned):
             res.errors.append(f"{where}: uses planned measure [{name}]: run `pbik bind prepare`")
         elif not ok:
             res.errors.append(f"{where}: {(t or '')}[{name}] is not in the contract")
@@ -392,7 +404,7 @@ def live(report, by, workspace=None, model=None, mid=None, from_=None, root=None
     for x in res.notes:
         out(f"note  {x}")
     if not res.ok():
-        raise BindError("bind check failed:\n  " + "\n  ".join(res.errors))
+        raise BindError("bind check failed:\n  " + "\n  ".join(res.lines()))
     if from_:
         workspace, model, mid, cs = from_report(from_)
     else:
@@ -620,7 +632,7 @@ def map_approve(report, by, root=None, ask=None, out=print):
         raise BindError(f"unmatched names left: {', '.join(ctx.map['unmatched'])} (map them, or clear `unmatched`)")
     res = check(report, ctx.root, ctx)
     if not res.ok():
-        raise BindError("bind check fails through this map:\n  " + "\n  ".join(res.errors))
+        raise BindError("bind check fails through this map:\n  " + "\n  ".join(res.lines()))
     for k, v in ctx.map.get("tables", {}).items():
         out(f"table {k} -> {v}")
     for k, v in ctx.map.get("fields", {}).items():

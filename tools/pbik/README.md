@@ -466,7 +466,9 @@ smoke report opens on one.
 
 - `check`: every field reference (visual queries, sorts, conditional formatting, filters at every level, slicer state,
   bookmarks, drillthrough and tooltip bindings, report-level measures and their DAX) exists in the synthetic model
-  and, through design/specs/bind-map.json when there is one, in the contract; column types match. Exit 1 on errors.
+  and, through design/specs/bind-map.json when there is one, in the contract; column types match. A name in neither
+  the synthetic model nor the map is listed as a `stale reference` with its file and JSON path (a leftover to remove
+  in Desktop or layout.json), apart from map errors. Exit 1 on either.
 - `prepare [--port auto]`: planned measures the report uses become report-level measures (reportExtensions.json),
   planned dependencies inlined as `CALCULATE ( ... )`, references marked `Schema: extension`; the synthetic model is
   regenerated without them. With `--port` the values before and after are compared first (nothing written when they

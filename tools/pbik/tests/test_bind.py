@@ -158,6 +158,36 @@ class PartZeroTests(BindBase):
         self.assertEqual((st["workspace"], st["model"], st["id"]), ("Sample Workspace", "Example Live", MID))
 
 
+class StaleReferenceTests(BindBase):
+    """Item 2: names in neither the synthetic model nor the map are stale references, with where they are."""
+
+    def test_stale_references_listed_with_their_place(self):
+        v = self.rep / "definition/pages/p1/visuals/P1-V02_amount-by-month/visual.json"
+        d = json.loads(read(v))
+        d["visual"]["query"]["sortDefinition"]["sort"][0]["field"] = bind_sample.col("Orders", "Old Column")
+        bind_sample.write(v, d)
+        p = self.rep / "definition/pages/p1/page.json"
+        d = json.loads(read(p))
+        d["filterConfig"]["filters"].append({"name": "pf2", "field": bind_sample.col("Gone Table", "X"),
+                                             "type": "Categorical"})
+        bind_sample.write(p, d)
+        e = self.rep / "definition/reportExtensions.json"
+        d = json.loads(read(e))
+        d["entities"][0]["measures"][0]["expression"] = "[Total Units] + [Retired Measure]"
+        bind_sample.write(e, d)
+        r = self.check()
+        self.assertEqual(r.errors, [], "stale references aren't map errors")
+        stale = " | ".join(r.stale)
+        self.assertIn("P1-V02_amount-by-month/visual.json /visual/query/sortDefinition/sort/0/field/Column: "
+                      "Orders[Old Column]", stale)
+        self.assertIn("pages/p1/page.json /filterConfig/filters/1/field/Column: Gone Table[X]", stale)
+        self.assertIn("reportExtensions.json _Measures[Per Unit]: [Retired Measure]", stale)
+        self.assertFalse(r.ok())
+        with self.assertRaises(BD.BindError) as cm:
+            self.go_live()
+        self.assertIn("stale reference", str(cm.exception))
+
+
 class BindMapTests(BindBase):
     """Item 1: bind-map.json drafted from similar names, approved by a person, applied by bind live everywhere."""
 
