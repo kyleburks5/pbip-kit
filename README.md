@@ -75,3 +75,14 @@ python tools\run_tests.py --regression
 ```
 
 Run it after any change to pbik or the scripts, and after a Power BI Desktop update.
+
+## Before you push
+
+```bat
+python tools\export_check.py
+```
+
+Run it before every push. It scans the tracked files, the unpushed commits and their messages, and unpushed tags for
+personal paths, user names, emails, secrets, real data files and smoke, sample or scratch folders, prints a pass/fail
+table and exits 1 on any finding. Something that may ship (a made-up test sample) goes in `tools/export_allow.txt`
+with its reason.

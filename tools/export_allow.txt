@@ -1,0 +1,5 @@
+# tools/export_check.py allow-list: <check or *> | <glob on the path or the matched text> | <why it may ship>
+# Every line needs a reason. Keep it short: an entry here is a promise the content is made up or meant to be public.
+smoke/sample/scratch folders | tools/pbik/tests/sample/* | pbik test layout on the kit's own toy fixture (made up)
+smoke/sample/scratch folders | tools/pbik/tests/synth_sample/* | invented "Example Live" model for the synth and bind tests
+smoke/sample/scratch folders | tools/tests/sample/* | copies of the kit's default tokens and theme for the tests

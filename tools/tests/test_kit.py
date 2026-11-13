@@ -144,6 +144,59 @@ class TidyRulesTests(unittest.TestCase):
         self.assertEqual(lessons.OVER, 1.25)
 
 
+class ExportCheckTests(unittest.TestCase):
+    """Batch 4 item 5: tools/export_check.py finds personal paths, names, emails, secrets, data files and smoke /
+    sample / scratch folders in tracked files and unpushed commits; the allow-list needs a reason."""
+
+    def test_finds_planted_items_in_a_scratch_repo(self):
+        sys.path.insert(0, str(KIT / "tools"))
+        import export_check as EC
+        tmp = pathlib.Path(tempfile.mkdtemp())
+        bs = "\\"
+        home = f"C:{bs}Users{bs}someone"
+        try:
+            def g(*a):
+                subprocess.run(["git", *a], cwd=tmp, capture_output=True, check=True)
+            g("init", "-q")
+            g("config", "user.name", "Sample Author")
+            g("config", "user.email", "sample@example.com")
+            mail, secret = "a.person" + "@" + "mail.invalidx", "pass" + 'word = "hunter22"'   # built here, so
+            (tmp / "notes.md").write_text(f"see {home}{bs}kit; ask Sample Author or {mail}\n{secret}\n",  # the kit
+                                          encoding="utf-8")                                # stays clean
+            (tmp / "data").mkdir()
+            (tmp / "data" / "rows.csv").write_text("a,b\n", encoding="utf-8")
+            (tmp / "pbik-smoke-x").mkdir()
+            (tmp / "pbik-smoke-x" / "readme.md").write_text("x\n", encoding="utf-8")
+            (tmp / "docs").mkdir()
+            (tmp / "docs" / "smoke.md").write_text("a command file named smoke is fine\n", encoding="utf-8")
+            g("add", "-A")
+            g("commit", "-q", "-m", f"work from {home}{bs}Desktop")
+            quiet = lambda *a: None                                                     # noqa: E731
+            with mock.patch.object(EC, "KIT", tmp), mock.patch.object(EC, "name_words", return_value=["sample author"]):
+                found = EC.run(allow_path=tmp / "none.txt", out=quiet)
+            self.assertTrue(any(x.startswith("notes.md") for x in found["personal paths"]))
+            self.assertTrue(any(x.startswith("commit") for x in found["personal paths"]), "commit messages count")
+            self.assertTrue(found["user names"])
+            self.assertTrue(any(mail in x for x in found["emails"]))
+            self.assertEqual(found["secrets"], ["notes.md: password"])
+            self.assertEqual(found["data files"], ["data/rows.csv"])
+            self.assertEqual(found["smoke/sample/scratch folders"], ["pbik-smoke-x/readme.md"])
+            allow = tmp / "allow.txt"
+            allow.write_text("smoke/sample/scratch folders | pbik-smoke-x/* | made up for this test\n"
+                             "data files | data/* |\n", encoding="utf-8")                # no reason: not allowed
+            with mock.patch.object(EC, "KIT", tmp), mock.patch.object(EC, "name_words", return_value=[]):
+                found = EC.run(allow_path=allow, out=quiet)
+            self.assertEqual(found["smoke/sample/scratch folders"], [])
+            self.assertEqual(found["data files"], ["data/rows.csv"])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_documented(self):
+        text = (KIT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("export_check.py", text)
+        self.assertIn("before every push", text)
+
+
 class BudgetTests(unittest.TestCase):
     """The lean learning system (docs/lessons/README.md, tools/lessons.py): lesson format and indexes, budgets
     (CLAUDE.md 150 lines, a lesson file 120, a pattern entry 80: a warning at the budget, a failure 25% over), no
