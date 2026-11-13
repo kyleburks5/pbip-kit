@@ -19,6 +19,12 @@
       "visualType": "actionButton",
       "source": "P4-V05_pill-button"
     },
+    "actionButton.text-link-button": {
+      "visualType": "actionButton",
+      "source": null,
+      "status": "needs a Desktop-saved sample",
+      "pattern": "text-link-button"
+    },
     "advancedSlicerVisual": {
       "visualType": "advancedSlicerVisual",
       "source": "P4-V22_button-slicer",
@@ -64,6 +70,12 @@
     "cardVisual.pill-label": {
       "visualType": "cardVisual",
       "source": "P4-V06_pill-label"
+    },
+    "cardVisual.two-kpi-card": {
+      "visualType": "cardVisual",
+      "source": null,
+      "status": "needs a Desktop-saved sample",
+      "pattern": "two-kpi-card"
     },
     "clusteredBarChart": {
       "visualType": "clusteredBarChart",
@@ -165,6 +177,12 @@
       "visualType": "pageNavigator",
       "source": "P4-V04_page-navigator"
     },
+    "pageNavigator.tabs-underline": {
+      "visualType": "pageNavigator",
+      "source": null,
+      "status": "needs a Desktop-saved sample",
+      "pattern": "tabs-underline"
+    },
     "pivotTable": {
       "visualType": "pivotTable",
       "source": "P4-V18_matrix",
@@ -184,6 +202,12 @@
     "shape.glass-panel": {
       "visualType": "shape",
       "source": "P4-V23_glass-panel"
+    },
+    "shape.headline-banner": {
+      "visualType": "shape",
+      "source": null,
+      "status": "needs a Desktop-saved sample",
+      "pattern": "headline-banner"
     },
     "shape.shape-band": {
       "visualType": "shape",
@@ -205,6 +229,12 @@
       "default": true,
       "sameAs": "tableEx.table"
     },
+    "tableEx.ranked-bar-table": {
+      "visualType": "tableEx",
+      "source": null,
+      "status": "needs a Desktop-saved sample",
+      "pattern": "ranked-bar-table"
+    },
     "tableEx.table": {
       "visualType": "tableEx",
       "source": "P4-V17_table"
@@ -214,6 +244,12 @@
       "source": "P4-V02_textbox-title",
       "default": true,
       "sameAs": "textbox.textbox-title"
+    },
+    "textbox.page-header-stack": {
+      "visualType": "textbox",
+      "source": null,
+      "status": "needs a Desktop-saved sample",
+      "pattern": "page-header-stack"
     },
     "textbox.textbox-note": {
       "visualType": "textbox",

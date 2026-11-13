@@ -14,6 +14,12 @@ number), then picks patterns from here and names them on each visual in layout.j
 | [Data freshness line](freshness-line.md) (`freshness-line`) | How current is this, and can I trust it today? | Text measure in a card + category-axis reference line | 1 native |
 | [Exception list](exception-list.md) (`exception-list`) | Which members need attention, worst first? | Table whose measures are blank for normal rows | 1 native |
 | [Direct labels instead of legends](direct-labels.md) (`direct-labels`) | Which line or bar is which, without a lookup? | Legend off; series / category labels on the marks | 1 native (line-end labels: series labels, to harvest) |
+| [Page header stack](page-header-stack.md) (`page-header-stack`) | Where am I, what is this page for, and what should I read first? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Headline banner](headline-banner.md) (`headline-banner`) | What is the one thing to know on this page right now? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Ranked bar table](ranked-bar-table.md) (`ranked-bar-table`) | Who ranks where, by how much, which way are they moving, and are they OK? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Two-KPI tinted card](two-kpi-card.md) (`two-kpi-card`) | How do two related numbers stand against each other (actual and target, this year and last)? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Tabs with underline](tabs-underline.md) (`tabs-underline`) | Which view am I on, and what else is there? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Text link button](text-link-button.md) (`text-link-button`) | Where do I go for more? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
 
 ## How a pattern page is laid out
 

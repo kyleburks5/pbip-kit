@@ -73,6 +73,21 @@ class PatternPageTests(unittest.TestCase):
             self.assertIn("- **Use when:** ", text, f.name)
             self.assertIn("- **Avoid when:** ", text, f.name)
 
+    def test_stubs_mark_their_templates(self):
+        """Batch 4 item 6: each stub names its template, marked "needs a Desktop-saved sample" here and in the index."""
+        idx = json.loads((KIT / "design" / "templates" / "index.json").read_text(encoding="utf-8"))["templates"]
+        stubs = ["page-header-stack", "headline-banner", "ranked-bar-table", "two-kpi-card", "tabs-underline",
+                 "text-link-button"]
+        readme = (KIT / "docs" / "patterns" / "README.md").read_text(encoding="utf-8")
+        for name in stubs:
+            text = (KIT / "docs" / "patterns" / f"{name}.md").read_text(encoding="utf-8")
+            self.assertIn("needs a Desktop-saved sample", text, name)
+            tpl = next(k for k, v in idx.items() if v.get("pattern") == name)
+            self.assertIn(f"`{tpl}`", text)
+            self.assertEqual(idx[tpl]["status"], "needs a Desktop-saved sample")
+            self.assertFalse((KIT / "design" / "templates" / f"{tpl}.json").exists(), "no file until the harvest")
+            self.assertIn(f"({name}.md)", readme)
+
     def test_plan_asks_for_pattern_choices(self):
         for f in (KIT / ".claude" / "commands" / "plan.md", KIT / ".github" / "prompts" / "kit-plan.prompt.md"):
             text = f.read_text(encoding="utf-8")
