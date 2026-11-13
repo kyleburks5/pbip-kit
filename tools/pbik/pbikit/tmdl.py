@@ -286,11 +286,23 @@ def references(expr):
     return refs, variables, strings
 
 
+VIRTUAL_RE = re.compile(r"^(Value\d*|@.+)$")
+
+
+def virtual_names(expr):
+    """Column names DAX defines itself, so not model fields: names given as strings (ADDCOLUMNS, SELECTCOLUMNS,
+    SUMMARIZE, ROW, DATATABLE, ...), [Value] (GENERATESERIES, one-column table constructors), [Value1..n]
+    (table constructors with n columns) and @-prefixed names. Returns a predicate (case-insensitive, as DAX)."""
+    strings = {s.casefold() for s in strip_dax(expr or "")[1]}
+    return lambda name: bool(VIRTUAL_RE.match(name or "")) or (name or "").casefold() in strings
+
+
 def check_references(model, expr):
     """Unresolved references in a DAX expression, as readable strings."""
     refs, variables, strings = references(expr)
     names_anywhere = {c for t in model.tables.values() for c in list(t.columns) + list(t.measures)}
-    generated = set(strings) | {"Value"} | {f"Value{k}" for k in range(1, 10)}
+    virtual = virtual_names(expr)
+    generated = type("V", (), {"__contains__": lambda self, n: virtual(n)})()
     bad = []
     for table, name in refs:
         if table is None:

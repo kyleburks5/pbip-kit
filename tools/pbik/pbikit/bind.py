@@ -175,16 +175,23 @@ def check_field(ctx, res, where, kind, ent, prop, planned):
     if kind == "Column":
         st, ct = ctx.synthetic_type(ent, prop), ctx.contract_type(lt, ln)
         if st and ct and st != ct:
-            res.errors.append(f"{where}: {ent}[{prop}] is {st} here, {ct} in the contract")
+            dev = next((d for d in ctx.gen.get("deviations", []) if N.same(d.get("table"), ent)
+                        and N.same(d.get("column"), prop)), None)
+            if dev:                                    # a synthetic-only change generate.json records
+                res.notes.append(f"{where}: {ent}[{prop}] is {st} in the synthetic model, {ct} live "
+                                 f"(deviation: {dev.get('why', 'recorded in generate.json')})")
+            else:
+                res.errors.append(f"{where}: {ent}[{prop}] is {st} here, {ct} in the contract")
 
 
 def check_dax(ctx, res, where, expr, planned):
     refs, variables, strings = tmdl.references(expr)
+    virtual = tmdl.virtual_names(expr)
     for t, name in refs:
         if t and N.ci_in(t, variables):
-            continue
-        if t is None and name in ("Value",) or re.fullmatch(r"Value\d+", name or "") or name in strings:
-            continue
+            continue                                   # a column of a VAR table
+        if virtual(name) and (t is None or not N.find(ctx.tables, t)):
+            continue                                   # a column DAX defines (virtual tables, @names)
         if t is None:
             lt, ln = ctx.mapper.field(None, name)
             ok = any(ctx.contract_has(tt, ln) for tt in ctx.contract["tables"])
@@ -597,15 +604,11 @@ def used_names(ctx):
     for (t, n), m in ext.items():
         out.append((t, None))
         refs, variables, _ = tmdl.references(m.get("expression", ""))
+        virtual = tmdl.virtual_names(m.get("expression", ""))
         for rt, rn in refs:
-            if not (rt and N.ci_in(rt, variables)) and not virtual_name(rn):
+            if not (rt and N.ci_in(rt, variables)) and not virtual(rn):
                 out.append((rt, rn))
     return list(dict.fromkeys(out))
-
-
-def virtual_name(name):
-    """Hook: names DAX defines itself (item 4)."""
-    return bool(re.fullmatch(r"Value\d*", name or ""))
 
 
 def map_draft(report, root=None, out=print):

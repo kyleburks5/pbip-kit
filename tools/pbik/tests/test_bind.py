@@ -322,5 +322,66 @@ class LocalRestoreTests(BindBase):
         self.assertEqual(before, {k: v for k, v in tree(self.rep).items()})
 
 
+class FalseAlarmTests(BindBase):
+    """Item 4: virtual-table columns, report-level measures used as filters, recorded type deviations."""
+
+    def set_ext(self, expr):
+        e = self.rep / "definition/reportExtensions.json"
+        d = json.loads(read(e))
+        d["entities"][0]["measures"][0]["expression"] = expr
+        bind_sample.write(e, d)
+
+    def test_virtual_table_columns_are_not_model_fields(self):
+        self.set_ext(
+            'VAR t = ADDCOLUMNS ( VALUES ( Area[Region] ), "@Amt", [Total Amount], "Share", 1 ) '
+            'VAR s = SELECTCOLUMNS ( t, "Picked", [@Amt] ) '
+            'VAR g = SUMX ( GENERATESERIES ( 1, 3 ), [Value] ) '
+            'VAR c = SUMX ( { ( 1, 2 ), ( 3, 4 ) }, [Value1] + [Value2] ) '
+            'VAR w = SUMX ( { ( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ) }, [Value12] ) '
+            'VAR r = SUMX ( ROW ( "Label", 1 ), [Label] ) + SUMX ( DATATABLE ( "Col", INTEGER, { { 1 } } ), [col] ) '
+            'VAR u = SUMX ( SUMMARIZE ( Orders, Area[Region], "Total", [Total Amount] ), [Total] ) '
+            'RETURN SUMX ( s, [Picked] ) + SUMX ( t, [Share] ) + g + c + w + r + u')
+        r = self.check()
+        self.assertEqual((r.errors, r.stale), ([], []))
+        from pbikit import tmdl
+        m = tmdl.load(self.root / "Example Synthetic.SemanticModel")
+        self.assertEqual(tmdl.check_references(m, "SUMX ( { ( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ) }, [Value11] )"), [])
+        self.assertEqual(tmdl.check_references(m, "[Value] + [Nope]"), ["[Nope]"])
+
+    def test_report_level_measure_as_a_visual_filter(self):
+        v = self.rep / "definition/pages/p1/visuals/P1-V01_amount-card/visual.json"
+        d = json.loads(read(v))
+        d["filterConfig"] = {"filters": [{"name": "mf1", "type": "Advanced",
+                                          "field": {"Measure": {"Expression": {"SourceRef": {"Entity": "_Measures",
+                                                    "Schema": "extension"}}, "Property": "Per Unit"}},
+                                          "filter": {"Version": 2, "From": [{"Name": "m", "Entity": "_Measures",
+                                                                             "Schema": "extension", "Type": 0}],
+                                                     "Where": [{"Condition": {"Comparison": {"ComparisonKind": 1,
+                                                               "Left": {"Measure": {"Expression": {"SourceRef": {
+                                                                   "Source": "m"}}, "Property": "Per Unit"}},
+                                                               "Right": {"Literal": {"Value": "1D"}}}}}]}}]}
+        bind_sample.write(v, d)
+        r = self.check()
+        self.assertEqual((r.errors, r.stale), ([], []))
+        import contextlib, io
+        from pbikit import validate as VAL
+        with contextlib.redirect_stdout(io.StringIO()):
+            fd = VAL.validate(self.rep, use_catalog=False, use_a11y=False)
+        self.assertFalse([e for e in fd.errors if "Per Unit" in e], fd.errors)
+
+    def test_recorded_type_deviation_is_a_note(self):
+        t = self.root / "Example Synthetic.SemanticModel/definition/tables/Orders.tmdl"
+        t.write_text(read(t).replace("column Status\n\t\tdataType: string", "column Status\n\t\tdataType: int64"),
+                     encoding="utf-8")
+        self.assertTrue(any("Status" in e and "int64" in e for e in self.check().errors))
+        g = S.read_json(self.root / "design/specs/generate.json")
+        g["deviations"] = [{"table": "orders", "column": "STATUS", "contract": "string", "synthetic": "int64",
+                            "why": "sample codes"}]
+        S.write_json(self.root / "design/specs/generate.json", g)
+        r = self.check()
+        self.assertEqual(r.errors, [])
+        self.assertTrue(any("deviation: sample codes" in x for x in r.notes))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

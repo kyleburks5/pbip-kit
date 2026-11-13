@@ -468,7 +468,11 @@ smoke report opens on one.
   bookmarks, drillthrough and tooltip bindings, report-level measures and their DAX) exists in the synthetic model
   and, through design/specs/bind-map.json when there is one, in the contract; column types match. A name in neither
   the synthetic model nor the map is listed as a `stale reference` with its file and JSON path (a leftover to remove
-  in Desktop or layout.json), apart from map errors. Exit 1 on either.
+  in Desktop or layout.json), apart from map errors. Exit 1 on either. Not alarms: columns DAX defines itself in
+  report-level measures (names given as strings in ADDCOLUMNS, SELECTCOLUMNS, SUMMARIZE, ROW, DATATABLE; `[Value]`,
+  `[Value1..n]` of GENERATESERIES and table constructors; `@` names; columns of VAR tables), report-level measures
+  used as visual filters (`Schema: extension` on the filter's From entry), and a type difference generate.json
+  `deviations` records (a note).
 - `prepare [--port auto]`: planned measures the report uses become report-level measures (reportExtensions.json),
   planned dependencies inlined as `CALCULATE ( ... )`, references marked `Schema: extension`; the synthetic model is
   regenerated without them. With `--port` the values before and after are compared first (nothing written when they
