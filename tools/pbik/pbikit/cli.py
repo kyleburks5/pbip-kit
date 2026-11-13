@@ -176,6 +176,28 @@ def main(argv=None):
     syv.add_argument("model")
     syv.add_argument("--root", default=".")
 
+    bi = sub.add_parser("bind", help="synthetic model <-> published model (docs/design/synth-to-live.md)")
+    bis = bi.add_subparsers(dest="sub", required=True)
+    bic = bis.add_parser("check", help="every field the report uses exists in the contract (through bind-map.json)")
+    bic.add_argument("report")
+    bic.add_argument("--root", help="project folder (default: the report's)")
+    bip = bis.add_parser("prepare", help="planned measures -> report-level measures, values checked")
+    bip.add_argument("report")
+    bip.add_argument("--root")
+    bip.add_argument("--port", help="Desktop port (or auto) of the open synthetic model, to compare values")
+    bil = bis.add_parser("live", help="person-only: rewrite references per the map and connect to the published model")
+    bil.add_argument("report")
+    bil.add_argument("--by", required=True)
+    bil.add_argument("--workspace")
+    bil.add_argument("--model")
+    bil.add_argument("--id", help="semantic model ID, or a link with /datasets/<id>/, /semanticmodels/<id>/, "
+                                  "/modeling/<id>/")
+    bil.add_argument("--from", dest="from_", help="a Desktop-saved report connected to the model (safest)")
+    bil.add_argument("--root")
+    blo = bis.add_parser("local", help="back to the synthetic model (refuses while Desktop is open)")
+    blo.add_argument("report")
+    blo.add_argument("--root")
+
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
     ds = dk.add_subparsers(dest="sub", required=True)
@@ -301,6 +323,8 @@ def main(argv=None):
         return 1 if failed else 0
     elif c == "synth":
         return synth_cmd(args)
+    elif c == "bind":
+        return bind_cmd(args)
     elif c == "desktop":
         from . import desktop as D
         if args.sub == "state":
@@ -310,6 +334,37 @@ def main(argv=None):
         else:
             D.screenshot(args.page, args.out, args.report, args.region, args.scale, args.bridge)
     return 0
+
+
+def bind_cmd(args):
+    from . import bind as BD, dataclass_ as DC, synth as S
+    try:
+        if args.sub == "check":
+            r = BD.check(args.report, args.root)
+            for x in r.notes:
+                print(f"note            {x}")
+            for x in r.stale:
+                print(f"stale reference {x}")
+            for x in r.errors:
+                print(f"error           {x}")
+            print(f"{len(r.errors)} error(s), {len(r.stale)} stale reference(s), {len(r.notes)} note(s)")
+            return 0 if r.ok() else 1
+        if args.sub == "prepare":
+            query = None
+            if args.port:
+                query = BD.port_query(args.report, args.port)
+            BD.prepare(args.report, args.root, query)
+            return 0
+        if args.sub == "live":
+            BD.live(args.report, args.by, args.workspace, args.model, args.id, args.from_, args.root)
+            return 0
+        if args.sub == "local":
+            BD.local(args.report, args.root)
+            return 0
+        return BD.command(args)
+    except (BD.BindError, S.ContractError, DC.Refused) as e:
+        print(f"pbik: {e}", file=sys.stderr)
+        return 2
 
 
 def synth_cmd(args):

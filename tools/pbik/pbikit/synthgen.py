@@ -184,7 +184,10 @@ def table_tmdl(c, g, t, vals):
         if col.get("sortBy"):
             L.append(f"\t\tsortByColumn: {q(col['sortBy'])}")
         L.append("")
+    prepared = {N.key(x) for x in g.get("prepared", [])}     # planned measures bind prepare moved to the report
     for m in sl["measures"]:
+        if N.key(m) in prepared and m not in tb["measures"]:
+            continue
         L += measure_lines(m, tb["measures"].get(m, planned.get(m)), m not in tb["measures"])
     if not data_cols:                                   # a measures-only table: one hidden column
         L += ["\tcolumn _", "\t\tdataType: string", "\t\tisHidden", f"\t\tlineageTag: {tag(t, '_')}",
@@ -287,6 +290,8 @@ def verify(root, model_folder):
                 else:
                     errs.append(f"{t}[{x}]: type {got}, contract {want}")
         for x in e["measures"]:
+            if N.ci_in(x, g.get("prepared", [])) and x not in c["tables"][t]["measures"]:
+                continue
             ms = N.find(m.tables[mt].measures, x)
             want = c["tables"][t]["measures"].get(x, planned.get(x, {})).get("expression")
             if not ms:

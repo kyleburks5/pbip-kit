@@ -462,6 +462,22 @@ drawn from them, a date key covering `dateRange`, hints per table (`rows`, `fact
 DAX, relationships); a type change listed in generate.json `deviations` is a note. UNVERIFIED in Desktop until the
 smoke report opens on one.
 
+### `bind check | prepare | live | local <Report>`
+
+- `check`: every field reference (visual queries, sorts, conditional formatting, filters at every level, slicer state,
+  bookmarks, drillthrough and tooltip bindings, report-level measures and their DAX) exists in the synthetic model
+  and, through design/specs/bind-map.json when there is one, in the contract; column types match. Exit 1 on errors.
+- `prepare [--port auto]`: planned measures the report uses become report-level measures (reportExtensions.json),
+  planned dependencies inlined as `CALCULATE ( ... )`, references marked `Schema: extension`; the synthetic model is
+  regenerated without them. With `--port` the values before and after are compared first (nothing written when they
+  differ); without it pbik says the values weren't checked.
+- `live --by <name> (--workspace W --model M --id <ID or link> | --from <Desktop-saved Report>)`: person-only (types
+  the model name). Refuses while Desktop is open, with an unapproved contract or a failing check. Backs up the report
+  (`.pbik/bind/backup`, git-ignored), rewrites references per the map, writes definition.pbir `byConnection`
+  (`Data Source="powerbi://api.powerbi.com/v1.0/myorg/<W>";initial catalog=<M>;...;semanticmodelid=<ID>`, UNVERIFIED in
+  Desktop: `--from` copies Desktop's own string), and records `.pbik/bind/state.json` (the restricted lock).
+- `local`: refuses while Desktop is open; restores definition.pbir and maps references back.
+
 ## Python helpers
 
 `pbikit/objects.py` holds the pure-Python builders carried over from the kit's v0.2 helpers (literals,
