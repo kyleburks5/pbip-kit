@@ -7,6 +7,8 @@ Only what pbik needs is read; everything else is skipped.
 """
 import pathlib, re
 
+from .names import CIDict
+
 KEYWORDS = {"table", "column", "measure", "partition", "hierarchy", "level", "annotation", "extendedProperty",
             "calculationGroup", "calculationItem", "relationship", "expression", "role", "perspective", "culture",
             "model", "database", "ref", "formatStringDefinition", "detailRowsDefinition", "tablePermission",
@@ -43,7 +45,8 @@ class Column:
 class Table:
     def __init__(self, name, file):
         self.name, self.file = name, file
-        self.columns, self.measures, self.partitions = {}, {}, []   # partitions: (kind, expression, line)
+        # names match case-insensitively, as in DAX (CIDict keeps the TMDL spelling)
+        self.columns, self.measures, self.partitions = CIDict(), CIDict(), []   # partitions: (kind, expression, line)
         self.description = None
 
 
@@ -56,7 +59,7 @@ class Relationship:
 class Model:
     def __init__(self, folder):
         self.folder = pathlib.Path(folder)
-        self.tables, self.relationships, self.functions = {}, [], set()
+        self.tables, self.relationships, self.functions = CIDict(), [], set()
 
     # lookups
     def measure_home(self, name):
@@ -300,7 +303,7 @@ def virtual_names(expr):
 def check_references(model, expr):
     """Unresolved references in a DAX expression, as readable strings."""
     refs, variables, strings = references(expr)
-    names_anywhere = {c for t in model.tables.values() for c in list(t.columns) + list(t.measures)}
+    names_anywhere = CIDict((c, 1) for t in model.tables.values() for c in list(t.columns) + list(t.measures))
     virtual = virtual_names(expr)
     generated = type("V", (), {"__contains__": lambda self, n: virtual(n)})()
     bad = []
@@ -308,7 +311,7 @@ def check_references(model, expr):
         if table is None:
             if name not in names_anywhere and name not in generated:
                 bad.append(f"[{name}]")
-        elif table in variables:
+        elif table.casefold() in {v.casefold() for v in variables}:
             continue
         elif table not in model.tables:
             bad.append(f"'{table}'[{name}] (no table {table})")

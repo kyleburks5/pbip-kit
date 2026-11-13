@@ -442,5 +442,38 @@ class ModelIdTests(BindBase):
         self.assertIn("Sample_Workspace", DC.read_project(self.root)["workspaces"])
 
 
+class NameCaseTests(BindBase):
+    """Item 9: names compare case-insensitively everywhere, as in DAX."""
+
+    def test_model_lookups(self):
+        from pbikit import names as NM, tmdl
+        m = tmdl.load(self.root / "Example Synthetic.SemanticModel")
+        self.assertEqual(m.tables["orders"].columns["AMOUNT"].data_type, "decimal")
+        self.assertIn("Orders", list(m.tables), "the TMDL spelling is kept")
+        self.assertTrue(m.has_field("ORDERS", "amount"))
+        self.assertEqual(m.measure_home("total amount"), ["_Measures"])
+        self.assertEqual(tmdl.check_references(m, "SUM ( orders[amount] ) + [total AMOUNT] + 'calendar'[DATE]"), [])
+        d = NM.CIDict({"Orders": 1})
+        d["ORDERS"] = 2
+        self.assertEqual((list(d), d["orders"], d.get("x")), (["Orders"], 2, None))
+
+    def test_report_and_layout_names_in_other_case(self):
+        v = self.rep / "definition/pages/p1/visuals/P1-V02_amount-by-month/visual.json"
+        bind_sample.write(v, json.loads(read(v).replace('"Entity": "Orders"', '"Entity": "ORDERS"')
+                                        .replace('"Property": "Amount"', '"Property": "amount"')))
+        r = self.check()
+        self.assertEqual((r.errors, r.stale), ([], []))
+        import contextlib, io
+        from pbikit import validate as VAL
+        with contextlib.redirect_stdout(io.StringIO()):
+            fd = VAL.validate(self.rep, use_catalog=False, use_a11y=False)
+        self.assertFalse([e for e in fd.errors if "ORDERS" in e or "amount" in e], fd.errors)
+        lay = layout()
+        lay["visuals"][0]["bindings"]["Data"] = ["[TOTAL AMOUNT]", "orders[status]"]
+        sl, missing = S.slice_contract(S.read_json(self.root / "design/specs/contract.json"), lay, TS.PLANNED)
+        self.assertEqual(missing, [])
+        self.assertIn("Status", sl["Orders"]["columns"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

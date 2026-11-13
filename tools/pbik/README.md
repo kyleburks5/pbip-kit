@@ -510,6 +510,12 @@ smoke report opens on one.
 - `map approve --by`: person-only; reruns the check through the map, prints it, asks for the contract's model name
   typed. `bind live` refuses a map that isn't approved or changed since.
 
+### Names are case-insensitive
+
+As in DAX, table, column and measure names match whatever their case: the TMDL reader's tables, columns and
+measures are case-insensitive dicts that keep the TMDL spelling (`names.CIDict`), so validate, build, model check,
+the synth and bind commands and the bind map all compare names that way.
+
 ## Python helpers
 
 `pbikit/objects.py` holds the pure-Python builders carried over from the kit's v0.2 helpers (literals,
