@@ -405,7 +405,7 @@ def from_report(path):
 
 
 def live(report, by, workspace=None, model=None, mid=None, from_=None, root=None, ask=None, out=print,
-         desktop_open=None):
+         desktop_open=None, verify=None):
     """Person-only. Check, back up, rewrite field references per the map, then write definition.pbir byConnection."""
     from .desktop import desktop_open as _open
     ctx = Context(report, root)
@@ -435,26 +435,25 @@ def live(report, by, workspace=None, model=None, mid=None, from_=None, root=None
             out(f"warning: workspace name {workspace!r} {w}. Safer: connect Desktop to the model (Get data > Power BI "
                 "semantic models), save that report, and run `pbik bind live --from <that report>`")
         cs = connection_string(workspace, model, mid)
-    out(f"Bind {ctx.rep.path.name} to {model!r} in workspace {workspace!r} (semantic model {mid})")
+    out(f"Bind {ctx.rep.path.name} to {model!r} in workspace {workspace!r}")
     DC.confirm(f"Bind live as {st['by']}?", model, ask)
-    # back up every file, byte for byte
     sd = state_dir(ctx.root)
     backup = sd / "backup"
-    if backup.exists():
-        shutil.rmtree(backup)
-    for rel in report_files(ctx.rep):
-        dst = backup / rel
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(ctx.rep.path / rel, dst)
+    sd.mkdir(parents=True, exist_ok=True)
     (sd / ".gitignore").write_text("*\n", encoding="utf-8")
+    try:
+        names = _snapshot(ctx.rep, backup)              # every file, byte for byte
+    except OSError as e:
+        raise SwitchFailed(f"the switch to live didn't start: the backup couldn't be made ({e}); nothing "
+                           "changed") from e
     synthetic = None
     if ctx.model_folder:
         try:
             synthetic = str(pathlib.Path(ctx.model_folder).resolve().relative_to(ctx.root)).replace("\\", "/")
         except ValueError:
             synthetic = str(pathlib.Path(ctx.model_folder).resolve())
-    labels = {}
     try:
+        labels = {}
         for rel, doc in json_docs(ctx.rep):
             lab = []
             if remap_doc(rel, doc, ctx.mapper, ctx.tables, ctx.map.get("liveLabels") is not True, lab):
@@ -465,18 +464,134 @@ def live(report, by, workspace=None, model=None, mid=None, from_=None, root=None
         d = load(pbir) if pbir.exists() else {"$schema": PBIR_SCHEMA, "version": "4.0"}
         d["datasetReference"] = {"byConnection": {"connectionString": cs}}
         pbir.write_text(dumps(d), encoding="utf-8")
-    except Exception:                                  # nothing half-done: the backup goes back as it was
-        for f in sorted(backup.rglob("*")):
-            if f.is_file():
-                shutil.copy2(f, ctx.rep.path / f.relative_to(backup))
-        raise
-    state = {"mode": "live", "workspace": workspace, "model": model, "id": mid, **st, "synthetic": synthetic,
-             "report": ctx.rep.path.name, "labels": labels,
-             "files": {rel: sha((ctx.rep.path / rel).read_bytes()) for rel in report_files(ctx.rep)}}
-    write_json(sd / "state.json", state)
+        state = {"mode": "live", "workspace": workspace, "model": model, "id": mid, **st, "synthetic": synthetic,
+                 "report": ctx.rep.path.name, "labels": labels,
+                 "files": {rel: sha((ctx.rep.path / rel).read_bytes()) for rel in report_files(ctx.rep)}}
+        write_json(sd / "state.json", state)
+        probs = (verify or verify_live)(ctx.rep.path, ctx.root, mid)
+        if probs:
+            raise BindError("; ".join(probs))
+    except Exception as e:                             # nothing half-done: the report goes back exactly as it was
+        _put_back(ctx.rep, backup, names)
+        (sd / "state.json").unlink(missing_ok=True)
+        why = str(e) if isinstance(e, BindError) else f"{type(e).__name__}: {e}"
+        raise SwitchFailed(f"the switch to live didn't finish ({why}); the report is exactly as it was") from e
     remember_workspace(ctx.root, workspace)
-    out(f"Live. Backup in {backup}. Open the report in Desktop; `pbik bind local` goes back.")
+    out(f"Live, checked: the report connects to {model!r}. A backup is kept; `pbik bind local` goes back.")
     return state
+
+
+def _snapshot(rep, dest):
+    """Every report file (not .pbi) copied byte for byte into dest; returns the relative names."""
+    if dest.exists():
+        shutil.rmtree(dest)
+    names = report_files(rep)
+    for rel in names:
+        d = dest / rel
+        d.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(rep.path / rel, d)
+    return names
+
+
+def _put_back(rep, snap, names):
+    """The report exactly as in the snapshot: its files back, files made since removed, empty new folders removed."""
+    for rel in report_files(rep):
+        if rel not in names:
+            (rep.path / rel).unlink()
+    for rel in names:
+        dst = rep.path / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if not dst.exists() or dst.read_bytes() != (snap / rel).read_bytes():
+            shutil.copy2(snap / rel, dst)
+    for d in sorted((x for x in rep.path.rglob("*") if x.is_dir()), key=lambda x: -len(x.parts)):
+        if ".pbi" not in d.relative_to(rep.path).parts and not any(d.iterdir()):
+            d.rmdir()
+
+
+def _pbir_ref(rep):
+    try:
+        return load(rep.path / "definition.pbir").get("datasetReference", {}) or {}
+    except (OSError, ValueError):
+        return {}
+
+
+def verify_live(report, root, mid):
+    """[] when the report is live as it should be (definition.pbir connects to the model ID, the switch is recorded,
+    every field it uses is in the contract); else the plain problems."""
+    rep = Report(report)
+    ref, probs = _pbir_ref(rep), []
+    cs = (ref.get("byConnection") or {}).get("connectionString", "")
+    if "byPath" in ref or f"semanticmodelid={mid}".lower() not in cs.lower():
+        probs.append("the report's connection doesn't point at the live model")
+    st = DC.bind_state(root)
+    if not st or st.get("mode") != "live":
+        probs.append("the switch wasn't recorded")
+    elif not check(report, root).ok():
+        probs.append("some fields the report uses aren't in the live model")
+    return probs
+
+
+def verify_local(report, root, synthetic):
+    """[] when the report is back on the synthetic model with every field it uses there; else the problems."""
+    rep = Report(report)
+    ref, probs = _pbir_ref(rep), []
+    path = (ref.get("byPath") or {}).get("path", "")
+    if "byConnection" in ref or not path or (synthetic and pathlib.Path(synthetic).name not in path):
+        probs.append("the report's connection doesn't point at the synthetic model")
+    if DC.bind_state(root):
+        probs.append("the switch back wasn't recorded")
+    elif not check(report, root).ok():
+        probs.append("some fields the report uses aren't in the synthetic model")
+    return probs
+
+
+class SwitchFailed(BindError):
+    """A switch that was rolled back: the report is exactly as it was before."""
+
+
+def ready(report=None, root=".", desktop_open=None, query=None, out=print):
+    """Before the "Connect to the live model" window opens (v1.7 live walkthrough fix 1): the report-only measures
+    are moved into the report (bind prepare) and the bind check passes. Returns the plain problems ([] = ready);
+    nothing is asked of the person while any is left."""
+    from .desktop import desktop_open as _open
+    root = pathlib.Path(root).resolve()
+    rep_path = pathlib.Path(report) if report else default_report(root)
+    if not rep_path or not pathlib.Path(rep_path).exists():
+        return ["there is no built report to switch yet"]
+    probs = []
+    try:
+        ctx = Context(rep_path, root)
+    except (ContractError, SystemExit) as e:
+        return [f"the model isn't ready: {e}"]
+    if ctx.state and ctx.state.get("mode") == "live":
+        return [f"the report is already on the live model ({ctx.state.get('model')})"]
+    from .synth import approved
+    if not approved(ctx.contract):
+        probs.append("the model isn't approved yet")
+    if ctx.map and not map_approved(ctx.map):
+        probs.append("the name map isn't approved yet")
+    if (desktop_open or _open)():
+        probs.append("Power BI Desktop has the report open: it must be closed first so it doesn't save over the "
+                     "switch")
+    if probs:
+        return probs
+    try:
+        moved = prepare(rep_path, root, query=query, out=lambda *a: None)
+    except (BindError, ContractError) as e:
+        return [f"the report-only measures couldn't be moved into the report ({e})"]
+    if moved:
+        out(f"moved {len(moved)} report-only measure(s) into the report: {', '.join(moved)}")
+    res = check(rep_path, root)
+    if not res.ok():
+        n = len(res.lines())
+        probs.append(f"{n} field(s) the report uses aren't in the live model's description"
+                     + (": " + "; ".join(x.split(': ', 1)[-1] for x in res.lines()[:3]) if n else ""))
+    return probs
+
+
+def default_report(root):
+    reps = sorted(pathlib.Path(root).glob("*.Report"))
+    return reps[0] if len(reps) == 1 else None
 
 
 def pre_live_checks(ctx, out):
@@ -520,7 +635,7 @@ def remap_doc(rel, doc, mapper, tables, keep_labels=True, labels=None, dax=None)
 
 
 # ---------------------------------------------------------------- local
-def local(report, root=None, out=print, desktop_open=None, restore_backup=False, ask=None):
+def local(report, root=None, out=print, desktop_open=None, restore_backup=False, ask=None, verify=None):
     """Put the synthetic connection back. Refuses while Desktop is open. Files unchanged since bind live come back
     from the backup byte for byte; files changed while live are mapped back. restore_backup: the whole backup, after
     a typed "restore" (changes made while live are lost)."""
@@ -541,22 +656,35 @@ def local(report, root=None, out=print, desktop_open=None, restore_backup=False,
         out(f"Restore the backup of {rep.path.name}: {len(changed)} file(s) changed while live are lost"
             + (f" ({', '.join(changed[:5])}{', ...' if len(changed) > 5 else ''})" if changed else ""))
         DC.confirm("Restore the whole backup?", "restore", ask)
-        for r in report_files(rep):
-            if not (backup / r).exists():
-                (rep.path / r).unlink()
-        for d in sorted((x for x in rep.path.rglob("*") if x.is_dir()), key=lambda x: -len(x.parts)):
-            if not any(d.iterdir()) and not (backup / d.relative_to(rep.path)).exists():
-                d.rmdir()                                  # folders made while live
-        for f in sorted(backup.rglob("*")):
-            if f.is_file():
-                dst = rep.path / f.relative_to(backup)
-                dst.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(f, dst)
-        summary = {"restored": "all"}
-    else:
-        summary = restore_local(rep, root, state, backup, out)
-    (state_dir(root) / "state.json").unlink()
-    out("Local again: the report is on the synthetic model.")
+    sf = state_dir(root) / "state.json"
+    saved_state = sf.read_bytes()
+    snap = state_dir(root) / "live-snapshot"
+    try:
+        names = _snapshot(rep, snap)                   # the live report, put back if anything fails (all or nothing)
+    except OSError as e:
+        shutil.rmtree(snap, ignore_errors=True)
+        raise SwitchFailed(f"the switch back didn't start: a safety copy couldn't be made ({e}); the report is "
+                           "still on the live model, exactly as it was") from e
+    try:
+        if restore_backup:
+            _put_back(rep, backup, sorted(str(f.relative_to(backup)).replace("\\", "/")
+                                          for f in backup.rglob("*") if f.is_file()))
+            summary = {"restored": "all"}
+        else:
+            summary = restore_local(rep, root, state, backup, out)
+        sf.unlink()
+        probs = (verify or verify_local)(rep.path, root, state.get("synthetic"))
+        if probs:
+            raise BindError("; ".join(probs))
+    except Exception as e:
+        _put_back(rep, snap, names)
+        sf.write_bytes(saved_state)
+        shutil.rmtree(snap, ignore_errors=True)
+        why = str(e) if isinstance(e, BindError) else f"{type(e).__name__}: {e}"
+        raise SwitchFailed(f"the switch back didn't finish ({why}); the report is still on the live model, exactly "
+                           "as it was") from e
+    shutil.rmtree(snap, ignore_errors=True)
+    out("Local again, checked: the report is on the synthetic model.")
     return summary
 
 

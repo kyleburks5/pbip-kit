@@ -7,7 +7,7 @@
     python tools/run_tests.py --changed       fast mode, even in the master kit
     python tools/run_tests.py --regression    every suite, then tools/regression/regress.py
 
-Suites: pbik, synth and bind (synthetic to live), layout (KPI cards, layout fidelity, pattern choices), patterns
+Suites: pbik, synth, bind and live (synthetic to live and back), layout (KPI cards, layout fidelity, pattern choices), patterns
 (Patterns builder), wireframe, design (/theme, /plan from a reference), kit (Copilot files, doctor.ps1, lessons).
 Exit 1 if any suite fails. Run it after every pbik change; run --regression also after every Desktop update
 (README "Regression suite").
@@ -16,7 +16,7 @@ import argparse, fnmatch, pathlib, subprocess, sys, time
 
 KIT = pathlib.Path(__file__).resolve().parents[1]
 SUITES = [("pbik", "tools/pbik/tests/test_pbik.py"), ("synth", "tools/pbik/tests/test_synth.py"),
-          ("bind", "tools/pbik/tests/test_bind.py"),
+          ("bind", "tools/pbik/tests/test_bind.py"), ("live", "tools/pbik/tests/test_live.py"),
           ("layout", "tools/pbik/tests/test_layout_rules.py"),
           ("phase1", "tools/pbik/tests/test_phase1.py"), ("v17", "tools/pbik/tests/test_v17.py"),
           ("walkthrough", "tools/pbik/tests/test_walkthrough.py"),
@@ -24,7 +24,7 @@ SUITES = [("pbik", "tools/pbik/tests/test_pbik.py"), ("synth", "tools/pbik/tests
           ("wireframe", "design/scripts/test_wireframe.py"), ("design", "design/scripts/test_design.py"),
           ("kit", "tools/tests/test_kit.py")]
 ALL = [n for n, _ in SUITES]
-PBIK_CORE = ["pbik", "synth", "bind", "layout", "phase1", "v17", "walkthrough"]
+PBIK_CORE = ["pbik", "synth", "bind", "live", "layout", "phase1", "v17", "walkthrough"]
 # a changed path (glob; the first match wins) -> the suites that test it
 RELATED = [("tools/run_tests.py", ALL),
            ("tools/pbik/tests/test_pbik.py", ["pbik"]), ("tools/pbik/tests/test_synth.py", ["synth"]),
@@ -38,13 +38,13 @@ RELATED = [("tools/run_tests.py", ALL),
            ("tools/pbik/pbikit/cli.py", PBIK_CORE), ("tools/export_check.py", ["v17", "kit"]),
            ("docs/layouts/starters/*", ["v17", "kit"]),
            ("tools/pbik/pbikit/summary.py", ["phase1"]), ("tools/pbik/pbikit/projectinit.py", ["phase1", "v17"]),
-           ("tools/pbik/pbikit/gates.py", ["phase1", "v17"]), ("tools/pbik/pbikit/intake.py", ["phase1"]),
+           ("tools/pbik/tests/test_live.py", ["live"]), ("tools/pbik/pbikit/gates.py", ["phase1", "v17", "live"]), ("tools/pbik/pbikit/intake.py", ["phase1"]),
            ("tools/pbik/pbikit/rules.py", ["phase1", "synth"]), ("tools/pbik/pbikit/picker.py", ["phase1", "bind"]),
-           ("tools/pbik/pbikit/steps.py", ["phase1"]), ("tools/pbik/rules/*", ["phase1", "synth"]),
+           ("tools/pbik/pbikit/steps.py", ["phase1", "live"]), ("tools/pbik/rules/*", ["phase1", "synth"]),
            ("tools/usage.py", ["phase1"]), ("tools/hooks/*", ["phase1", "v17"]), (".vscode/*", ["phase1", "kit"]),
            ("docs/PLAIN-WORDS.md", ["phase1", "v17", "kit"]), ("tools/pbik/tests/synth_sample/*", ["synth", "bind"]),
            ("tools/pbik/pbikit/synth*.py", ["synth", "bind"]), ("tools/pbik/pbikit/packs.py", ["synth"]),
-           ("tools/pbik/pbikit/bind*.py", ["bind"]), ("tools/pbik/pbikit/filtertypes.py", ["bind", "pbik"]),
+           ("tools/pbik/pbikit/bind*.py", ["bind", "live"]), ("tools/pbik/pbikit/filtertypes.py", ["bind", "pbik"]),
            ("tools/pbik/pbikit/dataclass_.py", ["synth", "bind", "layout"]),
            ("tools/pbik/pbikit/kpicards.py", ["layout", "pbik"]), ("tools/pbik/pbikit/namenew.py", ["pbik"]),
            ("tools/pbik/*", PBIK_CORE + ["patterns", "wireframe", "design"]),

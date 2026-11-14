@@ -63,8 +63,13 @@ def _contract_summary(root):
     return c, "\n".join(lines), content_hash(c)
 
 
+def _desktop_open():
+    from .desktop import desktop_open
+    return desktop_open()
+
+
 def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, model=None, mid=None, to_class=None,
-            to=None):
+            to=None, desktop_open=None):
     """Write .pbik/gates/<gate>.json; returns it."""
     root = pathlib.Path(root).resolve()
     if gate not in SM.GATES:
@@ -97,25 +102,48 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
         from . import bind as BD
         if from_ == "picked":                              # the Desktop model picker (pbikit/picker.py)
             from . import picker as PK_
-            ws, mdl, mi, rep_folder = PK_.picked(root)
+            try:
+                ws, mdl, mi, rep_folder = PK_.picked(root)
+            except PK_.PickError as e:
+                raise GateError(str(e)) from e
             args["from_"] = from_ = str(rep_folder)
-        if from_:
-            ws, mdl, mi, _ = BD.from_report(from_)
-        else:
-            ws, mdl, mi = workspace, model, BD.model_id(mid) if mid else None
+        try:
+            if from_:
+                ws, mdl, mi, _ = BD.from_report(from_)
+            else:
+                ws, mdl, mi = workspace, model, BD.model_id(mid) if mid else None
+        except BD.BindError as e:
+            raise GateError(f"the model you picked can't be read: {e}") from e
         if not (ws and mdl and mi):
             raise GateError("pick the live model in Desktop first (the model picker), or give workspace, model and ID")
-        args.update(workspace=ws, model=mdl, mid=mi)
-        text = (f"Connect the report to the published model {mdl!r} in workspace {ws!r} (model ID {mi}). A backup is "
-                "kept; 'Back to the synthetic model' undoes it.")
+        rep = report or (str(BD.default_report(root)) if BD.default_report(root) else None)
+        if not rep:
+            raise GateError("there is no built report to switch yet")
+        args.update(workspace=ws, model=mdl, mid=mi, report=rep)
+        # prepared first (v1.7 live walkthrough fix 1): report-only measures moved, the bind check passes
+        probs = BD.ready(rep, root, desktop_open=desktop_open)
+        if probs:
+            raise GateError("I can't switch to live yet, so I didn't open the window: " + "; ".join(probs))
+        text = (f"You picked {mdl} in workspace {ws}.\n\nConnect the report to it. A backup is kept, and "
+                "'Back to the synthetic model' undoes it. No real data is copied into the project.")
         h = _h(ws, mdl, mi, read_json(specs(root) / "bind-map.json", {}))
     elif gate == "bind-local":
+        from . import bind as BD
         st = DC.bind_state(root)
         if not st or st.get("mode") != "live":
             raise GateError("the report isn't connected to a live model")
-        text = (f"Point the report back at the synthetic model (it is connected to {st.get('model')!r} now). Files you "
+        rep = report or str(root / st.get("report", "")) if st.get("report") else report
+        if not rep or not pathlib.Path(rep).exists():
+            raise GateError("the report that was switched to live isn't in this project any more")
+        if not (BD.state_dir(root) / "backup" / "definition.pbir").exists():
+            raise GateError("the backup from the switch to live is missing, so I can't switch back safely")
+        if (desktop_open or _desktop_open)():
+            raise GateError("I can't switch back yet, so I didn't open the window: Power BI Desktop has the report "
+                            "open and must be closed first")
+        args["report"] = rep
+        text = (f"Point the report back at the synthetic model (it is connected to {st.get('model')} now). Files you "
                 "didn't change while live come back exactly as they were.")
-        h = _h(st)
+        h = _h({k: v for k, v in st.items() if k != "files"})
     elif gate == "class-lower":
         old = DC.data_class(root)
         if not to_class or DC.CLASSES.index(to_class) >= DC.CLASSES.index(old):
@@ -220,7 +248,7 @@ exit $script:result
 ANSWERS = {0: "yes", 1: "no", 2: "code"}
 
 
-def windows_dialog(title, text, code=False):
+def windows_dialog(title, text, code=False, details=""):
     """The approval window: a plain Yes / No; with `code` (screen control active) "yes" only when the person typed
     the code shown in the picture and clicked Yes. "no" (No, or closed) or "code" (three wrong tries)."""
     with tempfile.TemporaryDirectory() as d:
@@ -309,38 +337,104 @@ def confirm_from_dialog(prompt):
     return m.group(1) if m else ""
 
 
+PLAIN_DONE = {"synth-approve": "The model is approved.", "map-approve": "The name map is approved.",
+              "model-approve": "The model changes are approved.",
+              "bind-live": "The report is on the live model now (checked).",
+              "bind-local": "The report is back on the synthetic model (checked).",
+              "class-lower": "The data class is loosened.", "pack-register": "The model pack is shared."}
+
+
+def _result(root, gate, doc):
+    write_json(gate_dir(root) / f"{gate}.result.json", dict(doc, gate=gate,
+                                                            at=datetime.datetime.now().isoformat(timespec="seconds")))
+
+
+def plain_failure(e):
+    """A failure in words a person reads: never a traceback or a command."""
+    text = str(e).strip() or type(e).__name__
+    text = re.sub(r"[,;:]?\s*\(?(?:then\s+)?(?:a person\s+)?(?:run|runs|rerun)\s+`[^`]*`[^.;)]*\)?", "", text)
+    text = re.sub(r"`[^`]*`", "the step for it", text)
+    return text.splitlines()[0][:300]
+
+
 def run(gate, root=".", dialog=None, out=print, person=None):
-    """Show the approval window; on Yes (with the typed code) apply the step. Returns "approved" or "declined".
-    `person` is ignored (kept for older callers): the window's code is the person check (A8)."""
+    """Show the approval window; on Yes apply the step and verify it. Returns "approved", "declined" or "failed".
+    Never silent (v1.7 live walkthrough fix 3): the result file says "applying" the moment Yes is clicked, then
+    "approved" (done and checked) or "failed" (with the plain reason; a switch is rolled back first). `person` is
+    ignored (kept for older callers)."""
+    from . import status as ST, steps as STP
     root = pathlib.Path(root).resolve()
     doc = check_ready(gate, root)
     extra = run_time_details(gate, root)
-    text = doc["summary"] + ("\n\n" + extra if extra else "") + "\n\nApprove?"
     code = needs_code()
     _lock(gate, True)
     try:
         d = dialog or windows_dialog
+        whole = doc["summary"] + ("\n\n" + extra if extra else "")
         try:
-            ans = _answer(d(doc["task"], text, code=code))
-        except TypeError:                                       # an older stub: (title, text)
-            ans = _answer(d(doc["task"], text))
+            ans = _answer(d(doc["task"], doc["summary"], code=code, details=extra))
+        except TypeError:                                       # an older stub: (title, text[, code])
+            try:
+                ans = _answer(d(doc["task"], whole, code=code))
+            except TypeError:
+                ans = _answer(d(doc["task"], whole))
     finally:
         _lock(gate, False)
+    STP.interaction(root, f"window: {doc['task']}", source="window")       # every window answer counts (fix 17)
     if ans != "yes":
         why = "the code didn't match three times" if ans == "code" else "no"
-        write_json(gate_dir(root) / f"{gate}.result.json", {"gate": gate, "result": "declined", "why": why})
+        _result(root, gate, {"result": "declined", "why": why})
         out("Not approved: nothing changed." + (" (The code didn't match three times.)" if ans == "code" else ""))
         return "declined"
     by = approver(root)
-    apply(gate, root, doc["args"], by)
+    _result(root, gate, {"result": "applying", "by": by})
+    try:
+        apply(gate, root, doc["args"], by)
+    except Exception as e:                                       # noqa: BLE001  reported, never silent
+        why = plain_failure(e)
+        _result(root, gate, {"result": "failed", "by": by, "why": why})
+        ST.update(root, lastApproval={"gate": gate, "task": doc["task"], "result": "failed", "why": why})
+        out(f"Approved, but it didn't work: {why}")
+        return "failed"
     log(root, gate, doc, by)
-    write_json(gate_dir(root) / f"{gate}.result.json", {"gate": gate, "result": "approved", "by": by})
-    out(f"Approved by {by}.")
+    _result(root, gate, {"result": "approved", "by": by, "said": PLAIN_DONE.get(gate, "Done.")})
+    fields = {"lastApproval": {"gate": gate, "task": doc["task"], "result": "approved"}}
+    if gate == "bind-live":
+        ST.update(root, done="live", connection=f"live ({doc['args'].get('model')})", **fields)
+    elif gate == "bind-local":
+        ST.update(root, connection="synthetic", **fields)
+    elif gate == "synth-approve":
+        ST.update(root, done="model", **fields)
+    else:
+        ST.update(root, **fields)
+    out(f"Approved by {by}. {PLAIN_DONE.get(gate, '')}".strip())
     return "approved"
 
 
+def _alive(pid):
+    """True while a process runs (Windows: OpenProcess + GetExitCodeProcess; never a signal)."""
+    if not pid:
+        return False
+    if os.name == "nt":
+        import ctypes
+        k = ctypes.windll.kernel32
+        h = k.OpenProcess(0x1000, False, int(pid))              # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return False
+        code = ctypes.c_ulong()
+        ok = k.GetExitCodeProcess(h, ctypes.byref(code))
+        k.CloseHandle(h)
+        return bool(ok) and code.value == 259                   # STILL_ACTIVE
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except OSError:
+        return False
+
+
 def open_window(gate, root=".", launch=None):
-    """The agent opens the approval window in its own process and returns at once (A8)."""
+    """The agent opens the approval window in its own process and returns at once (A8). The process id is kept, so
+    `wait` can tell a closed window from one still open."""
     root = pathlib.Path(root).resolve()
     doc = check_ready(gate, root)
     res = gate_dir(root) / f"{gate}.result.json"
@@ -349,25 +443,67 @@ def open_window(gate, root=".", launch=None):
     cmd = [sys.executable, str(pathlib.Path(__file__).resolve().parents[1] / "pbik.py"), "gate", "run", gate,
            "--root", str(root)]
     if launch:
-        launch(cmd)
+        pid = launch(cmd)
+        write_json(gate_dir(root) / f"{gate}.window.json", {"pid": pid if isinstance(pid, int) else None})
         return doc
     logf = open(gate_dir(root) / f"{gate}.window.log", "w", encoding="utf-8")   # noqa: SIM115  the window keeps it
     flags = (0x00000008 | 0x00000200) if os.name == "nt" else 0              # DETACHED_PROCESS | NEW_PROCESS_GROUP
-    subprocess.Popen(cmd, cwd=str(root), stdout=logf, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                     creationflags=flags, close_fds=True)
+    p = subprocess.Popen(cmd, cwd=str(root), stdout=logf, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                         creationflags=flags, close_fds=True)
+    write_json(gate_dir(root) / f"{gate}.window.json", {"pid": p.pid})
     return doc
 
 
-def wait(gate, root=".", timeout=30 * 60, poll=1.0):
-    """Wait for the person's answer; the result doc, or {"result": "not answered"} after the timeout."""
-    res = gate_dir(pathlib.Path(root).resolve()) / f"{gate}.result.json"
-    end = time.monotonic() + timeout
-    while time.monotonic() < end:
+APPLY_LIMIT = 60          # seconds from Yes to "done" or "failed" (v1.7 live walkthrough fix 3)
+FINAL = ("approved", "declined", "failed")
+
+
+def wait(gate, root=".", timeout=30 * 60, poll=1.0, out=None, alive=None, clock=None, sleep=None):
+    """Wait for the person's answer and, after a Yes, for the step to finish and be checked. Returns the result doc:
+    "approved", "declined", "failed", or "not answered" (timeout). Never silent: a "Still waiting" line every minute
+    (`out`), and "failed" when the window closed without finishing or the step ran over a minute after the Yes."""
+    root = pathlib.Path(root).resolve()
+    res = gate_dir(root) / f"{gate}.result.json"
+    clock, sleep, alive = clock or time.monotonic, sleep or time.sleep, alive or _alive
+    start = clock()
+    end, said, applying_since, gone_since = start + timeout, 0, None, None
+    pid = (read_json(gate_dir(root) / f"{gate}.window.json") or {}).get("pid")
+    while clock() < end:
         doc = read_json(res)
-        if doc:
+        if doc and doc.get("result") in FINAL:
             return doc
-        time.sleep(poll)
+        now = clock()
+        if doc and doc.get("result") == "applying":
+            applying_since = applying_since or now
+            if now - applying_since > APPLY_LIMIT:
+                return {"gate": gate, "result": "failed", "why": "it didn't finish within a minute of your Yes; I'll "
+                        "check the report before going on"}
+        if pid and not alive(pid):
+            gone_since = gone_since if gone_since is not None else now
+            if now - gone_since >= 3:                     # a last look for a result written as the window closed
+                doc = read_json(res)
+                if doc and doc.get("result") in FINAL:
+                    return doc
+                why = window_error(root, gate)
+                return {"gate": gate, "result": "failed",
+                        "why": why or "the approval window closed without finishing; nothing changed"}
+        if out and int((now - start) // 60) > said:
+            said = int((now - start) // 60)
+            out("Still applying your Yes." if applying_since else
+                f"Still waiting for your answer in the approval window ({said} min so far).")
+        sleep(poll)
     return {"gate": gate, "result": "not answered"}
+
+
+def window_error(root, gate):
+    """The plain last error line the window's process logged, if any."""
+    f = gate_dir(root) / f"{gate}.window.log"
+    try:
+        lines = [ln.strip() for ln in f.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip()]
+    except OSError:
+        return None
+    last = next((ln for ln in reversed(lines) if re.match(r"\w*(Error|Exception|pbik):", ln)), None)
+    return plain_failure(last.split(":", 1)[1]) if last else None
 
 
 def run_time_details(gate, root):

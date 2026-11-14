@@ -89,9 +89,14 @@ do (their files say how), with a check after each step and one fix and recheck w
 - Score: `pbik score --item 1=<pass when plan compare finds nothing left to fix, with your own look at the screenshots> --item 3=<every
   card's measure returns a value: DAX query> --item 7=<slicers filter, buttons go where they should> --final`.
 Result: the before and after screenshots (shown or opened as the plan pictures), the polish score, and what you
-couldn't fix with its Desktop click steps (design/known-gaps.md). Then offer "Switch to live?": with a person's yes,
-prepare and open the window (`pbik gate prepare bind-live --from picked` after the Desktop model pick, or from the
-pack), and wait.
+couldn't fix with its Desktop click steps (design/known-gaps.md). Then offer "Switch to live?". With a person's yes:
+1. Prepare first: `pbik gate prepare bind-live --from picked` (after the Desktop model pick, or from the pack). It
+   moves the report-only measures into the report and runs the bind check; if anything would fail it says why and
+   opens no window: say that reason plainly and stop there (never open the window anyway).
+2. Open the window and wait (`pbik gate open`, then `pbik gate wait` in the background, passing on its "Still ..."
+   lines). After the answer, say within a minute what happened: done and checked, not approved, or failed with its
+   reason and "the report is exactly as it was". Never say "done" from anything but the wait's result.
+"Back to the synthetic model" is the same two steps with `bind-local`.
 
 ## 4. Wrap-up
 Ask once, optionally: "How many minutes did you spend tidying it in Desktop?" (`pbik score --hand-minutes N`).

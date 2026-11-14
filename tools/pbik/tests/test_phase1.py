@@ -386,7 +386,8 @@ class PickerTests(TB.BindBase):
         yes = lambda t, x: True                                                     # noqa: E731
         with mock.patch("pbikit.desktop.desktop_open", lambda: False):
             doc = GT.prepare("bind-live", self.root, report=str(self.rep), from_="picked")
-            self.assertIn("'Example Live' in workspace 'Sample Workspace'", doc["summary"])
+            self.assertIn("You picked Example Live in workspace Sample Workspace", doc["summary"])
+            self.assertNotIn(MID, doc["summary"], "plain names only, never the model's long ID")
             GT.run("bind-live", self.root, dialog=yes, person=True, out=lambda *a: None)
             self.assertEqual(DC.bind_state(self.root)["id"], MID)
             GT.prepare("bind-local", self.root, report=str(self.rep))

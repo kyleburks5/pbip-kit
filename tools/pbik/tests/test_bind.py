@@ -162,7 +162,7 @@ class PartZeroTests(BindBase):
         finally:
             os.chdir(cwd)
         before = tree(self.rep)
-        with mock.patch.object(BD, "dumps", side_effect=RuntimeError("disk full")), self.assertRaises(RuntimeError):
+        with mock.patch.object(BD, "dumps", side_effect=RuntimeError("disk full")), self.assertRaises(BD.SwitchFailed):
             self.go_live()
         self.assertEqual(before, tree(self.rep), "a failed bind live leaves the report as it was")
         self.assertIsNone(DC.bind_state(self.root))

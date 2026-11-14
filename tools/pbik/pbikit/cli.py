@@ -795,7 +795,7 @@ def _main(argv=None):
                 print(d["summary"])
                 print(f"next: I'll open the approval window ({d['task']}): check it, then click Yes or No")
             elif args.sub == "run":
-                GT.run(args.gate, args.root)
+                return 0 if GT.run(args.gate, args.root) == "approved" else 1
             elif args.sub == "open":
                 d = GT.open_window(args.gate, args.root)
                 print(f"The approval window ({d['task']}) is open in front of your other windows: check it, then "
@@ -803,10 +803,18 @@ def _main(argv=None):
                                            if GT.needs_code() else "."))
                 print("next: I'll wait for your answer")
             elif args.sub == "wait":
-                r = GT.wait(args.gate, args.root, timeout=args.minutes * 60)
-                said = {"approved": f"Approved by {r.get('by')}.", "declined": "Not approved: nothing changed.",
-                        "not answered": "No answer in the approval window yet."}
-                print(said.get(r["result"], r["result"]) + (f" ({r['why']})" if r.get("why", "no") != "no" else ""))
+                r = GT.wait(args.gate, args.root, timeout=args.minutes * 60,
+                            out=lambda x: print(x, flush=True))
+                if r["result"] == "approved":
+                    print(f"Approved by {r.get('by')}. {r.get('said', '')}".strip())
+                elif r["result"] == "declined":
+                    print("Not approved: nothing changed."
+                          + (f" ({r['why']})" if r.get("why", "no") != "no" else ""))
+                elif r["result"] == "failed":
+                    print(f"error: it didn't work: {r.get('why')}")
+                    print("next: I'll tell you what failed and what to do; nothing is left half-done")
+                else:
+                    print("No answer in the approval window yet.")
                 return 0 if r["result"] == "approved" else 1
             else:
                 from .synth import write_json

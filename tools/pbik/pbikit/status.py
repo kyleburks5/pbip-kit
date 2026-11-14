@@ -88,6 +88,11 @@ def line(root):
     if doc.get("score") is not None:
         extra.append(f"polish {doc['score']}/10")
     text = head + (f" ({', '.join(extra)})" if extra else "")
+    last = doc.get("lastApproval") or {}
+    if last.get("result") == "failed":
+        text += f" The last approval ({last.get('task')}) didn't work: {last.get('why')}."
+    if (doc.get("connection") or "").startswith("live"):
+        text += f" The report is on the {doc['connection'].replace('live (', 'live model (')}."
     if doc.get("mode", "guided") == "guided" and done and done[-1] in AFTER_LOOK and nxt:
         text += " Pause here: show what changed and wait for an OK."      # never in a quick build (fix 5)
     return text

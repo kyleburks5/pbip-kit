@@ -101,10 +101,10 @@ class FastTestModeTests(unittest.TestCase):
     def test_related_suites(self):
         sys.path.insert(0, str(KIT / "tools"))
         import run_tests as RT
-        self.assertEqual(RT.related(["tools/pbik/pbikit/bind.py"]), ["bind"])
+        self.assertEqual(RT.related(["tools/pbik/pbikit/bind.py"]), ["bind", "live"])
         self.assertEqual(RT.related(["docs/lessons/cards.md"]), ["kit"])
         self.assertEqual(RT.related(["tools/pbik/pbikit/build.py"]),
-                         ["pbik", "synth", "bind", "layout", "phase1", "v17", "walkthrough", "patterns", "wireframe", "design"])
+                         ["pbik", "synth", "bind", "live", "layout", "phase1", "v17", "walkthrough", "patterns", "wireframe", "design"])
         self.assertEqual(RT.related(["design/scripts/gen_wireframe_hf.py", "tools/patterns/build_patterns.py"]),
                          ["layout", "patterns", "wireframe", "design"])
         self.assertEqual(RT.related(["tools/run_tests.py"]), RT.ALL)
