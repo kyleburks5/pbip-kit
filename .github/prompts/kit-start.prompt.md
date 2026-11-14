@@ -35,11 +35,14 @@ and stop: never build in the master kit. No projects subfolder, no second folder
    the items that need the person are the only model questions; then prepare and open the approval window
    (`pbik gate prepare synth-approve`, `pbik gate open synth-approve`, `pbik gate wait synth-approve`). Mark stage
    "model" done (`pbik status --done model`).
-4. Build option: `pbik mode` gives the default and any suggestion. Ask only if there is no default yet, in one line
-   with both descriptions (PLAIN-WORDS "Build options"), batched with any other question. Record it (`pbik mode
+4. Build option: `pbik mode` gives the default, any suggestion, and whether to ask. Ask only when its next line says
+   so (no earlier build on this computer, no team default, nothing said yet), in one line with both descriptions
+   (PLAIN-WORDS "Build options"), batched with the model questions in the same message. If the person already said
+   it ("quick build"), record it and don't ask. Otherwise the plan list says which one and why. Record it (`pbik mode
    guided|quick`). They can switch any time ("switch to guided", "finish the rest quickly"): record it and go on.
+   Group like questions: one question for all the typed-in tables of one kind, never one per table.
 5. The path:
-   - from report: `pbik layout from-report <the .Report folder in the inputs> --out design/specs/layout.json`
+   - from report: `pbik layout from-report <the .Report folder in Reference> --out design/specs/layout.json`
    - from wireframe or picture: design/scripts/ref_layout.py (an image: write its boxes file first), into
      design/specs/layout.json
    - starter layouts: ask "What should this report help people decide?" (with requirements, take the answer from

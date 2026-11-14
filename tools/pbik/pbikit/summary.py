@@ -18,6 +18,23 @@ GATES = {
     "pack-register": ("Share the model pack", r"register to the team folder"),
 }
 LEVEL = re.compile(r"^\s*(error|warning|note|stale reference|pbik:)\s*", re.I)
+# v1.7 walkthrough fix 13: a result never tells the person to run a command, and never passes on a raw error.
+CMD = re.compile(r"`(?:pbik|python|powershell|pwsh|git|pip|code|tools[\\/])[^`]*`", re.I)
+INSTRUCT = re.compile(r"[,;:]?\s*\(?(?:then\s+)?(?:a person\s+)?(?:run|runs|rerun|pass|use|try)\s+`[^`]+`"
+                      r"(?:\s+(?:first|again|with [^.;)]*))?\)?", re.I)
+RAW = re.compile(r"^\s*(?:At (?:[A-Z]:\\|line:)|\+ |\+\s*~|~{4,}|CategoryInfo|FullyQualifiedErrorId|"
+                 r"Traceback \(most recent call last\)|File \"[^\"]+\", line \d+|[A-Za-z]+Error: |"
+                 r"Exception calling|at System\.)")
+
+
+def plain_text(text, hints):
+    """The text without any instruction to run a command; the commands go to `hints` (for the agent only)."""
+    for m in CMD.findall(text):
+        hints.append(m.strip("`"))
+    t = INSTRUCT.sub("", text)
+    t = CMD.sub("the step for it", t)
+    t = re.sub(r"\s{2,}", " ", t).strip(" ;,:")
+    return t or text
 
 
 def classify(lines):
@@ -58,9 +75,22 @@ def run_json(command, fn):
             code = 1
             err.write(f"\npbik: {type(e).__name__}: {e}\n")
     lines = (out.getvalue() + "\n" + err.getvalue()).splitlines()
+    raw = [ln for ln in lines if RAW.match(ln)]
+    lines = [ln for ln in lines if not RAW.match(ln)]
     facts, needs, nxt = classify(lines)
+    hints = []
+    facts = [plain_text(f, hints) if isinstance(f, str) else f for f in facts]
+    for n in needs:
+        if n.get("text"):
+            n["text"] = plain_text(n["text"], hints)
+    nxt = [plain_text(x, hints) for x in nxt]
+    if raw and not any(isinstance(n, dict) and n.get("kind") == "error" for n in needs):
+        needs.append({"kind": "error", "text": "something went wrong inside this step; I'll look at what happened "
+                                               "before going on"})
     if code and not facts and not any(isinstance(n, dict) and n.get("kind") == "error" for n in needs):
         needs.append({"kind": "error", "text": f"it stopped without saying why (exit code {code}); I'll look into it "
                                                "before going on"})
-    doc ={"ok": code == 0, "command": command, "exit": code, "facts": facts, "needs": needs, "next": nxt}
+    doc = {"ok": code == 0, "command": command, "exit": code, "facts": facts, "needs": needs, "next": nxt}
+    if hints or raw:          # for the agent only: never shown to the person
+        doc["agent"] = {"commands": list(dict.fromkeys(hints)), "raw": raw[:20]}
     return code, json.dumps(doc, ensure_ascii=False, indent=1)

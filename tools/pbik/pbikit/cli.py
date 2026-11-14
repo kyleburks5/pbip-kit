@@ -720,8 +720,17 @@ def _main(argv=None):
             print(f"Build option: {ST.MODE_WORDS[args.value]}.")
         else:
             rt = args.report_type or st.get("reportType") or st.get("path")
-            m, why = HI.default_mode(rt, HI.team_default(args.root))
+            team = HI.team_default(args.root)
+            m, why = HI.default_mode(rt, team)
             print(f"Default build option: {ST.MODE_WORDS[m]} ({why}).")
+            if st.get("mode"):
+                print(f"next: no question: you chose {ST.MODE_WORDS[st['mode']]} for this project")
+            elif HI.read() or team in HI.MODES:
+                print(f"next: no question: the plan list says {ST.MODE_WORDS[m]} ({why}); the person can change it "
+                      "there")
+            else:
+                print("next: ask once, with the other questions: guided build or quick build (no earlier build "
+                      "on this computer)")
             tip = HI.suggestion(rt)
             if tip:
                 print(tip)

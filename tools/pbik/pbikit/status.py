@@ -13,7 +13,7 @@ QUICK_PAUSES = ["plan"]
 # stages whose end is a stop for a look in a guided build; the page purpose and the plan are done only on the
 # person's OK, so being past them is never a pause
 AFTER_LOOK = ["theme", "build", "checks", "polish"]
-PLAIN = {"start": "start (what the report is for, and what you have)", "model": "the model",
+PLAIN = {"start": "what the report is for, and what you have", "model": "the model",
          "page purpose": "the page purpose", "plan": "the plan picture", "theme": "the colours", "build": "the build",
          "checks": "the checks", "polish": "the polish", "result": "the result",
          "live": "switching to the live model", "wrap-up": "the wrap-up"}

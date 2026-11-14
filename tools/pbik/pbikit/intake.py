@@ -172,14 +172,41 @@ def grouped_lines(c, most=10):
                    "the approval window and just check them.")
     if g["you"]:
         out.append(f"{len(g['you'])} need you:")
-        out += [f"  - {R.plain(f)}" for f in g["you"][:most]]
-        if len(g["you"]) > most:
-            out.append(f"  - and {len(g['you']) - most} more of the same kinds")
-        out.append("next: tell me for each whether to make up values for it or leave it out; then I'll open the "
-                   "approval window")
+        groups = similar(g["you"])
+        for kind, names in groups[:most]:
+            what = R.PLAIN.get(kind, kind)
+            out.append(f"  - {names[0]}: {what}" if len(names) == 1 else
+                       f"  - {len(names)} like this ({span(names)}): {what}")
+        if len(groups) > most:
+            out.append(f"  - and {len(groups) - most} more groups of the same kinds")
+        one = len(groups) == 1
+        out.append("next: tell me " + ("once, for all of them," if one and len(g["you"]) > 1 else
+                                       "for each group" if not one else "") +
+                   " whether to make up values or leave them out; then I'll open the approval window")
     else:
         out.append("next: I'll open the approval window (Approve the model): check it, then click Yes or No")
     return out
+
+
+def similar(flags):
+    """[(kind, [table names])]: flags of one kind on tables named alike (Manual Targets 1..5) as one group."""
+    import re
+    out = {}
+    for f in flags:
+        name = f.get("table") or "the model"
+        stem = re.sub(r"[\s_-]*\d+$", "", name)
+        out.setdefault((f["kind"], stem), []).append(name)
+    return [(k, v) for (k, _), v in out.items()]
+
+
+def span(names):
+    """'Manual Targets 1 to 5' for a numbered run, else the names joined."""
+    import re
+    m = [re.match(r"(.*?)(\d+)$", n) for n in names]
+    if all(m) and len({x.group(1) for x in m}) == 1:
+        nums = sorted(int(x.group(2)) for x in m)
+        return f"{m[0].group(1)}{nums[0]} to {nums[-1]}"
+    return ", ".join(names)
 
 
 def log(root, fmt, name, removed, c):

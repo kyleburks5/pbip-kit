@@ -665,5 +665,72 @@ class WalkthroughInputTests(Tmp):
         self.assertNotIn("rank stores", doc)
 
 
+# ---------------------------------------------------------------- LOW 12-13: questions and plain words
+class QuestionTests(Tmp):
+    def test_typed_in_tables_are_one_group_and_one_question(self):
+        from pbikit import intake as IN
+        c = {"flags": [{"id": f"F{k}", "kind": "enter-data", "table": f"Manual Targets {k}"} for k in range(1, 6)],
+             "tables": {}, "relationships": []}
+        import pbikit.rules as R
+        old = R.summary_line
+        R.summary_line = lambda c: "87 handled by rules, 0 option table(s) to keep, 5 need you"
+        try:
+            lines = IN.grouped_lines(c)
+        finally:
+            R.summary_line = old
+        text = "\n".join(lines)
+        self.assertIn("5 like this (Manual Targets 1 to 5): a small table someone typed into the model", text)
+        self.assertEqual(text.count("Manual Targets"), 1)
+        self.assertIn("once, for all of them", lines[-1])
+
+    def test_stage_wording(self):
+        from pbikit import status as ST
+        ST.update(self.tmp, done="model")
+        self.assertIn("next is what the report is for, and what you have", ST.line(self.tmp))
+        self.assertNotIn("next is start", ST.line(self.tmp))
+
+    def test_build_option_question_is_asked_only_without_a_default(self):
+        home = self.tmp / "home"
+        env = {**os.environ, "PBIK_HOME": str(home)}
+        r = subprocess.run([sys.executable, str(PBIK), "mode", "--root", str(self.tmp)], capture_output=True,
+                           text=True, env=env)
+        self.assertIn("next: ask once", r.stdout)
+        r = subprocess.run([sys.executable, str(PBIK), "mode", "quick", "--root", str(self.tmp)], capture_output=True,
+                           text=True, env=env)
+        r = subprocess.run([sys.executable, str(PBIK), "mode", "--root", str(self.tmp)], capture_output=True,
+                           text=True, env=env)
+        self.assertIn("next: no question", r.stdout)
+
+
+class PlainWordsTests(unittest.TestCase):
+    def test_no_command_for_the_person_and_hints_for_the_agent(self):
+        hints = []
+        self.assertEqual(SM.plain_text("Approval cleared: a person runs `pbik synth approve --by <name>`", hints),
+                         "Approval cleared")
+        self.assertEqual(SM.plain_text("no contract: run `pbik synth contract` first", hints), "no contract")
+        self.assertNotIn("`", SM.plain_text("schemas: 1 not cached: run `pbik schemas fetch X.Report` (first: u)",
+                                             hints))
+        self.assertIn("pbik synth approve --by <name>", hints)
+
+    def test_raw_errors_become_plain(self):
+        def ps_error():
+            print("application.state.get/v1 failed: something")
+            print(r"At C:\x\.claude\scripts\pbi-bridge.ps1:74 char:24")
+            print("+ CategoryInfo          : OperationStopped: (x) [], RuntimeException")
+            print("+ FullyQualifiedErrorId : x")
+            return 1
+        doc = json.loads(SM.run_json("desktop state", ps_error)[1])
+        shown = json.dumps([doc["facts"], doc["needs"], doc["next"]])
+        for raw in ("CategoryInfo", "FullyQualifiedErrorId", "char:24"):
+            self.assertNotIn(raw, shown)
+        self.assertTrue(any(n["kind"] == "error" for n in doc["needs"]))
+        self.assertEqual(len(doc["agent"]["raw"]), 3)
+
+    def test_a_real_message_through_the_cli(self):
+        r = pbik("--report", "json", "synth", "approve", "--by", "x", "--root", tempfile.mkdtemp())
+        doc = json.loads(r.stdout)
+        self.assertNotIn("`pbik", json.dumps([doc["facts"], doc["needs"], doc["next"]]))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)
