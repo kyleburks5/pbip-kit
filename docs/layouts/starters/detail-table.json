@@ -105,7 +105,8 @@
     ]
    },
    "container": {
-    "altText": "Items outside their normal range, worst first"
+    "altText": "Items outside their normal range, worst first",
+    "title": "Needs attention"
    },
    "build": {
     "method": "native",
@@ -133,7 +134,8 @@
     ]
    },
    "container": {
-    "altText": "{kpi1} by {category}, highest first"
+    "altText": "{kpi1} by {category}, highest first",
+    "title": "{kpi1} by {category}"
    },
    "build": {
     "method": "native",

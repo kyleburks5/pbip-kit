@@ -154,7 +154,8 @@
     ]
    },
    "container": {
-    "altText": "{kpi1} by {date} against its usual range"
+    "altText": "{kpi1} by {date} against its usual range",
+    "title": "{kpi1} over time"
    },
    "build": {
     "method": "native",
@@ -185,7 +186,8 @@
     ]
    },
    "container": {
-    "altText": "{kpi1} by {date}, one small chart per {category}"
+    "altText": "{kpi1} by {date}, one small chart per {category}",
+    "title": "{kpi1} over time, by {category}"
    },
    "build": {
     "method": "native",

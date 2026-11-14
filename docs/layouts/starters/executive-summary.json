@@ -154,7 +154,8 @@
     ]
    },
    "container": {
-    "altText": "Trend of {kpi1} by {date}"
+    "altText": "Trend of {kpi1} by {date}",
+    "title": "{kpi1} over time"
    },
    "build": {
     "method": "native",
@@ -182,7 +183,8 @@
     ]
    },
    "container": {
-    "altText": "{kpi1} by {category}, highest first"
+    "altText": "{kpi1} by {category}, highest first",
+    "title": "{kpi1} by {category}"
    },
    "build": {
     "method": "native",

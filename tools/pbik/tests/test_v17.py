@@ -449,5 +449,92 @@ class StartTests(Tmp):
         self.assertEqual((doc["pack"], "model" in doc["done"]), ("Example Big", True))
 
 
+# ---------------------------------------------------------------- stage e
+class PlanPictureTests(Tmp):
+    """A3: the plan as a picture plus a short list; OK records it; changes after OK are caught."""
+
+    def project(self):
+        from pbikit import start as SR
+        lay = SR.fill("executive-summary", ["Revenue", "Units Sold"], "Date[Date]", "stores[City]")
+        lay["visuals"][6]["build"] = {"method": "svg", "step": 2, "nativeTried": "a native bar can't draw chips",
+                                      "reason": "status pills in the table"}
+        f = self.tmp / "design" / "specs" / "layout.json"
+        f.parent.mkdir(parents=True)
+        f.write_text(json.dumps(lay), encoding="utf-8")
+        ST.update(self.tmp, done="start", mode="quick", dataClass="restricted")
+        ST.update(self.tmp, done="model")
+        return f
+
+    def shoot(self, html, png, w, h, hash_):
+        self.shots.append((w, h, hash_))
+        pathlib.Path(png).write_bytes(b"png")
+
+    def test_show_list_and_approve(self):
+        from pbikit import plan as PL
+        lf = self.project()
+        self.shots = []
+        pngs, text, h = PL.show(self.tmp, purposes={"P1": "Are we on track this month?"},
+                                assumptions=["'Total' means [Revenue], not [Gross Revenue]"], shoot=self.shoot)
+        self.assertEqual(len(pngs), 1)
+        self.assertEqual(self.shots[0], (1920, 1080, "#shot&labels=off&page=1"), "no ID badges for a person")
+        for need in ('Page Executive summary: "Are we on track this month?"', "| Revenue | [Revenue] |",
+                     "every headline number needs a comparison", "'Total' means [Revenue]",
+                     "Fallbacks (OK on the plan approves them):", "native option tried: a native bar can't draw chips",
+                     "Build: quick build", "Data: restricted"):
+            self.assertIn(need, text)
+        self.assertTrue((self.tmp / "design" / "plan" / "plan.md").exists())
+        self.assertTrue(PL.changed_since_approval(self.tmp))
+        r = pbik("plan", "approve", "--root", self.tmp)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("next: the colours", r.stdout)
+        doc = ST.read(self.tmp)
+        self.assertEqual((doc["planHash"], "plan" in doc["done"], "page purpose" in doc["done"]), (h, True, True))
+        spec = (self.tmp / "design" / "specs" / "spec.md").read_text(encoding="utf-8")
+        self.assertIn("## Page purpose", spec)
+        self.assertIn("Executive summary (P1): Are we on track this month?", spec)
+        self.assertFalse(PL.changed_since_approval(self.tmp))
+        lay = json.loads(lf.read_text(encoding="utf-8"))
+        lay["visuals"][1]["y"] += 8
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        self.assertTrue(PL.changed_since_approval(self.tmp), "a change after OK means showing it again")
+
+    def test_no_purpose_no_approval(self):
+        from pbikit import plan as PL
+        self.project()
+        with self.assertRaises(PL.PlanError) as cm:
+            PL.approve(self.tmp)
+        self.assertIn("what each should help people decide", str(cm.exception))
+
+    def test_open_beside_the_chat(self):
+        from pbikit import plan as PL
+        from unittest import mock
+        ran = []
+        with mock.patch.dict(os.environ, {"PBIK_OPEN": "vscode"}), mock.patch("shutil.which", lambda n: "code"):
+            self.assertEqual(PL.open_beside([self.tmp / "a.png"], run=ran.append), "vscode")
+        self.assertEqual(ran[0][:2], ["code", "--reuse-window"])
+
+    def test_starter_words_are_plain(self):
+        from pbikit import start as SR
+        lay = SR.fill("trend-dashboard", ["Revenue"], "Date[Date]", "stores[City]")
+        titles = [v["container"].get("title") for v in lay["visuals"] if isinstance(v.get("container"), dict)]
+        self.assertIn("Revenue over time, by City", titles)
+        self.assertEqual(lay["visuals"][5]["bindings"]["Y"], ["[Revenue]"], "fields stay fields")
+
+    def test_real_picture(self):
+        """The real drawing (headless Edge), when Edge is on this machine."""
+        sys.path.insert(0, str(KIT / "design" / "scripts"))
+        import edge_page
+        if not edge_page.available():
+            self.skipTest("no Edge on this machine: the picture is drawn at work (verify at work)")
+        from pbikit import plan as PL, start as SR
+        f = self.tmp / "design" / "specs" / "starters" / "x.layout.json"
+        f.parent.mkdir(parents=True)
+        f.write_text(json.dumps(SR.fill("detail-table", ["Revenue", "Units Sold"])), encoding="utf-8")
+        png = PL.picture(f, self.tmp / "pics")[0]
+        data = png.read_bytes()
+        self.assertEqual(data[:8], bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]))
+        self.assertEqual(int.from_bytes(data[16:20], "big"), 1920)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

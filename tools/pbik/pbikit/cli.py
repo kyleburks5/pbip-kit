@@ -304,6 +304,22 @@ def _main(argv=None):
     sast.add_argument("--date", help="the date field, e.g. Calendar[Date]")
     sast.add_argument("--category", help="the category field, e.g. Region[Name]")
     sast.add_argument("--title")
+    pl = sub.add_parser("plan", help="the plan as a picture: drawn pages and a short list")
+    pls = pl.add_subparsers(dest="sub", required=True)
+    pls_ = pls.add_parser("show", help="draw the plan (design/plan/) and write the short list")
+    pls_.add_argument("--root", default=".")
+    pls_.add_argument("--layout")
+    pls_.add_argument("--purpose", action="append", default=[], help="P1=what the page helps people decide")
+    pls_.add_argument("--assume", action="append", default=[], help="an assumption shown in the list")
+    plp = pls.add_parser("picture", help="draw any layout (a starter, a draft) as one picture per page")
+    plp.add_argument("layout")
+    plp.add_argument("--out", required=True)
+    plo = pls.add_parser("open", help="open the plan pictures (or any pictures) beside the chat")
+    plo.add_argument("files", nargs="*", help="pictures (default: the plan's page pictures)")
+    plo.add_argument("--root", default=".")
+    pla = pls.add_parser("approve", help="the person said OK in the chat: record the plan")
+    pla.add_argument("--root", default=".")
+    pla.add_argument("--layout")
     la = sub.add_parser("layout", help="draft layouts from other sources").add_subparsers(dest="sub", required=True)
     lfr = la.add_parser("from-report", help="an existing report (.Report folder) as a draft layout.json")
     lfr.add_argument("report")
@@ -555,6 +571,35 @@ def _main(argv=None):
             print(f"{len(fs)} starter layouts: " + ", ".join(SR.STARTER_NAMES.get(f.name.split('.')[0], f.stem)
                                                               for f in fs) + ".")
             print("next: I'll show them as pictures; pick one and change it in plain words")
+    elif c == "plan":
+        from . import plan as PL
+        try:
+            if args.sub == "show":
+                purposes = dict(x.split("=", 1) for x in args.purpose if "=" in x)
+                pngs, text, h = PL.show(args.root, args.layout, purposes, args.assume)
+                print(text.rstrip())
+                print(f"drew {len(pngs)} page picture(s)")
+                print("next: I'll show you the picture; say OK, or what to change")
+            elif args.sub == "picture":
+                pngs = PL.picture(args.layout, args.out)
+                print(f"drew {len(pngs)} page picture(s)")
+            elif args.sub == "open":
+                files = args.files or sorted((pathlib.Path(args.root) / PL.PLAN_DIR).glob("page-*.png"))
+                if not files:
+                    print("pbik: there are no pictures to open yet", file=sys.stderr)
+                    return 2
+                how = PL.open_beside(files)
+                print(f"Opened {len(files)} picture(s) " + ("beside the chat." if how == "vscode" else
+                                                             "in the picture viewer."))
+            else:
+                PL.approve(args.root, args.layout)
+                from . import status as ST
+                nxt = ST.read(args.root).get("next")
+                print("Plan approved.")
+                print(f"next: {ST.PLAIN.get(nxt, nxt)}")
+        except PL.PlanError as e:
+            print(f"pbik: {e}", file=sys.stderr)
+            return 2
     elif c == "layout":
         from . import fromreport as FR
         from .synth import write_json

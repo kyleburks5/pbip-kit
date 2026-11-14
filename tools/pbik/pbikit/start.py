@@ -128,6 +128,12 @@ def _fill_text(x, slots):
     return x
 
 
+def _plain(field):
+    """ "Table[Column]" -> "Column", "[Measure]" -> "Measure"; anything else unchanged."""
+    s = str(field)
+    return s[s.index("[") + 1:-1] if "[" in s and s.endswith("]") else s
+
+
 def fill(name, kpis=(), date=None, category=None, title=None):
     """A starter (docs/layouts/starters/<name>.json) as a layout.json: columns to pixels on the grid, slots filled
     with the model's names; unfilled slots keep a readable label ("KPI 2")."""
@@ -138,8 +144,13 @@ def fill(name, kpis=(), date=None, category=None, title=None):
                  title=title or STARTER_NAMES.get(name, name))
     out = {k: v for k, v in src.items() if k not in ("visuals", "_slots")}
     out["visuals"] = []
+    plain = {k: _plain(s) for k, s in slots.items()}                 # words people read: "Revenue", not "[Revenue]"
+    out["pages"] = _fill_text(out.get("pages", {}), plain)
     for v in src["visuals"]:
-        v = _fill_text(dict(v), slots)
+        v = dict(v)
+        words = {k: v.pop(k) for k in ("container", "text") if k in v}
+        v = _fill_text(v, slots)
+        v.update(_fill_text(words, plain))
         col, span = v.pop("col"), v.pop("span")
         v["x"], v["w"] = col_x(col), span_w(span)
         out["visuals"].append(v)
