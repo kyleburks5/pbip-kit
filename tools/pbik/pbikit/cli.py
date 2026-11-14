@@ -141,6 +141,7 @@ def _main(argv=None):
     mi = mo.add_parser("intake", help="the model drop folder: delete data files, detect the format, write the contract")
     mi.add_argument("--root", default=".")
     mi.add_argument("--folder", help="drop folder (default design/reference/model)")
+    mi.add_argument("--open", action="store_true", help="make the drop folder and open it for the user (reads nothing)")
     mpk = mo.add_parser("packs", help="model packs in the project's pack folders (project.json packFolders)")
     mpk.add_argument("--root", default=".")
     mrp = mo.add_parser("rules", help="rules a person made that the kit's rule library could learn")
@@ -359,6 +360,10 @@ def _main(argv=None):
         print(f"{len(props)} rule(s) proposed for the library")
     elif c == "model" and args.sub == "intake":
         from . import intake as IN, synth as S3
+        if args.open:
+            IN.open_drop(args.root)
+            print("the model folder is open: drop a copy of the model there (never your only file), then say done")
+            return 0
         try:
             IN.intake(args.root, args.folder)
         except (IN.IntakeError, S3.ContractError) as e:

@@ -70,6 +70,17 @@ def detect(folder):
     return found
 
 
+def open_drop(root=".", open_folder=True):
+    """Make the drop folder (git-ignored) and open it in File Explorer for the user; nothing in it is read."""
+    import os
+    d = pathlib.Path(root).resolve() / DROP
+    d.mkdir(parents=True, exist_ok=True)
+    (d / ".gitignore").write_text("*\n", encoding="utf-8")
+    if open_folder and os.name == "nt":
+        os.startfile(str(d))                              # noqa: S606
+    return d
+
+
 def intake(root=".", folder=None, out=print):
     """Delete data files, detect the model, write the contract. Returns {format, removed, contract}."""
     from . import synth as S

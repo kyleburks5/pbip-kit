@@ -213,6 +213,12 @@ class IntakeTests(Tmp):
         log = (self.tmp / "design/reviews/model-intake.md").read_text(encoding="utf-8")
         self.assertIn("`old report.pbix`", log)
 
+    def test_open_drop_reads_nothing(self):
+        from pbikit import intake as IN
+        d = IN.open_drop(self.tmp, open_folder=False)
+        self.assertTrue(d.is_dir())
+        self.assertEqual((d / ".gitignore").read_text(encoding="utf-8").strip(), "*")
+
     def test_refusals(self):
         from pbikit import intake as IN
         d = self.drop()
