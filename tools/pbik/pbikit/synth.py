@@ -199,6 +199,14 @@ def build_contract(source, root=None):
             "rules": [], "approval": None}
 
 
+def option_table(c, f):
+    """True when the kit's rule library keeps this table's rows as option labels (a small label + order table)."""
+    if f.get("kind") != "enter-data":
+        return False
+    from . import rules as R
+    return any(r.get("resolution") == KEEP_ROWS and R.matches(r, c, f) for r in R.load_library().get("rules", []))
+
+
 def apply_rules(contract):
     """Pre-fill unresolved flags from the contract's rules (kind, table or '*'). Returns the flags it filled."""
     filled = []
@@ -207,6 +215,8 @@ def apply_rules(contract):
             continue
         rules = sorted(contract.get("rules", []), key=lambda r: r.get("table") == "*")   # a table's own rule first
         for r in rules:
+            if r.get("table") == "*" and option_table(contract, f):
+                continue                  # an answer for every table of a kind never reaches an option table (fix 11)
             if r["kind"] == f["kind"] and (r.get("table") == "*" or N.same(r.get("table"), f.get("table"))):
                 f["resolution"], f["rule"] = r["resolution"], r["id"]
                 filled.append(f)
@@ -236,7 +246,12 @@ def resolve(root, target, resolution, why=None, every=False, cfile=None, out=pri
     c = read_json(cfile)
     if c is None:
         raise ContractError("no contract: run `pbik synth contract` first")
-    hits = [f for f in c["flags"] if f["id"] == target or (every and f["kind"] == target)]
+    # an answer for every table of a kind never reaches the option tables that keep their labels: those stay as they
+    # are (v1.7 live walkthrough fix 11)
+    hits = [f for f in c["flags"] if f["id"] == target or (every and f["kind"] == target
+                                                             and f.get("resolution") != KEEP_ROWS)]
+    if not hits and every and any(f["kind"] == target for f in c["flags"]):
+        raise ContractError(f"every {target} table is an option table that keeps its labels")
     if not hits:
         raise ContractError(f"no flag {target!r}")
     for f in hits:
@@ -245,8 +260,8 @@ def resolve(root, target, resolution, why=None, every=False, cfile=None, out=pri
             raise ContractError(f"{f['id']} ({f['kind']}) can be resolved as: {', '.join(allowed)}")
     rid = f"R{len(c.get('rules', [])) + 1}"
     table = "*" if every else hits[0].get("table")
-    c.setdefault("rules", []).append({"id": rid, "kind": hits[0]["kind"], "table": table, "resolution": resolution,
-                                      "why": why or ""})
+    rule = {"id": rid, "kind": hits[0]["kind"], "table": table, "resolution": resolution, "why": why or ""}
+    c.setdefault("rules", []).append(rule)
     for f in hits:
         f["resolution"], f["rule"] = resolution, rid
         if resolution == KEEP_ROWS and f.get("rows", 0) > OPTION_WARN_ROWS:

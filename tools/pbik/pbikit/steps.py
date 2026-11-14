@@ -45,14 +45,14 @@ def interactions(root, since=None):
             continue
         if r.get("event") == "interaction":
             recs.append(r)
-    hook = any(r.get("source") == "hook" for r in recs)
+    hook = any(r.get("source") in ("hook", "setup") for r in recs)
     win = any(r.get("source") == "window" for r in recs)
     out = []
     for r in recs:
         is_window = str(r["step"]).startswith("window:")
         if is_window and win and r.get("source") != "window":
             continue
-        if not is_window and hook and r.get("source") != "hook":
+        if not is_window and hook and r.get("source") not in ("hook", "setup"):
             continue
         at = datetime.datetime.fromisoformat(r["at"])
         if at.tzinfo is None:

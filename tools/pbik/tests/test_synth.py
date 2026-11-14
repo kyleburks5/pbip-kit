@@ -38,6 +38,10 @@ def resolve_all(root):
     for kind, res in (("m-code", "synthesize"), ("connection", "synthesize"), ("entity", "synthesize"),
                       ("rls", "not reproduced"), ("enter-data", "synthesize")):
         S.resolve(root, kind, res, why=f"{kind}: sample rule", every=True)
+    c = S.read_json(root / "design/specs/contract.json")      # an answer for every table of a kind leaves the option
+    for f in c["flags"]:                                       # tables kept (fix 11): these samples make them up too
+        if f.get("resolution") == S.KEEP_ROWS:
+            S.resolve(root, f["id"], "synthesize", why="sample: made up", out=lambda *a: None)
 
 
 def approved_project(root, planned=True):
@@ -138,7 +142,7 @@ class ContractTests(Tmp):
         resolve_all(self.root)
         c = S.read_json(self.root / "design/specs/contract.json")
         self.assertTrue(all(f["resolution"] and f["rule"] for f in c["flags"]))
-        self.assertEqual(len(c["rules"]), 5)
+        self.assertEqual(len(c["rules"]), 5 + sum(1 for r in c["rules"] if r["why"] == "sample: made up"))
         with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}), self.assertRaises(DC.Refused):
             S.approve(self.root, "Sample Person")
         with self.assertRaises(DC.Refused):

@@ -700,6 +700,12 @@ class QuestionTests(Tmp):
         r = subprocess.run([sys.executable, str(PBIK), "mode", "--root", str(self.tmp)], capture_output=True,
                            text=True, env=env)
         self.assertIn("next: no question", r.stdout)
+        other = self.tmp / "other project"                 # another project: the choice is only a suggestion there
+        other.mkdir()
+        r = subprocess.run([sys.executable, str(PBIK), "mode", "--root", str(other)], capture_output=True,
+                           text=True, env=env)
+        self.assertIn("next: ask once", r.stdout)
+        self.assertIn("Suggested build option", r.stdout)
 
 
 class PlainWordsTests(unittest.TestCase):

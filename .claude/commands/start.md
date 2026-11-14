@@ -2,8 +2,9 @@ Start or continue a report (the main flow, docs/design/phase1-usability.md Part 
 Follow this whenever someone asks for a dashboard or report; nobody needs to type this command. Talk only in
 docs/PLAIN-WORDS.md words: no slash commands, paths, commands, flags, IDs or JSON; after every step one line saying
 what happens next. Run every pbik command with `--report json` and answer from its facts, needs and next. Mark each
-stage with `pbik step start|end <stage>` and every reply from the person or approval window with
-`pbik step note <what> --interaction` (a window: `window: <title>`).
+stage with `pbik step start|end <stage>`. Interactions count themselves: each message the person sends (the chat
+app's hook) and each approval window answer (the window). Without the hook (Copilot), mark each message with
+`pbik step note message --interaction`; never mark a window answer.
 
 Never wait in silence: before any step that can take longer than 30 seconds (the plan picture, opening Desktop, a
 large build), say in one line what it is; run it so its "Still ..." lines reach you (in the background, reading its
@@ -14,7 +15,9 @@ the plain reason it gives; never leave a reply empty.
 Run `pbik status`. In a project, say its line ("You're past the plan picture; next is the colours") and carry on from
 there. In a fresh copy of the kit, make this folder the project: `pbik project setup` (data class restricted unless
 the person said otherwise; the folder's name unless they gave one) and say its lines: the project's name and its two
-folders, Model and Reference. In the master kit, say its line (copy the kit to a new folder, open that, ask there)
+folders, Model and Reference. Once the Reference folder holds something, `pbik project name` gives the report a
+sensible name (the wireframe's title, the requirements' heading or the model's name, never just the folder's): say it
+in the plan list and use it for the build; the person can change it (`--set`). In the master kit, say its line (copy the kit to a new folder, open that, ask there)
 and stop: never build in the master kit. No projects subfolder, no second folder, no chat switch.
 
 ## 1. Start (stage "start")
@@ -70,7 +73,7 @@ after the OK (a taller slicer, number formats, column widths, a legend) need no 
 quick build; list them in the result. If it fails, show the plan again. Then, as /theme, /build, /review and /fix
 do (their files say how), with a check after each step and one fix and recheck when a check fails:
 - theme (the colours: every build applies the project's theme, and the plan names it); build (`pbik build "<report
-  name>" design/specs/layout.json`: the first build makes a clean, empty report folder itself; never copy another
+  name from pbik project name>" design/specs/layout.json`: the first build makes a clean, empty report folder itself; never copy another
   report); checks (`pbik validate`, audit_layout.py, audit_ids.py). Build, checks and the final score mark their
   stages in the status file themselves;
 - before screenshots: open the report in Desktop (`pbik desktop open`: it waits until Desktop answers, saying "still
@@ -90,7 +93,10 @@ do (their files say how), with a check after each step and one fix and recheck w
   screenshot beside the approved preview and lists what differs (positions, kinds, titles; never the example
   numbers). Fix what differs, or say why it must.
 - Score: `pbik score --item 1=<pass when plan compare finds nothing left to fix, with your own look at the screenshots> --item 3=<every
-  card's measure returns a value: DAX query> --item 7=<slicers filter, buttons go where they should> --final`.
+  card's measure returns a value: DAX query> --item 7=pass:<what you clicked in Desktop and what changed> --final`.
+  Item 7 counts only when you really clicked the slicers and buttons; without the words after "pass:" it stays "not
+  checked". The score also fails item 1 itself when something in the approved plan was lost (a visual, a total row, a
+  comparison line), and item 11 when a card compares with last year but no year is chosen on the page.
 Result: the before and after screenshots (shown or opened as the plan pictures), the polish score, and what you
 couldn't fix with its Desktop click steps (design/known-gaps.md). Then offer "Switch to live?". With a person's yes:
 1. Prepare first: `pbik gate prepare bind-live --from picked` (after the Desktop model pick, or from the pack). It

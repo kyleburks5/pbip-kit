@@ -10,6 +10,9 @@ What it does, each only where the layout doesn't say otherwise (it never removes
 - Tables: a "vs" / change column is coloured by direction (rules: good at 0 and above, bad below).
 - The top row: a header band (a decorative shape behind the title and the filter, the full canvas width) and the
   filter styled as part of it (no box of its own: it sits in the band).
+"Lower is better" (v1.7 live walkthrough fix 10): layout.json `lowerIsBetter` lists the measures where a fall is good
+(returns, costs); measures named like that (returns, refunds, costs, complaints, churn, defects ...) are added with a
+note the person can change. Their change is ▼ green / ▲ red, in the colour measures and the plan picture alike.
 Line charts drawn straight, larger titles, axis labels and legends, and bar labels without needless decimals come
 from the theme (design/scripts/gen_theme.py and the kit's tokens), not from here.
 """
@@ -18,6 +21,28 @@ import json, pathlib, re
 CMP = re.compile(r"\bvs\b|change|growth|variance|\bdiff|delta|\byoy\b", re.I)     # a share is no comparison
 LY_IN = re.compile(r"SAMEPERIODLASTYEAR\s*\(\s*([^)]+?)\s*\)", re.I)
 ARROWS = '"▲ "0.0%;"▼ "0.0%;0.0%'
+LOWER = re.compile(r"\b(returns?|refunds?|costs?|expenses?|spend|complaints?|churn|defects?|errors?|incidents?|"
+                   r"cancell?ations?|late|delays?|overdue|backlog|absen\w*|turnover|write.?offs?|bad debt|losses|loss)\b",
+                   re.I)
+
+
+def lower_is_better(layout, name):
+    """True when a fall in this measure is good: layout.json `lowerIsBetter` (names, or {name: false} to say no)."""
+    lib = layout.get("lowerIsBetter")
+    n = (name or "").strip("[]")
+    if isinstance(lib, dict):
+        for k, v in lib.items():
+            if k.strip("[]").lower() == n.lower():
+                return bool(v)
+    elif isinstance(lib, list) and any(k.strip("[]").lower() == n.lower() for k in lib):
+        return True
+    return False
+
+
+def _colour(cmp_name, good, bad, lower):
+    """The colour measure: green when the change goes the good way (up, or down for lower-is-better)."""
+    op = "<=" if lower else ">="
+    return (f'IF ( ISBLANK ( [{cmp_name}] ), BLANK (), IF ( [{cmp_name}] {op} 0, "{good}", "{bad}" ) )')
 
 
 def _field(x):
@@ -60,13 +85,21 @@ def _date_of(field, planned):
     return m.group(1) if m else None
 
 
-def polish(layout, tokens=None, planned=None):
+def polish(layout, tokens=None, planned=None, measures=None):
     """Apply the defaults in place. Returns plain lines: what changed, and what it couldn't do and why."""
     tokens, planned = tokens or {}, planned if planned is not None else {}
     colors = tokens.get("colors", {})
     good, bad = colors.get("good", "#197982"), colors.get("bad", "#B94642")
     said, why_not = [], []
     vis = layout.setdefault("visuals", [])
+    found = _detect_lower(layout, planned, measures)
+    if found:
+        lib = layout.get("lowerIsBetter")
+        if isinstance(lib, dict):
+            lib.update({k: True for k in found})
+        else:
+            layout["lowerIsBetter"] = sorted(set(lib or []) | set(found))
+        why_not.append("lower is better for " + ", ".join(found) + " (a fall shows ▼ in green); say if that's wrong")
     for v in list(vis):
         t = v.get("type")
         if t == "cardVisual":
@@ -80,7 +113,19 @@ def polish(layout, tokens=None, planned=None):
                 for key in ("detailSize", "valueSize"):     # the change line at body size (the title: the theme's)
                     rl.setdefault(key, "body")
                 for lab in rl.get("labels", []) or []:
-                    if lab.get("detailColor") or not is_comparison(lab.get("value", "")):
+                    if lab.get("detailColor") and lab.get("detail"):        # polished before: the direction may change
+                        cmp_name = name_of(lab["detail"])
+                        base = name_of(lab.get("value", "")).removesuffix(" LY")
+                        lower = lower_is_better(layout, base) or lower_is_better(layout, cmp_name)
+                        col = name_of(lab["detailColor"])
+                        if col in planned:
+                            planned[col]["expression"] = _colour(cmp_name, good, bad, lower)
+                        if lower:
+                            lab["lowerIsBetter"] = True
+                        else:
+                            lab.pop("lowerIsBetter", None)
+                        continue
+                    if not is_comparison(lab.get("value", "")):
                         continue
                     cmp_name = name_of(lab["value"])
                     table = table_of(lab["value"]) or (planned.get(cmp_name) or {}).get("table") or "_Measures"
@@ -94,9 +139,13 @@ def polish(layout, tokens=None, planned=None):
                                             f"CALCULATE ( [{base}], SAMEPERIODLASTYEAR ( {date} ) )",
                                             "formatString": (planned.get(base) or {}).get("formatString", "#,0")})
                     col = f"{cmp_name} colour"
-                    planned.setdefault(col, {"table": table, "expression":
-                                             f'IF ( ISBLANK ( [{cmp_name}] ), BLANK (), IF ( [{cmp_name}] >= 0, '
-                                             f'"{good}", "{bad}" ) )', "dataType": "string"})
+                    lower = lower_is_better(layout, base) or lower_is_better(layout, cmp_name)
+                    planned[col] = {"table": table, "expression": _colour(cmp_name, good, bad, lower),
+                                    "dataType": "string"}           # the kit's own: rewritten when the setting changes
+                    if lower:
+                        lab["lowerIsBetter"] = True
+                    else:
+                        lab.pop("lowerIsBetter", None)
                     if cmp_name in planned and planned[cmp_name].get("formatString") != ARROWS:
                         planned[cmp_name]["formatString"] = ARROWS
                     title = re.sub(r"^vs\.?\s+", "", lab.get("title") or "last year", flags=re.I)
@@ -110,14 +159,37 @@ def polish(layout, tokens=None, planned=None):
                     continue
                 cmp_name = name_of(f)
                 col = f"{cmp_name} colour"              # a colour measure: the form Desktop saves for a table column
-                planned.setdefault(col, {"table": table_of(f) or "_Measures", "expression":
-                                         f'IF ( ISBLANK ( [{cmp_name}] ), BLANK (), IF ( [{cmp_name}] >= 0, '
-                                         f'"{good}", "{bad}" ) )', "dataType": "string"})
-                v.setdefault("cf", []).append({"type": "measure", "object": "values", "property": "fontColor",
-                                               "measure": f"[{col}]", "target": _field(f)})
+                lower = lower_is_better(layout, cmp_name) or lower_is_better(layout, _base(f, planned))
+                planned[col] = {"table": table_of(f) or "_Measures", "expression":
+                                _colour(cmp_name, good, bad, lower), "dataType": "string"}
+                rule = {"type": "measure", "object": "values", "property": "fontColor", "measure": f"[{col}]",
+                        "target": _field(f)}
+                if lower:
+                    rule["lowerIsBetter"] = True
+                v.setdefault("cf", []).append(rule)
                 said.append(f"{v['id']}: {cmp_name} coloured by direction")
     said += header_band(layout)
     return said, why_not
+
+
+def _detect_lower(layout, planned, measures=None):
+    """KPI measures named like returns or costs, not yet in `lowerIsBetter` either way."""
+    lib = layout.get("lowerIsBetter")
+    said = {k.strip("[]").lower() for k in (lib or [])} if not isinstance(lib, dict) else \
+        {k.strip("[]").lower() for k in lib}
+    out = []
+    for v in layout.get("visuals", []):
+        names = [name_of(x) for xs in (v.get("bindings") or {}).values() for x in (xs if isinstance(xs, list) else [xs])
+                 if _field(x).startswith("[") or name_of(x) in planned or name_of(x) in (measures or ())]
+        # measures only, never a column such as Return Reason
+        rl = v.get("referenceLabels") if isinstance(v.get("referenceLabels"), dict) else {}
+        names += [name_of(lab.get("value", "")) for lab in rl.get("labels", []) or []]
+        for n in names:
+            m = _base(n, planned) or (re.split(r"\s+(?:vs|change|growth|variance|diff|delta|yoy)", n, 1,
+                                               flags=re.I)[0] if is_comparison(n) else n)
+            if m and LOWER.search(m) and m.lower() not in said and not m.lower().endswith(" colour")                     and m not in out:
+                out.append(m)
+    return out
 
 
 def header_band(layout):
@@ -162,7 +234,12 @@ def run(root=".", layout=None):
     gf = root / "design" / "specs" / "generate.json"
     g = json.loads(gf.read_text(encoding="utf-8")) if gf.exists() else {}
     planned = g.setdefault("plannedMeasures", {})
-    said, why_not = polish(lay, tokens, planned)
+    c = {}
+    cf = root / "design" / "specs" / "contract.json"
+    if cf.exists():
+        c = json.loads(cf.read_text(encoding="utf-8"))
+    measures = {m for t in (c.get("tables") or {}).values() for m in (t.get("measures") or {})}
+    said, why_not = polish(lay, tokens, planned, measures)
     if not lay.get("theme") and (root / "design" / "themes" / "pbip-polish.json").exists():
         lay["theme"] = "design/themes/pbip-polish.json"         # the theme is part of every plan (v1.7 live fix 6)
         said.append("the project's theme applied to the report")

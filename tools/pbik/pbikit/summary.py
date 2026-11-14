@@ -22,7 +22,7 @@ LEVEL = re.compile(r"^\s*(error|warning|note|stale reference|pbik:)\s*", re.I)
 CMD = re.compile(r"`(?:pbik|python|powershell|pwsh|git|pip|code|tools[\\/])[^`]*`", re.I)
 INSTRUCT = re.compile(r"[,;:]?\s*\(?(?:then\s+)?(?:a person\s+)?(?:run|runs|rerun|pass|use|try)\s+`[^`]+`"
                       r"(?:\s+(?:first|again|with [^.;)]*))?\)?", re.I)
-RAW = re.compile(r"^\s*(?:At (?:[A-Z]:\\|line:)|\+ |\+\s*~|~{4,}|CategoryInfo|FullyQualifiedErrorId|"
+RAW = re.compile(r"^\s*(?:\[raw\] |At (?:[A-Z]:\\|line:)|\+ |\+\s*~|~{4,}|CategoryInfo|FullyQualifiedErrorId|"
                  r"Traceback \(most recent call last\)|File \"[^\"]+\", line \d+|[A-Za-z]+Error: |"
                  r"Exception calling|at System\.)")
 

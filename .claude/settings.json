@@ -26,6 +26,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/count_messages.py\""
+          }
+        ]
+      }
     ]
   }
 }

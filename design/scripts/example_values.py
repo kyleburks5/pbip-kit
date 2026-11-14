@@ -99,7 +99,7 @@ def categories(label, n=6):
     return [f"{base} {i + 1}" for i in range(n)]
 
 
-def for_visual(v, measures=None):
+def for_visual(v, measures=None, colors=None):
     """The wireframe data entry (as wireframe_data.py writes it) for one visual, with example values."""
     groups, values, names = [], [], []
     for role, b in (v.get("bindings") or {}).items():
@@ -137,6 +137,18 @@ def for_visual(v, measures=None):
     out = {"groups": [] if one else groups, "values": values, "formats": [fmt_for(x) for x in names],
            "cat": 0, "leg": None, "rows": rows, "counts": [99] * len(rows), "hidden": 0, "total": len(rows),
            "example": True}
+    colors = colors or {}
+    for c in v.get("cf", []) or []:              # a "vs" column coloured by direction, as the colour measure does
+        if c.get("type") != "measure" or c.get("property") != "fontColor" or one:
+            continue
+        tgt = re.sub(r"^.*\[|\]$", "", str(c.get("target") or ""))
+        if tgt not in names:
+            continue
+        k = len(groups) + names.index(tgt)
+        lower = bool(c.get("lowerIsBetter"))
+        good, bad = colors.get("good", "#197982"), colors.get("bad", "#B94642")
+        out["fonts"] = [None if r[k] is None else (good if (r[k] >= 0) != lower else bad) for r in rows]
+        out["fontTarget"] = values[names.index(tgt)]
     rl = v.get("referenceLabels")
     if isinstance(rl, dict) and rl.get("labels"):
         out["refs"], out["refDetails"] = [], []
@@ -148,7 +160,8 @@ def for_visual(v, measures=None):
                 x = value_for(det)
                 text = ("▲ " if x >= 0 else "▼ ") + format_value(abs(x), "0.0%") if PCT.search(det) or \
                     CMP_WORDS.search(det) else format_value(x, fmt_for(det))
-                out["refDetails"].append({"text": text, "good": x >= 0 if lab.get("detailColor") else None})
+                good = (x >= 0) != bool(lab.get("lowerIsBetter"))     # a fall is good for returns, costs
+                out["refDetails"].append({"text": text, "good": good if lab.get("detailColor") else None})
             else:
                 out["refDetails"].append(None)
     return out
@@ -166,9 +179,16 @@ def format_value(x, fmt):
 def data_for(layout, root=None):
     """The whole wireframe data document: {"visuals": {id: entry}, "privacy": [...], "example": true}."""
     measures = contract_measures(root or layout.get("_root") or ".")
+    colors = {}
+    try:
+        import json as _json, pathlib as _p
+        colors = _json.loads((_p.Path(root or layout.get("_root") or ".") / "design" / "tokens.json")
+                             .read_text(encoding="utf-8")).get("colors", {})
+    except (OSError, ValueError):
+        pass
     vis = {}
     for v in layout.get("visuals", []):
-        e = for_visual(v, measures)
+        e = for_visual(v, measures, colors)
         if e:
             vis[v["id"]] = e
     return {"visuals": vis, "example": True,

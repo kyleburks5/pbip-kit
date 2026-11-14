@@ -107,8 +107,8 @@ class GateTests(Tmp):
         self.addCleanup(home.stop)
 
     def dialog(self, answer):
-        def d(title, text):
-            self.shown.append((title, text))
+        def d(title, text, code=False, details=""):
+            self.shown.append((title, text, details))
             return answer
         return d
 
@@ -118,13 +118,15 @@ class GateTests(Tmp):
         S.resolve(self.tmp, opt, S.KEEP_ROWS, out=lambda *a: None)
         doc = self.GT.prepare("synth-approve", self.tmp)
         self.assertIn("66 tables, 400 measures", doc["summary"])
-        self.assertIn("111 handled by rules, 1 option table(s) to keep", doc["summary"])
+        self.assertIn("92 handled automatically", doc["summary"])     # "every typed-in table" left the option
+        self.assertIn("20 option table(s) keep their labels, e.g. Option 01; Option 02.", doc["summary"])  # tables
         self.assertNotIn("Choice 1", json.dumps(doc), "the agent's prepared file never holds the rows")
         with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}):     # v1.7: the agent opens it; the code protects it
             self.assertEqual(self.GT.run("synth-approve", self.tmp, dialog=self.dialog(True),
                                          out=lambda *a: None), "approved")
         self.assertEqual(self.shown[0][0], "Approve the model")
-        self.assertIn("Option 03 keeps 6 row(s): Choice 1 | 1", self.shown[0][1])
+        self.assertIn("Option 02 (Choice 1, Choice 2, Choice 3 +1 more)", self.shown[0][1])   # read in the window
+        self.assertIn("Option 03: 6 row(s): Choice 1, Choice 2, Choice 3 +3 more", self.shown[0][2].splitlines())
         c = S.read_json(self.tmp / "design/specs/contract.json")
         self.assertTrue(S.approved(c))
         self.assertEqual(c["tables"]["Option 03"]["rows"]["rows"][0], ["Choice 1", 1])
@@ -274,11 +276,15 @@ class RuleLibraryTests(Tmp):
         for f in g["you"]:                                   # the person answered in chat; the agent records it
             S.resolve(self.tmp, f["id"], "synthesize", why="typed targets: made-up values", out=lambda *a: None)
         doc = GT.prepare("synth-approve", self.tmp)
-        self.assertIn("92 handled by rules, 20 option table(s) to keep, 0 need you", doc["summary"])
+        self.assertIn("92 handled automatically: 39 tables loaded by a query get made-up rows", doc["summary"])
+        self.assertIn("20 option table(s) keep their labels, e.g. Option 01; Option 02.", doc["summary"])
+        self.assertIn("0 need you.", doc["summary"])
+        self.assertIn("No real data is copied", doc["summary"])
+        self.assertLessEqual(len(doc["summary"].splitlines()), 10, "one screen")
         shown = []
         GT.run("synth-approve", self.tmp, dialog=lambda t, x: shown.append(x) or True, person=True,
                out=lambda *a: None)
-        self.assertEqual(shown[0].count(" keeps "), 20)
+        self.assertEqual(shown[0].count(" row(s): "), 20, "the details: one line per option table")
         self.assertTrue(S.approved(S.read_json(self.tmp / "design/specs/contract.json")))
 
     def test_proposals(self):

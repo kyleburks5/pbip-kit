@@ -89,6 +89,14 @@ def plan_hash(layout, plan):
     return hashlib.sha1(body.encode("utf-8")).hexdigest()[:16]
 
 
+def moved(a, b):
+    """A visual moved when its columns changed or its top moved more than one row band (120 px). Its height, and
+    a nudge of up to one band when a visual above it grew, are the kit's own fixes after the OK (a taller table or
+    slicer: v1.7 live walkthrough fix 12) and need no new OK."""
+    a, b = list(a), list(b)
+    return a[0] != b[0] or a[1] != b[1] or abs(a[2] - b[2]) > 1
+
+
 def what_changed(old, new):
     """Plain lines: how the structure differs from the approved one."""
     out = []
@@ -103,7 +111,7 @@ def what_changed(old, new):
             out.append(f"{vid} is now a {b['type']}")
         if a["shows"] != b["shows"]:
             out.append(f"{vid} shows different numbers")
-        if list(a["cell"]) != list(b["cell"]) or a["page"] != b["page"]:
+        if moved(a["cell"], b["cell"]) or a["page"] != b["page"]:
             out.append(f"{vid} moved")
     if old.get("pages") != new.get("pages"):
         out.append("the pages changed")
@@ -376,6 +384,8 @@ def approve(root, layout=None):
     h = plan_hash(lay, plan)
     plan["approved"] = h
     plan["approvedStructure"] = structure(lay)
+    plan["approvedPurposes"] = dict(plan.get("purposes", {}))
+    save(pathlib.Path(root) / PLAN_DIR / "approved-layout.json", lay)   # what the score checks nothing was lost from
     save(plan_file(root), plan)
     keep_approved(root)
     write_purpose(root, lay, plan)
@@ -429,9 +439,7 @@ def compare(root=".", desktop=True, assume_saved=False, run=None):
 
 def changed_since_approval(root, layout=None):
     """True when the layout or plan changed after the person's OK (or there was no OK)."""
-    lay = load(layout_file(root, layout))
-    plan = load(plan_file(root), {}) or {}
-    return not lay or plan.get("approved") != plan_hash(lay, plan)
+    return bool(changes_since_approval(root, layout))
 
 
 def changes_since_approval(root, layout=None):
@@ -443,7 +451,11 @@ def changes_since_approval(root, layout=None):
     if plan.get("approved") == plan_hash(lay, plan):
         return []
     lines = what_changed(plan.get("approvedStructure") or {}, structure(lay))
-    return lines or ["the page purposes changed"]
+    if "approvedPurposes" in plan and plan["approvedPurposes"] != plan.get("purposes", {}):
+        lines.append("the page purposes changed")
+    elif "approvedPurposes" not in plan and not lines:
+        lines.append("the page purposes changed")                # an older approval: can't tell, so ask
+    return lines
 
 
 MAIN_FLOW = "<!-- pbik main flow: the plan list (design/plan/plan.md) is the design spec -->"

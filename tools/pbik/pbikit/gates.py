@@ -4,7 +4,7 @@
         the agent: writes .pbik/gates/<gate>.json (plain summary, args, a hash of what is approved)
     pbik gate open <gate>     the agent: opens the approval window in its own process and returns at once
     pbik gate wait <gate>     the agent: waits (up to 30 minutes) for the person's answer
-    pbik gate run <gate>      shows the window and waits (the optional Command Palette tasks use this)
+    pbik gate run <gate>      shows the window and waits (the optional VS Code tasks use this; never told to a person)
 
 The window shows the summary and a plain Yes / No (v1.7 walkthrough: the typed code was the most disliked step). It
 opens in front of every other window. Only when screen control is active (computer use in a Claude Code chat in the
@@ -54,13 +54,68 @@ def _contract_summary(root):
     if not c:
         raise GateError("there is no model to approve yet: drop the model first")
     g = R.groups(c)
-    lines = [f"Model {c['model']}: {len(c['tables'])} tables, "
-             f"{sum(len(t['measures']) for t in c['tables'].values())} measures, {len(c['relationships'])} relationships.",
-             R.summary_line(c) + "." + (" The option tables' rows are shown below." if g["keep"] else "")]
     if g["you"]:
         raise GateError(f"{len(g['you'])} item(s) still need a decision before approval: "
                         + "; ".join(R.plain(f) for f in g["you"][:5]))
-    return c, "\n".join(lines), content_hash(c)
+    return c, "\n".join(model_summary(c, root)), content_hash(c)
+
+
+REASONS = {("m-code", "synthesize"): "tables loaded by a query get made-up rows",
+           ("m-code", "drop"): "tables loaded by a query are left out",
+           ("connection", "synthesize"): "links to data sources aren't copied",
+           ("connection", "drop"): "links to data sources aren't copied",
+           ("rls", "not reproduced"): "security roles aren't copied",
+           ("entity", "synthesize"): "tables about people or accounts get made-up values only",
+           ("entity", "drop"): "tables about people or accounts are left out",
+           ("enter-data", "synthesize"): "typed-in tables get made-up values",
+           ("enter-data", "drop"): "typed-in tables are left out"}
+
+
+def _labels(rows):
+    """The words a person reads in an option table's rows: the first text value of each row."""
+    out = []
+    for r in rows:
+        txt = next((str(v) for v in r if isinstance(v, str) and v.strip()), None)
+        out.append(txt if txt is not None else " | ".join(map(str, r)))
+    return out
+
+
+def _first(xs, n=3):
+    return ", ".join(xs[:n]) + (f" +{len(xs) - n} more" if len(xs) > n else "")
+
+
+def model_summary(c, root, examples=False):
+    """The approval window's first screen (v1.7 live walkthrough fix 8): the model and its counts, what was handled
+    automatically with short reasons, the option tables that keep their labels with 1-2 examples, what needs the
+    person, and that no real data is copied. The rows themselves go behind "Show details". `examples`: the option
+    labels are read at run time, inside the window's own process only (the agent's prepared file never holds them)."""
+    from . import rules as R, synth as S
+    g = R.groups(c)
+    lines = [f"Model {c['model']}: {len(c['tables'])} tables, "
+             f"{sum(len(t['measures']) for t in c['tables'].values())} measures, "
+             f"{len(c['relationships'])} relationships.", ""]
+    why = {}
+    for f in g["rules"]:
+        k = REASONS.get((f["kind"], f.get("resolution")), f"{R.PLAIN.get(f['kind'], f['kind'])}: {f.get('resolution')}")
+        why[k] = why.get(k, 0) + 1
+    lines.append(f"{len(g['rules'])} handled automatically" + (": " + "; ".join(
+        f"{n} {k}" if n > 1 else f"1: {k}" for k, n in sorted(why.items(), key=lambda x: -x[1])[:4]) if why else "")
+        + ".")
+    if g["keep"]:
+        ex = []
+        for f in g["keep"][:2]:
+            try:
+                labs = _labels(S.kept_rows(c, root, f["table"])["rows"]) if examples else None
+                ex.append(f"{f['table']} ({_first(labs)})" if labs else f["table"])
+            except (S.ContractError, OSError, KeyError):
+                ex.append(f["table"])
+        lines.append(f"{len(g['keep'])} option table(s) keep their labels, e.g. " + "; ".join(ex) + ".")
+    else:
+        lines.append("0 option tables keep their labels.")
+    lines.append(f"{len(g['you'])} need you.")
+    lines += ["", "No real data is copied: the made-up model has the same tables, columns and measures"
+              + (", and the option tables' labels." if g["keep"] else ".")]
+    return lines
 
 
 def _desktop_open():
@@ -76,6 +131,7 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
         raise GateError(f"unknown gate {gate!r}")
     args = {k: v for k, v in dict(report=report, pack=pack, from_=from_, workspace=workspace, model=model, mid=mid,
                                   to_class=to_class, to=to).items() if v}
+    details = ""
     if gate == "synth-approve":
         _, text, h = _contract_summary(root)
     elif gate == "map-approve":
@@ -83,9 +139,10 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
         m = read_json(BD.map_file(root))
         if not m:
             raise GateError("there is no name map to approve")
-        text = (f"{len(m.get('tables', {}))} table name(s) and {len(m.get('fields', {}))} field name(s) map to the live "
-                "model:\n" + "\n".join(f"  {k} -> {v}" for k, v in list(m.get("tables", {}).items())
-                                         + list(m.get("fields", {}).items())[:30]))
+        pairs = list(m.get("tables", {}).items()) + list(m.get("fields", {}).items())
+        text = (f"{len(m.get('tables', {}))} table name(s) and {len(m.get('fields', {}))} field name(s) map to the "
+                "live model, e.g. " + "; ".join(f"{k} is {v}" for k, v in pairs[:2]) + ".")
+        details = "\n".join(f"{k} is {v}" for k, v in pairs)
         h = BD.map_hash(m)
     elif gate == "model-approve":
         pack = pack or (DC.read_project(root).get("pack") or {}).get("path")
@@ -95,8 +152,9 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
         d = read_json(df) if df else None
         if not d:
             raise GateError("no model changes are waiting for approval")
-        text = f"{len(d['changes'])} change(s) to {d['contract']['model']} since the last approval:\n" + "\n".join(
-            f"  {x['change']} {x['kind']} {x['what']}" for x in d["changes"][:30])
+        text = (f"{len(d['changes'])} change(s) to {d['contract']['model']} since the last approval, e.g. "
+                + "; ".join(f"{x['change']} {x['kind']} {x['what']}" for x in d["changes"][:2]) + ".")
+        details = "\n".join(f"{x['change']} {x['kind']} {x['what']}" for x in d["changes"])
         h = _h(d["contract"].get("model"), d["changes"], content_hash(d["contract"]))
     elif gate == "bind-live":
         from . import bind as BD
@@ -163,7 +221,7 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
         text = (f"Share the approved setup of {c['model']} (data class {DC.data_class(root)}) in the team folder. "
                 "Only people approved for this data class may do this.")
         h = _h(content_hash(c), str(to))
-    doc = {"gate": gate, "task": SM.GATES[gate][0], "summary": text, "hash": h, "args": args,
+    doc = {"gate": gate, "task": SM.GATES[gate][0], "summary": text, "details": details, "hash": h, "args": args,
            "prepared": datetime.datetime.now().isoformat(timespec="seconds")}
     write_json(gate_dir(root) / f"{gate}.json", doc)
     (gate_dir(root).parent / ".gitignore").write_text("*\n", encoding="utf-8")
@@ -186,6 +244,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 $text = [IO.File]::ReadAllText($args[1])
 $withCode = ($args[2] -eq 'code')
+$details = if ($args.Count -gt 3 -and $args[3]) { [IO.File]::ReadAllText($args[3]) } else { '' }
 Add-Type -Namespace PbikWin -Name Native -MemberDefinition @'
 [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
 [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int n);
@@ -197,13 +256,26 @@ $bytes = New-Object byte[] 4; $rng.GetBytes($bytes)
 $code = -join ($bytes | ForEach-Object { $letters[$_ % $letters.Length] })
 $f = New-Object Windows.Forms.Form
 $f.Text = $args[0]; $f.Width = 780; $f.Height = 640; $f.StartPosition = 'CenterScreen'; $f.TopMost = $true
+$f.AutoScroll = $false
 $f.FormBorderStyle = 'FixedDialog'; $f.MaximizeBox = $false; $f.MinimizeBox = $false
 $t = New-Object Windows.Forms.TextBox
 $t.Multiline = $true; $t.ReadOnly = $true; $t.ScrollBars = 'Vertical'; $t.Text = $text; $t.TabStop = $false
-$t.SetBounds(16, 16, 732, 380); $t.Font = New-Object Drawing.Font('Segoe UI', 10)
+$t.SetBounds(16, 16, 732, 250); $t.Font = New-Object Drawing.Font('Segoe UI', 10)
+# summary first, one screen; the full list behind "Show details" (v1.7 live walkthrough fix 8)
+$dt = New-Object Windows.Forms.TextBox
+$dt.Multiline = $true; $dt.ReadOnly = $true; $dt.ScrollBars = 'Both'; $dt.WordWrap = $false; $dt.Text = $details
+$dt.TabStop = $false; $dt.Visible = $false; $dt.Font = New-Object Drawing.Font('Segoe UI', 9)
+$sd = New-Object Windows.Forms.Button; $sd.Text = 'Show details'; $sd.SetBounds(16, 274, 140, 30)
+$sd.Visible = [bool]$details
+$sd.Add_Click({
+  if ($dt.Visible) { $dt.Visible = $false; $sd.Text = 'Show details'; $f.Height -= 260
+    foreach ($c in @($l, $pic, $box, $msg, $y, $n)) { $c.Top -= 260 } }
+  else { $dt.SetBounds(16, 312, 732, 250); $dt.Visible = $true; $sd.Text = 'Hide details'; $f.Height += 260
+    foreach ($c in @($l, $pic, $box, $msg, $y, $n)) { $c.Top += 260 } }
+})
 $l = New-Object Windows.Forms.Label
 $l.Text = if ($withCode) { 'Screen control is on in a chat, so: type the code in the picture, then click Yes, approve.' } else { 'Approve this? Click Yes, approve or No.' }
-$l.SetBounds(16, 410, 732, 22); $l.Font = New-Object Drawing.Font('Segoe UI', 10)
+$l.SetBounds(16, 314, 732, 22); $l.Font = New-Object Drawing.Font('Segoe UI', 10)
 $bmp = New-Object Drawing.Bitmap 220, 64
 $g = [Drawing.Graphics]::FromImage($bmp); $g.SmoothingMode = 'AntiAlias'; $g.Clear([Drawing.Color]::White)
 $r = New-Object Random
@@ -217,13 +289,13 @@ for ($i = 0; $i -lt 4; $i++) {
   $g.DrawString([string]$code[$i], $font, [Drawing.Brushes]::Black, 0, 0); $g.ResetTransform()
 }
 $g.Dispose()
-$pic = New-Object Windows.Forms.PictureBox; $pic.Image = $bmp; $pic.SetBounds(16, 440, 220, 64)
+$pic = New-Object Windows.Forms.PictureBox; $pic.Image = $bmp; $pic.SetBounds(16, 344, 220, 64)
 $pic.AccessibleName = 'approval code picture'
-$box = New-Object Windows.Forms.TextBox; $box.SetBounds(256, 456, 120, 32); $box.MaxLength = 4
+$box = New-Object Windows.Forms.TextBox; $box.SetBounds(256, 360, 120, 32); $box.MaxLength = 4
 $box.Font = New-Object Drawing.Font('Consolas', 16); $box.CharacterCasing = 'Upper'
-$msg = New-Object Windows.Forms.Label; $msg.SetBounds(392, 462, 356, 22); $msg.ForeColor = [Drawing.Color]::DarkRed
-$y = New-Object Windows.Forms.Button; $y.Text = 'Yes, approve'; $y.SetBounds(476, 548, 132, 34)
-$n = New-Object Windows.Forms.Button; $n.Text = 'No'; $n.SetBounds(620, 548, 128, 34)
+$msg = New-Object Windows.Forms.Label; $msg.SetBounds(392, 366, 356, 22); $msg.ForeColor = [Drawing.Color]::DarkRed
+$y = New-Object Windows.Forms.Button; $y.Text = 'Yes, approve'; $y.SetBounds(476, 430, 132, 34)
+$n = New-Object Windows.Forms.Button; $n.Text = 'No'; $n.SetBounds(620, 430, 128, 34)
 $script:result = 1; $script:tries = 0
 $y.Add_Click({
   if (-not $withCode) { $script:result = 0; $f.Close(); return }
@@ -235,8 +307,10 @@ $y.Add_Click({
   }
 })
 $n.Add_Click({ $script:result = 1; $f.Close() })
-if ($withCode) { $f.Controls.AddRange(@($t, $l, $pic, $box, $msg, $y, $n)); $f.ActiveControl = $box }
-else { $f.Controls.AddRange(@($t, $l, $y, $n)); $f.Height = 520; $y.Top = 440; $n.Top = 440; $f.ActiveControl = $n }
+if ($withCode) { $f.Controls.AddRange(@($t, $sd, $dt, $l, $pic, $box, $msg, $y, $n)); $f.Height = 520
+  $f.ActiveControl = $box }
+else { $f.Controls.AddRange(@($t, $sd, $dt, $l, $y, $n)); $f.Height = 430; $y.Top = 344; $n.Top = 344
+  $f.ActiveControl = $n }
 $f.CancelButton = $n
 # in front of every other window, even when opened from a background process (walkthrough fix 14)
 $f.Add_Shown({ $f.TopMost = $true; $f.Activate(); $f.BringToFront()
@@ -248,15 +322,17 @@ exit $script:result
 ANSWERS = {0: "yes", 1: "no", 2: "code"}
 
 
-def windows_dialog(title, text, code=False, details=""):
+def windows_dialog(title, text, code=False, details=""):  # noqa: C901
     """The approval window: a plain Yes / No; with `code` (screen control active) "yes" only when the person typed
     the code shown in the picture and clicked Yes. "no" (No, or closed) or "code" (three wrong tries)."""
     with tempfile.TemporaryDirectory() as d:
         script, body = pathlib.Path(d) / "gate.ps1", pathlib.Path(d) / "text.txt"
+        more = pathlib.Path(d) / "details.txt"
+        more.write_text((details or "").replace("\n", "\r\n"), encoding="utf-8-sig")
         script.write_text(DIALOG_PS, encoding="utf-8-sig")
         body.write_text(text.replace("\n", "\r\n"), encoding="utf-8-sig")
         r = subprocess.run(["powershell", "-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", str(script),
-                            title, str(body), "code" if code else "plain"])
+                            title, str(body), "code" if code else "plain", str(more) if details else ""])
     return ANSWERS.get(r.returncode, "no")
 
 
@@ -366,6 +442,8 @@ def run(gate, root=".", dialog=None, out=print, person=None):
     root = pathlib.Path(root).resolve()
     doc = check_ready(gate, root)
     extra = run_time_details(gate, root)
+    if gate == "synth-approve":                          # the option labels, read here in the window's process
+        doc = dict(doc, summary="\n".join(model_summary(read_json(specs(root) / "contract.json"), root, True)))
     code = needs_code()
     _lock(gate, True)
     try:
@@ -509,14 +587,14 @@ def window_error(root, gate):
 def run_time_details(gate, root):
     """What only the person sees, read at run time: the option-table rows a synth approval keeps."""
     if gate != "synth-approve":
-        return ""
+        return (read_json(gate_dir(root) / f"{gate}.json") or {}).get("details", "")
     from . import synth as S
     c = read_json(specs(root) / "contract.json")
     keep = [f for f in c["flags"] if f.get("resolution") == S.KEEP_ROWS]
     out = []
-    for f in keep:
+    for f in keep:                       # one line per table: name, rows, first 3 labels, +N more
         x = S.kept_rows(c, root, f["table"])
-        out.append(f"{f['table']} keeps {len(x['rows'])} row(s): " + "; ".join(" | ".join(map(str, r)) for r in x["rows"][:40]))
+        out.append(f"{f['table']}: {len(x['rows'])} row(s): {_first(_labels(x['rows']))}")
     return "\n".join(out)
 
 

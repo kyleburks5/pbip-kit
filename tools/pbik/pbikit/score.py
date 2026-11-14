@@ -96,12 +96,64 @@ def _fields(b):
     return out
 
 
-def compute(report, layout, agent=None, validate_fn=None):
-    """{item: (passed True/False/None, why)}. `agent`: {1: True, 3: False, ...} from the agent's own checks."""
+def lost_since_approval(report, layout, approved):
+    """What the approved plan had that the built report lost (v1.7 live walkthrough fix 16): a visual, a table's
+    total row, a card's comparison line. [] when nothing was lost or there is no approved plan."""
+    if not approved:
+        return []
+    out = []
+    built = built_visuals(report)
+    now = {v["id"]: v for v in layout.get("visuals", [])}
+    for a in approved.get("visuals", []):
+        vid = a.get("id")
+        if not vid or a.get("decorative"):
+            continue
+        if vid not in now or vid not in built:
+            out.append(f"{vid} ({a.get('type')}) is gone")
+            continue
+        vf = next(pathlib.Path(report).glob(f"definition/pages/*/visuals/{vid}_*/visual.json"), None)
+        try:
+            vd = json.loads(vf.read_text(encoding="utf-8")) if vf else {}
+        except ValueError:
+            vd = {}
+        objs = vd.get("visual", {}).get("objects", {})
+        if a.get("type") in ("tableEx", "pivotTable") and (a.get("props") or {}).get("total.totals") is not False:
+            for e in objs.get("total", []):
+                show = ((e.get("properties") or {}).get("totals") or {}).get("expr", {}).get("Literal", {})
+                if str(show.get("Value", "")).lower() == "false":
+                    out.append(f"{vid} lost its total row")
+                    break
+        rl = a.get("referenceLabels") if isinstance(a.get("referenceLabels"), dict) else {}
+        if rl.get("labels") and not (now[vid].get("referenceLabels") or {}).get("labels"):
+            out.append(f"{vid} lost its comparison line")
+    return out
+
+
+def compute(report, layout, agent=None, validate_fn=None, approved=None):
+    """{item: (passed True/False/None, why)}. `agent`: {1: True, 3: False, 7: "how it was tested"} from the agent's
+    own checks. Item 7 (interactions) passes only with how it was tested; "pass" alone stays "not checked" (fix 16).
+    Item 1 fails whatever the agent says when something in the approved plan was lost."""
     agent = agent or {}
     res = {}
     for n in AGENT:
         res[n] = (agent.get(n), "" if n in agent else "not checked")
+    if 7 in agent:
+        tested = agent[7]
+        if tested is True or tested is None or (isinstance(tested, str) and not tested.strip()):
+            res[7] = (None, "not checked: say what was clicked and what changed")
+        elif tested is False:
+            res[7] = (False, "")
+        else:
+            res[7] = (True, f"tested: {tested}")
+    if approved is None:
+        af = pathlib.Path(report).parent / "design" / "plan" / "approved-layout.json"
+        try:
+            approved = json.loads(af.read_text(encoding="utf-8")) if af.exists() else None
+        except ValueError:
+            approved = None
+    lost = lost_since_approval(report, layout, approved)
+    if lost:
+        res[1] = (False, "lost since the approved plan: " + "; ".join(lost[:5]))
     bad = check_grid(layout)
     res[2] = (not bad, f"off the grid: {', '.join(bad[:5])}" if bad else "")
     built = built_visuals(report)
@@ -232,6 +284,9 @@ def polish_checks(report, layout):
             if CMP.search(_name(lab.get("value", "")) + " " + _name(lab.get("detail", ""))) and \
                     not lab.get("detailColor"):
                 bad.append(f"{v['id']} change isn't coloured by direction")
+        if rl.get("labels") and _last_year(rl) and not year_chosen(layout, v.get("page")):
+            bad.append(f"{v['id']} compares with last year, but no year is chosen on the page, so it isn't clear "
+                       "which years it compares (add a year filter, or say the year in the title)")
         if rl.get("labels"):
             size = _pt(rl.get("detailSize") or rl.get("valueSize"), tok) or _style(
                 theme, "cardVisual", "referenceLabelValue", "valueFontSize", 10)
@@ -329,6 +384,33 @@ CHARTS = {"lineChart", "areaChart", "barChart", "clusteredBarChart", "columnChar
           "lineStackedColumnComboChart", "lineClusteredColumnComboChart", "ribbonChart"}
 
 
+LY = re.compile(r"last year|\bLY\b|prior year|previous year|\bPY\b|year ago|same period", re.I)
+YEARISH = re.compile(r"year|date|calendar|period|fiscal|month", re.I)
+
+
+def _last_year(rl):
+    return any(LY.search(" ".join(str(lab.get(k, "")) for k in ("title", "value", "detail")))
+               for lab in rl.get("labels", []) or [])
+
+
+def year_chosen(layout, page):
+    """True when the page (or report) has a slicer or filter on a year or date field."""
+    def fields(x):
+        out = []
+        for f in (x if isinstance(x, list) else [x]):
+            out.append(str(f.get("field", "")) if isinstance(f, dict) else str(f))
+        return out
+    for v in layout.get("visuals", []):
+        if v.get("page") == page and v.get("type") in ("slicer", "advancedSlicerVisual", "listSlicer",
+                                                       "textSlicer"):
+            if any(YEARISH.search(f) for xs in (v.get("bindings") or {}).values() for f in fields(xs)):
+                return True
+    pages = layout.get("pages", {}) or {}
+    flt = list((pages.get(page) or {}).get("filters", []) or []) + list(
+        ((layout.get("report") or {}).get("filters")) or [])
+    return any(YEARISH.search(str(f.get("field", "")) if isinstance(f, dict) else str(f)) for f in flt)
+
+
 def passed(res):
     return sum(1 for ok, _ in res.values() if ok)
 
@@ -366,9 +448,17 @@ def write_review(root, res, mode=None):
 
 
 def parse_items(xs):
+    """--item 1=pass, --item 3=no, --item 7=pass:clicked the region slicer, the cards changed. Item 7 keeps the
+    words after "pass:" as how it was tested; without them it is "not checked"."""
     out = {}
     for x in xs or []:
         k, _, v = x.partition("=")
-        if k.strip().isdigit() and int(k) in AGENT:
-            out[int(k)] = v.strip().lower() in ("pass", "yes", "ok", "true", "1")
+        if not (k.strip().isdigit() and int(k) in AGENT):
+            continue
+        word, _, how = v.partition(":")
+        ok = word.strip().lower() in ("pass", "yes", "ok", "true", "1")
+        if int(k) == 7:
+            out[7] = (how.strip() or True) if ok else False
+        else:
+            out[int(k)] = ok
     return out

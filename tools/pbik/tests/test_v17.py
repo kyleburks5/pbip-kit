@@ -628,6 +628,8 @@ class ScoreTests(Tmp):
     def test_clean_build(self):
         from pbikit import score as SC
         res = SC.compute(self.report, self.layout(), {1: True, 3: True, 7: True})
+        self.assertIsNone(res[7][0], "a bare pass for interactions is 'not checked' (v1.7 live fix 16)")
+        res = SC.compute(self.report, self.layout(), {1: True, 3: True, 7: "clicked the region slicer: cards changed"})
         for n in (2, 4, 5, 8, 10):
             self.assertTrue(res[n][0], (n, res[n]))
         self.assertEqual(sum(1 for n in range(1, 11) if res[n][0]), 10, res)      # the ten build checks

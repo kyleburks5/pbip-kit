@@ -16,7 +16,7 @@ project. Setup, in place:
 - commits "project start".
 A `projects` folder copied over from the old setup is never deleted (git ignores it; setup says so).
 """
-import pathlib, shutil, subprocess
+import re, pathlib, shutil, subprocess
 
 from . import dataclass_ as DC, drops
 
@@ -81,6 +81,55 @@ def master_only(root):
     return found
 
 
+FOLDERISH = re.compile(r"^(copy of |new folder|pbip[- _]?kit|kit|project|report|test|tmp|temp)\b|"
+                       r"\b(copy|\(\d+\)|v?\d+(\.\d+)*|final|draft)$", re.I)
+NOISE = re.compile(r"\((?:made[- ]up|example|sample|draft|copy|test)\)|"
+                   r"\b(wire ?frame|mock ?-?up|sketch|layout|requirements?|brief|draft|final|v\d+)\b", re.I)
+
+
+def _tidy(text):
+    t = NOISE.sub(" ", re.sub(r"[_]+", " ", text or ""))
+    t = re.sub(r"\s{2,}", " ", t).strip(" -:|.")
+    return (t[:1].upper() + t[1:]) if t else ""
+
+
+def report_name(root="."):
+    """(name, from what): a sensible report name instead of the folder's (v1.7 live walkthrough fix 15). In order:
+    the name already chosen; a wireframe's title or file name; the first heading of the requirements; an existing
+    report's name; the model's name + " report"; the folder name, tidied."""
+    import html as _html
+    from . import drops, status as ST, start as SR, synth as S
+    root = pathlib.Path(root).resolve()
+    chosen = ST.read(root).get("reportName")
+    if chosen:
+        return chosen, "chosen before"
+    ref = drops.reference_dir(root)
+    d = SR.detect(root)
+    for kind, n in d["inputs"]:
+        p = ref / n
+        if kind == "from wireframe" and p.is_file():
+            m = re.search(r"<title>(.*?)</title>", p.read_text(encoding="utf-8", errors="replace"), re.I | re.S)
+            t = _tidy(_html.unescape(m.group(1))) if m else ""
+            if t:
+                return t, "the wireframe's title"
+            if _tidy(p.stem):
+                return _tidy(p.stem), "the wireframe's name"
+        if kind == "from report":
+            return _tidy(n[:-len(".Report")]), "the existing report's name"
+    for n in d["requirements"]:
+        p = ref / n
+        if p.suffix.lower() in (".md", ".txt"):
+            m = re.search(r"^\s*#+\s*(.+?)\s*$", p.read_text(encoding="utf-8", errors="replace"), re.M)
+            t = _tidy(m.group(1)) if m else ""
+            if t:
+                return t, "the requirements' heading"
+    c = S.read_json(S.specs(root) / "contract.json") or {}
+    if c.get("model"):
+        return f"{_tidy(c['model'])} report", "the model's name"
+    t = _tidy(FOLDERISH.sub("", root.name)) or "Report"
+    return t, "the folder name"
+
+
 def setup(root=".", name=None, cls="restricted", out=print):
     """Turn a fresh copy of the kit into a project, in place. Returns the project's name."""
     from . import status as ST
@@ -112,6 +161,8 @@ def setup(root=".", name=None, cls="restricted", out=print):
     gi.write_text("\n".join(lines) + "\n", encoding="utf-8")
     DC.set_class(root, cls)
     ST.update(root, project=name, dataClass=cls, setup="one folder")
+    from . import steps as STP                    # the message that started the project (the hook couldn't count it:
+    STP.interaction(root, "message", source="setup")   # there was no project yet)
     if not (root / ".git").exists():
         git(root, "init", "-q")
         how = "a new git repository"

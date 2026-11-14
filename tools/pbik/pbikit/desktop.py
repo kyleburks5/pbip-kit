@@ -70,7 +70,7 @@ def run(action, *args, bridge=None, wait=None, sleep=None):
     from . import progress as PR
     script = pathlib.Path(bridge) if bridge else find_bridge()
     if not script or not script.exists():
-        unavailable("no .claude/scripts/pbi-bridge.ps1 found above the current folder (pass --bridge)")
+        unavailable("the kit's Desktop connection script is missing from this project")
     ps = shutil.which("powershell") or shutil.which("powershell.exe") or shutil.which("pwsh")
     if not ps:
         unavailable("PowerShell is not on PATH")
@@ -91,12 +91,36 @@ def run(action, *args, bridge=None, wait=None, sleep=None):
         if "no desktop bridge pipe" in low or "pipe" in low and ("timeout" in low or "not found" in low):
             unavailable("Power BI Desktop is not open, or its Desktop Bridge preview is off", check_version=True)
         if "running scripts is disabled" in low or "execution polic" in low:
-            unavailable("PowerShell's execution policy blocks the bridge script (tools/doctor.ps1 shows the policy)")
+            unavailable("Windows settings block the kit's Desktop connection script (PowerShell's execution policy)")
         if "multiple desktop instances" in low:
-            unavailable("several Desktop windows are open; close all but one (or pass --process-id)")
-        print(out.strip())
+            unavailable("several Power BI Desktop windows are open; close all but one")
+        print(plain_desktop_error(out))
+        for ln in out.strip().splitlines()[:20]:         # for the agent only (pbik --report json keeps it apart)
+            print("[raw] " + ln)
         sys.exit(code)
     return stdout
+
+
+DESKTOP_ERRORS = [
+    (r"unsaved|dirty", "Power BI Desktop has unsaved changes"),
+    (r"no (report|file) (is )?open|no active (report|document)", "Power BI Desktop has no report open"),
+    (r"page .*not found|unknown page|no such page", "that page isn't in the report Desktop has open"),
+    (r"access (is )?denied|unauthori[sz]ed", "Windows refused the connection to Power BI Desktop"),
+    (r"time(d)? ?out", "Power BI Desktop didn't answer in time"),
+    (r"not ready|busy|loading", "Power BI Desktop is busy"),
+    (r"out of memory|insufficient memory", "Power BI Desktop ran out of memory"),
+    (r"schema|invalid json|failed to (load|parse)", "Power BI Desktop couldn't read the report files"),
+]
+
+
+def plain_desktop_error(text):
+    """A raw Desktop or bridge error in plain words (v1.7 live walkthrough fix 14): never a stack trace."""
+    import re as _re
+    low = (text or "").lower()
+    for pat, said in DESKTOP_ERRORS:
+        if _re.search(pat, low):
+            return f"error: {said}. I'll check it before going on."
+    return "error: Power BI Desktop couldn't do that step. I'll look at what it said before going on."
 
 
 def wait_ready(bridge=None, wait=None):

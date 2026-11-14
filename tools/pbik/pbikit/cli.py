@@ -224,6 +224,9 @@ def _main(argv=None):
     pst.add_argument("--root", default=".")
     pst.add_argument("--name", help="the project's name (default: the folder's name)")
     pst.add_argument("--class", dest="cls", default="restricted", choices=["public", "internal", "restricted"])
+    pnm = pjs.add_parser("name", help="the report's name: from the wireframe, requirements or model, not the folder")
+    pnm.add_argument("--root", default=".")
+    pnm.add_argument("--set", help="the name the person chose")
     pms = pjs.add_parser("master", help="(the maintainer) mark this folder as the master kit, so it is never set up")
     pms.add_argument("--here", action="store_true", required=True)
     pms.add_argument("--root", default=".")
@@ -549,6 +552,17 @@ def _main(argv=None):
                 print(f"pbik: {e}", file=sys.stderr)
                 return 2
             return 0
+        if args.sub == "name":
+            from . import projectsetup as PS, status as ST
+            if args.set:
+                ST.update(args.root, reportName=args.set.strip())
+                print(f"Report name: {args.set.strip()}.")
+                return 0
+            name, why = PS.report_name(args.root)
+            ST.update(args.root, reportName=name)
+            print(f"Report name: {name} (from {why}).")
+            print("next: I'll use it for the report and its files; say another name if you'd like one")
+            return 0
         if args.sub == "master":
             from . import projectsetup as PS
             PS.mark_master(args.root)
@@ -750,15 +764,13 @@ def _main(argv=None):
             rt = args.report_type or st.get("reportType") or st.get("path")
             team = HI.team_default(args.root)
             m, why = HI.default_mode(rt, team)
-            print(f"Default build option: {ST.MODE_WORDS[m]} ({why}).")
             if st.get("mode"):
+                print(f"Build option: {ST.MODE_WORDS[st['mode']]} (chosen for this project).")
                 print(f"next: no question: you chose {ST.MODE_WORDS[st['mode']]} for this project")
-            elif HI.read() or team in HI.MODES:
-                print(f"next: no question: the plan list says {ST.MODE_WORDS[m]} ({why}); the person can change it "
-                      "there")
-            else:
-                print("next: ask once, with the other questions: guided build or quick build (no earlier build "
-                      "on this computer)")
+            else:                        # once per project; another project's choice is only a suggestion (fix 9)
+                print(f"Suggested build option: {ST.MODE_WORDS[m]} ({why}).")
+                print(f"next: ask once, with the other questions: guided build or quick build? Say you'd suggest "
+                      f"{ST.MODE_WORDS[m]} ({why})")
             tip = HI.suggestion(rt)
             if tip:
                 print(tip)

@@ -405,5 +405,243 @@ class StatusTests(Tmp):
         self.assertIn("past the result", line)
         self.assertIn("switching to the live model", line)
 
+
+# ---------------------------------------------------------------- MEDIUM 8-12, 14-17
+class ApprovalWindowTests(Tmp):
+    """8. Every approval window: the summary first, one screen; the full list behind "Show details"."""
+
+    def test_model_window_summary_and_details(self):
+        import test_phase1 as T1
+        T1.big_project(self.tmp)
+        doc = GT.prepare("synth-approve", self.tmp)
+        lines = doc["summary"].splitlines()
+        self.assertLessEqual(len(lines), 10, "one screen")
+        self.assertTrue(lines[0].startswith("Model Example Big: 66 tables"))
+        self.assertTrue(any(x.startswith("92 handled automatically: ") for x in lines))
+        self.assertTrue(any(x.startswith("20 option table(s) keep their labels, e.g. ") for x in lines))
+        self.assertIn("0 need you.", lines)
+        self.assertTrue(any(x.startswith("No real data is copied") for x in lines))
+        self.assertNotIn("Choice 1", json.dumps(doc), "the agent's prepared file never holds the labels")
+        shown = []
+        GT.run("synth-approve", self.tmp, dialog=lambda t, x, code=False, details="": shown.append((x, details))
+               or "no", out=QUIET)
+        text, details = shown[0]
+        self.assertIn("e.g. Option 01 (Choice 1, Choice 2); Option 02 (Choice 1, Choice 2, Choice 3 +1 more)", text)
+        rows = details.splitlines()
+        self.assertEqual(len(rows), 20, "one line per option table")
+        self.assertEqual(rows[9], "Option 10: 20 row(s): Choice 1, Choice 2, Choice 3 +17 more")
+
+    def test_every_window_puts_long_lists_behind_details(self):
+        S.write_json(self.tmp / "design/specs/bind-map.json", {"tables": {f"T{i}": f"Live {i}" for i in range(40)},
+                                                              "fields": {}})
+        with mock.patch("pbikit.bind.map_hash", lambda m: "h"):
+            doc = GT.prepare("map-approve", self.tmp)
+        self.assertEqual(len(doc["summary"].splitlines()), 1)
+        self.assertEqual(len(doc["details"].splitlines()), 40)
+        self.assertIn("Show details", GT.DIALOG_PS)
+        self.assertIn("$sd.Visible = [bool]$details", GT.DIALOG_PS)
+
+
+class ScopedAnswerTests(Tmp):
+    """11. The answer for the typed-in target tables never changes the option tables."""
+
+    def test_every_answer_leaves_option_tables_kept(self):
+        import test_phase1 as T1
+        T1.big_project(self.tmp, resolve=False)
+        S.resolve(self.tmp, "enter-data", "synthesize", every=True, out=QUIET)
+        c = S.read_json(self.tmp / "design/specs/contract.json")
+        opts = [f for f in c["flags"] if f["table"].startswith("Option")]
+        self.assertEqual(len(opts), 20)
+        self.assertTrue(all(f["resolution"] == S.KEEP_ROWS for f in opts), "option tables keep their labels")
+        self.assertTrue(all(f["resolution"] == "synthesize" for f in c["flags"]
+                            if f["table"].startswith("Manual Targets")))
+        T1.BM.write(self.tmp / "src", "tmdl")                # the model read again: the saved answer stays scoped
+        S.contract(self.tmp / "src", self.tmp)
+        c = S.read_json(self.tmp / "design/specs/contract.json")
+        self.assertTrue(all(f["resolution"] == S.KEEP_ROWS for f in c["flags"] if f["table"].startswith("Option")))
+
+
+class LowerIsBetterTests(Tmp):
+    """10. "Lower is better" per measure: ▼ is green for returns and costs, in the measures and the picture."""
+
+    def layout(self, lower=None):
+        lay = {"pages": {"P1": {}}, "visuals": [
+            {"id": "P1-V01", "name": "returns", "page": "P1", "type": "cardVisual", "x": 32, "y": 96, "w": 444,
+             "h": 160, "bindings": {"Data": ["[Returns]"]},
+             "referenceLabels": {"labels": [{"title": "vs last year", "value": "[Returns vs LY]"}]}},
+            {"id": "P1-V02", "name": "sales", "page": "P1", "type": "cardVisual", "x": 500, "y": 96, "w": 444,
+             "h": 160, "bindings": {"Data": ["[Sales]"]},
+             "referenceLabels": {"labels": [{"title": "vs last year", "value": "[Sales vs LY]"}]}}]}
+        if lower is not None:
+            lay["lowerIsBetter"] = lower
+        planned = {"Returns vs LY": {"table": "_Measures", "expression": "DIVIDE ( [Returns] - CALCULATE ( [Returns], "
+                                     "SAMEPERIODLASTYEAR ( 'Calendar'[Date] ) ), 1 )"},
+                   "Sales vs LY": {"table": "_Measures", "expression": "DIVIDE ( [Sales] - CALCULATE ( [Sales], "
+                                   "SAMEPERIODLASTYEAR ( 'Calendar'[Date] ) ), 1 )"}}
+        return lay, planned
+
+    def test_returns_fall_is_green_and_the_picture_agrees(self):
+        from pbikit import polish as PO
+        sys.path.insert(0, str(KIT / "design" / "scripts"))
+        import example_values as EV
+        lay, planned = self.layout()
+        said, notes = PO.polish(lay, {"colors": {"good": "#00AA00", "bad": "#AA0000"}}, planned)
+        self.assertIn("Returns", lay["lowerIsBetter"])
+        self.assertTrue(any("lower is better for Returns" in n for n in notes))
+        self.assertIn('[Returns vs LY] <= 0, "#00AA00"', planned["Returns vs LY colour"]["expression"])
+        self.assertIn('[Sales vs LY] >= 0, "#00AA00"', planned["Sales vs LY colour"]["expression"])
+        r_lab = lay["visuals"][0]["referenceLabels"]["labels"][0]
+        self.assertTrue(r_lab["lowerIsBetter"])
+        for v, lower in ((lay["visuals"][0], True), (lay["visuals"][1], False)):
+            e = EV.for_visual(v)
+            det = e["refDetails"][0]
+            up = det["text"].startswith("▲")
+            self.assertEqual(det["good"], up != lower, (v["id"], det))
+
+    def test_the_setting_wins_and_is_kept_on_a_second_run(self):
+        from pbikit import polish as PO
+        lay, planned = self.layout({"Returns": False})
+        PO.polish(lay, {}, planned)
+        self.assertIn(">= 0", planned["Returns vs LY colour"]["expression"], "the person said higher is better")
+        lay["lowerIsBetter"] = {"Returns": True}
+        PO.polish(lay, {}, planned)
+        self.assertIn("<= 0", planned["Returns vs LY colour"]["expression"], "a changed setting reaches the measure")
+
+
+class KitFixesKeepTheOkTests(Tmp):
+    """12. A taller table or slicer after the OK, and the visuals it nudges down, need no new OK."""
+
+    def test_taller_table_needs_no_new_ok(self):
+        from pbikit import plan as PL
+        (self.tmp / "design" / "specs").mkdir(parents=True)
+        lay = {"pages": {"P1": {"displayName": "Orders"}}, "visuals": [
+            {"id": "P1-V01", "page": "P1", "type": "tableEx", "x": 32, "y": 96, "w": 900, "h": 300,
+             "bindings": {"Values": ["[Orders]"]}},
+            {"id": "P1-V02", "page": "P1", "type": "barChart", "x": 32, "y": 420, "w": 900, "h": 300,
+             "bindings": {"Y": ["[Orders]"]}}]}
+        lf = self.tmp / "design/specs/layout.json"
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        PL.save(PL.plan_file(self.tmp), {"purposes": {"P1": "orders"}})
+        PL.approve(self.tmp)
+        lay["visuals"][0]["h"] = 420                         # the kit's table fix: taller
+        lay["visuals"][1]["y"] = 540                         # the chart below nudged down
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        self.assertEqual(PL.changes_since_approval(self.tmp), [])
+        self.assertFalse(PL.changed_since_approval(self.tmp))
+        lay["visuals"][1]["x"] = 980                         # a real move: another column
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        self.assertEqual(PL.changes_since_approval(self.tmp), ["P1-V02 moved"])
+
+
+class PlainWordsTests(Tmp):
+    """14. No VS Code-only steps, no File Explorer, raw Desktop errors in plain words."""
+
+    def test_raw_desktop_errors_are_translated(self):
+        from pbikit import desktop as D, summary as SM
+        self.assertEqual(D.plain_desktop_error("System.TimeoutException: The operation has timed out.\n at X"),
+                         "error: Power BI Desktop didn't answer in time. I'll check it before going on.")
+        self.assertIn("couldn't do that step", D.plain_desktop_error("HRESULT 0x80004005"))
+        code, js = SM.run_json("desktop reload", lambda: (print(D.plain_desktop_error("weird")),
+                                                         print("[raw] HRESULT 0x80004005"), 1)[-1])
+        doc = json.loads(js)
+        self.assertNotIn("HRESULT", json.dumps({k: doc[k] for k in ("facts", "needs", "next")}))
+        self.assertIn("[raw] HRESULT 0x80004005", doc["agent"]["raw"])
+
+    def test_no_vs_code_only_steps_or_file_explorer_in_what_pbik_says(self):
+        import re as _re
+        for f in (HERE.parent / "pbikit").glob("*.py"):
+            text = f.read_text(encoding="utf-8")
+            for m in _re.finditer(r"(?:print|out)\((?:f?\"|f?')([^\n]*)", text):
+                self.assertNotIn("Command Palette", m.group(1), f.name)
+                self.assertNotIn("Run Task", m.group(1), f.name)
+            self.assertNotRegex(text, r"os\.startfile\(str\((?:folder|d)\)\)", f.name)
+
+
+class ReportNameTests(Tmp):
+    """15. A sensible report name, not the folder's."""
+
+    def test_names(self):
+        from pbikit import projectsetup as PS
+        root = self.tmp / "Orders Guided"
+        (root / "Reference").mkdir(parents=True)
+        self.assertEqual(PS.report_name(root), ("Orders Guided", "the folder name"))
+        (root / "Reference" / "needs.md").write_text("# Returns check: requirements\n\ntext", encoding="utf-8")
+        self.assertEqual(PS.report_name(root), ("Returns check", "the requirements' heading"))
+        (root / "Reference" / "Orders overview.html").write_text(
+            "<html><head><title>Orders overview - wireframe</title></head></html>", encoding="utf-8")
+        self.assertEqual(PS.report_name(root), ("Orders overview", "the wireframe's title"))
+        ST.update(root, reportName="Order health")
+        self.assertEqual(PS.report_name(root)[0], "Order health")
+        bare = self.tmp / "Copy of pbip-kit"
+        (bare / "design" / "specs").mkdir(parents=True)
+        S.write_json(bare / "design/specs/contract.json", {"model": "Example Big"})
+        self.assertEqual(PS.report_name(bare), ("Example Big report", "the model's name"))
+
+
+class StricterScoreTests(Tmp):
+    """16. Interactions "not checked" unless tested; lost elements; last-year comparisons without a year."""
+
+    def test_item_7_needs_how_it_was_tested(self):
+        from pbikit import score as SC
+        self.assertEqual(SC.parse_items(["7=pass"]), {7: True})
+        self.assertEqual(SC.parse_items(["7=pass:clicked Region, cards changed"]), {7: "clicked Region, cards changed"})
+        self.assertEqual(SC.parse_items(["1=pass", "3=no"]), {1: True, 3: False})
+
+    def test_lost_total_row_and_comparison_line(self):
+        from pbikit import score as SC
+        rep = self.tmp / "R.Report"
+        vf = rep / "definition/pages/p1/visuals/P1-V01_t/visual.json"
+        vf.parent.mkdir(parents=True)
+        vf.write_text(json.dumps({"visual": {"visualType": "tableEx", "objects": {"total": [{"properties": {
+            "totals": {"expr": {"Literal": {"Value": "false"}}}}}]}}}), encoding="utf-8")
+        (rep / "definition/pages/p1/visuals/P1-V02_c").mkdir(parents=True)
+        (rep / "definition/pages/p1/visuals/P1-V02_c/visual.json").write_text(
+            json.dumps({"visual": {"visualType": "cardVisual"}}), encoding="utf-8")
+        approved = {"visuals": [{"id": "P1-V01", "type": "tableEx"},
+                                {"id": "P1-V02", "type": "cardVisual", "referenceLabels": {"labels": [{"value": "[LY]"}]}},
+                                {"id": "P1-V03", "type": "barChart"}]}
+        now = {"visuals": [{"id": "P1-V01", "type": "tableEx"}, {"id": "P1-V02", "type": "cardVisual"}]}
+        lost = SC.lost_since_approval(rep, now, approved)
+        self.assertEqual(lost, ["P1-V01 lost its total row", "P1-V02 lost its comparison line",
+                                "P1-V03 (barChart) is gone"])
+
+    def test_last_year_without_a_year_is_flagged(self):
+        from pbikit import score as SC
+        lay = {"pages": {"P1": {}}, "visuals": [
+            {"id": "P1-V01", "page": "P1", "type": "cardVisual",
+             "referenceLabels": {"labels": [{"title": "last year", "value": "[Sales LY]"}]}}]}
+        self.assertFalse(SC.year_chosen(lay, "P1"))
+        lay["visuals"].append({"id": "P1-V02", "page": "P1", "type": "advancedSlicerVisual",
+                               "bindings": {"Values": ["Calendar[Year]"]}})
+        self.assertTrue(SC.year_chosen(lay, "P1"))
+
+
+class InteractionCountTests(Tmp):
+    """17. Every message and every window answer counts once."""
+
+    def test_hook_window_and_agent_notes(self):
+        hook = KIT / "tools" / "hooks" / "count_messages.py"
+        run = lambda: subprocess.run([sys.executable, str(hook)], input=json.dumps({"cwd": str(self.tmp)}),  # noqa
+                                     capture_output=True, text=True, env={**os.environ, "CLAUDE_PROJECT_DIR": ""})
+        run()
+        self.assertEqual(STP.interactions(self.tmp), [], "not a project yet: nothing counted")
+        ST.update(self.tmp, done="start")
+        for _ in range(3):
+            self.assertEqual(run().returncode, 0)
+        STP.interaction(self.tmp, "reply")                       # the agent's own note: not counted twice
+        STP.interaction(self.tmp, "window: Approve the model", source="window")
+        STP.interaction(self.tmp, "window: Approve the model")   # the agent's window note: not counted twice
+        got = [w for w, _ in STP.interactions(self.tmp)]
+        self.assertEqual(got, ["message", "message", "message", "window: Approve the model"])
+
+    def test_without_the_hook_the_agent_counts(self):
+        STP.interaction(self.tmp, "reply")
+        STP.interaction(self.tmp, "reply")
+        self.assertEqual(len(STP.interactions(self.tmp)), 2)
+
+    def test_the_hook_is_registered(self):
+        d = json.loads((KIT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+        self.assertIn("count_messages.py", json.dumps(d["hooks"]["UserPromptSubmit"]))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
