@@ -16,6 +16,15 @@
             "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/guard_model_folder.py\""
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell|mcp__computer-use__.*|mcp__remote-devices__computer.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/guard_gates.py\""
+          }
+        ]
       }
     ]
   }

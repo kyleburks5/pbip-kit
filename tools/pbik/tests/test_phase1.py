@@ -101,6 +101,9 @@ class GateTests(Tmp):
         self.GT = GT
         big_project(self.tmp)
         self.shown = []
+        home = mock.patch.dict(os.environ, {"PBIK_HOME": str(self.tmp / "home")})   # no real marker or lock
+        home.start()
+        self.addCleanup(home.stop)
 
     def dialog(self, answer):
         def d(title, text):
@@ -116,10 +119,9 @@ class GateTests(Tmp):
         self.assertIn("66 tables, 400 measures", doc["summary"])
         self.assertIn("111 handled by rules, 1 option table(s) to keep", doc["summary"])
         self.assertNotIn("Choice 1", json.dumps(doc), "the agent's prepared file never holds the rows")
-        with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}), self.assertRaises(self.GT.GateError):
-            self.GT.run("synth-approve", self.tmp, dialog=self.dialog(True))
-        self.assertEqual(self.GT.run("synth-approve", self.tmp, dialog=self.dialog(True), person=True,
-                                     out=lambda *a: None), "approved")
+        with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}):     # v1.7: the agent opens it; the code protects it
+            self.assertEqual(self.GT.run("synth-approve", self.tmp, dialog=self.dialog(True),
+                                         out=lambda *a: None), "approved")
         self.assertEqual(self.shown[0][0], "Approve the model")
         self.assertIn("Option 03 keeps 6 row(s): Choice 1 | 1", self.shown[0][1])
         c = S.read_json(self.tmp / "design/specs/contract.json")

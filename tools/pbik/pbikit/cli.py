@@ -313,7 +313,7 @@ def _main(argv=None):
     stp.add_argument("step")
     stp.add_argument("--outcome")
     stp.add_argument("--root", default=".")
-    ga = sub.add_parser("gate", help="person-only steps as Command Palette tasks with a Yes / No dialog")
+    ga = sub.add_parser("gate", help="person-only steps: an approval window with a typed code (the agent opens it)")
     gas = ga.add_subparsers(dest="sub", required=True)
     gp = gas.add_parser("prepare", help="the agent: write the plain summary of what the person approves")
     gp.add_argument("gate", choices=["synth-approve", "map-approve", "model-approve", "bind-live", "bind-local",
@@ -327,9 +327,16 @@ def _main(argv=None):
     gp.add_argument("--id", dest="mid")
     gp.add_argument("--to-class", choices=["public", "internal", "restricted"])
     gp.add_argument("--to", help="the team pack folder (pack-register)")
-    gr = gas.add_parser("run", help="the person (Command Palette task): show the summary, apply on Yes")
+    gr = gas.add_parser("run", help="show the approval window and wait; apply on Yes with the typed code")
     gr.add_argument("gate")
     gr.add_argument("--root", default=".")
+    go = gas.add_parser("open", help="the agent: open the approval window in its own process, return at once")
+    go.add_argument("gate")
+    go.add_argument("--root", default=".")
+    gw = gas.add_parser("wait", help="the agent: wait for the person's answer in the approval window")
+    gw.add_argument("gate")
+    gw.add_argument("--root", default=".")
+    gw.add_argument("--minutes", type=float, default=30)
     gt = gas.add_parser("tasks", help="write .vscode/tasks.json (one task per gate)")
     gt.add_argument("--root", default=".")
 
@@ -544,9 +551,20 @@ def _main(argv=None):
                 d = GT.prepare(args.gate, args.root, args.report, args.pack, args.from_, args.workspace, args.model,
                                args.mid, args.to_class, args.to)
                 print(d["summary"])
-                print(f"Next (the person): Command Palette > Tasks: Run Task > {d['task']}")
+                print(f"next: I'll open the approval window ({d['task']}): type the code it shows, then click Yes")
             elif args.sub == "run":
                 GT.run(args.gate, args.root)
+            elif args.sub == "open":
+                d = GT.open_window(args.gate, args.root)
+                print(f"The approval window ({d['task']}) is open: type the code in its picture, then click Yes "
+                      "or No.")
+                print("next: I'll wait for your answer")
+            elif args.sub == "wait":
+                r = GT.wait(args.gate, args.root, timeout=args.minutes * 60)
+                said = {"approved": f"Approved by {r.get('by')}.", "declined": "Not approved: nothing changed.",
+                        "not answered": "No answer in the approval window yet."}
+                print(said.get(r["result"], r["result"]) + (f" ({r['why']})" if r.get("why", "no") != "no" else ""))
+                return 0 if r["result"] == "approved" else 1
             else:
                 from .synth import write_json
                 write_json(pathlib.Path(args.root) / ".vscode" / "tasks.json", GT.tasks_json())

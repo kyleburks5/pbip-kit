@@ -154,5 +154,108 @@ class StatusTests(Tmp):
         self.assertIn("next is the colours", json.loads(r.stdout)["facts"][0])
 
 
+# ---------------------------------------------------------------- stage b
+class WindowTests(Tmp):
+    """A8: the agent opens the approval window; the typed code, refusals, screen control, window lock."""
+
+    def setUp(self):
+        super().setUp()
+        from unittest import mock
+        from pbikit import gates as GT
+        import test_phase1 as P1
+        self.GT, self.S = GT, P1.S
+        P1.big_project(self.tmp)
+        self.home = self.tmp / "home"
+        env = mock.patch.dict(os.environ, {"PBIK_HOME": str(self.home)})
+        env.start()
+        self.addCleanup(env.stop)
+        self.GT.prepare("synth-approve", self.tmp)
+
+    def marker(self, name, minutes_ago):
+        import datetime
+        self.home.mkdir(parents=True, exist_ok=True)
+        at = datetime.datetime.now() - datetime.timedelta(minutes=minutes_ago)
+        (self.home / name).write_text(json.dumps({"at": at.isoformat(timespec="seconds")}), encoding="utf-8")
+
+    def test_open_then_wait(self):
+        launched = []
+
+        def launch(cmd):                       # stands in for the detached window process: the person types the code
+            launched.append(cmd)
+            self.GT.run("synth-approve", self.tmp, dialog=lambda title, text: "yes", out=lambda *a: None)
+
+        self.GT.open_window("synth-approve", self.tmp, launch=launch)
+        self.assertEqual(launched[0][-4:], ["run", "synth-approve", "--root", str(self.tmp.resolve())])
+        r = self.GT.wait("synth-approve", self.tmp, timeout=2, poll=0.05)
+        self.assertEqual(r["result"], "approved")
+        self.assertFalse((self.home / "gate-window.json").exists(), "the lock goes when the window closes")
+        self.assertTrue(self.S.approved(self.S.read_json(self.tmp / "design/specs/contract.json")))
+
+    def test_wrong_code_no_and_not_answered(self):
+        said = []
+        self.assertEqual(self.GT.run("synth-approve", self.tmp, dialog=lambda *a: "code", out=said.append), "declined")
+        self.assertIn("didn't match three times", said[0])
+        r = self.S.read_json(self.tmp / ".pbik/gates/synth-approve.result.json")
+        self.assertEqual((r["result"], r["why"]), ("declined", "the code didn't match three times"))
+        self.assertFalse(self.S.approved(self.S.read_json(self.tmp / "design/specs/contract.json")))
+        self.GT.open_window("synth-approve", self.tmp, launch=lambda cmd: None)
+        self.assertEqual(self.GT.wait("synth-approve", self.tmp, timeout=0.2, poll=0.05)["result"], "not answered")
+
+    def test_refusals(self):
+        self.marker("screen-control.json", 2)
+        for fn in (lambda: self.GT.open_window("synth-approve", self.tmp, launch=lambda c: None),
+                   lambda: self.GT.run("synth-approve", self.tmp, dialog=lambda *a: "yes")):
+            with self.assertRaises(self.GT.GateError) as cm:
+                fn()
+            self.assertIn("screen control", str(cm.exception))
+        self.marker("screen-control.json", 11)                    # 11 minutes ago: past the window
+        self.marker("gate-window.json", 1)
+        with self.assertRaises(self.GT.GateError) as cm:
+            self.GT.open_window("synth-approve", self.tmp, launch=lambda c: None)
+        self.assertIn("another approval window", str(cm.exception))
+        self.marker("gate-window.json", 60)                       # a stale lock (a crashed window) doesn't block
+        cf = self.tmp / "design/specs/contract.json"
+        c = self.S.read_json(cf)
+        c["tables"]["Calendar"]["columns"]["Year"]["type"] = "string"
+        self.S.write_json(cf, c)
+        with self.assertRaises(self.GT.GateError) as cm:
+            self.GT.open_window("synth-approve", self.tmp, launch=lambda c: None)
+        self.assertIn("changed after it was prepared", str(cm.exception))
+
+    def test_hook_marks_screen_control_and_blocks_key_senders(self):
+        hook = KIT / "tools" / "hooks" / "guard_gates.py"
+        env = {**os.environ, "PBIK_HOME": str(self.home)}
+
+        def run(tool, inp=None):
+            return subprocess.run([sys.executable, str(hook)], input=json.dumps({"tool_name": tool,
+                                  "tool_input": inp or {}}), capture_output=True, text=True, env=env).returncode
+        send = {"command": "$w = New-Object -ComObject wscript.shell; $w.SendKeys('ABCD{ENTER}')"}
+        self.assertEqual(run("PowerShell", send), 0, "no window open: not blocked")
+        self.marker("gate-window.json", 0)
+        self.assertEqual(run("PowerShell", send), 2)
+        self.assertEqual(run("Bash", {"command": "python -c 'import pyautogui'"}), 2)
+        self.assertEqual(run("Bash", {"command": "python tools/pbik/pbik.py gate wait synth-approve"}), 0)
+        self.assertEqual(run("mcp__computer-use__screenshot"), 0)
+        self.assertTrue(self.GT.screen_control_active())
+        settings = json.dumps(json.loads((KIT / ".claude" / "settings.json").read_text(encoding="utf-8")))
+        self.assertIn("guard_gates.py", settings)
+        self.assertIn("mcp__computer-use__", settings)
+
+    def test_window_script(self):
+        ps = self.GT.DIALOG_PS
+        self.assertIn("RNGCryptoServiceProvider", ps)
+        self.assertIn("Drawing.Bitmap", ps, "the code is drawn as a picture, not a text label")
+        for leak in ("Out-File", "Set-Content", "Add-Content", "Write-Output", "Write-Host", "Clipboard"):
+            self.assertNotIn(leak, ps, "the code never leaves the window")
+        self.assertNotRegex(ps, r"\$l\.Text\s*=.*\$code")
+        if shutil.which("powershell"):                            # the script parses (it can't be clicked in a test)
+            f = self.tmp / "w.ps1"
+            f.write_text(ps, encoding="utf-8-sig")
+            r = subprocess.run(["powershell", "-NoProfile", "-Command",
+                                "$e=$null; [void][System.Management.Automation.Language.Parser]::ParseFile("
+                                f"'{f}', [ref]$null, [ref]$e); $e.Count"], capture_output=True, text=True)
+            self.assertEqual(r.stdout.strip(), "0", r.stdout + r.stderr)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

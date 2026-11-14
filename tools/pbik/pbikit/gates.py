@@ -1,16 +1,21 @@
-"""Person-only gates as VS Code tasks with a Windows dialog (docs/design/phase1-usability.md, section 2).
+"""Person-only gates: an approval window the agent opens itself (docs/design/phase1-usability.md, A8 and B2).
 
     pbik gate prepare <gate> [--report R] [--pack P] [--from F | --workspace W --model M --id I] [--to-class C]
         the agent: writes .pbik/gates/<gate>.json (plain summary, args, a hash of what is approved)
-    pbik gate run <gate>
-        the person, through the Command Palette task: shows the summary in a dialog (Yes / No), applies on Yes,
-        logs it in design/reviews/approvals.md and writes .pbik/gates/<gate>.result.json
+    pbik gate open <gate>     the agent: opens the approval window in its own process and returns at once
+    pbik gate wait <gate>     the agent: waits (up to 30 minutes) for the person's answer
+    pbik gate run <gate>      shows the window and waits (the optional Command Palette tasks use this)
 
-`run` refuses in an agent's shell (CLAUDECODE) or without a terminal, and when what is approved changed after it was
-prepared. An agent can type into a terminal but can't click a desktop dialog. This stops approvals by accident or on
-an agent's own initiative; it is not proof against a person who scripts around it.
+The window shows the summary, a 4-character code drawn as a picture (made inside the window's own process, never
+written to a file, stdout or the log), a box to type it, and Yes / No. Yes needs the code; three wrong tries close it
+with nothing changed. On Yes the step is applied, logged in design/reviews/approvals.md, and the answer written to
+.pbik/gates/<gate>.result.json. Refusals: what is approved changed after it was prepared (hash); screen control was
+used in the last few minutes (a Claude Code hook leaves a marker, tools/hooks/guard_gates.py); another approval window
+is open. Honest limit: this stops an agent approving by accident, on its own initiative or by sending key presses; an
+agent with screen control could read the picture, which is why the window refuses when that can be told. It isn't
+proof against a person who scripts around it.
 """
-import datetime, getpass, hashlib, json, pathlib, re, subprocess, tempfile
+import datetime, getpass, hashlib, json, os, pathlib, re, subprocess, sys, tempfile, time
 
 from . import dataclass_ as DC, summary as SM
 from .synth import ContractError, content_hash, read_json, specs, write_json
@@ -145,59 +150,159 @@ def current_hash(gate, root, args):
     return doc["hash"]
 
 
-# ---------------------------------------------------------------- the dialog
+# ---------------------------------------------------------------- the window
 DIALOG_PS = r"""
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 $text = [IO.File]::ReadAllText($args[1])
+$letters = 'ACDEFHJKMNPRTUVWXY34679'
+$rng = New-Object Security.Cryptography.RNGCryptoServiceProvider
+$bytes = New-Object byte[] 4; $rng.GetBytes($bytes)
+$code = -join ($bytes | ForEach-Object { $letters[$_ % $letters.Length] })
 $f = New-Object Windows.Forms.Form
-$f.Text = $args[0]; $f.Width = 760; $f.Height = 520; $f.StartPosition = 'CenterScreen'; $f.TopMost = $true
+$f.Text = $args[0]; $f.Width = 780; $f.Height = 640; $f.StartPosition = 'CenterScreen'; $f.TopMost = $true
+$f.FormBorderStyle = 'FixedDialog'; $f.MaximizeBox = $false; $f.MinimizeBox = $false
 $t = New-Object Windows.Forms.TextBox
-$t.Multiline = $true; $t.ReadOnly = $true; $t.ScrollBars = 'Vertical'; $t.Text = $text
-$t.SetBounds(12, 12, 720, 400); $t.Font = New-Object Drawing.Font('Segoe UI', 10)
-$y = New-Object Windows.Forms.Button; $y.Text = 'Yes, approve'; $y.SetBounds(476, 428, 120, 32)
-$y.DialogResult = [Windows.Forms.DialogResult]::Yes
-$n = New-Object Windows.Forms.Button; $n.Text = 'No'; $n.SetBounds(612, 428, 120, 32)
-$n.DialogResult = [Windows.Forms.DialogResult]::No
-$f.Controls.AddRange(@($t, $y, $n)); $f.AcceptButton = $n; $f.CancelButton = $n
-if ($f.ShowDialog() -eq [Windows.Forms.DialogResult]::Yes) { exit 0 } else { exit 1 }
+$t.Multiline = $true; $t.ReadOnly = $true; $t.ScrollBars = 'Vertical'; $t.Text = $text; $t.TabStop = $false
+$t.SetBounds(16, 16, 732, 380); $t.Font = New-Object Drawing.Font('Segoe UI', 10)
+$l = New-Object Windows.Forms.Label
+$l.Text = 'To approve, type the code in the picture, then click Yes, approve.'
+$l.SetBounds(16, 410, 732, 22); $l.Font = New-Object Drawing.Font('Segoe UI', 10)
+$bmp = New-Object Drawing.Bitmap 220, 64
+$g = [Drawing.Graphics]::FromImage($bmp); $g.SmoothingMode = 'AntiAlias'; $g.Clear([Drawing.Color]::White)
+$r = New-Object Random
+for ($i = 0; $i -lt 6; $i++) {
+  $pen = New-Object Drawing.Pen ([Drawing.Color]::FromArgb(70, 120, 120, 120)), 2
+  $g.DrawLine($pen, $r.Next(0, 220), $r.Next(0, 64), $r.Next(0, 220), $r.Next(0, 64))
+}
+$font = New-Object Drawing.Font('Consolas', 30, [Drawing.FontStyle]::Bold)
+for ($i = 0; $i -lt 4; $i++) {
+  $g.TranslateTransform(18 + 50 * $i, 8); $g.RotateTransform($r.Next(-12, 12))
+  $g.DrawString([string]$code[$i], $font, [Drawing.Brushes]::Black, 0, 0); $g.ResetTransform()
+}
+$g.Dispose()
+$pic = New-Object Windows.Forms.PictureBox; $pic.Image = $bmp; $pic.SetBounds(16, 440, 220, 64)
+$pic.AccessibleName = 'approval code picture'
+$box = New-Object Windows.Forms.TextBox; $box.SetBounds(256, 456, 120, 32); $box.MaxLength = 4
+$box.Font = New-Object Drawing.Font('Consolas', 16); $box.CharacterCasing = 'Upper'
+$msg = New-Object Windows.Forms.Label; $msg.SetBounds(392, 462, 356, 22); $msg.ForeColor = [Drawing.Color]::DarkRed
+$y = New-Object Windows.Forms.Button; $y.Text = 'Yes, approve'; $y.SetBounds(476, 548, 132, 34)
+$n = New-Object Windows.Forms.Button; $n.Text = 'No'; $n.SetBounds(620, 548, 128, 34)
+$script:result = 1; $script:tries = 0
+$y.Add_Click({
+  if ($box.Text.Trim().ToUpper() -eq $code) { $script:result = 0; $f.Close() }
+  else {
+    $script:tries++
+    if ($script:tries -ge 3) { $script:result = 2; $f.Close() }
+    else { $msg.Text = "That code doesn't match ($(3 - $script:tries) tries left)."; $box.Text = '' }
+  }
+})
+$n.Add_Click({ $script:result = 1; $f.Close() })
+$f.Controls.AddRange(@($t, $l, $pic, $box, $msg, $y, $n)); $f.CancelButton = $n; $f.ActiveControl = $box
+[void]$f.ShowDialog()
+exit $script:result
 """
+ANSWERS = {0: "yes", 1: "no", 2: "code"}
 
 
 def windows_dialog(title, text):
-    """True when the person clicks Yes in a desktop dialog."""
+    """The approval window: "yes" only when the person typed the code shown in the picture and clicked Yes;
+    "no" (No, or closed) or "code" (three wrong tries)."""
     with tempfile.TemporaryDirectory() as d:
         script, body = pathlib.Path(d) / "gate.ps1", pathlib.Path(d) / "text.txt"
         script.write_text(DIALOG_PS, encoding="utf-8-sig")
         body.write_text(text.replace("\n", "\r\n"), encoding="utf-8-sig")
         r = subprocess.run(["powershell", "-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", str(script),
                             title, str(body)])
-    return r.returncode == 0
+    return ANSWERS.get(r.returncode, "no")
 
 
-# ---------------------------------------------------------------- run
+def _answer(x):
+    """A window's answer: "yes", "no" or "code" (test stubs may return True / False)."""
+    return ("yes" if x else "no") if isinstance(x, bool) or x is None else str(x)
+
+
+# ---------------------------------------------------------------- refusals checked before a window opens
+SCREEN_CONTROL_MINUTES = 10
+WINDOW_MINUTES = 35
+
+
+def user_dir():
+    """Per-person pbik state outside every project (PBIK_HOME in tests): screen-control marker, window lock, history."""
+    return pathlib.Path(os.environ.get("PBIK_HOME") or pathlib.Path.home() / ".pbik")
+
+
+def _age_minutes(f):
+    try:
+        at = datetime.datetime.fromisoformat(json.loads(f.read_text(encoding="utf-8"))["at"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    return (datetime.datetime.now() - at).total_seconds() / 60
+
+
+def screen_control_active():
+    """True when a screen-control tool was used in the last SCREEN_CONTROL_MINUTES (the Claude Code hook's marker).
+    Other screen-control apps can't be detected: the window's typed code is then the only protection."""
+    age = _age_minutes(user_dir() / "screen-control.json")
+    return age is not None and age < SCREEN_CONTROL_MINUTES
+
+
+def window_open():
+    age = _age_minutes(user_dir() / "gate-window.json")
+    return age is not None and age < WINDOW_MINUTES
+
+
+def _lock(gate, on):
+    f = user_dir() / "gate-window.json"
+    if on:
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps({"gate": gate, "at": datetime.datetime.now().isoformat(timespec="seconds")}),
+                     encoding="utf-8")
+    else:
+        try:
+            f.unlink()
+        except OSError:
+            pass
+
+
+def check_ready(gate, root):
+    """Every refusal, checked before a window opens; returns the prepared doc."""
+    doc = read_json(gate_dir(root) / f"{gate}.json")
+    if not doc:
+        raise GateError("nothing is waiting for this approval: ask the agent to prepare it")
+    if screen_control_active():
+        raise GateError(f"screen control was used in this chat in the last {SCREEN_CONTROL_MINUTES} minutes, so the "
+                        "approval window won't open: turn screen control off, then ask again in a few minutes")
+    if window_open():
+        raise GateError("another approval window is open: answer it first")
+    if current_hash(gate, root, doc["args"]) != doc["hash"]:
+        raise GateError("what you'd approve changed after it was prepared: ask the agent to prepare it again")
+    return doc
+
+
+# ---------------------------------------------------------------- run, open, wait
 def confirm_from_dialog(prompt):
-    """The typed confirmations the step asks for: the Yes in the dialog stands for them."""
+    """The typed confirmations the step asks for: the code and Yes in the window stand for them."""
     m = re.search(r"Type (.+) to confirm: $", prompt)
     return m.group(1) if m else ""
 
 
 def run(gate, root=".", dialog=None, out=print, person=None):
-    """Show the prepared summary; on Yes apply the step. Returns "approved" or "declined"."""
+    """Show the approval window; on Yes (with the typed code) apply the step. Returns "approved" or "declined".
+    `person` is ignored (kept for older callers): the window's code is the person check (A8)."""
     root = pathlib.Path(root).resolve()
-    if not (person if person is not None else DC.person_present()):
-        raise GateError("this step is yours: run it from the Command Palette (Tasks: Run Task), not from an agent")
-    doc = read_json(gate_dir(root) / f"{gate}.json")
-    if not doc:
-        raise GateError("nothing is waiting for this approval: ask the agent to prepare it")
-    if current_hash(gate, root, doc["args"]) != doc["hash"]:
-        raise GateError("what you'd approve changed after it was prepared: ask the agent to prepare it again")
+    doc = check_ready(gate, root)
     extra = run_time_details(gate, root)
     text = doc["summary"] + ("\n\n" + extra if extra else "") + "\n\nApprove?"
-    ok = (dialog or windows_dialog)(doc["task"], text)
-    if not ok:
-        write_json(gate_dir(root) / f"{gate}.result.json", {"gate": gate, "result": "declined"})
-        out("Not approved: nothing changed.")
+    _lock(gate, True)
+    try:
+        ans = _answer((dialog or windows_dialog)(doc["task"], text))
+    finally:
+        _lock(gate, False)
+    if ans != "yes":
+        why = "the code didn't match three times" if ans == "code" else "no"
+        write_json(gate_dir(root) / f"{gate}.result.json", {"gate": gate, "result": "declined", "why": why})
+        out("Not approved: nothing changed." + (" (The code didn't match three times.)" if ans == "code" else ""))
         return "declined"
     by = approver(root)
     apply(gate, root, doc["args"], by)
@@ -205,6 +310,37 @@ def run(gate, root=".", dialog=None, out=print, person=None):
     write_json(gate_dir(root) / f"{gate}.result.json", {"gate": gate, "result": "approved", "by": by})
     out(f"Approved by {by}.")
     return "approved"
+
+
+def open_window(gate, root=".", launch=None):
+    """The agent opens the approval window in its own process and returns at once (A8)."""
+    root = pathlib.Path(root).resolve()
+    doc = check_ready(gate, root)
+    res = gate_dir(root) / f"{gate}.result.json"
+    if res.exists():
+        res.unlink()
+    cmd = [sys.executable, str(pathlib.Path(__file__).resolve().parents[1] / "pbik.py"), "gate", "run", gate,
+           "--root", str(root)]
+    if launch:
+        launch(cmd)
+        return doc
+    logf = open(gate_dir(root) / f"{gate}.window.log", "w", encoding="utf-8")   # noqa: SIM115  the window keeps it
+    flags = (0x00000008 | 0x00000200) if os.name == "nt" else 0              # DETACHED_PROCESS | NEW_PROCESS_GROUP
+    subprocess.Popen(cmd, cwd=str(root), stdout=logf, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                     creationflags=flags, close_fds=True)
+    return doc
+
+
+def wait(gate, root=".", timeout=30 * 60, poll=1.0):
+    """Wait for the person's answer; the result doc, or {"result": "not answered"} after the timeout."""
+    res = gate_dir(pathlib.Path(root).resolve()) / f"{gate}.result.json"
+    end = time.monotonic() + timeout
+    while time.monotonic() < end:
+        doc = read_json(res)
+        if doc:
+            return doc
+        time.sleep(poll)
+    return {"gate": gate, "result": "not answered"}
 
 
 def run_time_details(gate, root):
@@ -249,7 +385,7 @@ def apply(gate, root, a, by):
 def log(root, gate, doc, by):
     f = pathlib.Path(root) / "design" / "reviews" / "approvals.md"
     f.parent.mkdir(parents=True, exist_ok=True)
-    head = "# Approvals\n\nPerson-only steps approved through the Command Palette tasks (pbikit/gates.py).\n\n" \
+    head = "# Approvals\n\nPerson-only steps approved in the approval window (pbikit/gates.py).\n\n" \
            "| When | Gate | Who | Hash | Summary |\n| --- | --- | --- | --- | --- |\n"
     text = f.read_text(encoding="utf-8") if f.exists() else head
     first = doc["summary"].splitlines()[0].replace("|", "/")
