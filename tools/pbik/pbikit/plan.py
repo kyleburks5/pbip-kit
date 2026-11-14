@@ -377,7 +377,7 @@ def approve(root, layout=None):
     keep_approved(root)
     write_purpose(root, lay, plan)
     ST.update(root, done="plan", planHash=h)
-    for s in ("page purpose",):
+    for s in ("start", "page purpose"):          # an approved plan means the start is done too
         ST.update(root, done=s)
     return h
 
