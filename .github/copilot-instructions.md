@@ -16,7 +16,7 @@ Goal: build polished Power BI reports (PBIP + PBIR) from a requirements file (de
   `pbik gate wait`); never send keys or clicks to it. At the start of every chat, run `pbik status` and say where the
   project is. One folder = one project: a fresh copy of the kit becomes the project (`pbik project setup`); never build
   in the master kit. When someone asks for a dashboard, follow .claude/commands/start.md (the main flow).
-- Never open the Model folder (or design/reference/model/ in older projects; it may hold data): run
+- Never open the Model folder (it may hold data; the old design/reference/model is never read): run
   `pbik model intake`, which deletes data files first. Never open File Explorer: name the Model or Reference folder.
 - Canvas 1920x1080 (custom page size), 32px margin, 12-column grid, 24px gutters. Compute positions from the grid.
 - Read design/tokens.json before styling. Never hardcode colors or fonts.
@@ -67,7 +67,7 @@ then a guided build (a stop after each stage) or a quick build (stops only at th
 result with the polish score. The steps below are what its stages run, and still work one at a time.
 0. `/brd`: draft design/reference/brd.md from the template and my brief. Wait for my review.
 1. `/model`: profile the raw data in data/ (row counts, timings, an audit-mode recommendation) and propose the core model from brd.md. Wait for my approval before applying it; `/model approved` applies it through the Modeling MCP, recalculates, runs `pbik model check` and a DAX query that every new measure returns a value, and commits.
-2. `/plan`: first the design ambition in design/specs/spec.md (per key number: baseline, normal, exceptions, partial or stale; every headline number needs a comparison) and the patterns from docs/patterns/ that show it; then update design/tokens.json, write design/specs/layout.json, design/specs/spec.md and design/specs/audit.json. A wireframe or reference image in design/reference/ (any layout style: grid, bento, rail, tabs, dense tables) is optional input; if there is one, it is the source for layout.json (design/scripts/ref_layout.py), with what Power BI can't reproduce listed by ID. Otherwise layout.json comes from the BRD and design/scripts/gen_wireframe_hf.py draws the high-fidelity wireframe in design/wireframes/ (gen_wireframe.py, the box wireframe, is the fallback).
+2. `/plan`: first the design ambition in design/specs/spec.md (per key number: baseline, normal, exceptions, partial or stale; every headline number needs a comparison) and the patterns from docs/patterns/ that show it; then update design/tokens.json, write design/specs/layout.json, design/specs/spec.md and design/specs/audit.json. A wireframe or reference image in the Reference folder (any layout style: grid, bento, rail, tabs, dense tables) is optional input; if there is one, it is the source for layout.json (design/scripts/ref_layout.py), with what Power BI can't reproduce listed by ID. Otherwise layout.json comes from the BRD and design/scripts/gen_wireframe_hf.py draws the high-fidelity wireframe in design/wireframes/ (gen_wireframe.py, the box wireframe, is the fallback).
 3. `/build`: build with `pbik build` from layout.json (styling through the theme and tokens), then run `pbik validate`, design/scripts/audit_layout.py and design/scripts/audit_ids.py.
 4. I save and reload in Desktop; `/review` screenshots, compares to the wireframe and design/checks.md, and runs the numbers audit.
 5. `/fix`: fix the review items, re-check, repeat.

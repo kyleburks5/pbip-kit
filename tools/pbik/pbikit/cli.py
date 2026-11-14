@@ -175,7 +175,7 @@ def _main(argv=None):
     mc.add_argument("--folder", help="only measures in this display folder (e.g. Model)")
     mi = mo.add_parser("intake", help="the model drop folder: delete data files, detect the format, write the contract")
     mi.add_argument("--root", default=".")
-    mi.add_argument("--folder", help="drop folder (default design/reference/model)")
+    mi.add_argument("--folder", help="drop folder (default: the Model folder)")
     mi.add_argument("--open", action="store_true", help="make the drop folder and open it for the user (reads nothing)")
     mpk = mo.add_parser("packs", help="model packs in the project's pack folders (project.json packFolders)")
     mpk.add_argument("--root", default=".")
@@ -377,7 +377,7 @@ def _main(argv=None):
     sts.add_argument("--plan-hash")
     sts.add_argument("--score", type=int)
     sts.add_argument("--json", action="store_true", help="the whole status file")
-    sop = sub.add_parser("open", help="open the project folder in File Explorer")
+    sop = sub.add_parser("open", help="say which folder is the project (never opens File Explorer)")
     sop.add_argument("--root", default=".")
 
     stp = sub.add_parser("step", help="mark a workflow step for token tracking (tools/usage.py)")
@@ -422,6 +422,7 @@ def _main(argv=None):
     rl = ds.add_parser("reload", help="reload the report (not the model); refuses while unsaved")
     rl.add_argument("--force", action="store_true")
     rl.add_argument("--report", help="the report folder (default: the project's one)")
+    rl.add_argument("--root", default=".")
     dcl = ds.add_parser("close", help="close Desktop without saving, only when its only unsaved changes are its own "
                                       "reload marks (else it says why and leaves it open)")
     dcl.add_argument("--report")
@@ -449,6 +450,8 @@ def _main(argv=None):
         from . import desktop as D_
         from .newreport import report_folder
         D_.mark_built(".", args.report if pathlib.Path(args.report, "definition").is_dir() else report_folder(args.report))                   # the agent's own change, for desktop close (D1)
+        from . import status as ST_
+        ST_.mark(".", "theme", "build")                 # the theme is applied with every build (v1.7 live fix 6)
     elif c == "measure":
         from . import extensions as X
         if args.op == "add":
@@ -466,9 +469,13 @@ def _main(argv=None):
         resource_add(args.report, args.file, args.name, args.type)
     elif c == "validate":
         from .validate import validate
-        return 1 if validate(args.report, args.layout, port=args.port, catalog=args.catalog,
-                             use_catalog=not args.no_catalog, use_a11y=not args.no_a11y,
-                             project=args.project, strict_schema=args.strict).errors else 0
+        bad = validate(args.report, args.layout, port=args.port, catalog=args.catalog,
+                       use_catalog=not args.no_catalog, use_a11y=not args.no_a11y,
+                       project=args.project, strict_schema=args.strict).errors
+        if not bad:
+            from . import status as ST_
+            ST_.mark(pathlib.Path(args.report).resolve().parent, "checks")
+        return 1 if bad else 0
     elif c == "catalog":
         from . import catalog as CAT
         if args.sub == "refresh":
@@ -729,6 +736,7 @@ def _main(argv=None):
         t_ = SC.total(res)
         ST.update(args.root, score=t_)
         if args.final:
+            ST.mark(args.root, "polish", "result")
             mins = round(sum((e - s).total_seconds() for _, s, e, _ in STP.windows(args.root)) / 60, 1)
             HI.record(st.get("mode", "guided"), st.get("reportType") or st.get("path"), t_,
                       len(STP.interactions(args.root)), mins, args.hand_minutes)
@@ -770,11 +778,8 @@ def _main(argv=None):
         else:
             ST.show(args.root)
     elif c == "open":
-        import os
-        folder = pathlib.Path(args.root).resolve()
-        if hasattr(os, "startfile"):
-            os.startfile(str(folder))                     # noqa: S606  File Explorer on Windows
-        print(f"Opened your project {folder.name} in File Explorer.")
+        folder = pathlib.Path(args.root).resolve()       # never File Explorer (v1.7 live walkthrough fix 14)
+        print(f"Your project is the folder {folder.name}; its Model and Reference folders are inside it.")
     elif c == "step":
         from . import steps as STP
         if args.event == "note":
@@ -828,7 +833,7 @@ def _main(argv=None):
         if args.sub == "state":
             D.state(args.bridge, args.fail_if_dirty)
         elif args.sub == "reload":
-            D.reload(args.bridge, args.force, report=args.report)
+            D.reload(args.bridge, args.force, report=args.report, root=args.root)
         elif args.sub == "close":
             why = D.close(args.root, args.report, args.bridge)
             if why:
@@ -838,23 +843,14 @@ def _main(argv=None):
             print("Closed Desktop without saving (it held only its own reload marks).")
             print("next: I'll open the report again")
         elif args.sub == "open":
-            import os
             pbip = next(pathlib.Path(args.root).glob("*.pbip"), None)
             if not pbip:
                 print("pbik: there is no report in this project yet", file=sys.stderr)
                 return 2
-            if hasattr(os, "startfile"):
-                os.startfile(str(pbip.resolve()))                 # noqa: S606
-            import time as _t
-            D.opening_file(args.root).parent.mkdir(parents=True, exist_ok=True)
-            D.opening_file(args.root).write_text(str(_t.time()), encoding="utf-8")
-            print("Opening the report in Power BI Desktop.")
-            if not args.no_wait:
-                if D.wait_ready(args.bridge):
-                    print("Power BI Desktop has the report open.")
-                else:
-                    print("Power BI Desktop is still opening the report. I'll check again in a moment.")
-                    return D.NOT_READY
+            code, lines = D.open_report(args.root, pbip, bridge=args.bridge, wait=not args.no_wait)
+            for ln in lines:
+                print(ln)
+            return code
         else:
             D.screenshot(args.page, args.out, args.report, args.region, args.scale, args.bridge)
     return 0
@@ -871,13 +867,13 @@ def bind_cmd(args):
                 except PKR.PickError as e:
                     print(f"pbik: {e}", file=sys.stderr)
                     return 2
-                print(f"picked: model {model!r} in workspace {ws!r}")
-                print("Next (the person): Command Palette > Tasks: Run Task > Connect to the live model "
-                      "(after the agent runs gate prepare bind-live --from picked)")
+                print(f"You picked {model} in workspace {ws}.")
+                print("next: I'll get the switch ready, then open the approval window Connect to the live model")
             else:
-                PKR.prepare(args.root, args.open)
-                print("the picker folder is ready: in Power BI Desktop, File > New, Get data > Power BI semantic "
-                      "models, pick the model, then save as a Power BI project (.pbip) in that folder and close")
+                PKR.prepare(args.root)
+                print("In Power BI Desktop: File > New, Get data > Power BI semantic models, pick the model, then "
+                      "File > Save as, type Power BI project (.pbip), into the Live pick folder inside your Reference "
+                      "folder, and close it. Then say saved.")
             return 0
         if args.sub == "check":
             r = BD.check(args.report, args.root)

@@ -69,13 +69,16 @@ what the person approved changed (which visuals, what they show, where they sit)
 after the OK (a taller slicer, number formats, column widths, a legend) need no new OK, so never stop for them in a
 quick build; list them in the result. If it fails, show the plan again. Then, as /theme, /build, /review and /fix
 do (their files say how), with a check after each step and one fix and recheck when a check fails:
-- theme (the colours); build (`pbik build "<project name>" design/specs/layout.json`: the first build makes a clean,
-  empty report folder itself; never copy another report); checks (`pbik validate`, audit_layout.py, audit_ids.py);
+- theme (the colours: every build applies the project's theme, and the plan names it); build (`pbik build "<report
+  name>" design/specs/layout.json`: the first build makes a clean, empty report folder itself; never copy another
+  report); checks (`pbik validate`, audit_layout.py, audit_ids.py). Build, checks and the final score mark their
+  stages in the status file themselves;
 - before screenshots: open the report in Desktop (`pbik desktop open`: it waits until Desktop answers, saying "still
-  opening" meanwhile), reload (`pbik desktop reload`), screenshot
-  each page (`pbik desktop screenshot`); polish: up to two rounds of review and fix against the approved picture and
-  design/checks.md; after screenshots. Before a reload after your own edits: `pbik desktop close`; if it leaves
-  Desktop open, ask the person to close it without saving and wait.
+  opening" meanwhile; it never opens a second window: when another Desktop window is open it asks the person to close
+  it), reload (`pbik desktop reload`: it reloads when Desktop's only unsaved marks are its own from opening or the
+  last reload), screenshot each page (`pbik desktop screenshot`); polish: up to two rounds of review and fix against
+  the approved picture and design/checks.md; after screenshots. Before a reload after your own edits:
+  `pbik desktop close`; if it leaves Desktop open, ask the person to close it without saving and wait.
 - Guided build: stop after each stage, show what changed, wait for an OK. Quick build: don't stop, except when
   unsure: a check still failing after its fix, a fallback not in the plan, a measure the plan didn't name, two
   measures that fit one KPI, an approval window, a Desktop or bridge failure. Then ask one plain question with the

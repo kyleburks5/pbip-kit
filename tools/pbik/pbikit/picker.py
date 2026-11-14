@@ -1,8 +1,9 @@
 """Desktop as the model picker for bind live (docs/design/phase1-usability.md, section 5).
 
-The agent runs `pbik bind picker`: it makes the project's picker folder (git-ignored) and opens it in File Explorer.
-The user, in Power BI Desktop: File > New, Get data > Power BI semantic models, picks the model, File > Save as, type
-Power BI project (.pbip), into that folder, and closes. `pbik bind picker --scan` finds the newest Desktop-saved report
+The agent runs `pbik bind picker`: it makes the "Live pick" folder inside the Reference folder (git-ignored, never read
+as a layout input) and names it; it never opens File Explorer. The person, in Power BI Desktop: File > New, Get data >
+Power BI semantic models, picks the model, File > Save as, type Power BI project (.pbip), into that folder, and
+closes. `pbik bind picker --scan` finds the newest Desktop-saved report
 there (and in project.json `pickerFolders`, saved in the last day) and says which model it connects to; the
 *Connect to the live model* task reads it (gate prepare bind-live --from picked). No typed names or IDs.
 """
@@ -11,7 +12,8 @@ import os, pathlib, time
 from . import dataclass_ as DC
 from .objects import load
 
-FOLDER = pathlib.Path("design") / "reference" / "live"
+FOLDER = pathlib.Path("Reference") / "Live pick"
+OLD_FOLDER = pathlib.Path("design") / "reference" / "live"
 RECENT = 24 * 3600
 
 
@@ -24,18 +26,17 @@ def folder(root):
 
 
 def prepare(root, open_folder=False):
+    """Make the folder. `open_folder` is ignored: the kit never opens File Explorer (v1.7 live walkthrough fix 14)."""
     d = folder(root)
     d.mkdir(parents=True, exist_ok=True)
     (d / ".gitignore").write_text("*\n", encoding="utf-8")
-    if open_folder and os.name == "nt":
-        os.startfile(str(d))                              # noqa: S606  the user saves Desktop's report here
     return d
 
 
 def candidates(root, now=None):
     """[(mtime, definition.pbir)] of Desktop-saved live reports, newest first."""
     now = now or time.time()
-    places = [(folder(root), None)] + [(pathlib.Path(os.path.expandvars(os.path.expanduser(p))), RECENT)
+    places = [(folder(root), None), (pathlib.Path(root) / OLD_FOLDER, None)] + [(pathlib.Path(os.path.expandvars(os.path.expanduser(p))), RECENT)
                                        for p in DC.read_project(root).get("pickerFolders", [])]
     out = []
     for base, max_age in places:

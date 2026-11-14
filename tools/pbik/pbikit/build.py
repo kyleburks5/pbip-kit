@@ -1655,6 +1655,15 @@ def register_custom_visual(rep, name):
         rep.write(rf, new)
 
 
+THEME_FILE = "design/themes/pbip-polish.json"
+
+
+def default_theme(design):
+    """The project's theme (gen_theme.py writes it from tokens.json) when layout.json names none, else None."""
+    f = pathlib.Path(design).parent / THEME_FILE
+    return THEME_FILE if f.exists() else None
+
+
 def build(report_path, layout_path, prune=False, reset=False, map_path=None, tokens_path=None, templates=None,
           quiet=False, no_custom_visuals=False, project=None, strict=False):
     layout_path = pathlib.Path(layout_path).resolve()
@@ -1674,8 +1683,11 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     map_path = pathlib.Path(map_path) if map_path else layout_path.parent / "visual-map.json"
     old_map = load(map_path) if map_path.exists() else {}
     theme_changed = []
-    if layout.get("theme"):                     # the theme file (gen_theme.py writes it from tokens), registered first
-        tf = pathlib.Path(layout["theme"])
+    theme_ref = layout.get("theme") or default_theme(design)    # the theme is always applied (v1.7 live fix 6)
+    if theme_ref and not layout.get("theme") and not quiet:
+        print("theme: the project's theme (design/themes/pbip-polish.json) applied; layout.json didn't name one")
+    if theme_ref:                               # the theme file (gen_theme.py writes it from tokens), registered first
+        tf = pathlib.Path(theme_ref)
         tf = tf if tf.is_absolute() else design.parent / tf
         if not tf.exists():
             fail(f"theme {tf} not found (run design/scripts/gen_theme.py first)")

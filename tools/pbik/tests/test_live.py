@@ -254,5 +254,156 @@ class NeverSilentTests(unittest.TestCase):
         self.assertEqual(len(STP.interactions(root)), 1, "the window answer counts once")
 
 
+
+# ---------------------------------------------------------------- HIGH 5-7 (and the status, MEDIUM 13)
+import shutil, subprocess  # noqa: E402
+KIT = HERE.parents[2]
+
+
+def pbik(*args, cwd=None):
+    return subprocess.run([sys.executable, str(HERE.parent / "pbik.py"), *map(str, args)], capture_output=True,
+                          text=True, encoding="utf-8", cwd=cwd)
+
+
+class Tmp(unittest.TestCase):
+    def setUp(self):
+        self.tmp = pathlib.Path(tempfile.mkdtemp(prefix="pbik_high_"))
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+
+class OneReferenceFolderTests(Tmp):
+    """5. Intake and the start read only the Model and Reference folders; files in the old place are named."""
+
+    def test_old_places_are_warned_never_read(self):
+        from pbikit import drops, intake as IN, start as SR
+        old_model = self.tmp / "design" / "reference" / "model"
+        shutil.copytree(HERE / "synth_sample" / "Example Live.SemanticModel", old_model / "Old.SemanticModel")
+        old_ref = self.tmp / "design" / "reference" / "inputs"
+        old_ref.mkdir(parents=True)
+        (old_ref / "Wireframe.html").write_text("<html></html>", encoding="utf-8")
+        said = []
+        with self.assertRaises(IN.IntakeError):
+            IN.intake(self.tmp, out=said.append)
+        self.assertTrue(any("old place for model files" in x and "Old.SemanticModel" in x for x in said), said)
+        self.assertFalse((self.tmp / "design/specs/contract.json").exists(), "the old place was never read")
+        lines = SR.check(self.tmp)
+        self.assertTrue(any("old place for reference files" in x for x in lines), lines)
+        self.assertEqual(SR.detect(self.tmp)["inputs"], [], "the old wireframe isn't a layout input")
+        self.assertFalse(any("design/reference" in x or "design\\reference" in x for x in lines), "no paths")
+        self.assertEqual(drops.model_dir(self.tmp), self.tmp / "Model")
+
+    def test_the_live_pick_sits_in_reference_and_is_no_layout(self):
+        from pbikit import picker as PK, start as SR
+        with mock.patch("os.startfile", side_effect=AssertionError("never File Explorer"), create=True):
+            d = PK.prepare(self.tmp, open_folder=True)
+        self.assertEqual(d, self.tmp / "Reference" / "Live pick")
+        bind_sample.write(d / "Pick.Report" / "definition.pbir", {"version": "4.0", "datasetReference": {
+            "byConnection": {"connectionString": BD.connection_string("Sample Workspace", "Example Live", TB.MID)}}})
+        self.assertEqual(SR.detect(self.tmp)["path"], "starter layouts", "the pick is not an existing report")
+        self.assertEqual(PK.picked(self.tmp)[1], "Example Live")
+        r = pbik("bind", "picker", "--scan", "--root", self.tmp)
+        self.assertNotIn("Command Palette", r.stdout)
+        self.assertNotIn("Example Live'", r.stdout)
+
+    def test_pbik_open_names_the_folder_and_opens_nothing(self):
+        r = pbik("open", "--root", self.tmp) if "--root" in pbik("open", "--help").stdout else pbik("open", cwd=self.tmp)
+        self.assertNotIn("File Explorer", r.stdout)
+
+
+class ThemeAlwaysTests(Tmp):
+    """6. The theme is applied with every build, also when layout.json doesn't name it."""
+
+    def test_build_applies_the_project_theme(self):
+        import test_walkthrough as TW
+        p = TW.project(self.tmp)
+        (p / "design" / "themes").mkdir(parents=True)
+        shutil.copy2(KIT / "design" / "themes" / "pbip-polish.json", p / "design" / "themes" / "pbip-polish.json")
+        lay = json.loads((p / "design/specs/layout.json").read_text(encoding="utf-8"))
+        lay.pop("theme", None)
+        (p / "design/specs/layout.json").write_text(json.dumps(lay), encoding="utf-8")
+        ST.update(p, done="plan")
+        r = pbik("build", "Demo", "design/specs/layout.json", cwd=p)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        rep = json.loads((p / "Demo.Report/definition/report.json").read_text(encoding="utf-8"))
+        self.assertIn("customTheme", rep["themeCollection"], "the theme is on the report")
+        st = ST.read(p)
+        self.assertIn("theme", st["done"])
+        self.assertIn("build", st["done"])
+        self.assertNotIn("next is the colours", ST.line(p))
+        self.assertIn("No changes", pbik("build", "Demo.Report", "design/specs/layout.json", cwd=p).stdout)
+
+    def test_polish_and_plan_approval_put_the_theme_in_the_plan(self):
+        from pbikit import polish as PO
+        (self.tmp / "design" / "specs").mkdir(parents=True)
+        (self.tmp / "design" / "themes").mkdir(parents=True)
+        (self.tmp / "design" / "themes" / "pbip-polish.json").write_text("{}", encoding="utf-8")
+        (self.tmp / "design/specs/layout.json").write_text(json.dumps({"pages": {}, "visuals": []}), encoding="utf-8")
+        said, _ = PO.run(self.tmp)
+        self.assertEqual(json.loads((self.tmp / "design/specs/layout.json").read_text(encoding="utf-8"))["theme"],
+                         "design/themes/pbip-polish.json")
+        self.assertIn("the project's theme applied to the report", said)
+
+
+class DesktopWindowTests(Tmp):
+    """7. One Desktop window, the one the kit opened; reload or close it only when its only marks are its own."""
+
+    def setUp(self):
+        super().setUp()
+        rep = self.tmp / "Demo.Report"
+        (rep / "definition").mkdir(parents=True)
+        (rep / "definition" / "report.json").write_text("{}", encoding="utf-8")
+        self.pbip = self.tmp / "Demo.pbip"
+        self.pbip.write_text("{}", encoding="utf-8")
+        self.started = []
+
+    def open(self, before, after, state=None):
+        from pbikit import desktop as D
+        seq = [before, after]
+        return D.open_report(self.tmp, self.pbip, start=self.started.append,
+                             pids=lambda: seq.pop(0) if len(seq) > 1 else seq[0], ready=lambda b: True,
+                             read_state=lambda: state or {"isDirty": True, "pages": 1}, settle=lambda s: None)
+
+    def test_opens_once_and_records_the_window(self):
+        from pbikit import desktop as D
+        code, lines = self.open([], [4100])
+        self.assertEqual((code, self.started), (0, [self.pbip]))
+        rec = S.read_json(D.record_file(self.tmp))
+        self.assertEqual(rec["pid"], 4100)
+        self.assertTrue(rec["opened"])
+        st = {"isDirty": True, "pages": 1}
+        self.assertIsNone(D.why_not_close(self.tmp, self.tmp / "Demo.Report", st, pids=[4100]),
+                          "only Desktop's on-open marks: the kit may reload or close it")
+        self.assertIn("changed", D.why_not_close(self.tmp, self.tmp / "Demo.Report", {"isDirty": True, "pages": 2},
+                                                 pids=[4100]))
+        code, lines = self.open([4100], [4100])
+        self.assertEqual(code, 0)
+        self.assertEqual(len(self.started), 1, "never a second window: the kit's own is used")
+        self.assertIn("already has the report open", lines[0])
+
+    def test_another_desktop_window_is_never_doubled(self):
+        code, lines = self.open([999], [999])
+        self.assertEqual(code, 4)
+        self.assertEqual(self.started, [])
+        self.assertIn("won't open a second one", lines[0])
+        self.assertNotIn("`", lines[0])
+
+
+class StatusTests(Tmp):
+    """13. Each stage updates the status file itself; "Where am I?" is right after the build and after a switch."""
+
+    def test_mark_only_in_a_project(self):
+        self.assertIsNone(ST.mark(self.tmp, "build"))
+        self.assertFalse(ST.status_file(self.tmp).exists())
+        for d in ("start", "model", "page purpose", "plan"):
+            ST.update(self.tmp, done=d)
+        ST.mark(self.tmp, "theme", "build")
+        ST.mark(self.tmp, "checks")
+        ST.mark(self.tmp, "polish", "result")
+        line = ST.line(self.tmp)
+        self.assertIn("past the result", line)
+        self.assertIn("switching to the live model", line)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

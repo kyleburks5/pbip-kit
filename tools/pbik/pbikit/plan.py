@@ -370,6 +370,9 @@ def approve(root, layout=None):
     missing = [pk for pk in lay.get("pages", {}) if not plan.get("purposes", {}).get(pk)]
     if missing:
         raise PlanError(f"{len(missing)} page(s) have no purpose yet: ask what each should help people decide")
+    if not lay.get("theme") and (root / "design" / "themes" / "pbip-polish.json").exists():
+        lay["theme"] = "design/themes/pbip-polish.json"         # the theme is part of every plan (v1.7 live fix 6)
+        save(layout_file(root, layout), lay)
     h = plan_hash(lay, plan)
     plan["approved"] = h
     plan["approvedStructure"] = structure(lay)

@@ -163,6 +163,9 @@ def run(root=".", layout=None):
     g = json.loads(gf.read_text(encoding="utf-8")) if gf.exists() else {}
     planned = g.setdefault("plannedMeasures", {})
     said, why_not = polish(lay, tokens, planned)
+    if not lay.get("theme") and (root / "design" / "themes" / "pbip-polish.json").exists():
+        lay["theme"] = "design/themes/pbip-polish.json"         # the theme is part of every plan (v1.7 live fix 6)
+        said.append("the project's theme applied to the report")
     lf.write_text(json.dumps(lay, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     if planned:
         gf.parent.mkdir(parents=True, exist_ok=True)

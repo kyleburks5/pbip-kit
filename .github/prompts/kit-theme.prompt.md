@@ -9,7 +9,7 @@ Make the colour scheme for this rep: the text after /kit-theme in my message
 Read CLAUDE.md (Accessibility), docs/lessons/accessibility.md and design/themes/presets/README.md. Work directly; don't ask me to approve the palette first.
 1. The source, first match wins (design/scripts/gen_tokens.py does the rest):
    - **Brand colours** in my brief (`#0E1A2B, #F2B705, #E4572E`, or named: `primary=`, `brand=`, `bad=`, `good=`, `second=`): `--brand "<colours>"`. Pass `--mode dark` when I ask for a dark report or the brief says so; otherwise light.
-   - **A reference** in design/reference/ (an image, or an HTML page): `--from design/reference/<file>`. The reference's own background decides light or dark.
+   - **A reference** in the Reference folder (an image, or an HTML page): `--from Reference/<file>`. The reference's own background decides light or dark.
    - **Neither**: a preset, `--preset clean | bento | corporate` (the one I name; default clean).
    Run `python design/scripts/gen_tokens.py <source> --layout design/specs/layout.json --fix-layout` (leave out the layout options when there is no layout.json yet). It derives the full token set (canvas, cards, text, primary bands, brand marks and text, tints, good / bad, secondary, selected and its text), moves any colour that fails WCAG 2.1 AA in lightness only until it passes, renames layout colours used out of role (a fill colour as text, a selected state not on `selected` / `onSelected`), and writes design/tokens.json and design/reviews/theme.md. Exit 1 means a check can't be met: tell me which pair and stop.
 2. `python design/scripts/gen_theme.py` (the Power BI theme from the tokens).

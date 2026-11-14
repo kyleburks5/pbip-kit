@@ -64,6 +64,18 @@ def update(root, done=None, **fields):
     return write(root, doc)
 
 
+def mark(root, *stages, **fields):
+    """The stages a pbik step just finished, in a project (a status file exists); nothing elsewhere. Every stage
+    updates the status this way, so "Where am I?" is right without the agent remembering (v1.7 live fix 13)."""
+    if not status_file(root).exists():
+        return None
+    doc = None
+    for s in stages:
+        doc = update(root, done=s, **fields)
+        fields = {}
+    return doc if stages else update(root, **fields)
+
+
 def pauses(doc):
     """The stages the build stops after, for its mode."""
     return GUIDED_PAUSES if doc.get("mode", "guided") == "guided" else QUICK_PAUSES

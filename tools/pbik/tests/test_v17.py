@@ -297,7 +297,7 @@ class PlainWordsTests(Tmp):
     def test_intake_groups_and_never_says_slash_model(self):
         from pbikit import intake as IN
         import big_model as BM
-        drop = self.tmp / "design" / "reference" / "model"
+        drop = self.tmp / "Model"
         BM.write(drop, "tmdl")
         (self.tmp / "design" / "specs").mkdir(parents=True, exist_ok=True)
         said = []
@@ -336,7 +336,7 @@ class StartTests(Tmp):
     """A2: what the person gave picks the path; reports read into layouts; known models recognised; starters."""
 
     def inputs(self, *names):
-        d = self.tmp / "design" / "reference" / "inputs"
+        d = self.tmp / "Reference"
         d.mkdir(parents=True, exist_ok=True)
         for n in names:
             if n.endswith(".Report"):
@@ -446,7 +446,7 @@ class StartTests(Tmp):
                  env_home=self.tmp / "home")                            # the person's own settings, any project
         self.assertIn("Example Big: version 1", r.stdout)
         self.assertNotIn("packFolders", json.dumps(DC.read_project(b)), "no machine path in a project file")
-        drop = b / "design" / "reference" / "model"
+        drop = b / "Model"
         import big_model as BM
         BM.write(drop, "tmdl")
         said = []
@@ -686,7 +686,7 @@ class DesktopCloseTests(Tmp):
         self.state = {"application": {"isDirty": True, "activePage": "P1", "timestamp": "10:00"}}
 
     def test_proven_then_closed(self):
-        self.assertIn("haven't reloaded", self.D.why_not_close(self.tmp, self.report, self.state))
+        self.assertIn("didn't open or reload", self.D.why_not_close(self.tmp, self.report, self.state))
         self.D.remember_reload(self.tmp, self.report, self.state)
         later = {"application": {"isDirty": True, "activePage": "P1", "timestamp": "10:05"}}
         self.assertIsNone(self.D.why_not_close(self.tmp, self.report, later), "times don't count")
@@ -702,12 +702,12 @@ class DesktopCloseTests(Tmp):
         from unittest import mock
         self.D.remember_reload(self.tmp, self.report, self.state)
         moved = {"application": {"isDirty": True, "activePage": "P2", "timestamp": "10:01"}}
-        self.assertIn("changed after my reload", self.D.why_not_close(self.tmp, self.report, moved))
+        self.assertIn("changed after I opened or reloaded it", self.D.why_not_close(self.tmp, self.report, moved))
         self.assertIn("doesn't report", self.D.why_not_close(self.tmp, self.report, None))
         with mock.patch.dict(os.environ, {"PBIK_DESKTOP_PIDS": "4242,77"}):
             self.assertIn("more than one", self.D.why_not_close(self.tmp, self.report, self.state))
         with mock.patch.dict(os.environ, {"PBIK_DESKTOP_PIDS": "77"}):
-            self.assertIn("isn't the one I reloaded", self.D.why_not_close(self.tmp, self.report, self.state))
+            self.assertIn("isn't the one I opened or reloaded", self.D.why_not_close(self.tmp, self.report, self.state))
         (self.report / "definition" / "report.json").write_text('{"saved": "by Desktop"}', encoding="utf-8")
         self.assertIn("didn't make", self.D.why_not_close(self.tmp, self.report, self.state))
         killed = []

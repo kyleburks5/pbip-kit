@@ -12,7 +12,6 @@ requirements then fill the KPI list and the assumptions. Data files are never re
 """
 import json, pathlib, shutil
 
-INPUTS = pathlib.Path("design") / "reference" / "inputs"
 STARTERS = pathlib.Path(__file__).resolve().parents[3] / "docs" / "layouts" / "starters"
 HTML = {".html", ".htm"}
 IMAGES = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"}
@@ -32,7 +31,7 @@ class StartError(Exception):
 
 
 def inputs_dir(root):
-    """The Reference folder (pbikit/drops.py; design/reference/inputs in projects made before v1.7's one-folder setup)."""
+    """The Reference folder (pbikit/drops.py); the old design/reference/inputs is never read."""
     from . import drops
     return drops.reference_dir(root)
 
@@ -46,7 +45,10 @@ def detect(root):
     """{"path", "reportType", "inputs": [(kind, name)], "requirements": [names], "refused": [names]}."""
     folder = inputs_dir(root)
     found, reqs, refused = [], [], []
+    from . import drops
     for p in sorted(folder.rglob("*")) if folder.is_dir() else []:
+        if drops.LIVE_PICK in p.relative_to(folder).parts:
+            continue                                              # the live-model pick, not a layout input
         if any(is_report(q) for q in p.parents if folder in q.parents or q == folder):
             continue                                              # inside a .Report folder: read as a report
         if is_report(p):
@@ -131,6 +133,7 @@ def check(root):
                      "folder.)")
     for n in d["refused"]:
         lines.append(f"warning: I won't read {n} in the Reference folder: it can hold data.")
+    lines += drops.old_lines(root)
     if not model and not contract:
         lines.append("next: put the model in the Model folder and say done")
     elif not got:

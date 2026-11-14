@@ -167,7 +167,7 @@ class IntakeTests(Tmp):
     """Stage (c): the model drop folder: data files deleted before anything reads it, every format detected."""
 
     def drop(self):
-        d = self.tmp / "design" / "reference" / "model"
+        d = self.tmp / "Model"
         d.mkdir(parents=True)
         (self.tmp / "design" / "specs").mkdir(parents=True, exist_ok=True)
         return d

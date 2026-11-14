@@ -144,14 +144,23 @@ def state(bridge=None, fail_if_dirty=False, quiet=False):
 
 
 def reload(bridge=None, force=False, report=None, root="."):
-    flag = state(bridge=bridge, quiet=True)
+    raw = run("state", bridge=bridge)
+    try:
+        st = json.loads(raw)
+    except json.JSONDecodeError:
+        st = None
+    flag = dirty_flag(st) if st is not None else None
+    folder = pathlib.Path(report) if report else next(pathlib.Path(root).glob("*.Report"), None)
     if flag and not force:
-        print("Desktop has unsaved changes: not reloading. Close Desktop without saving, reopen, then reload.")
-        sys.exit(DIRTY)
+        why = why_not_close(root, folder, st) if folder else "there is no report in this project"
+        if why:
+            print(f"Desktop has unsaved changes I can't account for ({why}): not reloading. Close Desktop without "
+                  "saving and tell me; I'll open it again.")
+            sys.exit(DIRTY)
+        print("Desktop's only unsaved marks are its own (from opening the report or my last reload): reloading.")
     if flag is None and not force:
         print("warning: the bridge reports no unsaved-changes flag; check Desktop's title bar before relying on this")
     print(run("reload", bridge=bridge).strip())
-    folder = pathlib.Path(report) if report else next(pathlib.Path(root).glob("*.Report"), None)
     if folder:                                            # the state that proves "only my reload marks" (D1)
         try:
             remember_reload(root, folder, json.loads(run("state", bridge=bridge)))
@@ -257,6 +266,61 @@ def remember_reload(root, report_folder, state_json, pids=None):
                                    "at": datetime.datetime.now().isoformat(timespec="seconds")})
 
 
+def open_report(root, pbip, bridge=None, wait=True, start=None, pids=None, ready=None, read_state=None,
+                settle=None):
+    """Open the report in Desktop once (v1.7 live walkthrough fix 7). Never a second window: when the window the
+    kit opened still has it, it is used; when another Desktop window is open, the person is asked. The new window's
+    process and its state right after opening (Desktop's own on-open marks) are recorded, so the kit may reload or
+    close it later when nothing else changed. Returns (exit code, plain lines)."""
+    import datetime, time
+    from .synth import read_json, write_json
+    root = pathlib.Path(root)
+    pids_now = (pids or desktop_pids)()
+    rec = read_json(record_file(root)) or {}
+    if pids_now:
+        if rec.get("pid") in pids_now and len(pids_now) == 1:
+            return 0, ["Power BI Desktop already has the report open (the window I opened): I'll use it."]
+        return 4, ["Power BI Desktop is already open in a window I didn't open, so I won't open a second one. "
+                   "Close it without saving (File > Close, then Don't save) and say done, and I'll open the report."]
+    if start:
+        start(pbip)
+    elif hasattr(os, "startfile"):
+        os.startfile(str(pathlib.Path(pbip).resolve()))          # noqa: S606
+    opening_file(root).parent.mkdir(parents=True, exist_ok=True)
+    opening_file(root).write_text(str(time.time()), encoding="utf-8")
+    new = []
+    for _ in range(60):                                          # the new process appears within a few seconds
+        new = (pids or desktop_pids)()
+        if new:
+            break
+        (settle or time.sleep)(1)
+    folder = next(root.glob("*.Report"), None)
+    write_json(record_file(root), {"pid": new[0] if len(new) == 1 else None, "opened": True,
+                                   "report": str(folder) if folder else None,
+                                   "files": files_hash(folder) if folder else None,
+                                   "at": datetime.datetime.now().isoformat(timespec="seconds")})
+    lines = ["Opening the report in Power BI Desktop."]
+    if not wait:
+        return 0, lines
+    if not (ready or wait_ready)(bridge):
+        return NOT_READY, lines + ["Power BI Desktop is still opening the report. I'll check again in a moment."]
+    remember_open(root, folder, read_state, bridge)
+    return 0, lines + ["Power BI Desktop has the report open."]
+
+
+def remember_open(root, folder, read_state=None, bridge=None):
+    """Right after opening: Desktop's state with only its own on-open marks (compared before a reload or close)."""
+    from .synth import read_json, write_json
+    rec = read_json(record_file(root)) or {}
+    try:
+        st = read_state() if read_state else json.loads(run("state", bridge=bridge))
+    except (SystemExit, json.JSONDecodeError, ValueError):
+        return rec
+    rec.update(state=normalise(st), files=files_hash(folder) if folder else rec.get("files"))
+    write_json(record_file(root), rec)
+    return rec
+
+
 def mark_built(root, report_folder):
     """pbik build changed the report files after the reload: the agent's own change, not Desktop's."""
     from .synth import read_json, write_json
@@ -273,16 +337,16 @@ def why_not_close(root, report_folder, state_json, pids=None):
     from .synth import read_json
     rec = read_json(record_file(root))
     pids = desktop_pids() if pids is None else pids
-    if not rec:
-        return "I haven't reloaded this report in Desktop myself, so I can't tell what changed there"
+    if not rec or "state" not in rec:
+        return "I didn't open or reload this report in Desktop myself, so I can't tell what changed there"
     if len(pids) != 1:
         return "more than one Power BI Desktop window is open" if pids else "Power BI Desktop isn't open"
     if rec.get("pid") != pids[0]:
-        return "this Desktop window isn't the one I reloaded"
+        return "this Desktop window isn't the one I opened or reloaded"
     if state_json is None:
         return "Desktop doesn't report its state"
     if normalise(state_json) != rec.get("state"):
-        return "something in Desktop changed after my reload (maybe yours)"
+        return "something in Desktop changed after I opened or reloaded it (maybe yours)"
     if files_hash(report_folder) not in (rec.get("files"), rec.get("built")):
         return "the report's files changed in a way I didn't make (maybe a save in Desktop)"
     return None

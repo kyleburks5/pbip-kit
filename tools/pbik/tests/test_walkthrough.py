@@ -560,11 +560,11 @@ class DropFolderTests(Tmp):
         self.assertTrue(said[0].startswith("warning: the model folder held"))
         self.assertFalse((self.tmp / "Model" / "Example Big.SemanticModel" / ".pbi").exists())
 
-    def test_old_projects_keep_their_folders(self):
+    def test_the_old_places_are_never_read(self):
         from pbikit import drops
         old = self.tmp / "design" / "reference" / "model"
         old.mkdir(parents=True)
-        self.assertEqual(drops.model_dir(self.tmp), self.tmp / "design" / "reference" / "model")
+        self.assertEqual(drops.model_dir(self.tmp), self.tmp / "Model")
         self.assertEqual(drops.reference_dir(self.tmp), self.tmp / "Reference")
 
     def test_the_guard_covers_the_model_folder(self):

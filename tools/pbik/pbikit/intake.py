@@ -1,6 +1,6 @@
 """`pbik model intake`: the model drop folder (docs/design/phase1-usability.md, section 3).
 
-The user drops a copy of the model into design/reference/model/: a TMDL folder, a single TMDL createOrReplace script, a
+The user drops a copy of the model into the project's Model folder (never the old design/reference/model): a TMDL folder, a single TMDL createOrReplace script, a
 .SemanticModel folder or a TMSL / JSON export (.bim, .json). Intake first deletes every data file in the folder
 (permanently: cache.abf and any .abf, .pbi folders, data folders, .pbix / .pbit, .parquet, .csv, .xlsx, .xls, .cache)
 before anything reads it, then detects the format, git-ignores the folder, writes the contract (synth contract) and
@@ -10,7 +10,6 @@ import datetime, json, pathlib, shutil
 
 from . import dataclass_ as DC
 
-DROP = pathlib.Path("design") / "reference" / "model"
 DATA_SUFFIX = {".abf", ".pbix", ".pbit", ".parquet", ".csv", ".xlsx", ".xls", ".cache"}
 DATA_DIRS = {".pbi", "data"}
 
@@ -71,7 +70,7 @@ def detect(folder):
 
 
 def drop_dir(root="."):
-    """The Model folder (pbikit/drops.py; design/reference/model in projects made before the one-folder setup)."""
+    """The Model folder (pbikit/drops.py); the old design/reference/model is never read."""
     from . import drops
     return drops.model_dir(pathlib.Path(root).resolve())
 
@@ -90,8 +89,11 @@ def intake(root=".", folder=None, out=print):
     """Delete data files, detect the model, write the contract. Returns {format, removed, contract}."""
     from . import synth as S
     root = pathlib.Path(root).resolve()
+    from . import drops
     folder = pathlib.Path(folder) if folder else drop_dir(root)
-    if not folder.is_dir():
+    for w in drops.old_lines(root):
+        out(w)
+    if not folder.is_dir() or not drops.entries(folder):
         raise IntakeError("put a copy of the model in the Model folder first")
     (folder / ".gitignore").write_text("*\n", encoding="utf-8")
     removed = remove_data(folder)                   # before anything reads the folder

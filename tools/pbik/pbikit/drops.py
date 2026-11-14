@@ -5,8 +5,10 @@
 
 Both sit at the top of the project folder with plain names, made on first run (`pbik project setup`). The agent never
 opens File Explorer: it says which folder to put a file in, and `pbik start check` says what each folder holds and
-what is missing, in one line each. Projects made before this (design/reference/model and design/reference/inputs)
-keep working: the old folder is used when it exists and the new one doesn't.
+what is missing, in one line each. Only these two folders are read (v1.7 live walkthrough fix 5): files left in the
+old places (design/reference/model and design/reference/inputs) are never read; `old_lines` names them so the agent
+can ask the person to move them. The live-model pick (pbikit/picker.py) is saved in Reference's "Live pick" folder,
+which is never read as a layout input.
 """
 import pathlib
 
@@ -25,19 +27,37 @@ README = {
 NOT_INPUTS = {"readme.txt", ".gitignore", ".gitkeep", "desktop.ini", "thumbs.db"}
 
 
-def _pick(root, new, old):
-    root = pathlib.Path(root)
-    if (root / new).is_dir() or not (root / old).is_dir():
-        return root / new
-    return root / old
+LIVE_PICK = "Live pick"
 
 
 def model_dir(root="."):
-    return _pick(root, MODEL, OLD_MODEL)
+    return pathlib.Path(root) / MODEL
 
 
 def reference_dir(root="."):
-    return _pick(root, REFERENCE, OLD_REFERENCE)
+    return pathlib.Path(root) / REFERENCE
+
+
+def old_files(root="."):
+    """{"Model": [names], "Reference": [names]}: what a person left in the old places, which nothing reads."""
+    root = pathlib.Path(root)
+    out = {}
+    for name, old in ((MODEL, OLD_MODEL), (REFERENCE, OLD_REFERENCE)):
+        got = entries(root / old)
+        if got:
+            out[name] = [p.name for p in got]
+    return out
+
+
+def old_lines(root="."):
+    """Plain warnings for files in the old places (never read): move them into the named folder."""
+    out = []
+    for name, names in old_files(root).items():
+        one = len(names) == 1
+        out.append(f"warning: {', '.join(names[:3])}{' and more' if len(names) > 3 else ''} "
+                   f"{'is' if one else 'are'} in the old place for {name.lower()} files (inside the design folder), "
+                   f"which I no longer read: move {'it' if one else 'them'} into the {name} folder and say done")
+    return out
 
 
 def make(root="."):
@@ -53,8 +73,9 @@ def make(root="."):
 
 
 def entries(folder):
-    """What a person put in a drop folder (top level only, the kit's own README and ignore files left out)."""
+    """What a person put in a drop folder (top level only, the kit's own README and ignore files and the live-model
+    pick left out)."""
     folder = pathlib.Path(folder)
     if not folder.is_dir():
         return []
-    return sorted(p for p in folder.iterdir() if p.name.lower() not in NOT_INPUTS)
+    return sorted(p for p in folder.iterdir() if p.name.lower() not in NOT_INPUTS and p.name != LIVE_PICK)
