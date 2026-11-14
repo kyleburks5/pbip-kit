@@ -536,5 +536,167 @@ class PlanPictureTests(Tmp):
         self.assertEqual(int.from_bytes(data[16:20], "big"), 1920)
 
 
+# ---------------------------------------------------------------- stage f
+def built_starter(work, name="executive-summary"):
+    """The Rep 4 fixture with one starter page built from layout.json; returns (report, layout file)."""
+    from pbikit import start as SR
+    shutil.copytree(KIT / "tools" / "fixtures" / "rep4", work)
+    lay = SR.fill(name, ["Revenue", "Units Sold", "Profit", "Margin %"], "Date[Date]", "stores[City]")
+    lf = work / "design" / "specs" / "layout.json"
+    lf.parent.mkdir(parents=True, exist_ok=True)
+    lf.write_text(json.dumps(lay), encoding="utf-8")
+    report = work / "Toy Sales.Report"
+    for p in (report / "definition" / "pages").iterdir():
+        if p.is_dir():
+            shutil.rmtree(p)
+    (report / "definition" / "pages" / "pages.json").unlink(missing_ok=True)
+    r = pbik("build", report, lf, cwd=work)
+    assert r.returncode == 0, r.stdout + r.stderr
+    return report, lf
+
+
+class ModeAndHistoryTests(Tmp):
+    """A4: guided until quick reaches 7 on a report type, then the last choice or the team default; suggestions."""
+
+    def setUp(self):
+        super().setUp()
+        from unittest import mock
+        env = mock.patch.dict(os.environ, {"PBIK_HOME": str(self.tmp / "home")})
+        env.start()
+        self.addCleanup(env.stop)
+
+    def test_default_and_suggestion(self):
+        from pbikit import history as HI
+        self.assertEqual(HI.default_mode("from wireframe")[0], "guided")
+        HI.record("quick", "from wireframe", 6)
+        self.assertEqual(HI.default_mode("from wireframe")[0], "guided", "6/10 isn't the target yet")
+        HI.record("quick", "from wireframe", 8)
+        self.assertEqual(HI.default_mode("from wireframe"), ("quick", "your last choice"))
+        HI.record("guided", "executive-summary", 9)
+        self.assertEqual(HI.default_mode("from wireframe")[0], "guided", "the last choice, whatever the type")
+        self.assertEqual(HI.default_mode("detail-table")[0], "guided", "per report type")
+        for s in (5, 6, 6):
+            HI.record("quick", "executive-summary", s)
+        self.assertIn("(5.7 vs 9.0); I suggest a guided build", HI.suggestion("executive-summary"))
+        self.assertIsNone(HI.suggestion("from wireframe"), "fewer than 3 quick builds: no suggestion")
+        HI.set_hand_minutes(12)
+        self.assertEqual(HI.read()[-1]["handMinutes"], 12)
+        self.assertNotIn("Revenue", HI.history_file().read_text(encoding="utf-8"), "no names in the history")
+
+    def test_switch_and_pause_line(self):
+        ST.update(self.tmp, done="start", mode="guided")
+        for s in ("model", "page purpose", "plan", "theme"):
+            ST.update(self.tmp, done=s)
+        self.assertIn("Pause here", ST.line(self.tmp), "guided: a look after the colours")
+        r = pbik("mode", "quick", "--root", self.tmp)
+        self.assertIn("quick build", r.stdout)
+        self.assertNotIn("Pause here", ST.line(self.tmp), "finish the rest quickly: no more pauses")
+        self.assertEqual(ST.read(self.tmp)["switches"][-1], {"from": "guided", "to": "quick", "after": ["theme"]})
+
+
+class ScoreTests(Tmp):
+    """A6: the polish score from the built report and layout; seeded faults lose their item."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base = pathlib.Path(tempfile.mkdtemp(prefix="pbik_v17_score_"))
+        cls.report, cls.lf = built_starter(cls.base / "rep")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.base, ignore_errors=True)
+
+    def layout(self):
+        return json.loads(self.lf.read_text(encoding="utf-8"))
+
+    def test_clean_build(self):
+        from pbikit import score as SC
+        res = SC.compute(self.report, self.layout(), {1: True, 3: True, 7: True})
+        for n in (2, 4, 5, 8, 10):
+            self.assertTrue(res[n][0], (n, res[n]))
+        self.assertEqual(SC.total(res), 10, res)
+        lines = SC.say(SC.compute(self.report, self.layout()))
+        self.assertIn("Not checked: matches the approved picture (my own judgment); KPI cards filled; interactions "
+                      "working.", lines)
+
+    def test_seeded_faults(self):
+        from pbikit import score as SC
+        lay = self.layout()
+        lay["visuals"][1]["x"] += 5                                 # off the grid
+        lay["visuals"][2]["x"], lay["visuals"][2]["y"] = lay["visuals"][1]["x"], lay["visuals"][1]["y"] + 16  # overlap
+        lay["visuals"][3]["props"] = {"value.fontColor": "#FF0000"}   # a colour written in
+        lay["visuals"][5]["type"] = "areaChart"                     # not what was built
+        lay["visuals"][6]["bindings"] = {"Category": ["stores[City]"], "Y": ["[Profit]"]}
+        res = SC.compute(self.report, lay, {1: True, 3: True, 7: True})
+        for n in (2, 4, 5, 6, 8):
+            self.assertFalse(res[n][0], (n, res[n]))
+        self.assertIn("P1-V02", res[2][1])
+        self.assertIn("P1-V06", res[4][1])
+        self.assertIn("P1-V07", res[5][1])
+
+    def test_cli_final_records_history(self):
+        from unittest import mock
+        work = self.tmp / "p"
+        shutil.copytree(self.base / "rep", work)
+        ST.update(work, done="start", mode="quick", reportType="executive-summary")
+        env = {**os.environ, "PBIK_HOME": str(self.tmp / "home")}
+        r = subprocess.run([sys.executable, str(PBIK), "score", "--root", work, "--item", "1=pass", "--item",
+                            "3=pass", "--item", "7=pass", "--final"], capture_output=True, text=True, cwd=work,
+                           env=env, encoding="utf-8")
+        self.assertIn("Polish ", r.stdout, r.stderr)
+        self.assertTrue((work / "design" / "reviews" / "polish.md").exists())
+        with mock.patch.dict(os.environ, {"PBIK_HOME": str(self.tmp / "home")}):
+            from pbikit import history as HI
+            rec = HI.read()[-1]
+        self.assertEqual((rec["mode"], rec["reportType"]), ("quick", "executive-summary"))
+        self.assertEqual(rec["score"], ST.read(work)["score"])
+
+
+class DesktopCloseTests(Tmp):
+    """D1: Desktop is closed without saving only when its only unsaved changes are its own reload marks."""
+
+    def setUp(self):
+        super().setUp()
+        from unittest import mock
+        from pbikit import desktop as D
+        self.D = D
+        self.report = self.tmp / "X.Report"
+        (self.report / "definition").mkdir(parents=True)
+        (self.report / "definition" / "report.json").write_text("{}", encoding="utf-8")
+        env = mock.patch.dict(os.environ, {"PBIK_DESKTOP_PIDS": "4242"})
+        env.start()
+        self.addCleanup(env.stop)
+        self.state = {"application": {"isDirty": True, "activePage": "P1", "timestamp": "10:00"}}
+
+    def test_proven_then_closed(self):
+        self.assertIn("haven't reloaded", self.D.why_not_close(self.tmp, self.report, self.state))
+        self.D.remember_reload(self.tmp, self.report, self.state)
+        later = {"application": {"isDirty": True, "activePage": "P1", "timestamp": "10:05"}}
+        self.assertIsNone(self.D.why_not_close(self.tmp, self.report, later), "times don't count")
+        (self.report / "definition" / "report.json").write_text('{"pbik": 1}', encoding="utf-8")
+        self.D.mark_built(self.tmp, self.report)                         # the agent's own build after the reload
+        self.assertIsNone(self.D.why_not_close(self.tmp, self.report, later))
+        killed = []
+        self.assertIsNone(self.D.close(self.tmp, self.report, kill=killed.append, read_state=lambda: later))
+        self.assertEqual(killed, [4242])
+        self.assertFalse(self.D.record_file(self.tmp).exists())
+
+    def test_any_doubt_leaves_it_open(self):
+        from unittest import mock
+        self.D.remember_reload(self.tmp, self.report, self.state)
+        moved = {"application": {"isDirty": True, "activePage": "P2", "timestamp": "10:01"}}
+        self.assertIn("changed after my reload", self.D.why_not_close(self.tmp, self.report, moved))
+        self.assertIn("doesn't report", self.D.why_not_close(self.tmp, self.report, None))
+        with mock.patch.dict(os.environ, {"PBIK_DESKTOP_PIDS": "4242,77"}):
+            self.assertIn("more than one", self.D.why_not_close(self.tmp, self.report, self.state))
+        with mock.patch.dict(os.environ, {"PBIK_DESKTOP_PIDS": "77"}):
+            self.assertIn("isn't the one I reloaded", self.D.why_not_close(self.tmp, self.report, self.state))
+        (self.report / "definition" / "report.json").write_text('{"saved": "by Desktop"}', encoding="utf-8")
+        self.assertIn("didn't make", self.D.why_not_close(self.tmp, self.report, self.state))
+        killed = []
+        self.assertTrue(self.D.close(self.tmp, self.report, kill=killed.append, read_state=lambda: self.state))
+        self.assertEqual(killed, [], "never closed on doubt")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

@@ -314,6 +314,9 @@ def _main(argv=None):
     plp = pls.add_parser("picture", help="draw any layout (a starter, a draft) as one picture per page")
     plp.add_argument("layout")
     plp.add_argument("--out", required=True)
+    plc = pls.add_parser("check", help="before the build: exit 1 if the plan changed after the person's OK")
+    plc.add_argument("--root", default=".")
+    plc.add_argument("--layout")
     plo = pls.add_parser("open", help="open the plan pictures (or any pictures) beside the chat")
     plo.add_argument("files", nargs="*", help="pictures (default: the plan's page pictures)")
     plo.add_argument("--root", default=".")
@@ -324,6 +327,20 @@ def _main(argv=None):
     lfr = la.add_parser("from-report", help="an existing report (.Report folder) as a draft layout.json")
     lfr.add_argument("report")
     lfr.add_argument("--out", default="design/specs/layout.reference.json")
+
+    sc_ = sub.add_parser("score", help="the polish score (10 items; target 7 before showing colleagues)")
+    sc_.add_argument("report", nargs="?")
+    sc_.add_argument("--layout", default="design/specs/layout.json")
+    sc_.add_argument("--root", default=".")
+    sc_.add_argument("--item", action="append", default=[],
+                     help="the agent's own checks: 1=pass (matches the approved picture), 3=pass (KPI cards filled), "
+                          "7=pass (interactions working)")
+    sc_.add_argument("--final", action="store_true", help="the build's final score: record it in the build history")
+    sc_.add_argument("--hand-minutes", type=float, help="the person's hand-polish minutes (wrap-up)")
+    md_ = sub.add_parser("mode", help="the build option: guided or quick (no value: the default and why)")
+    md_.add_argument("value", nargs="?", choices=["guided", "quick"])
+    md_.add_argument("--root", default=".")
+    md_.add_argument("--report-type")
 
     sts = sub.add_parser("status", help="where the project is, in one plain line (design/status.json)")
     sts.add_argument("--root", default=".")
@@ -382,6 +399,12 @@ def _main(argv=None):
     st.add_argument("--fail-if-dirty", action="store_true", help="exit 4 when Desktop has unsaved changes")
     rl = ds.add_parser("reload", help="reload the report (not the model); refuses while unsaved")
     rl.add_argument("--force", action="store_true")
+    dcl = ds.add_parser("close", help="close Desktop without saving, only when its only unsaved changes are its own "
+                                      "reload marks (else it says why and leaves it open)")
+    dcl.add_argument("--report")
+    dcl.add_argument("--root", default=".")
+    dop = ds.add_parser("open", help="open the project's report in Power BI Desktop")
+    dop.add_argument("--root", default=".")
     sh = ds.add_parser("screenshot")
     sh.add_argument("--page", required=True, help="page name (id), or display name with --report")
     sh.add_argument("--out", required=True)
@@ -399,6 +422,8 @@ def _main(argv=None):
         build(args.report, args.layout, prune=args.prune, reset=args.reset, map_path=args.map,
               tokens_path=args.tokens, templates=args.templates, no_custom_visuals=args.no_custom_visuals,
               project=args.project, strict=args.strict)
+        from . import desktop as D_
+        D_.mark_built(".", args.report)                   # the agent's own change, for desktop close (D1)
     elif c == "measure":
         from . import extensions as X
         if args.op == "add":
@@ -583,6 +608,12 @@ def _main(argv=None):
             elif args.sub == "picture":
                 pngs = PL.picture(args.layout, args.out)
                 print(f"drew {len(pngs)} page picture(s)")
+            elif args.sub == "check":
+                if PL.changed_since_approval(args.root, args.layout):
+                    print("The plan changed after your OK (or wasn't approved yet).")
+                    print("next: I'll show you the plan picture again before building")
+                    return 1
+                print("The plan is the one you approved.")
             elif args.sub == "open":
                 files = args.files or sorted((pathlib.Path(args.root) / PL.PLAN_DIR).glob("page-*.png"))
                 if not files:
@@ -614,6 +645,42 @@ def _main(argv=None):
         for vid, feat, native, _ in findings:
             print(f"note {vid}: {feat}: {native}")
         print("next: I'll turn it into a plan and show it to you as a picture")
+    elif c == "score":
+        from . import score as SC, status as ST, history as HI, steps as STP
+        if args.hand_minutes is not None and not args.report:
+            HI.set_hand_minutes(args.hand_minutes)
+            print(f"Thanks: {args.hand_minutes:g} minute(s) of hand polish recorded.")
+            return 0
+        report = args.report or next((str(x) for x in pathlib.Path(args.root).glob("*.Report")), None)
+        lf = pathlib.Path(args.root) / args.layout
+        if not report or not lf.exists():
+            print("pbik: there is no built report or layout to score yet", file=sys.stderr)
+            return 2
+        import json as _j
+        res = SC.compute(report, _j.loads(lf.read_text(encoding="utf-8")), SC.parse_items(args.item))
+        st = ST.read(args.root)
+        SC.write_review(args.root, res, st.get("mode"))
+        for ln in SC.say(res):
+            print(ln)
+        t_ = SC.total(res)
+        ST.update(args.root, score=t_)
+        if args.final:
+            mins = round(sum((e - s).total_seconds() for _, s, e, _ in STP.windows(args.root)) / 60, 1)
+            HI.record(st.get("mode", "guided"), st.get("reportType") or st.get("path"), t_,
+                      len(STP.interactions(args.root)), mins, args.hand_minutes)
+    elif c == "mode":
+        from . import status as ST, history as HI
+        st = ST.read(args.root)
+        if args.value:
+            ST.update(args.root, mode=args.value)
+            print(f"Build option: {ST.MODE_WORDS[args.value]}.")
+        else:
+            rt = args.report_type or st.get("reportType") or st.get("path")
+            m, why = HI.default_mode(rt, HI.team_default(args.root))
+            print(f"Default build option: {ST.MODE_WORDS[m]} ({why}).")
+            tip = HI.suggestion(rt)
+            if tip:
+                print(tip)
     elif c == "status":
         from . import status as ST
         fields = dict(mode=args.mode, path=args.path_taken, reportType=args.report_type, pack=args.pack,
@@ -680,6 +747,23 @@ def _main(argv=None):
             D.state(args.bridge, args.fail_if_dirty)
         elif args.sub == "reload":
             D.reload(args.bridge, args.force)
+        elif args.sub == "close":
+            why = D.close(args.root, args.report, args.bridge)
+            if why:
+                print(f"I left Desktop open: {why}. Please close it yourself without saving (File > Close, then "
+                      "Don't save) and tell me.")
+                return 4
+            print("Closed Desktop without saving (it held only its own reload marks).")
+            print("next: I'll open the report again")
+        elif args.sub == "open":
+            import os
+            pbip = next(pathlib.Path(args.root).glob("*.pbip"), None)
+            if not pbip:
+                print("pbik: there is no report in this project yet", file=sys.stderr)
+                return 2
+            if hasattr(os, "startfile"):
+                os.startfile(str(pbip.resolve()))                 # noqa: S606
+            print("Opening the report in Power BI Desktop.")
         else:
             D.screenshot(args.page, args.out, args.report, args.region, args.scale, args.bridge)
     return 0

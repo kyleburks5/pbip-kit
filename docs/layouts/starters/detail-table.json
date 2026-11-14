@@ -32,7 +32,12 @@
      ]
     }
    ],
-   "container": "off",
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "{title}"
+   },
    "build": {
     "method": "native",
     "step": 1,
@@ -65,30 +70,6 @@
   },
   {
    "id": "P1-V03",
-   "name": "filter-date",
-   "page": "P1",
-   "type": "slicer",
-   "col": 0,
-   "span": 3,
-   "y": 336,
-   "h": 200,
-   "z": 1,
-   "bindings": {
-    "Values": [
-     "{date}"
-    ]
-   },
-   "container": {
-    "altText": "Filter by {date}"
-   },
-   "build": {
-    "method": "native",
-    "step": 1,
-    "reason": "Date slicer"
-   }
-  },
-  {
-   "id": "P1-V04",
    "name": "exceptions",
    "page": "P1",
    "type": "tableEx",
@@ -113,7 +94,35 @@
     "step": 1,
     "reason": "Table with conditional formatting"
    },
-   "pattern": "exception-list"
+   "pattern": "exception-list",
+   "sort": {
+    "field": "{kpi1}",
+    "direction": "Descending"
+   }
+  },
+  {
+   "id": "P1-V04",
+   "name": "filter-date",
+   "page": "P1",
+   "type": "slicer",
+   "col": 0,
+   "span": 3,
+   "y": 336,
+   "h": 200,
+   "z": 1,
+   "bindings": {
+    "Values": [
+     "{date}"
+    ]
+   },
+   "container": {
+    "altText": "Filter by {date}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Date slicer"
+   }
   },
   {
    "id": "P1-V05",

@@ -84,7 +84,10 @@ def line(root):
         extra.append(f"data {doc['dataClass']}")
     if doc.get("score") is not None:
         extra.append(f"polish {doc['score']}/10")
-    return head + (f" ({', '.join(extra)})" if extra else "")
+    text = head + (f" ({', '.join(extra)})" if extra else "")
+    if done and done[-1] in pauses(doc) and nxt:
+        text += " Pause here: show what changed and wait for an OK."
+    return text
 
 
 def projects(kit):

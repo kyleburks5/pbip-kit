@@ -32,7 +32,12 @@
      ]
     }
    ],
-   "container": "off",
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "{title}"
+   },
    "build": {
     "method": "native",
     "step": 1,
@@ -162,7 +167,11 @@
     "step": 1,
     "reason": "Line chart with direct labels"
    },
-   "pattern": "direct-labels"
+   "pattern": "direct-labels",
+   "sort": {
+    "field": "{date}",
+    "direction": "Ascending"
+   }
   },
   {
    "id": "P1-V07",

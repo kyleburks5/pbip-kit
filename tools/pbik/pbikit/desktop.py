@@ -85,7 +85,7 @@ def state(bridge=None, fail_if_dirty=False, quiet=False):
     return flag
 
 
-def reload(bridge=None, force=False):
+def reload(bridge=None, force=False, report=None, root="."):
     flag = state(bridge=bridge, quiet=True)
     if flag and not force:
         print("Desktop has unsaved changes: not reloading. Close Desktop without saving, reopen, then reload.")
@@ -93,6 +93,12 @@ def reload(bridge=None, force=False):
     if flag is None and not force:
         print("warning: the bridge reports no unsaved-changes flag; check Desktop's title bar before relying on this")
     print(run("reload", bridge=bridge).strip())
+    folder = pathlib.Path(report) if report else next(pathlib.Path(root).glob("*.Report"), None)
+    if folder:                                            # the state that proves "only my reload marks" (D1)
+        try:
+            remember_reload(root, folder, json.loads(run("state", bridge=bridge)))
+        except (SystemExit, json.JSONDecodeError):
+            pass
     print("Reloaded. The reload marks the report unsaved: close without saving and reopen before the next reload.")
     print("Reloading resets filters and slicer selections to what the files hold (Microsoft Learn, external editing): "
           "a screenshot now shows the report's default state.")
@@ -131,3 +137,117 @@ def screenshot(page, out, report=None, region=None, scale=1, bridge=None):
     if region:
         args += ["-Region", region]
     print(run("screenshot", *args, bridge=bridge).strip())
+
+
+# ---------------------------------------------------------------- closing Desktop (v1.7, decision D1)
+VOLATILE = ("time", "timestamp", "date", "now", "elapsed", "uptime", "memory", "lastactivity")
+
+
+def record_file(root="."):
+    return pathlib.Path(root) / ".pbik" / "desktop.json"
+
+
+def normalise(obj):
+    """The bridge state without values that change on their own (times, memory)."""
+    if isinstance(obj, dict):
+        return {k: normalise(v) for k, v in sorted(obj.items()) if not any(w in k.lower() for w in VOLATILE)}
+    if isinstance(obj, list):
+        return [normalise(v) for v in obj]
+    return obj
+
+
+def desktop_pids():
+    """Process ids of running Power BI Desktop windows (PBIK_DESKTOP_PIDS="1,2" overrides, for tests)."""
+    env = os.environ.get("PBIK_DESKTOP_PIDS")
+    if env is not None:
+        return [int(x) for x in env.split(",") if x.strip()]
+    if os.name != "nt":
+        return []
+    try:
+        r = subprocess.run(["tasklist", "/FI", "IMAGENAME eq PBIDesktop.exe", "/NH", "/FO", "CSV"],
+                           capture_output=True, text=True, errors="replace", timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return []
+    out = []
+    for ln in (r.stdout or "").splitlines():
+        parts = [p.strip('"') for p in ln.split('","')]
+        if len(parts) > 1 and parts[0].lower().startswith("pbidesktop") and parts[1].isdigit():
+            out.append(int(parts[1]))
+    return out
+
+
+def files_hash(report_folder):
+    """A hash of the report's files on disk (to tell whether Desktop saved since the agent's reload)."""
+    import hashlib
+    h = hashlib.sha1()
+    base = pathlib.Path(report_folder)
+    for f in sorted(base.rglob("*")) if base.is_dir() else []:
+        if f.is_file() and ".pbi" not in f.parts:
+            h.update(str(f.relative_to(base)).encode("utf-8"))
+            h.update(f.read_bytes())
+    return h.hexdigest()[:16]
+
+
+def remember_reload(root, report_folder, state_json, pids=None):
+    """After the agent's own reload: the state Desktop is in when its only unsaved changes are its reload marks."""
+    import datetime
+    from .synth import write_json
+    pids = desktop_pids() if pids is None else pids
+    write_json(record_file(root), {"pid": pids[0] if len(pids) == 1 else None, "state": normalise(state_json),
+                                   "files": files_hash(report_folder), "report": str(pathlib.Path(report_folder)),
+                                   "at": datetime.datetime.now().isoformat(timespec="seconds")})
+
+
+def mark_built(root, report_folder):
+    """pbik build changed the report files after the reload: the agent's own change, not Desktop's."""
+    from .synth import read_json, write_json
+    rec = read_json(record_file(root))
+    if rec:
+        rec["built"] = files_hash(report_folder)
+        write_json(record_file(root), rec)
+
+
+def why_not_close(root, report_folder, state_json, pids=None):
+    """None when it is proven that Desktop's only unsaved changes are its own reload marks; else the plain reason.
+    Any doubt is a reason (D1): no reload by the agent on record, another Desktop window, a different process, a
+    state that differs from right after the reload, or report files Desktop saved."""
+    from .synth import read_json
+    rec = read_json(record_file(root))
+    pids = desktop_pids() if pids is None else pids
+    if not rec:
+        return "I haven't reloaded this report in Desktop myself, so I can't tell what changed there"
+    if len(pids) != 1:
+        return "more than one Power BI Desktop window is open" if pids else "Power BI Desktop isn't open"
+    if rec.get("pid") != pids[0]:
+        return "this Desktop window isn't the one I reloaded"
+    if state_json is None:
+        return "Desktop doesn't report its state"
+    if normalise(state_json) != rec.get("state"):
+        return "something in Desktop changed after my reload (maybe yours)"
+    if files_hash(report_folder) not in (rec.get("files"), rec.get("built")):
+        return "the report's files changed in a way I didn't make (maybe a save in Desktop)"
+    return None
+
+
+def close(root=".", report=None, bridge=None, kill=None, read_state=None):
+    """Close the Desktop window for this report without saving, only when proven safe (D1). Returns the reason it
+    didn't, or None after closing."""
+    folder = pathlib.Path(report) if report else next(pathlib.Path(root).glob("*.Report"), None)
+    if not folder:
+        return "there is no report in this project"
+    try:
+        st = read_state() if read_state else json.loads(run("state", bridge=bridge))
+    except SystemExit:
+        return "the Desktop bridge isn't available, so I can't check Desktop"
+    except (json.JSONDecodeError, ValueError):
+        st = None
+    why = why_not_close(root, folder, st)
+    if why:
+        return why
+    pid = desktop_pids()[0]
+    if kill:
+        kill(pid)
+    else:
+        subprocess.run(["powershell", "-NoProfile", "-Command", f"Stop-Process -Id {pid}"], capture_output=True)
+    record_file(root).unlink(missing_ok=True)
+    return None

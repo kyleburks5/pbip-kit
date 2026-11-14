@@ -32,7 +32,12 @@
      ]
     }
    ],
-   "container": "off",
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "{title}"
+   },
    "build": {
     "method": "native",
     "step": 1,
@@ -162,7 +167,11 @@
     "step": 1,
     "reason": "Line chart with a range band"
    },
-   "pattern": "range-band"
+   "pattern": "range-band",
+   "sort": {
+    "field": "{date}",
+    "direction": "Ascending"
+   }
   },
   {
    "id": "P1-V07",
@@ -194,7 +203,11 @@
     "step": 1,
     "reason": "Small multiples"
    },
-   "pattern": "small-multiples-expected"
+   "pattern": "small-multiples-expected",
+   "sort": {
+    "field": "{date}",
+    "direction": "Ascending"
+   }
   }
  ]
 }
