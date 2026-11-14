@@ -244,6 +244,26 @@ def _main(argv=None):
     blo.add_argument("--restore-backup", action="store_true",
                      help="put the whole pre-live backup back (typed 'restore'; changes made while live are lost)")
 
+    ga = sub.add_parser("gate", help="person-only steps as Command Palette tasks with a Yes / No dialog")
+    gas = ga.add_subparsers(dest="sub", required=True)
+    gp = gas.add_parser("prepare", help="the agent: write the plain summary of what the person approves")
+    gp.add_argument("gate", choices=["synth-approve", "map-approve", "model-approve", "bind-live", "bind-local",
+                                     "class-lower", "pack-register"])
+    gp.add_argument("--root", default=".")
+    gp.add_argument("--report")
+    gp.add_argument("--pack")
+    gp.add_argument("--from", dest="from_")
+    gp.add_argument("--workspace")
+    gp.add_argument("--model")
+    gp.add_argument("--id", dest="mid")
+    gp.add_argument("--to-class", choices=["public", "internal", "restricted"])
+    gp.add_argument("--to", help="the team pack folder (pack-register)")
+    gr = gas.add_parser("run", help="the person (Command Palette task): show the summary, apply on Yes")
+    gr.add_argument("gate")
+    gr.add_argument("--root", default=".")
+    gt = gas.add_parser("tasks", help="write .vscode/tasks.json (one task per gate)")
+    gt.add_argument("--root", default=".")
+
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
     ds = dk.add_subparsers(dest="sub", required=True)
@@ -400,6 +420,23 @@ def _main(argv=None):
         return synth_cmd(args)
     elif c == "bind":
         return bind_cmd(args)
+    elif c == "gate":
+        from . import gates as GT, synth as S2, dataclass_ as DC2
+        try:
+            if args.sub == "prepare":
+                d = GT.prepare(args.gate, args.root, args.report, args.pack, args.from_, args.workspace, args.model,
+                               args.mid, args.to_class, args.to)
+                print(d["summary"])
+                print(f"Next (the person): Command Palette > Tasks: Run Task > {d['task']}")
+            elif args.sub == "run":
+                GT.run(args.gate, args.root)
+            else:
+                from .synth import write_json
+                write_json(pathlib.Path(args.root) / ".vscode" / "tasks.json", GT.tasks_json())
+                print("wrote .vscode/tasks.json")
+        except (GT.GateError, S2.ContractError, DC2.Refused) as e:
+            print(f"pbik: {e}", file=sys.stderr)
+            return 2
     elif c == "desktop":
         from . import desktop as D
         if args.sub == "state":

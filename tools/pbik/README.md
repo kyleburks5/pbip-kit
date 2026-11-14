@@ -453,6 +453,16 @@ docs/PLAIN-WORDS.md words and never shows a path or a command. `project init` co
 new folder beside the kit, sets the data class, starts git with a first commit and, with `--from-pack`, starts from a
 model pack at the plan step.
 
+### `gate prepare <gate> ...`, `gate run <gate>`, `gate tasks`
+
+Person-only steps as Command Palette tasks (.vscode/tasks.json, written by `gate tasks`): Approve the model, Approve
+the name map, Approve model changes, Connect to the live model, Back to the synthetic model, Loosen the data class,
+Share the model pack. The agent runs `gate prepare` (a plain summary and a hash of what is approved, in
+`.pbik/gates/`, git-ignored; option-table rows are never in it); the person picks the task, which runs `gate run`:
+a Windows dialog shows the summary (and, for the model, the rows kept) with Yes / No. On Yes the step runs with the
+approver from git's user name and the Windows login, and is logged in design/reviews/approvals.md. `gate run`
+refuses in an agent's shell or without a terminal, and when what is approved changed after `prepare`.
+
 ## Synthetic to live (docs/design/synth-to-live.md)
 
 ### `project class [public|internal|restricted] [--guard dax|screenshot]`

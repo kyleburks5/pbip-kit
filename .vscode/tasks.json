@@ -1,0 +1,159 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Approve the model",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "tools/pbik/pbik.py",
+        "gate",
+        "run",
+        "synth-approve"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "pbik person-only step (synth-approve): shows a summary, then Yes / No"
+    },
+    {
+      "label": "Approve the name map",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "tools/pbik/pbik.py",
+        "gate",
+        "run",
+        "map-approve"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "pbik person-only step (map-approve): shows a summary, then Yes / No"
+    },
+    {
+      "label": "Approve model changes",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "tools/pbik/pbik.py",
+        "gate",
+        "run",
+        "model-approve"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "pbik person-only step (model-approve): shows a summary, then Yes / No"
+    },
+    {
+      "label": "Connect to the live model",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "tools/pbik/pbik.py",
+        "gate",
+        "run",
+        "bind-live"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "pbik person-only step (bind-live): shows a summary, then Yes / No"
+    },
+    {
+      "label": "Back to the synthetic model",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "tools/pbik/pbik.py",
+        "gate",
+        "run",
+        "bind-local"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "pbik person-only step (bind-local): shows a summary, then Yes / No"
+    },
+    {
+      "label": "Loosen the data class",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "tools/pbik/pbik.py",
+        "gate",
+        "run",
+        "class-lower"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "pbik person-only step (class-lower): shows a summary, then Yes / No"
+    },
+    {
+      "label": "Share the model pack",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "tools/pbik/pbik.py",
+        "gate",
+        "run",
+        "pack-register"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "pbik person-only step (pack-register): shows a summary, then Yes / No"
+    }
+  ]
+}
