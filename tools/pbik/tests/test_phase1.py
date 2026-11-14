@@ -12,6 +12,7 @@ sys.path.insert(0, str(HERE.parent))
 sys.path.insert(0, str(HERE))
 
 import big_model as BM  # noqa: E402
+NL = chr(10)
 from pbikit import dataclass_ as DC, summary as SM, synth as S  # noqa: E402
 
 
@@ -386,6 +387,39 @@ class PickerTests(TB.BindBase):
         log = (self.root / "design/reviews/approvals.md").read_text(encoding="utf-8")
         self.assertIn("| Connect to the live model |", log)
         self.assertIn("| Back to the synthetic model |", log)
+
+
+class UsageTests(Tmp):
+    """Stage (f): steps marked by the agent, joined with made-up transcript usage (each message counted once)."""
+
+    def test_per_step_totals(self):
+        import datetime as dt
+        sys.path.insert(0, str(KIT / "tools"))
+        import usage as U
+        from pbikit import steps as ST
+        t0 = dt.datetime(2026, 1, 5, 9, 0, tzinfo=dt.timezone.utc)
+        ST.mark(self.tmp, "start", "brd", now=t0)
+        ST.mark(self.tmp, "end", "brd", "ok", now=t0 + dt.timedelta(minutes=12))
+        ST.mark(self.tmp, "start", "model", now=t0 + dt.timedelta(minutes=13))
+        ST.mark(self.tmp, "end", "model", "ok", now=t0 + dt.timedelta(minutes=30))
+        tr = self.tmp / "transcripts"
+        tr.mkdir()
+        lines = []
+        for k, (minute, out_tok) in enumerate([(1, 100), (5, 50), (20, 300)]):
+            msg = {"type": "assistant", "timestamp": (t0 + dt.timedelta(minutes=minute)).isoformat().replace("+00:00", "Z"),
+                   "message": {"id": f"msg_{k}", "usage": {"input_tokens": 10, "cache_creation_input_tokens": 1000,
+                                                            "cache_read_input_tokens": 5000, "output_tokens": out_tok}}}
+            lines += [json.dumps(msg), json.dumps(msg)]           # the transcript repeats a message per content block
+        (tr / "session.jsonl").write_text(NL.join(lines) + NL, encoding="utf-8")
+        rows = U.per_step(self.tmp, tr)
+        self.assertEqual([(r["step"], r["minutes"], r["messages"], r["output_tokens"]) for r in rows],
+                         [("brd", 12.0, 2, 150), ("model", 17.0, 1, 300)])
+        text = U.report(rows)
+        self.assertIn("| **total** | 29.0 |", text)
+        self.assertIn("| first setup | 30-45 |", text)
+        r = pbik("step", "start", "plan", "--root", self.tmp)
+        self.assertEqual(r.returncode, 0)
+        self.assertEqual(ST.windows(self.tmp)[-1][3], "open")
 
 
 if __name__ == "__main__":

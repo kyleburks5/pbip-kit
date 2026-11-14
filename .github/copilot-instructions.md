@@ -63,7 +63,7 @@ Goal: build polished Power BI reports (PBIP + PBIR) from a requirements file (de
 4. I save and reload in Desktop; `/review` screenshots, compares to the wireframe and design/checks.md, and runs the numbers audit.
 5. `/fix`: fix the review items, re-check, repeat.
 6. `/wrapup` after the last /fix: places the rep's lessons (docs/lessons/README.md), updating existing ones, shows the diff, waits for approval; it suggests `/tidy` when a budget is near or 3+ reps have passed.
-7. After each step, say what changed.
+7. After each step, say what changed. Mark each step with `pbik step start|end <step>` (tools/usage.py: tokens per step).
 - `/theme` makes the colour scheme on its own (brand colours, a reference, or a preset: clean, bento, corporate;
   every text and state AA); /plan step 2 runs the same.
 - `/smoke` after any tool or plugin update; `/update` after a Power BI Desktop update (docs/UPDATE-ROUTINE.md);

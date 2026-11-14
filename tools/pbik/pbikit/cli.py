@@ -256,6 +256,11 @@ def _main(argv=None):
     blo.add_argument("--restore-backup", action="store_true",
                      help="put the whole pre-live backup back (typed 'restore'; changes made while live are lost)")
 
+    stp = sub.add_parser("step", help="mark a workflow step for token tracking (tools/usage.py)")
+    stp.add_argument("event", choices=["start", "end"])
+    stp.add_argument("step")
+    stp.add_argument("--outcome")
+    stp.add_argument("--root", default=".")
     ga = sub.add_parser("gate", help="person-only steps as Command Palette tasks with a Yes / No dialog")
     gas = ga.add_subparsers(dest="sub", required=True)
     gp = gas.add_parser("prepare", help="the agent: write the plain summary of what the person approves")
@@ -451,6 +456,10 @@ def _main(argv=None):
         return synth_cmd(args)
     elif c == "bind":
         return bind_cmd(args)
+    elif c == "step":
+        from . import steps as STP
+        STP.mark(args.root, args.event, args.step, args.outcome)
+        print(f"step {args.step}: {args.event}")
     elif c == "gate":
         from . import gates as GT, synth as S2, dataclass_ as DC2
         try:

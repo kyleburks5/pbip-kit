@@ -495,6 +495,13 @@ report to the published model (Get data > Power BI semantic models), saves it as
 Both byConnection forms are read (the current connection string with `semanticmodelid`, and the older
 `pbiModelDatabaseName`). Verify at work: a real published model and Desktop 2.155's saved form.
 
+### `step start|end <step> [--outcome]`
+
+The agent marks each workflow step (.pbik/steps.jsonl, git-ignored); `python tools/usage.py` joins them with Claude
+Code's session transcripts (each message's token usage, counted once) and writes design/reviews/usage.md: minutes and
+input, cache write, cache read and output tokens per step, with the Phase 1 targets (first setup 30-45 minutes, reuse
+about 10). Copilot usage is filled in by hand from GitHub's usage page (verify at work).
+
 ## Synthetic to live (docs/design/synth-to-live.md)
 
 ### `project class [public|internal|restricted] [--guard dax|screenshot]`
