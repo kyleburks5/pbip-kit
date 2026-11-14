@@ -5,6 +5,11 @@ what happens next. Run every pbik command with `--report json` and answer from i
 stage with `pbik step start|end <stage>` and every reply from the person or approval window with
 `pbik step note <what> --interaction` (a window: `window: <title>`).
 
+Never wait in silence: before any step that can take longer than 30 seconds (the plan picture, opening Desktop, a
+large build), say in one line what it is; run it so its "Still ..." lines reach you (in the background, reading its
+output) and pass one on at least every minute ("Still drawing the plan picture (1 min so far)."). If a step fails, say
+the plain reason it gives; never leave a reply empty.
+
 ## 0. Where are we
 Run `pbik status`. In a project, say its line ("You're past the plan picture; next is the colours") and carry on from
 there. In the kit folder with several projects, name them by their lines and take the one the person means (or the
@@ -49,8 +54,10 @@ where it is ("in the projects folder of this kit") and offer to open it (`pbik -
 ## 3. Build (stages "theme", "build", "checks", "polish", "result")
 Run `pbik plan check` first: if the plan changed after the OK, show it again. Then, as /theme, /build, /review and /fix
 do (their files say how), with a check after each step and one fix and recheck when a check fails:
-- theme (the colours); build (`pbik build`); checks (`pbik validate`, audit_layout.py, audit_ids.py);
-- before screenshots: open the report in Desktop (`pbik desktop open`), reload (`pbik desktop reload`), screenshot
+- theme (the colours); build (`pbik build "<project name>" design/specs/layout.json`: the first build makes a clean,
+  empty report folder itself; never copy another report); checks (`pbik validate`, audit_layout.py, audit_ids.py);
+- before screenshots: open the report in Desktop (`pbik desktop open`: it waits until Desktop answers, saying "still
+  opening" meanwhile), reload (`pbik desktop reload`), screenshot
   each page (`pbik desktop screenshot`); polish: up to two rounds of review and fix against the approved picture and
   design/checks.md; after screenshots. Before a reload after your own edits: `pbik desktop close`; if it leaves
   Desktop open, ask the person to close it without saving and wait.

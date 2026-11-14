@@ -107,10 +107,16 @@ def short_list(root, layout, plan, mode=None, data_class=None, model=None):
     return "\n".join(lines) + "\n"
 
 
-def picture(layout_path, out_folder, tokens=None, theme=None, shoot=None):
-    """Draw a layout as one PNG per page; returns the PNG paths. `shoot` (tests) replaces the Edge screenshot."""
+def picture(layout_path, out_folder, tokens=None, theme=None, shoot=None, notes=None):
+    """Draw a layout as one PNG per page; returns the PNG paths. `shoot` (tests) replaces the Edge screenshot.
+
+    Every path is absolute before Edge sees it: Edge resolves a relative --screenshot path against its own folder, so
+    with `--in <project>` the picture was written elsewhere and the wait timed out (walkthrough fix 3). If the browser
+    still can't draw a page, a simple preview (the boxes, from layout.json) is written instead and the plain reason is
+    added to `notes`: never a silent failure."""
+    from . import progress as PR
     layout_path = pathlib.Path(layout_path).resolve()
-    out_folder = pathlib.Path(out_folder)
+    out_folder = pathlib.Path(out_folder).resolve()
     out_folder.mkdir(parents=True, exist_ok=True)
     html = out_folder / "plan.html"
     tokens = tokens or _find_up(layout_path, "design/tokens.json") or KIT / "design" / "tokens.json"
@@ -128,14 +134,77 @@ def picture(layout_path, out_folder, tokens=None, theme=None, shoot=None):
     for i, (pk, page) in enumerate(layout.get("pages", {}).items(), 1):
         png = out_folder / f"page-{i}.png"
         h = int(page.get("height") or 1080)
-        if shoot:
-            shoot(page_html, png, 1920, h, f"#shot&labels=off&page={i}")
-        else:
-            sys.path.insert(0, str(SCRIPTS))
-            import edge_page
-            edge_page.screenshot(page_html, png, 1920, h, hash_=f"#shot&labels=off&page={i}")
+        try:
+            with PR.still("drawing the plan picture"):
+                if shoot:
+                    shoot(page_html, png, 1920, h, f"#shot&labels=off&page={i}")
+                else:
+                    sys.path.insert(0, str(SCRIPTS))
+                    import edge_page
+                    edge_page.screenshot(page_html, png, 1920, h, hash_=f"#shot&labels=off&page={i}")
+        except (SystemExit, RuntimeError, OSError, FileNotFoundError) as e:
+            why = _plain_draw_error(e)
+            boxes_png(layout, pk, png, load(tokens, {}) or {}, h)
+            if notes is not None:
+                notes.append(f"The full plan picture couldn't be drawn ({why}), so this is a simpler preview: the "
+                             "boxes and their places, without colours or sample shapes.")
         pngs.append(png)
     return pngs
+
+
+def _plain_draw_error(e):
+    t = str(getattr(e, "code", None) or e).lower()
+    if "didn't write" in t or "within" in t or "post" in t:
+        return "the hidden browser that draws it didn't finish in time"
+    if isinstance(e, FileNotFoundError) or "no such file" in t or "cannot find" in t:
+        return "Microsoft Edge wasn't found on this computer"
+    return "the hidden browser that draws it stopped"
+
+
+def _hex(c, default):
+    c = str(c or default).lstrip("#")
+    try:
+        return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
+    except ValueError:
+        return _hex(default, "#FFFFFF")
+
+
+def boxes_png(layout, page_key, png, tokens=None, height=1080, scale=0.5):
+    """A simple preview of one page without a browser: the page background, each visual's box with a border, the
+    title band darker. Standard library only (zlib), so it always works."""
+    import struct, zlib
+    colors = (tokens or {}).get("colors", tokens or {})
+    W, H = int(1920 * scale), int(height * scale)
+    bg, card, border, text = (_hex(colors.get("background"), "#F3F5F8"), _hex(colors.get("card"), "#FFFFFF"),
+                              _hex(colors.get("border"), "#D0D7E2"), _hex(colors.get("text"), "#1D2733"))
+    px = [bytearray(bytes(bg) * W) for _ in range(H)]
+
+    def rect(x, y, w, h, col):
+        x0, y0 = max(0, int(x * scale)), max(0, int(y * scale))
+        x1, y1 = min(W, int((x + w) * scale)), min(H, int((y + h) * scale))
+        for yy in range(y0, y1):
+            row = px[yy]
+            row[x0 * 3:x1 * 3] = bytes(col) * (x1 - x0)
+
+    for v in layout.get("visuals", []):
+        if v.get("page") != page_key or not all(k in v for k in ("x", "y", "w", "h")):
+            continue
+        if v.get("type") in ("textbox",):
+            rect(v["x"], v["y"] + v["h"] * 0.3, min(v["w"], 420), v["h"] * 0.4, text)
+            continue
+        rect(v["x"], v["y"], v["w"], v["h"], border)
+        rect(v["x"] + 2, v["y"] + 2, v["w"] - 4, v["h"] - 4, card)
+        rect(v["x"] + 16, v["y"] + 14, min(220, v["w"] - 32), 10, border)        # where the title goes
+    raw = b"".join(b"\x00" + bytes(r) for r in px)
+
+    def chunk(t, d):
+        return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xFFFFFFFF)
+
+    data = (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", W, H, 8, 2, 0, 0, 0))
+            + chunk(b"IDAT", zlib.compress(raw, 6)) + chunk(b"IEND", b""))
+    pathlib.Path(png).parent.mkdir(parents=True, exist_ok=True)
+    pathlib.Path(png).write_bytes(data)
+    return png
 
 
 def _find_up(start, rel):
@@ -153,8 +222,9 @@ def _first_theme(layout_path):
     return None
 
 
-def show(root, layout=None, purposes=None, assumptions=None, shoot=None):
-    """Draw the plan picture and write the short list; returns (pngs, list text, hash)."""
+def show(root, layout=None, purposes=None, assumptions=None, shoot=None, notes=None):
+    """Draw the plan picture and write the short list; returns (pngs, list text, hash). `notes` collects plain
+    lines about the drawing (a simpler preview, and why)."""
     root = pathlib.Path(root)
     lf = layout_file(root, layout)
     lay = load(lf)
@@ -167,7 +237,7 @@ def show(root, layout=None, purposes=None, assumptions=None, shoot=None):
         plan["assumptions"] = list(dict.fromkeys(plan.get("assumptions", []) + list(assumptions)))
     save(plan_file(root), plan)
     out = root / PLAN_DIR
-    pngs = picture(lf, out, shoot=shoot)
+    pngs = picture(lf, out, shoot=shoot, notes=notes)
     text = short_list(root, lay, plan)
     (out / "plan.md").write_text(text, encoding="utf-8")
     return pngs, text, plan_hash(lay, plan)

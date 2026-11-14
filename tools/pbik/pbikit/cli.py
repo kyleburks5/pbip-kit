@@ -402,12 +402,14 @@ def _main(argv=None):
     st.add_argument("--fail-if-dirty", action="store_true", help="exit 4 when Desktop has unsaved changes")
     rl = ds.add_parser("reload", help="reload the report (not the model); refuses while unsaved")
     rl.add_argument("--force", action="store_true")
+    rl.add_argument("--report", help="the report folder (default: the project's one)")
     dcl = ds.add_parser("close", help="close Desktop without saving, only when its only unsaved changes are its own "
                                       "reload marks (else it says why and leaves it open)")
     dcl.add_argument("--report")
     dcl.add_argument("--root", default=".")
     dop = ds.add_parser("open", help="open the project's report in Power BI Desktop")
     dop.add_argument("--root", default=".")
+    dop.add_argument("--no-wait", action="store_true", help="return at once instead of waiting until Desktop answers")
     sh = ds.add_parser("screenshot")
     sh.add_argument("--page", required=True, help="page name (id), or display name with --report")
     sh.add_argument("--out", required=True)
@@ -426,7 +428,8 @@ def _main(argv=None):
               tokens_path=args.tokens, templates=args.templates, no_custom_visuals=args.no_custom_visuals,
               project=args.project, strict=args.strict)
         from . import desktop as D_
-        D_.mark_built(".", args.report)                   # the agent's own change, for desktop close (D1)
+        from .newreport import report_folder
+        D_.mark_built(".", args.report if pathlib.Path(args.report, "definition").is_dir() else report_folder(args.report))                   # the agent's own change, for desktop close (D1)
     elif c == "measure":
         from . import extensions as X
         if args.op == "add":
@@ -607,13 +610,19 @@ def _main(argv=None):
         try:
             if args.sub == "show":
                 purposes = dict(x.split("=", 1) for x in args.purpose if "=" in x)
-                pngs, text, h = PL.show(args.root, args.layout, purposes, args.assume)
+                notes = []
+                pngs, text, h = PL.show(args.root, args.layout, purposes, args.assume, notes=notes)
                 print(text.rstrip())
                 print(f"drew {len(pngs)} page picture(s)")
+                for n in notes:
+                    print(n)
                 print("next: I'll show you the picture; say OK, or what to change")
             elif args.sub == "picture":
-                pngs = PL.picture(args.layout, args.out)
+                notes = []
+                pngs = PL.picture(args.layout, args.out, notes=notes)
                 print(f"drew {len(pngs)} page picture(s)")
+                for n in notes:
+                    print(n)
             elif args.sub == "check":
                 if PL.changed_since_approval(args.root, args.layout):
                     print("The plan changed after your OK (or wasn't approved yet).")
@@ -752,7 +761,7 @@ def _main(argv=None):
         if args.sub == "state":
             D.state(args.bridge, args.fail_if_dirty)
         elif args.sub == "reload":
-            D.reload(args.bridge, args.force)
+            D.reload(args.bridge, args.force, report=args.report)
         elif args.sub == "close":
             why = D.close(args.root, args.report, args.bridge)
             if why:
@@ -769,7 +778,16 @@ def _main(argv=None):
                 return 2
             if hasattr(os, "startfile"):
                 os.startfile(str(pbip.resolve()))                 # noqa: S606
+            import time as _t
+            D.opening_file(args.root).parent.mkdir(parents=True, exist_ok=True)
+            D.opening_file(args.root).write_text(str(_t.time()), encoding="utf-8")
             print("Opening the report in Power BI Desktop.")
+            if not args.no_wait:
+                if D.wait_ready(args.bridge):
+                    print("Power BI Desktop has the report open.")
+                else:
+                    print("Power BI Desktop is still opening the report. I'll check again in a moment.")
+                    return D.NOT_READY
         else:
             D.screenshot(args.page, args.out, args.report, args.region, args.scale, args.bridge)
     return 0

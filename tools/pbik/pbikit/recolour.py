@@ -11,6 +11,11 @@ import json, pathlib, re
 TEXT = re.compile(r"(font|label|title|value|detail|text)color$|^color$", re.I)
 LINE = re.compile(r"(line|outline|border|gridline|stroke)color$|^lineColor$", re.I)
 LIT = re.compile(r"'(#[0-9A-Fa-f]{6})'")
+# objects whose plain `color` is a fill, never text (walkthrough fix 2: the container background's `color` matched the
+# text rule, so a white card background became the "text on dark" colour, near-black on a light theme)
+FILL_OBJECTS = {"background", "fill", "fillCustom", "dataPoint", "plotArea", "visualHeader", "visualTooltip",
+                "values", "rowHeaders", "columnHeaders", "total", "subTotals", "grid", "shape", "pill", "accentBar",
+                "spacing"}
 
 
 def load_palette(templates):
@@ -25,11 +30,14 @@ def category(obj, prop):
         return "shadow"
     if obj in ("border", "outline") or LINE.search(prop):
         return "line"
+    pl = prop.lower()
+    if obj in FILL_OBJECTS and (pl in ("color", "fill", "fillcolor") or "back" in pl):
+        return "fill"
     if obj in ("labels", "legend", "categoryAxis", "valueAxis", "title", "subTitle", "header", "items",
                "columnHeaders", "rowHeaders") and prop.lower().endswith("color") and "back" not in prop.lower() \
             and "grid" not in prop.lower():
         return "text"
-    if TEXT.search(prop) and "back" not in prop.lower() and "fill" not in prop.lower():
+    if (TEXT.search(prop) or "fontcolor" in pl) and "back" not in pl and "fill" not in pl:
         return "text"
     return "fill"
 

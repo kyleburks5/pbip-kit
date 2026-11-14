@@ -47,7 +47,10 @@ Creates or updates pages and visuals by visual ID. Run it as often as you like: 
 changes, and a second run prints `No changes`. It writes the ID map `design/specs/visual-map.json`, which
 `audit_ids.py` reads. Visuals, and pages pbik made, that left layout.json stay until you pass `--prune` (roadmap gap 12:
 the page folder goes, and pages.json drops it from `pageOrder`, `activePageName` and `landingPageName`). Visuals without an ID (made in
-Desktop) are never touched.
+Desktop) are never touched. A report that doesn't exist yet (`build "Orders Overview" ...` in a new project) is made
+first as a clean, empty report folder (`pbikit/newreport.py`: no pages, the base theme, linked to
+`<Name>.SemanticModel`, plus `<Name>.pbip`); nothing is copied from another report and an existing folder is never
+touched (v1.7 walkthrough fix 1).
 
 ```bat
 pbik build "Sales.Report" design\specs\layout.json
@@ -450,6 +453,11 @@ person: it leaves Desktop open, says why, and the agent asks the person to close
 
 ## Chat-only use (docs/design/phase1-usability.md)
 
+While Desktop is still opening (the bridge answers HostNotReady, or, within two minutes of `desktop open`, has no pipe
+yet), every bridge command waits up to `PBIK_DESKTOP_WAIT` seconds (300) with a plain "Still waiting for Power BI
+Desktop to finish opening" line every 30 seconds, then says "still opening" (exit 5) instead of a raw "not ready"
+error. `desktop open` waits until Desktop answers (`--no-wait` returns at once); `screenshot` makes the output folder.
+
 ### `--report json <command>`, `--in <project>`, `project init <name> [--parent] [--class] [--from-pack]`, `open`
 
 `pbik --report json <any command>` prints `{ok, command, exit, facts, needs, next}`: errors and warnings as needs, and
@@ -489,6 +497,11 @@ build option, data class and model. `plan picture <layout> --out <folder>` draws
 opens the pictures beside the chat (VS Code editor tabs through `code`, else the picture viewer). `plan approve` (the
 person said OK in the chat) records the plan's hash in status.json and plan.json and writes the Page purpose section of
 design/specs/spec.md; `plan check` exits 1 when the layout or plan changed after the OK.
+
+Edge gets absolute paths (it resolves a relative screenshot path against its own folder, so with `--in` the picture
+landed elsewhere). While a page draws, a "Still drawing the plan picture" line every 30 seconds (`pbikit/progress.py`,
+also in `.pbik/progress.txt`). If the browser still fails, a simpler preview (the boxes, drawn without a browser) is
+written instead, with the plain reason in the output: never an empty report (v1.7 walkthrough fixes 3 and 4).
 
 ### `mode [guided|quick] [--report-type]`, `score [<Report>] [--item n=pass] [--final] [--hand-minutes N]`
 

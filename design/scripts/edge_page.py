@@ -95,7 +95,7 @@ def screenshot(page, out, width=1920, height=1080, hash_="", budget_ms=8000, tim
     """A PNG of the page at width x height (what a viewer sees at the top of the page). The page is served the same
     way as dom(), so its scripts run alike; Edge waits up to budget_ms of virtual time for loads and timers."""
     srv, url, _, _ = _serve(page)
-    out = pathlib.Path(out)
+    out = pathlib.Path(out).resolve()      # Edge resolves a relative --screenshot path against its own folder
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists():
         out.unlink()

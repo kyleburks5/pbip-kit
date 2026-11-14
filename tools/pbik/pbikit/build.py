@@ -1613,6 +1613,8 @@ def register_custom_visual(rep, name):
 def build(report_path, layout_path, prune=False, reset=False, map_path=None, tokens_path=None, templates=None,
           quiet=False, no_custom_visuals=False, project=None, strict=False):
     layout_path = pathlib.Path(layout_path).resolve()
+    from . import newreport as NR               # a new project: a clean, empty report folder (walkthrough fix 1)
+    report_path, _made = NR.ensure(report_path, quiet=quiet)
     if project is None and (layout_path.parent / "project.json").exists():
         project = layout_path.parent / "project.json"        # design/specs/project.json, next to layout.json
     if not no_custom_visuals and project and pathlib.Path(project).exists()             and load(pathlib.Path(project)).get("customVisuals") is False:

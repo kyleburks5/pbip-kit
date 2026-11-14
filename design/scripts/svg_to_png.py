@@ -60,7 +60,7 @@ def render(svg, out, scale=4, timeout=None):
     pw, ph = round(w * scale), round(h * scale)
     big = re.sub(r'(<svg[^>]*\s)width="[\d.]+"', rf'\g<1>width="{pw}"', svg, count=1)
     big = re.sub(r'(<svg[^>]*\s)height="[\d.]+"', rf'\g<1>height="{ph}"', big, count=1)
-    out = pathlib.Path(out)
+    out = pathlib.Path(out).resolve()     # Edge resolves a relative --screenshot path against its own folder
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists():
         out.unlink()                      # so the wait sees this render, not an earlier file

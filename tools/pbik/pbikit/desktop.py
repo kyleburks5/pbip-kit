@@ -2,7 +2,8 @@
 
 If PowerShell, the script or the bridge pipe isn't there, pbik says so and exits with code 3 (no traceback), so a
 caller can tell "couldn't check" from "clean". reload refuses while Desktop reports unsaved changes.
-Exit codes: 0 ok, 3 bridge not available, 4 unsaved changes (state --fail-if-dirty, reload).
+Exit codes: 0 ok, 3 bridge not available, 4 unsaved changes (state --fail-if-dirty, reload), 5 Desktop still
+opening after the wait (say "still opening", never "not ready").
 """
 import json, os, pathlib, shutil, subprocess, sys
 
@@ -29,18 +30,64 @@ def unavailable(msg, check_version=False):
     sys.exit(UNAVAILABLE)
 
 
-def run(action, *args, bridge=None):
+NOT_READY = 5
+READY_WAIT = float(os.environ.get("PBIK_DESKTOP_WAIT", "300"))     # seconds to wait for Desktop to finish opening
+
+
+def opening_file(root="."):
+    return pathlib.Path(root) / ".pbik" / "desktop-opening.txt"
+
+
+def just_opened(root=".", within=None):
+    """True when `pbik desktop open` started Desktop in the last few minutes (its bridge pipe may not exist yet)."""
+    import time
+    f = opening_file(root)
+    try:
+        return time.time() - float(f.read_text(encoding="utf-8").strip()) < (within or READY_WAIT)
+    except (OSError, ValueError):
+        return False
+
+
+def _call(ps, script, action, args):
+    r = subprocess.run([ps, "-NoProfile", "-NonInteractive", "-File", str(script), action, *args],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return r.returncode, r.stdout or "", (r.stdout or "") + (r.stderr or "")
+
+
+def _not_ready(low, opening):
+    """Desktop is up but still opening: the bridge says HostNotReady, or (right after `desktop open`) no pipe yet."""
+    if "hostnotready" in low or "not ready to accept" in low:
+        return True
+    no_pipe = "no desktop bridge pipe" in low or "pipe" in low and ("timeout" in low or "not found" in low)
+    return bool(opening and no_pipe and desktop_open())
+
+
+def run(action, *args, bridge=None, wait=None, sleep=None):
+    """Run one bridge action. While Desktop is still opening, wait (up to PBIK_DESKTOP_WAIT seconds) with a plain
+    "Still waiting for Power BI Desktop to finish opening" line every 30 seconds, instead of failing "not ready"
+    (walkthrough fix 4)."""
+    import time
+    from . import progress as PR
     script = pathlib.Path(bridge) if bridge else find_bridge()
     if not script or not script.exists():
         unavailable("no .claude/scripts/pbi-bridge.ps1 found above the current folder (pass --bridge)")
     ps = shutil.which("powershell") or shutil.which("powershell.exe") or shutil.which("pwsh")
     if not ps:
         unavailable("PowerShell is not on PATH")
-    r = subprocess.run([ps, "-NoProfile", "-NonInteractive", "-File", str(script), action, *args],
-                       capture_output=True, text=True, encoding="utf-8", errors="replace")
-    out = (r.stdout or "") + (r.stderr or "")
-    if r.returncode != 0:
-        low = out.lower()
+    wait = READY_WAIT if wait is None else wait
+    sleep = sleep or time.sleep
+    end = time.monotonic() + wait
+    with PR.still("waiting for Power BI Desktop to finish opening"):
+        while True:
+            code, stdout, out = _call(ps, script, action, args)
+            low = out.lower()
+            if code == 0 or not _not_ready(low, just_opened(within=120)) or time.monotonic() >= end:
+                break
+            sleep(3)
+    if code != 0:
+        if _not_ready(low, just_opened(within=120)):
+            print("Power BI Desktop is still opening the report. I'll try again in a moment.")
+            sys.exit(NOT_READY)
         if "no desktop bridge pipe" in low or "pipe" in low and ("timeout" in low or "not found" in low):
             unavailable("Power BI Desktop is not open, or its Desktop Bridge preview is off", check_version=True)
         if "running scripts is disabled" in low or "execution polic" in low:
@@ -48,8 +95,19 @@ def run(action, *args, bridge=None):
         if "multiple desktop instances" in low:
             unavailable("several Desktop windows are open; close all but one (or pass --process-id)")
         print(out.strip())
-        sys.exit(r.returncode)
-    return r.stdout
+        sys.exit(code)
+    return stdout
+
+
+def wait_ready(bridge=None, wait=None):
+    """After `desktop open`: wait until Desktop answers (still-opening lines meanwhile). Returns True when ready."""
+    try:
+        run("state", bridge=bridge, wait=wait)
+        return True
+    except SystemExit as e:
+        if e.code in (NOT_READY, UNAVAILABLE):
+            return False
+        raise
 
 
 def dirty_flag(obj):
@@ -133,6 +191,7 @@ def screenshot(page, out, report=None, region=None, scale=1, bridge=None):
             print(f"pbik: no page {page!r} in {report}")
             sys.exit(2)
         page_id = hit[0]
+    pathlib.Path(out).resolve().parent.mkdir(parents=True, exist_ok=True)     # e.g. a new project's _snapshots
     args = ["-PageId", page_id, "-Out", str(pathlib.Path(out).resolve()), "-Scale", str(scale)]
     if region:
         args += ["-Region", region]

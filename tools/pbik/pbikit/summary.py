@@ -52,7 +52,15 @@ def run_json(command, fn):
             code = fn() or 0
         except SystemExit as e:
             code = e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
+            if isinstance(e.code, str) and e.code.strip():       # SystemExit("message"): its text was lost before
+                err.write("\npbik: " + e.code.strip() + "\n")
+        except Exception as e:                                    # noqa: BLE001  never a traceback, never empty
+            code = 1
+            err.write(f"\npbik: {type(e).__name__}: {e}\n")
     lines = (out.getvalue() + "\n" + err.getvalue()).splitlines()
     facts, needs, nxt = classify(lines)
-    doc = {"ok": code == 0, "command": command, "exit": code, "facts": facts, "needs": needs, "next": nxt}
+    if code and not facts and not any(isinstance(n, dict) and n.get("kind") == "error" for n in needs):
+        needs.append({"kind": "error", "text": f"it stopped without saying why (exit code {code}); I'll look into it "
+                                               "before going on"})
+    doc ={"ok": code == 0, "command": command, "exit": code, "facts": facts, "needs": needs, "next": nxt}
     return code, json.dumps(doc, ensure_ascii=False, indent=1)
