@@ -163,6 +163,13 @@ Shown on every build's final screen and in the wrap-up. Ten pass/fail items, one
 | 9 | Accessibility | A-01 to A-05 without warnings, or excepted by ID |
 | 10 | No validate errors | `pbik validate` |
 
+**v1.7 walkthrough revision (2026-11-14):** five more checks, the polish a person notices, so the score is honest:
+11 KPI cards read well (they fill their space; the change line readable, ▲ / ▼, green / red by direction), 12 numbers
+read well (thousands separators, number headers over their numbers, "vs" columns coloured), 13 charts read well
+(months in month order, straight lines), 14 text sized for the 1920 canvas, 15 a finished look (a header band with
+the filter in it). Fifteen checks, shown out of 10: the walkthrough's page scores 6/10 (9 of 15) where the ten gave 8;
+rebuilt with the polish defaults (`pbik layout polish`, the theme) it scores 9/10 on the files.
+
 Plus **hand-polish minutes**: at wrap-up, one optional question, "How many minutes did you spend tidying it in
 Desktop?" (0 if none). Target: 7/10 before showing colleagues; below that, the final screen says so and lists the
 failing items. `pbik score` computes items 2-10 from the files and queries; the agent records item 1.

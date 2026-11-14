@@ -33,3 +33,18 @@ Seeded from Reps 2-7. Add a line whenever a new defect is found. Name findings b
 - The tallest column or its label touches the top of the plot (no Y-axis max measure, Rep 6)
 - Every visual ID in layout.json is in the report, the wireframe and the spec, once (`audit_ids.py`)
 - Every SVG measure is well-formed in every audit state, and the numbers it draws match the measure (`audit_svg.py`, `audit_numbers.py`)
+
+## The polish a person notices (polish score checks 11-15, the Phase 1 walkthrough, 2026-11-14)
+
+`pbik score` checks these from the files; `pbik layout polish` puts the fixes in the plan before the OK.
+
+- KPI cards: the number left-aligned in a wide card leaves its right side empty; the change line is caption-sized,
+  without ▲ / ▼, or not green / red by direction (check 11)
+- Months on an axis sort A to Z (Apr, Aug, Dec) instead of by month number; line charts smoothed so the swings look
+  bigger than they are (check 13)
+- Large amounts with decimals ("599956.9"), numbers without thousands separators, table headers left of
+  right-aligned numbers, a "vs last year" column not coloured by direction (check 12)
+- Titles, legends and axis labels too small for a 1920 canvas: titles under 14pt, legends and axis labels under 11pt
+  (check 14)
+- No header band behind the title, or the filter in a box of its own instead of part of the band (check 15)
+

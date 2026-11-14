@@ -254,8 +254,15 @@ CONFIRMED_WRITES = {
 }
 
 
+# Settings the kit's own lessons require that no Desktop-saved file in the catalog holds yet: a note, not a warning,
+# so two kit rules never contradict each other (the lesson is the decision; a Desktop save will confirm it).
+KIT_REQUIRED = {
+    "container general.keepLayerOrder": "lesson C-11 (a background shape keeps its layer order), batch 3 item 12",
+}
+
+
 def confirmed(why):
-    return any(why.startswith(k + " never seen") for k in CONFIRMED_WRITES)
+    return any(why.startswith(k + " never seen") for k in {**CONFIRMED_WRITES, **KIT_REQUIRED})
 
 
 def check_entry(cat, visual_type, where, obj, prop, val, sel):

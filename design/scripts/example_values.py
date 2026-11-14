@@ -56,6 +56,7 @@ def fmt_for(name):
     return "#,0"
 
 
+CMP_WORDS = re.compile(r"\bvs\b|change|growth|variance|\bdiff|delta|\byoy\b", re.I)
 LY = re.compile(r"\b(LY|PY|last year|prior|previous)\b", re.I)
 SMALL = re.compile(r"return|refund|cost|discount|claim", re.I)
 
@@ -138,10 +139,18 @@ def for_visual(v, measures=None):
            "example": True}
     rl = v.get("referenceLabels")
     if isinstance(rl, dict) and rl.get("labels"):
-        out["refs"] = []
+        out["refs"], out["refDetails"] = [], []
         for lab in rl["labels"]:
             name = re.sub(r"^.*\[|\]$", "", str(lab.get("value", "")))
             out["refs"].append(format_value(value_for(name), fmt_for(name)))
+            det = re.sub(r"^.*\[|\]$", "", str(lab.get("detail", "") or ""))
+            if det:                               # the change beside it: ▲ / ▼, green or red when coloured
+                x = value_for(det)
+                text = ("▲ " if x >= 0 else "▼ ") + format_value(abs(x), "0.0%") if PCT.search(det) or \
+                    CMP_WORDS.search(det) else format_value(x, fmt_for(det))
+                out["refDetails"].append({"text": text, "good": x >= 0 if lab.get("detailColor") else None})
+            else:
+                out["refDetails"].append(None)
     return out
 
 

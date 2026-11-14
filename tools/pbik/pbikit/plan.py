@@ -374,11 +374,54 @@ def approve(root, layout=None):
     plan["approved"] = h
     plan["approvedStructure"] = structure(lay)
     save(plan_file(root), plan)
+    keep_approved(root)
     write_purpose(root, lay, plan)
     ST.update(root, done="plan", planHash=h)
     for s in ("page purpose",):
         ST.update(root, done=s)
     return h
+
+
+def keep_approved(root):
+    """Keep the approved preview (two renderers, v1.7): design/plan/approved.html and approved-page-<n>.png, which the
+    Desktop screenshot after the build is compared with (`pbik plan compare`); a later redraw doesn't touch them."""
+    import shutil
+    d = pathlib.Path(root) / PLAN_DIR
+    if (d / "plan.html").exists():
+        shutil.copy2(d / "plan.html", d / "approved.html")
+    for png in sorted(d.glob("page-*.png")):
+        shutil.copy2(png, d / f"approved-{png.name}")
+
+
+def compare(root=".", desktop=True, assume_saved=False, run=None):
+    """The real Desktop screenshot of the built report against the approved preview (fidelity_check.py, numbers not
+    compared: the preview's are examples). Returns (exit code, plain lines)."""
+    from . import progress as PR
+    root = pathlib.Path(root).resolve()
+    approved = root / PLAN_DIR / "approved.html"
+    if not approved.exists():
+        raise PlanError("there is no approved plan picture to compare with yet")
+    args = [sys.executable, str(SCRIPTS / "fidelity_check.py"), "--project", str(root), "--wireframe", str(approved),
+            "--out", str(root / "design" / "reviews" / "fidelity"), "--example"]
+    if not desktop:
+        args.append("--no-desktop")
+    if assume_saved:
+        args.append("--assume-saved")
+    with PR.still("comparing the built page with the approved picture"):
+        r = (run or subprocess.run)(args, capture_output=True, text=True, encoding="utf-8")
+    out = (r.stdout or "").splitlines()
+    diffs = [ln.strip() for ln in out if ln.startswith("  P")]
+    lines = []
+    if r.returncode == 0:
+        lines.append("The built page matches the approved picture: every visual where it was approved, of the same "
+                     "kind, with the same titles (the numbers are your model's, not the picture's examples).")
+    elif r.returncode == 1:
+        lines.append(f"{len(diffs)} difference(s) from the approved picture; side by side in the fidelity review:")
+        lines += [f"- {d}" for d in diffs[:12]]
+    else:
+        lines.append("Not compared: " + (out[0] if out else "Power BI Desktop couldn't be checked") +
+                     " (the files were compared instead when Desktop isn't there)")
+    return r.returncode, lines
 
 
 def changed_since_approval(root, layout=None):

@@ -262,7 +262,8 @@ def check_catalog(fd, rep, pages, layout, catalog_path):
         ids = sorted(set(vids))
         line = f"{why} ({', '.join(ids[:6])}{' ...' if len(ids) > 6 else ''})"
         if CAT.confirmed(why):              # pbik writes it, and Desktop has shown it as intended
-            fd.note("catalog", line + ": written by pbik and confirmed in Desktop")
+            fd.note("catalog", line + (": required by a kit lesson (C-11)" if "keepLayerOrder" in line else
+                                       ": written by pbik and confirmed in Desktop"))
         else:
             fd.warn("catalog", line)
 

@@ -630,7 +630,8 @@ class ScoreTests(Tmp):
         res = SC.compute(self.report, self.layout(), {1: True, 3: True, 7: True})
         for n in (2, 4, 5, 8, 10):
             self.assertTrue(res[n][0], (n, res[n]))
-        self.assertEqual(SC.total(res), 10, res)
+        self.assertEqual(sum(1 for n in range(1, 11) if res[n][0]), 10, res)      # the ten build checks
+        self.assertEqual(len(res), 15, "and the five polish checks (11-15) a person notices")
         lines = SC.say(SC.compute(self.report, self.layout()))
         self.assertIn("Not checked: matches the approved picture (my own judgment); KPI cards filled; interactions "
                       "working.", lines)

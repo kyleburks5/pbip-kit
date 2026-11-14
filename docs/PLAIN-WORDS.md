@@ -50,8 +50,10 @@ build, the checks, the polish, the result, switching to the live model, the wrap
 
 ## Polish score
 
-"Polish 8/10 (target 7 before showing colleagues). Not yet: alignment, accessibility." Item 1 is always called
-"matches the approved picture (my own judgment)".
+"Polish 6/10 (9 of 15 checks; target 7 before showing colleagues). Not yet: KPI cards read well, text sized for the
+canvas." Check 1 is always called "matches the approved picture (my own judgment)". After the build, the real Desktop
+screenshot is put beside the approved picture: "The built page matches the approved picture" or "2 differences from
+the approved picture: ...". The picture's numbers are examples; never compare them with the report's.
 
 ## Flags in a model (gate summaries use the same words)
 

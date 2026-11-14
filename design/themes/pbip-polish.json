@@ -26,7 +26,7 @@
     },
     "title": {
       "fontFace": "Segoe UI Semibold",
-      "fontSize": 13,
+      "fontSize": 15,
       "color": "#1D2733"
     },
     "header": {
@@ -85,7 +85,7 @@
           {
             "show": false,
             "fontFamily": "Segoe UI Semibold",
-            "fontSize": 13,
+            "fontSize": 15,
             "fontColor": {
               "solid": {
                 "color": "#1D2733"
@@ -97,6 +97,21 @@
         "visualHeader": [
           {
             "show": false
+          }
+        ],
+        "categoryAxis": [
+          {
+            "fontSize": 12
+          }
+        ],
+        "valueAxis": [
+          {
+            "fontSize": 12
+          }
+        ],
+        "legend": [
+          {
+            "fontSize": 12
           }
         ]
       }
@@ -370,7 +385,7 @@
             "$id": "default",
             "show": true,
             "titleFontFamily": "Segoe UI",
-            "titleFontSize": 10,
+            "titleFontSize": 11,
             "titleFontColor": {
               "solid": {
                 "color": "#1D2733"
@@ -485,7 +500,7 @@
         "categoryAxis": [
           {
             "fontFamily": "Segoe UI",
-            "fontSize": 10,
+            "fontSize": 12,
             "labelColor": {
               "solid": {
                 "color": "#5A6577"
@@ -503,7 +518,7 @@
         "valueAxis": [
           {
             "fontFamily": "Segoe UI",
-            "fontSize": 10,
+            "fontSize": 12,
             "labelColor": {
               "solid": {
                 "color": "#5A6577"
@@ -520,7 +535,21 @@
         ],
         "legend": [
           {
-            "show": false
+            "show": false,
+            "position": "TopRight",
+            "fontFamily": "Segoe UI",
+            "fontSize": 12,
+            "labelColor": {
+              "solid": {
+                "color": "#5A6577"
+              }
+            },
+            "showTitle": false
+          }
+        ],
+        "lineStyles": [
+          {
+            "lineChartType": "linear"
           }
         ]
       }
@@ -548,7 +577,7 @@
         "valueAxis": [
           {
             "fontFamily": "Segoe UI",
-            "fontSize": 10,
+            "fontSize": 12,
             "labelColor": {
               "solid": {
                 "color": "#5A6577"
@@ -566,21 +595,29 @@
         ],
         "legend": [
           {
-            "show": false
+            "show": false,
+            "position": "TopRight",
+            "fontFamily": "Segoe UI",
+            "fontSize": 12,
+            "labelColor": {
+              "solid": {
+                "color": "#5A6577"
+              }
+            },
+            "showTitle": false
           }
         ],
         "labels": [
           {
             "show": true,
             "fontFamily": "Segoe UI",
-            "fontSize": 10,
+            "fontSize": 12,
             "color": {
               "solid": {
                 "color": "#5A6577"
               }
             },
-            "labelDisplayUnits": 1000000,
-            "labelPrecision": 1
+            "labelDisplayUnits": 0
           }
         ]
       }

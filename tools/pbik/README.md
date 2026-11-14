@@ -516,6 +516,18 @@ missing, then one next line. It lists names only (the Model folder is read by `m
 opens File Explorer; `start inputs` and `model intake --open` only make the folders. Projects made before the
 one-folder setup keep design/reference/model and design/reference/inputs.
 
+`layout polish` (v1.7 walkthrough fix 15, pbikit/polish.py) writes the kit's polish defaults into layout.json before
+the plan picture, so they are part of what the person approves: each KPI's comparison becomes last year's value with
+the change beside it as the detail, ▲ / ▼ (the planned measure's format) and green / red (a planned colour measure on
+the detail colour: the form Rep 2 confirmed in Desktop), at body size, the number centred; a table's "vs" column gets
+a colour measure on its font colour; a header band (a decorative shape, keepLayerOrder) goes behind the title and the
+filter, and the filter loses its own box. The measures it needs go into generate.json `plannedMeasures`. It never
+removes anything, says what it couldn't do and why, and a second run changes nothing. Line charts drawn straight,
+larger titles, axis labels and legends, and bar labels in auto units come from the theme (gen_theme.py, kit tokens).
+`plan compare` (two renderers): after the build, fidelity_check.py puts the Desktop screenshot beside the approved
+preview (design/plan/approved.html, kept by `plan approve`) and lists positions, kinds and titles that differ; the
+preview's example numbers are never compared. `score` has 15 checks, shown out of 10 (checks 11-15: design/checks.md).
+
 ### `plan show | picture | open | check | approve`
 
 The plan as a picture: `plan show [--purpose P1=...] [--assume ...]` draws each page of layout.json (the high-fidelity

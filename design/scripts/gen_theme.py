@@ -48,9 +48,10 @@ def css_shadow(s):
     }
 
 
+# a 1920 canvas reads at a distance: axis labels and legends at the tokens' axis / legend sizes (walkthrough fix 15)
 axis = {
     "fontFamily": FONT,
-    "fontSize": P["caption"],
+    "fontSize": P.get("axis", P["caption"]),
     "labelColor": solid(C["textMuted"]),
     "showAxisTitle": False,
     "gridlineColor": solid(C["border"]),
@@ -59,7 +60,7 @@ legend = {
     "show": True,
     "position": "TopRight",
     "fontFamily": FONT,
-    "fontSize": P["caption"],
+    "fontSize": P.get("legend", P["caption"]),
     "labelColor": solid(C["textMuted"]),
     "showTitle": False,
 }
@@ -102,6 +103,11 @@ theme = {
             # batch 4 item 2: no visual header (the hover icons) on any visual type; validate flags a visual
             # whose own formatting turns it back on
             "visualHeader": [{"show": False}],
+            # every chart type's axis labels and legend at the canvas sizes (walkthrough fix 15), not only the
+            # line and bar charts styled below
+            "categoryAxis": [{"fontSize": P.get("axis", P["caption"])}],
+            "valueAxis": [{"fontSize": P.get("axis", P["caption"])}],
+            "legend": [{"fontSize": P.get("legend", P["caption"])}],
         }},
         # Region card backgrounds: white, 1px border, rounded corners, shadow token. The sidebar shape overrides
         # fill/outline/shadow per visual.
@@ -161,7 +167,7 @@ theme = {
             # Trend line at body size (Rep 1 review: caption size was too small to read).
             # Rep 2: "PY: 597.4M" in body text, then the pill (detail) beside it.
             "referenceLabelTitle": [{"$id": "default", "show": True, "titleFontFamily": FONT,
-                                     "titleFontSize": P["caption"], "titleFontColor": solid(C["text"])}],
+                                     "titleFontSize": P["body"], "titleFontColor": solid(C["text"])}],
             "referenceLabelValue": [{"$id": "default", "show": True, "valueFontFamily": FONT, "valueFontSize": P["caption"],
                                      "valueFontColor": solid(C["text"]), "valueDisplayUnits": 1}],
             # No detailFontColor here: the per-card good/bad/neutral color must not be shadowed by a theme color.
@@ -186,14 +192,17 @@ theme = {
             "categoryAxis": [{**axis, "gridlineShow": False}],
             # Rep 2: Auto display units (52M / 12.5M / 60K), no gridlines or legend.
             "valueAxis": [{**axis, "gridlineShow": False}],
-            "legend": [{"show": False}],
+            "legend": [{**legend, "show": False}],
+            # straight lines: the base theme draws them smooth, which overstates the swings (walkthrough fix 15)
+            "lineStyles": [{"lineChartType": "linear"}],
         }},
         "clusteredBarChart": {"*": {
             "categoryAxis": [{**axis, "fontSize": P["body"], "labelColor": solid(C["text"]), "gridlineShow": False}],
             "valueAxis": [{**axis, "show": False, "gridlineShow": False}],
-            "legend": [{"show": False}],
-            "labels": [{"show": True, "fontFamily": FONT, "fontSize": P["caption"], "color": solid(C["textMuted"]),
-                        "labelDisplayUnits": 1000000, "labelPrecision": 1}],
+            "legend": [{**legend, "show": False}],
+            # auto display units: 600K, 1.6M, no forced decimals on large amounts (walkthrough fix 15)
+            "labels": [{"show": True, "fontFamily": FONT, "fontSize": P.get("axis", P["caption"]),
+                        "color": solid(C["textMuted"]), "labelDisplayUnits": 0}],
         }},
     },
 }

@@ -732,5 +732,127 @@ class PlainWordsTests(unittest.TestCase):
         self.assertNotIn("`pbik", json.dumps([doc["facts"], doc["needs"], doc["next"]]))
 
 
+# ---------------------------------------------------------------- 15: output polish and the stricter score
+PLANNED = {"Orders Amount vs LY %": {"table": "_Measures", "expression":
+           "VAR cur = [Fact Orders Amount] VAR prev = CALCULATE ( [Fact Orders Amount], SAMEPERIODLASTYEAR ( "
+           "Calendar[Date] ) ) RETURN DIVIDE ( cur - prev, prev )", "formatString": "+0.0%;-0.0%;0.0%"}}
+
+
+def polish_layout():
+    lay = json.loads(json.dumps(WT))
+    lay["visuals"].insert(0, {"id": "P1-V00", "name": "title", "page": "P1", "type": "textbox", "x": 32, "y": 32,
+                              "w": 916, "h": 48})
+    for v in lay["visuals"]:
+        if v["id"] == "P1-V01":
+            v["y"], v["h"] = 24, 76
+    return lay
+
+
+class PolishTests(unittest.TestCase):
+    def test_kpi_change_line_tables_and_band(self):
+        from pbikit import polish as PO
+        lay, planned = polish_layout(), json.loads(json.dumps(PLANNED))
+        said, why_not = PO.polish(lay, {"colors": {"good": "#197982", "bad": "#B94642"}}, planned)
+        card = next(v for v in lay["visuals"] if v["id"] == "P1-V02")
+        lab = card["referenceLabels"]["labels"][0]
+        self.assertEqual((lab["title"], lab["value"], lab["detail"], lab["detailColor"]),
+                         ("last year", "[Fact Orders Amount LY]", "[Orders Amount vs LY %]",
+                          "[Orders Amount vs LY % colour]"))
+        self.assertEqual(card["props"]["value.horizontalAlignment@default"], "center")
+        self.assertEqual(card["referenceLabels"]["detailSize"], "body")
+        self.assertIn("SAMEPERIODLASTYEAR ( Calendar[Date] )", planned["Fact Orders Amount LY"]["expression"])
+        self.assertIn('"#197982"', planned["Orders Amount vs LY % colour"]["expression"])
+        self.assertTrue(planned["Orders Amount vs LY %"]["formatString"].startswith('"▲ "'))
+        table = next(v for v in lay["visuals"] if v["id"] == "P1-V03")
+        self.assertEqual([c["target"] for c in table["cf"]], ["_Measures[Orders Amount vs LY %]"],
+                         "only the comparison column, never a share")
+        band = next(v for v in lay["visuals"] if v["name"] == "header-band")
+        self.assertEqual((band["x"], band["y"], band["w"], band["h"]), (0, 0, 1920, 112))
+        self.assertTrue(band["decorative"] and band["container"]["keepLayerOrder"])
+        slicer = next(v for v in lay["visuals"] if v["id"] == "P1-V01")
+        self.assertIs(slicer["container"]["background"], False)
+        again, _ = PO.polish(lay, {}, planned)
+        self.assertEqual(again, [], "a second run changes nothing")
+
+    def test_a_comparison_it_cant_read_is_said_plainly(self):
+        from pbikit import polish as PO
+        lay = polish_layout()
+        _, why_not = PO.polish(lay, {}, {})
+        self.assertTrue(any("isn't coloured" in w for w in why_not))
+
+    def test_score_out_of_ten_from_fifteen_checks(self):
+        from pbikit import score as SC
+        res = {n: (n not in (7, 11, 12, 13, 14, 15), "") for n in range(1, 16)}
+        res[7] = (None, "not checked")
+        self.assertEqual(SC.total(res), 6)
+        self.assertIn("Polish 6/10 (9 of 15 checks", SC.say(res)[0])
+
+    def test_theme_lines_straight_and_text_sized_for_the_canvas(self):
+        theme = json.loads((KIT / "design" / "themes" / "pbip-polish.json").read_text(encoding="utf-8"))
+        vs = theme["visualStyles"]
+        self.assertEqual(vs["lineChart"]["*"]["lineStyles"][0]["lineChartType"], "linear")
+        self.assertGreaterEqual(vs["lineChart"]["*"]["categoryAxis"][0]["fontSize"], 11)
+        self.assertGreaterEqual(vs["lineChart"]["*"]["legend"][0]["fontSize"], 11)
+        self.assertGreaterEqual(vs["*"]["*"]["title"][0]["fontSize"], 14)
+        self.assertEqual(vs["clusteredBarChart"]["*"]["labels"][0]["labelDisplayUnits"], 0)
+        self.assertNotIn("labelPrecision", vs["clusteredBarChart"]["*"]["labels"][0])
+
+
+class PolishScoreTests(Tmp):
+    def test_the_checks_see_what_a_person_sees(self):
+        from pbikit import score as SC
+        p = project(self.tmp)
+        self.assertEqual(pbik("build", "Demo", "design/specs/layout.json", cwd=p).returncode, 0)
+        lay = json.loads((p / "design" / "specs" / "layout.json").read_text(encoding="utf-8"))
+        res = SC.polish_checks(p / "Demo.Report", lay)
+        self.assertFalse(res[13][0])
+        self.assertIn("lines are smoothed", res[13][1], "the base theme draws lines smooth")
+        self.assertFalse(res[15][0])
+        (p / "design" / "themes").mkdir(parents=True)
+        shutil.copy(KIT / "design" / "themes" / "pbip-polish.json", p / "design" / "themes" / "pbip-polish.json")
+        res = SC.polish_checks(p / "Demo.Report", lay)
+        self.assertNotIn("smoothed", res[13][1])
+        self.assertTrue(res[14][0], res[14][1])
+
+
+class TwoRendererTests(Tmp):
+    def test_the_preview_draws_the_coloured_change(self):
+        import example_values as EV
+        from pbikit import polish as PO
+        lay, planned = polish_layout(), json.loads(json.dumps(PLANNED))
+        PO.polish(lay, {}, planned)
+        d = EV.data_for(lay)["visuals"]["P1-V02"]
+        self.assertTrue(d["refDetails"][0]["text"][0] in "▲▼")
+        self.assertIsNotNone(d["refDetails"][0]["good"])
+
+    def test_approved_preview_is_kept_and_compared_without_its_numbers(self):
+        sys.path.insert(0, str(KIT / "design" / "scripts"))
+        import fidelity_check as FC
+        wf = [{"id": "P1-V02", "page": "P1", "type": "cardVisual", "x": 0, "y": 0, "w": 100, "h": 50,
+               "hidden": False, "main": "2.27M", "measure": False}]
+        rp = [{"id": "P1-V02", "type": "cardVisual", "x": 0, "y": 0, "w": 100, "h": 50, "hidden": False,
+               "valueShow": True}]
+        diffs, notes = FC.compare(wf, rp, model={"P1-V02": {"values": ["1.56M"]}}, example=True)
+        self.assertEqual(diffs, [])
+        self.assertIn("example values", notes[0][1])
+        self.assertEqual(FC.compare(wf, rp, model={"P1-V02": {"values": ["1.56M"]}})[0][0][1], "main text")
+        lf = self.tmp / "design" / "specs" / "layout.json"
+        lf.parent.mkdir(parents=True)
+        lf.write_text(json.dumps(WT), encoding="utf-8")
+        PL.show(self.tmp, purposes={"P1": "x"}, shoot=lambda h, png, *a: png.write_bytes(b"x"), measure=lambda h: [])
+        PL.approve(self.tmp)
+        self.assertTrue((self.tmp / "design" / "plan" / "approved.html").exists())
+        self.assertTrue((self.tmp / "design" / "plan" / "approved-page-1.png").exists())
+        ran = []
+
+        class R:
+            returncode, stdout = 1, "P1 Orders overview: 1 difference(s)\n  P1-V02 position: wireframe 'x 0' / Desktop 'x 8'\n"
+        code, lines = PL.compare(self.tmp, run=lambda a, **k: ran.append(a) or R)
+        self.assertIn("approved.html", " ".join(ran[0]))
+        self.assertIn("--example", ran[0])
+        self.assertEqual(code, 1)
+        self.assertIn("1 difference(s) from the approved picture", lines[0])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

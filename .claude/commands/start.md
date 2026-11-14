@@ -50,7 +50,10 @@ and stop: never build in the master kit. No projects subfolder, no second folder
    choosing defaults for everything only the person doesn't need to decide: which total measure, colour rules,
    default filters. Each default goes in the list as an assumption (`--assume`). Every headline number needs a
    comparison. A fallback (CLAUDE.md "Native first") goes in the list with the native option tried.
-2. `pbik plan show --purpose "P1=<what the page helps decide>" --assume "..."` (pass every assumption each time: the
+2. `pbik layout polish`: the kit's polish defaults (each KPI's change beside last year's value, ▲ / ▼ in green or
+   red; "vs" columns coloured; a header band with the filter in it) go into the layout, so the picture shows them;
+   say any "couldn't" note as an assumption. Then
+   `pbik plan show --purpose "P1=<what the page helps decide>" --assume "..."` (pass every assumption each time: the
    list replaces the last one). The picture is the fast preview: the theme, tokens and the templates' look with
    example values (never data). Show the pictures: in the Claude desktop app in the chat; in VS Code (Copilot or
    Claude Code) `pbik plan open` opens them beside the chat. Give the short list from design/plan/plan.md in plain
@@ -80,7 +83,10 @@ do (their files say how), with a check after each step and one fix and recheck w
 - The kit does these itself, without asking: months sort by month number (the made-up model gets the sort-by column;
   a live model: say why not and give the Desktop clicks), number columns' headers right-aligned, thousands
   separators in the made-up model's number formats.
-- Score: `pbik score --item 1=<your own judgment of the screenshots against the approved picture> --item 3=<every
+- Two renderers: the plan picture is the fast preview; after the build, `pbik plan compare` puts the real Desktop
+  screenshot beside the approved preview and lists what differs (positions, kinds, titles; never the example
+  numbers). Fix what differs, or say why it must.
+- Score: `pbik score --item 1=<pass when plan compare finds nothing left to fix, with your own look at the screenshots> --item 3=<every
   card's measure returns a value: DAX query> --item 7=<slicers filter, buttons go where they should> --final`.
 Result: the before and after screenshots (shown or opened as the plan pictures), the polish score, and what you
 couldn't fix with its Desktop click steps (design/known-gaps.md). Then offer "Switch to live?": with a person's yes,

@@ -334,6 +334,10 @@ def _main(argv=None):
     plo = pls.add_parser("open", help="open the plan pictures (or any pictures) beside the chat")
     plo.add_argument("files", nargs="*", help="pictures (default: the plan's page pictures)")
     plo.add_argument("--root", default=".")
+    plm = pls.add_parser("compare", help="after the build: the Desktop screenshot against the approved preview")
+    plm.add_argument("--root", default=".")
+    plm.add_argument("--no-desktop", action="store_true", help="the report files only (no Desktop open)")
+    plm.add_argument("--assume-saved", action="store_true")
     pla = pls.add_parser("approve", help="the person said OK in the chat: record the plan")
     pla.add_argument("--root", default=".")
     pla.add_argument("--layout")
@@ -341,6 +345,10 @@ def _main(argv=None):
     lfr = la.add_parser("from-report", help="an existing report (.Report folder) as a draft layout.json")
     lfr.add_argument("report")
     lfr.add_argument("--out", default="design/specs/layout.reference.json")
+    lpo = la.add_parser("polish", help="the kit's polish defaults into layout.json before the plan picture (KPI change "
+                                       "lines, coloured comparisons, header band)")
+    lpo.add_argument("--root", default=".")
+    lpo.add_argument("--layout")
 
     sc_ = sub.add_parser("score", help="the polish score (10 items; target 7 before showing colleagues)")
     sc_.add_argument("report", nargs="?")
@@ -651,6 +659,11 @@ def _main(argv=None):
                 print(f"drew {len(pngs)} page picture(s)")
                 for n in notes:
                     print(n)
+            elif args.sub == "compare":
+                code, lines = PL.compare(args.root, not args.no_desktop, args.assume_saved)
+                for ln in lines:
+                    print(ln)
+                return 0 if code in (0, 1) else 3
             elif args.sub == "check":
                 if PL.changed_since_approval(args.root, args.layout):
                     ch = PL.changes_since_approval(args.root, args.layout)
@@ -675,6 +688,13 @@ def _main(argv=None):
         except PL.PlanError as e:
             print(f"pbik: {e}", file=sys.stderr)
             return 2
+    elif c == "layout" and args.sub == "polish":
+        from . import polish as PO
+        said, why_not = PO.run(args.root, args.layout)
+        print(f"polish: {len(said)} change(s)" + (": " + "; ".join(said) if said else ""))
+        for x in why_not:
+            print(f"note: {x}")
+        print("next: I'll show you the plan picture with these in it")
     elif c == "layout":
         from . import fromreport as FR
         from .synth import write_json

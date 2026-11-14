@@ -195,8 +195,10 @@ def number(x):
 
 
 # ---------------------------------------------------------------- compare
-def compare(wf, rp, model=None, tolerance=2):
-    """Differences on one page: [(id, what, wireframe, desktop)]; and the not-compared notes [(id, reason)]."""
+def compare(wf, rp, model=None, tolerance=2, example=False):
+    """Differences on one page: [(id, what, wireframe, desktop)]; and the not-compared notes [(id, reason)].
+    example: the drawn page is the plan preview with example values (two renderers, v1.7): its numbers are made up,
+    so card values aren't compared; positions, types, text boxes and titles are."""
     diffs, notes = [], []
     rp_by = {i["id"]: i for i in rp if i["id"]}
     wf_by = {v["id"]: v for v in wf}
@@ -226,6 +228,9 @@ def compare(wf, rp, model=None, tolerance=2):
         t = b["type"]
         if t in ("textbox", "actionButton"):
             want = b.get("text", "")
+        elif t in CARDS and example:
+            notes.append((vid, "example values in the approved preview: the card's number isn't compared"))
+            continue
         elif t in CARDS:
             mv = (model or {}).get(vid, {})
             if not b["valueShow"]:
@@ -322,6 +327,9 @@ def main(argv=None):
     ap.add_argument("--assume-saved", action="store_true",
                     help="go on although Desktop reports unsaved changes (the flag it sets on opening a report)")
     ap.add_argument("--tolerance", type=float, default=2, help="position difference allowed, px (default 2)")
+    ap.add_argument("--example", action="store_true",
+                    help="the drawn page has example values (the approved plan preview): numbers aren't compared "
+                         "(automatic when the page says so)")
     a = ap.parse_args(argv)
     root = pathlib.Path(a.project).resolve()
     layout = json.loads(pathlib.Path(a.layout or root / "design" / "specs" / "layout.json").read_text(encoding="utf-8"))
@@ -354,6 +362,7 @@ def main(argv=None):
         mf = next(root.glob("*.SemanticModel"), None)
         W.load_extensions(root)
         model_txt = model_texts(layout, tmdl.load(mf) if mf else None, port)
+    example = a.example or "Example values" in page_html
     wf = wireframe_visuals(page_html)
     rp = report_visuals(report_dir)
     keys = a.pages or list(layout.get("pages", {}))
@@ -363,7 +372,8 @@ def main(argv=None):
         name = lp.get("displayName", key)
         w = lp.get("width", 1920)
         h = lp.get("height", 1080)
-        diffs, notes = compare([v for v in wf if v["page"] == key], rp.get(name, []), model_txt, a.tolerance)
+        diffs, notes = compare([v for v in wf if v["page"] == key], rp.get(name, []), model_txt, a.tolerance,
+                               example)
         wpng = out / f"{key}-wireframe.png"
         edge_page.screenshot(page_html, wpng, w, h, hash_=f"#shot&labels=off&page={list(layout['pages']).index(key) + 1}")
         dpng = None

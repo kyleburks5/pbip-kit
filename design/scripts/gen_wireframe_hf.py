@@ -1032,7 +1032,10 @@ R.cardVisual = (s, el, w, h) => {
     const val = c.value ? `<div style="font-family:'${c.family}';font-weight:${c.weight};font-size:${c.valueSize}px;color:${c.valueColor};line-height:1.15;text-align:${al};${c.wrap ? 'white-space:normal' : 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}">${esc(v)}</div>` : '';
     return `<div style="min-width:0">${c.labelPos === 'aboveValue' ? lab + val : val + lab}</div>`; });
   // reference labels: the title and the value (example or data); never the measure's raw name
-  const refs = (c.refs || []).map((r, k) => `<span>${esc([r.title, (d.refs || [])[k] ?? (d.sample ? '–' : '')].filter(Boolean).join(' '))}</span>`).join(' ');
+  const refs = (c.refs || []).map((r, k) => { const det = (d.refDetails || [])[k];
+    const dc = det && det.good != null ? (det.good ? (C.good || '#197982') : (C.bad || '#B94642')) : c.refColor;
+    return `<span>${esc([r.title, (d.refs || [])[k] ?? (d.sample ? '–' : '')].filter(Boolean).join(' '))}</span>` +
+      (det ? ` <span style="color:${dc};font-weight:600">${esc(det.text)}</span>` : ''); }).join(' ');
   el.insertAdjacentHTML('beforeend', `<div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:4px 16px;width:100%">${tiles.join('')}</div>` +
     (refs ? `<div style="font-size:${c.refSize}px;color:${c.refColor};margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:${al}">${refs}</div>` : '') +
     (c.image ? `<div class="nodata">image from data</div>` : ''));

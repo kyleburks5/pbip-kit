@@ -210,7 +210,7 @@ def measure_lines(m, src, planned):
     if len(body) > 1:
         L += ["\t\t\t" + ln.strip() for ln in body]
     fmt = (src or {}).get("formatString")
-    if not fmt and not re.search(r"%|share|rate|ratio|vs\b", m, re.I):
+    if not fmt and not (src or {}).get("dataType") and not re.search(r"%|share|rate|ratio|vs\b|colou?r$", m, re.I):
         fmt = "#,0.00" if re.search(r"\bavg\b|average|mean", m, re.I) else "#,0"   # thousands separators (fix 8)
     if fmt:
         L.append(f"\t\tformatString: {thousands(fmt)}")
