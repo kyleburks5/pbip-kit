@@ -14,3 +14,5 @@ tools/wheels/
 .pbik/
 # the model drop folder may hold data until pbik model intake runs (it deletes data files first)
 design/reference/model/
+# report projects made by `pbik project init` (each has its own git repository; the export check fails if one is tracked here)
+projects/

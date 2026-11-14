@@ -4,7 +4,8 @@
     python tools/export_check.py --names "A B" extra names to look for (git user.name and the login are always used)
 
 Looks for personal paths (C:\\Users\\<name>, /Users/<name>, /home/<name>), user names, email addresses, secrets
-(keys, tokens, passwords, connection secrets), real data files (csv, xlsx, xls, pbix, abf, parquet, cache) and smoke,
+(keys, tokens, passwords, connection secrets), report project files (projects/, each its own repository), real
+data files (csv, xlsx, xls, pbix, abf, parquet, cache) and smoke,
 scratch or sample folders. A path or folder that belongs in the kit (a made-up test sample, an address meant to be
 public) is listed in tools/export_allow.txt with its reason. Prints a pass/fail table; exit 1 on any finding.
 """
@@ -25,7 +26,9 @@ SECRETS = [("AWS key", r"AKIA[0-9A-Z]{16}"), ("GitHub token", r"gh[pousr]_[A-Za-
            ("private key", r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
            ("password", r"(?i)\b(password|passwd|pwd)\s*[=:]\s*['\"][^'\"\s]{4,}['\"]"),
            ("connection secret", r"(?i)(AccountKey|SharedAccessKey|client_secret|SharedAccessSignature)\s*=\s*[^;\s\"']{8,}")]
-CHECKS = ["personal paths", "user names", "emails", "secrets", "data files", "smoke/sample/scratch folders"]
+CHECKS = ["personal paths", "user names", "emails", "secrets", "data files", "smoke/sample/scratch folders",
+          "report projects"]
+PROJECTS = re.compile(r"^projects/", re.I)   # pbik project init folders: never tracked by the kit (v1.7, D2)
 
 
 def git(*args):
@@ -85,6 +88,8 @@ def scan_path(path, allow, found):
     folder = p.rsplit("/", 1)[0] + "/" if "/" in p else ""     # folder names only, not file names (smoke.md)
     if FOLDERS.search(folder) and not allowed(allow, "smoke/sample/scratch folders", p):
         found["smoke/sample/scratch folders"].append(p)
+    if PROJECTS.search(p):                              # no allow-list entry can let a project file through
+        found["report projects"].append(p)
 
 
 def upstream():

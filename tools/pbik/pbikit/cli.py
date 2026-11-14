@@ -16,6 +16,9 @@ def main(argv=None):
     except AttributeError:
         pass
     argv = list(sys.argv[1:] if argv is None else argv)
+    argv = _enter_project(argv)
+    if argv is None:
+        return 2
     if argv[:2] == ["--report", "json"] or argv[:1] == ["--report=json"]:
         rest = argv[2:] if argv[0] == "--report" else argv[1:]
         from . import summary
@@ -24,6 +27,38 @@ def main(argv=None):
         print(text)
         return code
     return _main(argv)
+
+
+def find_project(name, start=None):
+    """A project by name: a folder, or projects/<name> in the current folder, above it, or in the kit."""
+    p = pathlib.Path(name)
+    if p.is_dir():
+        return p.resolve()
+    here = pathlib.Path(start or ".").resolve()
+    kit = pathlib.Path(__file__).resolve().parents[3]
+    for base in [here, *here.parents, kit]:
+        cand = base / "projects" / name
+        if cand.is_dir():
+            return cand
+    return None
+
+
+def _enter_project(argv):
+    """`pbik --in <project> ...` (anywhere before the command): run in that project's folder (v1.7, A7)."""
+    import os
+    for i, a in enumerate(argv):
+        if a == "--in" or a.startswith("--in="):
+            name = a.split("=", 1)[1] if "=" in a else (argv[i + 1] if i + 1 < len(argv) else "")
+            rest = argv[:i] + argv[i + (1 if "=" in a else 2):]
+            folder = find_project(name)
+            if not folder:
+                print(f"pbik: there is no project called {name!r}", file=sys.stderr)
+                return None
+            os.chdir(folder)
+            return rest
+        if not a.startswith("-") and a not in ("json",):
+            break                                          # --in only before the command
+    return argv
 
 
 def _main(argv=None):
@@ -257,6 +292,22 @@ def _main(argv=None):
     blo.add_argument("--restore-backup", action="store_true",
                      help="put the whole pre-live backup back (typed 'restore'; changes made while live are lost)")
 
+    sts = sub.add_parser("status", help="where the project is, in one plain line (design/status.json)")
+    sts.add_argument("--root", default=".")
+    sts.add_argument("--done", help="mark this stage done (start, model, page purpose, plan, theme, build, checks, "
+                                    "polish, result, live, wrap-up)")
+    sts.add_argument("--mode", choices=["guided", "quick"])
+    sts.add_argument("--path", dest="path_taken", help="the start path (from wireframe, from picture, from report, "
+                                                        "starter layouts)")
+    sts.add_argument("--report-type")
+    sts.add_argument("--pack")
+    sts.add_argument("--class", dest="data_class", choices=["public", "internal", "restricted"])
+    sts.add_argument("--plan-hash")
+    sts.add_argument("--score", type=int)
+    sts.add_argument("--json", action="store_true", help="the whole status file")
+    sop = sub.add_parser("open", help="open the project folder in File Explorer")
+    sop.add_argument("--root", default=".")
+
     stp = sub.add_parser("step", help="mark a workflow step for token tracking (tools/usage.py)")
     stp.add_argument("event", choices=["start", "end"])
     stp.add_argument("step")
@@ -461,6 +512,27 @@ def _main(argv=None):
         return synth_cmd(args)
     elif c == "bind":
         return bind_cmd(args)
+    elif c == "status":
+        from . import status as ST
+        fields = dict(mode=args.mode, path=args.path_taken, reportType=args.report_type, pack=args.pack,
+                      dataClass=args.data_class, planHash=args.plan_hash, score=args.score)
+        if args.done or any(v is not None for v in fields.values()):
+            try:
+                ST.update(args.root, done=args.done, **fields)
+            except ValueError as e:
+                print(f"pbik: {e}", file=sys.stderr)
+                return 2
+        if args.json:
+            import json as _j
+            print(_j.dumps(ST.read(args.root), indent=1, ensure_ascii=False))
+        else:
+            ST.show(args.root)
+    elif c == "open":
+        import os
+        folder = pathlib.Path(args.root).resolve()
+        if hasattr(os, "startfile"):
+            os.startfile(str(folder))                     # noqa: S606  File Explorer on Windows
+        print(f"Opened your project {folder.name} in File Explorer.")
     elif c == "step":
         from . import steps as STP
         STP.mark(args.root, args.event, args.step, args.outcome)

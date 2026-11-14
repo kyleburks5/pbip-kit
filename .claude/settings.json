@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python tools/hooks/guard_model_folder.py"
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/hooks/guard_model_folder.py\""
           }
         ]
       }
