@@ -486,6 +486,15 @@ task; a team folder's `team.json` `{"registrars": {"<class>": [names]}}` limits 
 `model rules` writes design/reviews/rule-proposals.md: rules a person made for every table of a kind that the library
 doesn't have, for review at the next kit update.
 
+### `bind picker [--open] [--scan]`: Desktop as the model picker
+
+`bind picker --open` makes `design/reference/live/` (git-ignored) and opens it; the user, in Desktop, connects a new
+report to the published model (Get data > Power BI semantic models), saves it as a Power BI project there, and closes.
+`--scan` says which model the newest pick connects to (also project.json `pickerFolders`, picks of the last day);
+`gate prepare bind-live --report <R> --from picked` prepares *Connect to the live model* from it: no typed names or IDs.
+Both byConnection forms are read (the current connection string with `semanticmodelid`, and the older
+`pbiModelDatabaseName`). Verify at work: a real published model and Desktop 2.155's saved form.
+
 ## Synthetic to live (docs/design/synth-to-live.md)
 
 ### `project class [public|internal|restricted] [--guard dax|screenshot]`

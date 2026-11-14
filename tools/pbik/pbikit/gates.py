@@ -88,6 +88,10 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
         h = _h(d["contract"].get("model"), d["changes"], content_hash(d["contract"]))
     elif gate == "bind-live":
         from . import bind as BD
+        if from_ == "picked":                              # the Desktop model picker (pbikit/picker.py)
+            from . import picker as PK_
+            ws, mdl, mi, rep_folder = PK_.picked(root)
+            args["from_"] = from_ = str(rep_folder)
         if from_:
             ws, mdl, mi, _ = BD.from_report(from_)
         else:

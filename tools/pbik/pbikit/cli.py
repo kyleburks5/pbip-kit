@@ -246,6 +246,10 @@ def _main(argv=None):
     bma.add_argument("report")
     bma.add_argument("--by", required=True)
     bma.add_argument("--root")
+    bpk = bis.add_parser("picker", help="Desktop as the model picker: make and open the folder, or --scan for the pick")
+    bpk.add_argument("--root", default=".")
+    bpk.add_argument("--open", action="store_true", help="open the folder in File Explorer")
+    bpk.add_argument("--scan", action="store_true", help="say which published model the newest pick connects to")
     blo = bis.add_parser("local", help="back to the synthetic model (refuses while Desktop is open)")
     blo.add_argument("report")
     blo.add_argument("--root")
@@ -478,6 +482,22 @@ def _main(argv=None):
 def bind_cmd(args):
     from . import bind as BD, dataclass_ as DC, synth as S
     try:
+        if args.sub == "picker":
+            from . import picker as PKR
+            if args.scan:
+                try:
+                    ws, model, mid, _ = PKR.picked(args.root)
+                except PKR.PickError as e:
+                    print(f"pbik: {e}", file=sys.stderr)
+                    return 2
+                print(f"picked: model {model!r} in workspace {ws!r}")
+                print("Next (the person): Command Palette > Tasks: Run Task > Connect to the live model "
+                      "(after the agent runs gate prepare bind-live --from picked)")
+            else:
+                PKR.prepare(args.root, args.open)
+                print("the picker folder is ready: in Power BI Desktop, File > New, Get data > Power BI semantic "
+                      "models, pick the model, then save as a Power BI project (.pbip) in that folder and close")
+            return 0
         if args.sub == "check":
             r = BD.check(args.report, args.root)
             for x in r.notes:

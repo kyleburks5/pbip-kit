@@ -389,10 +389,16 @@ def from_report(path):
     if p.suffix.lower() == ".pbip":
         p = p.with_suffix(".Report")
     f = p / "definition.pbir" if p.is_dir() else p
-    cs = load(f).get("datasetReference", {}).get("byConnection", {}).get("connectionString")
+    bc = load(f).get("datasetReference", {}).get("byConnection", {})
+    cs = bc.get("connectionString")
     if not cs:
         raise BindError(f"{f}: no byConnection (open the live model in Desktop, save the report, then use it)")
     ws, model, mid = parse_connection(cs)
+    if not mid and re.fullmatch(GUID, str(bc.get("pbiModelDatabaseName") or "")):
+        mid = bc["pbiModelDatabaseName"].lower()          # the older byConnection form (definition.pbir 1.0)
+    if ws:
+        from urllib.parse import unquote
+        ws = unquote(ws)
     if not mid:
         raise BindError(f"{f}: the connection has no semanticmodelid")
     return ws, model, mid, cs

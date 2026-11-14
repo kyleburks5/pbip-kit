@@ -330,5 +330,63 @@ class PackReuseTests(Tmp):
         self.assertLess(time.time() - start, 600, "reuse in under 10 minutes of tool time")
 
 
+import test_bind as TB  # noqa: E402
+
+MID = "00000000-0000-4000-8000-0000000000bb"
+
+
+def desktop_pick(folder, name, cs=None, old_form=False, age=0):
+    """A made-up report folder as Desktop saves one connected to a published model."""
+    rep = folder / f"{name}.Report"
+    rep.mkdir(parents=True)
+    bc = ({"connectionString": None, "pbiServiceModelId": None, "pbiModelVirtualServerName": "sobe_wowvirtualserver",
+           "pbiModelDatabaseName": MID, "name": "EntityDataSource", "connectionType": "pbiServiceXmlaStyleLive"}
+          if old_form else {"connectionString": cs})
+    if old_form:
+        bc["connectionString"] = ('Data Source="powerbi://api.powerbi.com/v1.0/myorg/Sample%20Workspace";'
+                                  "initial catalog=Example Live;integrated security=ClaimsToken")
+    f = rep / "definition.pbir"
+    f.write_text(json.dumps({"version": "4.0", "datasetReference": {"byConnection": bc}}), encoding="utf-8")
+    if age:
+        t = __import__("time").time() - age
+        os.utime(f, (t, t))
+    return rep
+
+
+class PickerTests(TB.BindBase):
+    """Stage (e): Desktop as the model picker; live and back through the gates, with made-up connection files."""
+
+    def test_pick_live_and_back(self):
+        from pbikit import bind as BD, gates as GT, picker as PKR
+        live = PKR.prepare(self.root)
+        self.assertEqual((live / ".gitignore").read_text(encoding="utf-8").strip(), "*")
+        with self.assertRaises(PKR.PickError):
+            PKR.picked(self.root)
+        desktop_pick(live, "Older", old_form=True, age=60)
+        self.assertEqual(PKR.picked(self.root)[:3], ("Sample Workspace", "Example Live", MID))
+        desktop_pick(live, "Newer", BD.connection_string("Sample Workspace", "Example Live", MID))
+        self.assertEqual(PKR.picked(self.root)[3].name, "Newer.Report")
+        other = self.root / "elsewhere"
+        desktop_pick(other, "Stale", BD.connection_string("Old Space", "Old Model", MID), age=3 * 86400)
+        proj = DC.read_project(self.root)
+        proj["pickerFolders"] = [str(other)]
+        S.write_json(DC.project_file(self.root), proj)
+        self.assertEqual(len(PKR.candidates(self.root)), 2, "a pick older than a day elsewhere is ignored")
+        before = TB.tree(self.rep)
+        yes = lambda t, x: True                                                     # noqa: E731
+        with mock.patch("pbikit.desktop.desktop_open", lambda: False):
+            doc = GT.prepare("bind-live", self.root, report=str(self.rep), from_="picked")
+            self.assertIn("'Example Live' in workspace 'Sample Workspace'", doc["summary"])
+            GT.run("bind-live", self.root, dialog=yes, person=True, out=lambda *a: None)
+            self.assertEqual(DC.bind_state(self.root)["id"], MID)
+            GT.prepare("bind-local", self.root, report=str(self.rep))
+            GT.run("bind-local", self.root, dialog=yes, person=True, out=lambda *a: None)
+        self.assertIsNone(DC.bind_state(self.root))
+        self.assertEqual(before, TB.tree(self.rep), "back to the synthetic model byte for byte")
+        log = (self.root / "design/reviews/approvals.md").read_text(encoding="utf-8")
+        self.assertIn("| Connect to the live model |", log)
+        self.assertIn("| Back to the synthetic model |", log)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
