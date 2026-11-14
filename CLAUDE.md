@@ -3,6 +3,8 @@
 Goal: build polished Power BI reports (PBIP + PBIR) from a requirements file (design/reference/brd.md) and HTML wireframes. Public data only.
 
 ## Rules
+- Chat only: run every pbik step yourself (`pbik --report json ...`) and answer in docs/PLAIN-WORDS.md words; never
+  show me a path or a command. For a person-only step, name the Command Palette task to pick (Tasks: Run Task).
 - Canvas 1920x1080 (custom page size), 32px margin, 12-column grid, 24px gutters. Compute positions from the grid.
 - Read design/tokens.json before styling. Never hardcode colors or fonts.
 - Use only the powerbi-authoring modeling MCP server for model changes, plus the daxlib-mcp server (.mcp.json) only to

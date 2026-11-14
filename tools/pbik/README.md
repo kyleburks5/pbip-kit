@@ -443,6 +443,16 @@ pbik desktop reload                                           rem report only; r
 pbik desktop screenshot --report "Sales.Report" --page "Overview" --out _snapshots\p1.png --region 0,0,1920,1080
 ```
 
+## Chat-only use (docs/design/phase1-usability.md)
+
+### `--report json <command>` and `project init <name> [--parent] [--class] [--from-pack]`
+
+`pbik --report json <any command>` prints `{ok, command, exit, facts, needs, next}`: errors and warnings as needs, and
+person-only steps as `{"kind": "gate", "gate", "task"}` with the Command Palette task to name. The agent answers in
+docs/PLAIN-WORDS.md words and never shows a path or a command. `project init` copies the kit's tracked files into a
+new folder beside the kit, sets the data class, starts git with a first commit and, with `--from-pack`, starts from a
+model pack at the plan step.
+
 ## Synthetic to live (docs/design/synth-to-live.md)
 
 ### `project class [public|internal|restricted] [--guard dax|screenshot]`

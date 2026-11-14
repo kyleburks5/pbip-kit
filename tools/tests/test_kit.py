@@ -104,7 +104,7 @@ class FastTestModeTests(unittest.TestCase):
         self.assertEqual(RT.related(["tools/pbik/pbikit/bind.py"]), ["bind"])
         self.assertEqual(RT.related(["docs/lessons/cards.md"]), ["kit"])
         self.assertEqual(RT.related(["tools/pbik/pbikit/build.py"]),
-                         ["pbik", "synth", "bind", "layout", "patterns", "wireframe", "design"])
+                         ["pbik", "synth", "bind", "layout", "phase1", "patterns", "wireframe", "design"])
         self.assertEqual(RT.related(["design/scripts/gen_wireframe_hf.py", "tools/patterns/build_patterns.py"]),
                          ["layout", "patterns", "wireframe", "design"])
         self.assertEqual(RT.related(["tools/run_tests.py"]), RT.ALL)

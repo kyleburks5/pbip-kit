@@ -18,7 +18,7 @@ visuals with different filters, and identification from a combination of categor
 
 | Data set | Classification | Row-level access cleared? | By whom, when |
 | --- | --- | --- | --- |
-| *(fill in)* | public / synthetic / internal / restricted | no | |
+| *(fill in)* | public / internal / restricted (synthetic data is "restricted with a synthetic model": pbik `project class restricted`, docs/design/synth-to-live.md) | no | |
 
 ## Data classification and location
 

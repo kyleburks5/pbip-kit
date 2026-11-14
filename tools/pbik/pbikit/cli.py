@@ -9,11 +9,24 @@ def versions_default():
 
 
 def main(argv=None):
+    """`pbik --report json <command> ...` prints a machine summary (pbikit/summary.py) for the agent."""
     try:
         sys.stdout.reconfigure(encoding="utf-8")
         sys.stderr.reconfigure(encoding="utf-8")
     except AttributeError:
         pass
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:2] == ["--report", "json"] or argv[:1] == ["--report=json"]:
+        rest = argv[2:] if argv[0] == "--report" else argv[1:]
+        from . import summary
+        words = [a for a in rest if not a.startswith("-")][:2]
+        code, text = summary.run_json(" ".join(words), lambda: _main(rest))
+        print(text)
+        return code
+    return _main(argv)
+
+
+def _main(argv=None):
     ap = argparse.ArgumentParser(prog="pbik", description="pbip-kit's PBIR / TMDL tool (Python standard library).")
     ap.add_argument("--version", action="version", version=f"pbik {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -160,6 +173,11 @@ def main(argv=None):
     pc.add_argument("--project", default=str(versions_default()))
     pc.add_argument("--version", help="Desktop version (default: detected from the installed Desktop)")
 
+    pin = pjs.add_parser("init", help="a new report project beside the kit: kit copy, git, data class")
+    pin.add_argument("name")
+    pin.add_argument("--parent", help="folder to create it in (default: beside the kit)")
+    pin.add_argument("--class", dest="cls", default="internal", choices=["public", "internal", "restricted"])
+    pin.add_argument("--from-pack", dest="init_pack", help="start from this model pack, at the plan step")
     pnw = pjs.add_parser("new", help="start a project at the plan step from a model pack")
     pnw.add_argument("folder", nargs="?", default=".")
     pnw.add_argument("--from-pack", required=True, help="the pack folder (<packs>/<model>)")
@@ -308,6 +326,14 @@ def main(argv=None):
         return 1 if check(args.model, args.folder) else 0
     elif c == "project":
         from . import versions as V
+        if args.sub == "init":
+            from . import projectinit as PI, packs as PK
+            try:
+                PI.init(args.name, args.parent, args.cls, args.init_pack)
+            except (PI.InitError, PK.PackError) as e:
+                print(f"pbik: {e}", file=sys.stderr)
+                return 2
+            return 0
         if args.sub == "new":
             from . import packs as PK
             try:

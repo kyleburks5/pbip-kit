@@ -18,16 +18,24 @@ KIT = pathlib.Path(__file__).resolve().parents[1]
 SUITES = [("pbik", "tools/pbik/tests/test_pbik.py"), ("synth", "tools/pbik/tests/test_synth.py"),
           ("bind", "tools/pbik/tests/test_bind.py"),
           ("layout", "tools/pbik/tests/test_layout_rules.py"),
+          ("phase1", "tools/pbik/tests/test_phase1.py"),
           ("patterns", "tools/patterns/test_patterns.py"),
           ("wireframe", "design/scripts/test_wireframe.py"), ("design", "design/scripts/test_design.py"),
           ("kit", "tools/tests/test_kit.py")]
 ALL = [n for n, _ in SUITES]
-PBIK_CORE = ["pbik", "synth", "bind", "layout"]
+PBIK_CORE = ["pbik", "synth", "bind", "layout", "phase1"]
 # a changed path (glob; the first match wins) -> the suites that test it
 RELATED = [("tools/run_tests.py", ALL),
            ("tools/pbik/tests/test_pbik.py", ["pbik"]), ("tools/pbik/tests/test_synth.py", ["synth"]),
            ("tools/pbik/tests/test_bind.py", ["bind"]), ("tools/pbik/tests/bind_sample.py", ["bind", "layout"]),
-           ("tools/pbik/tests/test_layout_rules.py", ["layout"]), ("tools/pbik/tests/synth_sample/*", ["synth", "bind"]),
+           ("tools/pbik/tests/test_layout_rules.py", ["layout"]), ("tools/pbik/tests/test_phase1.py", ["phase1"]),
+           ("tools/pbik/tests/big_model.py", ["phase1"]),
+           ("tools/pbik/pbikit/summary.py", ["phase1"]), ("tools/pbik/pbikit/projectinit.py", ["phase1"]),
+           ("tools/pbik/pbikit/gates.py", ["phase1"]), ("tools/pbik/pbikit/intake.py", ["phase1"]),
+           ("tools/pbik/pbikit/rules.py", ["phase1", "synth"]), ("tools/pbik/pbikit/picker.py", ["phase1", "bind"]),
+           ("tools/pbik/pbikit/steps.py", ["phase1"]), ("tools/pbik/rules/*", ["phase1", "synth"]),
+           ("tools/usage.py", ["phase1"]), ("tools/hooks/*", ["phase1"]), (".vscode/*", ["phase1", "kit"]),
+           ("docs/PLAIN-WORDS.md", ["phase1", "kit"]), ("tools/pbik/tests/synth_sample/*", ["synth", "bind"]),
            ("tools/pbik/pbikit/synth*.py", ["synth", "bind"]), ("tools/pbik/pbikit/packs.py", ["synth"]),
            ("tools/pbik/pbikit/bind*.py", ["bind"]), ("tools/pbik/pbikit/filtertypes.py", ["bind", "pbik"]),
            ("tools/pbik/pbikit/dataclass_.py", ["synth", "bind", "layout"]),
