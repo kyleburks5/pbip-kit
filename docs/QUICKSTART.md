@@ -6,6 +6,21 @@ Commands that start with `/` are typed in the assistant's chat.
 In GitHub Copilot the chat commands start with `/kit-`: `/kit-brd`, `/kit-model`, and so on. Set up VS Code first
 ([WORK-SETUP.md](WORK-SETUP.md)).
 
+## The easy way (v1.7): just ask
+
+Open the kit in the Claude desktop app, Claude Code in VS Code, or GitHub Copilot Chat (agent mode) and say what you
+want ("I want an orders dashboard; I have a wireframe"). The assistant makes the project, asks for copies of your files,
+shows the plan as a picture, and builds. You never need a terminal or a command; the sections below are the
+step-by-step way for experts. A walkthrough with made-up data: [PHASE1-WALKTHROUGH.md](PHASE1-WALKTHROUGH.md).
+
+**Guided build.** "We build it together, one step at a time." The assistant stops after the page purpose, the plan
+picture, the colours, the build, the checks and the polish, shows what changed, and waits for your OK or your changes.
+It's the default until a quick build of that kind of report has reached 7/10.
+
+**Quick build.** "Tell me what you want, approve the plan, and I'll build it." The assistant stops only at the plan
+picture and the approval windows, then does the rest on its own and shows the result: before and after screenshots,
+the polish score and anything it couldn't fix. Say "switch to guided" or "finish the rest quickly" at any time.
+
 ## 1. Copy the kit
 
 Pick a folder name with no spaces, outside OneDrive. Copy the kit without its Git history and start a new one:

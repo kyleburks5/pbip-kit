@@ -281,14 +281,35 @@ def approve(pack, by, ask=None, out=print, drift_file=None):
 
 
 # ---------------------------------------------------------------- pack folders (Phase 1, stage d)
+def user_settings_file():
+    """Per-person pbik settings outside every project and repository (PBIK_HOME in tests): pack folders, so every new
+    project finds the packs without a machine path in any committed file (v1.7)."""
+    import os
+    return pathlib.Path(os.environ.get("PBIK_HOME") or pathlib.Path.home() / ".pbik") / "settings.json"
+
+
+def add_pack_folder(path, team=False):
+    f = user_settings_file()
+    s = read_json(f) or {}
+    folders = [x for x in s.get("packFolders", []) if (x if isinstance(x, str) else x.get("path")) != str(path)]
+    folders.append({"path": str(pathlib.Path(path).resolve()), "team": bool(team)})
+    s["packFolders"] = folders
+    f.parent.mkdir(parents=True, exist_ok=True)
+    write_json(f, s)
+    return folders
+
+
 def pack_folders(root):
-    """[(path, team?)] from project.json `packFolders` (strings, or {"path", "team"})."""
-    out = []
-    for x in DC.read_project(root).get("packFolders", []):
+    """[(path, team?)] from project.json `packFolders` (strings, or {"path", "team"}), then the person's own
+    settings (`pbik model packs --add-folder`); team folders first."""
+    out, seen = [], set()
+    for x in DC.read_project(root).get("packFolders", []) + (read_json(user_settings_file()) or {}).get(
+            "packFolders", []):
         p, team = (x, False) if isinstance(x, str) else (x.get("path"), bool(x.get("team")))
-        if p:
+        if p and str(pathlib.Path(p).resolve()) not in seen:
+            seen.add(str(pathlib.Path(p).resolve()))
             out.append((pathlib.Path(p), team))
-    return out
+    return sorted(out, key=lambda x: not x[1])
 
 
 def list_packs(root):

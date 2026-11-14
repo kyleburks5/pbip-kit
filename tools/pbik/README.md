@@ -1,4 +1,4 @@
-# pbik 0.16.0
+# pbik 0.17.0
 
 pbip-kit's own command line tool for PBIR reports and TMDL models. Python standard library only; `jsonschema` is
 optional (schema checks).
@@ -430,7 +430,7 @@ define (`DaxLib.SVG.Viz.Nope`). `--folder` limits the measure checks to one disp
 pbik model check "Sales.SemanticModel" --folder Model
 ```
 
-### `desktop state | reload | screenshot`
+### `desktop state | reload | screenshot | open | close`
 Runs `.claude/scripts/pbi-bridge.ps1` (found above the current folder, or `--bridge <path>`). If PowerShell, the
 script or the Desktop Bridge isn't available, pbik says so and exits with code 3; when Desktop is open but has no
 bridge, it adds whether this Desktop is too old for reloading (before August 2026) or needs the preview option
@@ -442,26 +442,78 @@ pbik desktop state --fail-if-dirty                            rem exit 4 when De
 pbik desktop reload                                           rem report only; refuses while unsaved
 pbik desktop screenshot --report "Sales.Report" --page "Overview" --out _snapshots\p1.png --region 0,0,1920,1080
 ```
+`desktop open` opens the project's report in Desktop. `desktop close` (v1.7, decision D1) closes it without saving only
+when it is proven that its only unsaved changes are its own reload marks: the agent's `desktop reload` recorded
+Desktop's state right after the reload (.pbik/desktop.json), there is one Desktop window and it is that one, its state
+now is the same (times aside), and the report files changed only by `pbik build`. Any doubt, or any change by the
+person: it leaves Desktop open, says why, and the agent asks the person to close it.
 
 ## Chat-only use (docs/design/phase1-usability.md)
 
-### `--report json <command>` and `project init <name> [--parent] [--class] [--from-pack]`
+### `--report json <command>`, `--in <project>`, `project init <name> [--parent] [--class] [--from-pack]`, `open`
 
 `pbik --report json <any command>` prints `{ok, command, exit, facts, needs, next}`: errors and warnings as needs, and
-person-only steps as `{"kind": "gate", "gate", "task"}` with the Command Palette task to name. The agent answers in
-docs/PLAIN-WORDS.md words and never shows a path or a command. `project init` copies the kit's tracked files into a
-new folder beside the kit, sets the data class, starts git with a first commit and, with `--from-pack`, starts from a
-model pack at the plan step.
+person-only steps as `{"kind": "gate", "gate", "task"}`. The agent answers in docs/PLAIN-WORDS.md words and never
+shows a path or a command. `project init` (v1.7) copies the kit's tracked files into `projects/<name>` inside the kit
+(git-ignored by the kit; each project has its own git repository; the export check fails on any tracked project file),
+sets the data class (default restricted), writes design/status.json and makes a first commit; with `--from-pack` it
+starts from a model pack at the plan step. The agent keeps working in the same chat with `pbik --in <name> ...` (before
+the command) and `open` opens the project folder in File Explorer.
 
-### `gate prepare <gate> ...`, `gate run <gate>`, `gate tasks`
+### `status [--done <stage>] [--mode] [--path] [--report-type] [--pack] [--class] [--plan-hash] [--score] [--json]`
 
-Person-only steps as Command Palette tasks (.vscode/tasks.json, written by `gate tasks`): Approve the model, Approve
-the name map, Approve model changes, Connect to the live model, Back to the synthetic model, Loosen the data class,
-Share the model pack. The agent runs `gate prepare` (a plain summary and a hash of what is approved, in
-`.pbik/gates/`, git-ignored; option-table rows are never in it); the person picks the task, which runs `gate run`:
-a Windows dialog shows the summary (and, for the model, the rows kept) with Yes / No. On Yes the step runs with the
-approver from git's user name and the Windows login, and is logged in design/reviews/approvals.md. `gate run`
-refuses in an agent's shell or without a terminal, and when what is approved changed after `prepare`.
+design/status.json (committed, no data): the stages done and the next one (start, model, page purpose, plan, theme,
+build, checks, polish, result, live, wrap-up), the build option and its switches, the path taken, the report type, the
+pack, the data class, the approved plan's hash and the last polish score. `status` prints the plain line a new chat
+starts with ("Sales: you're past the plan picture; next is the colours (quick build, data restricted)"), and in a
+guided build adds "Pause here" after a stage it stops at. In the kit folder it lists every project, the last one used
+first.
+
+### `start detect | inputs | starters`, `layout from-report <X.Report> [--out]`
+
+`start detect` reads the inputs folder (design/reference/inputs/) and picks the path: from report (a `.Report` folder),
+from wireframe (HTML), from picture (an image: a wireframe or any report's screenshot), or starter layouts
+(requirements only, or nothing); a `.pbix`, `.pbit` or data file is named and never read. `start inputs` opens the
+folder. `start starters --kpi M ... --date F --category F` fills docs/layouts/starters/ (executive summary, trend
+dashboard, detail table: existing layouts and patterns only, on the 12-column grid) into
+design/specs/starters/<name>.layout.json. `layout from-report` reads an existing report's PBIR pages and visuals
+(positions, types, fields; never data) through the wireframe mapping (design/scripts/ref_layout.py) into a draft
+layout.json with the fields as bindings.
+
+### `plan show | picture | open | check | approve`
+
+The plan as a picture: `plan show [--purpose P1=...] [--assume ...]` draws each page of layout.json (the high-fidelity
+wireframe in headless Edge, no ID badges) into design/plan/page-<n>.png and writes design/plan/plan.md: each page's
+purpose, each KPI with its measure and comparison, the assumptions, each fallback with the native option tried, and the
+build option, data class and model. `plan picture <layout> --out <folder>` draws any layout (the starters). `plan open`
+opens the pictures beside the chat (VS Code editor tabs through `code`, else the picture viewer). `plan approve` (the
+person said OK in the chat) records the plan's hash in status.json and plan.json and writes the Page purpose section of
+design/specs/spec.md; `plan check` exits 1 when the layout or plan changed after the OK.
+
+### `mode [guided|quick] [--report-type]`, `score [<Report>] [--item n=pass] [--final] [--hand-minutes N]`
+
+`mode` sets the build option, or without a value prints the default and why: guided until a quick build of that report
+type reached 7/10 (the personal build history, %USERPROFILE%\.pbik\builds.jsonl, no names or data), then the last
+choice, or a team pack folder's team.json `defaultMode`; it also suggests a guided build when the last 3 quick builds
+of the type average below 7 or below the guided ones. `score` gives the polish score: ten items, 2, 4, 5, 6, 8, 9 and 10
+from the files (grid, built types and fields against layout.json, no colours or fonts written into the layout, no
+overlaps or crowded pages, accessibility warnings, validate errors), 1, 3 and 7 from the agent's own checks
+(`--item 1=pass`: matches the approved picture, labelled as the agent's judgment; KPI cards filled; interactions
+working), unchecked items counted 0. It writes design/reviews/polish.md; `--final` records the build in the history;
+`--hand-minutes` (wrap-up) adds the person's hand-polish minutes.
+
+### `gate prepare <gate> ...`, `gate open | wait | run <gate>`, `gate tasks`
+
+Person-only steps: Approve the model, Approve the name map, Approve model changes, Connect to the live model, Back to
+the synthetic model, Loosen the data class, Share the model pack. The agent runs `gate prepare` (a plain summary and a
+hash of what is approved, in `.pbik/gates/`, git-ignored; option-table rows are never in it), then `gate open` (the
+approval window in its own process; it returns at once) and `gate wait` (up to 30 minutes). The window shows the
+summary (and, for the model, the rows kept), a 4-character code drawn as a picture (made in the window's process and
+written nowhere), a box to type it, and Yes / No; three wrong codes decline. On Yes the step runs with the approver
+from git's user name and the Windows login, and is logged in design/reviews/approvals.md. Refusals: the content
+changed after `prepare`; screen control used in the last 10 minutes (the Claude Code hook tools/hooks/guard_gates.py
+leaves a marker; it also blocks key and window drivers while a window is open); another window open. `gate run` shows
+the same window in the foreground (the optional Command Palette tasks in .vscode/tasks.json, written by `gate tasks`).
 
 ### `model intake [--root] [--folder] [--open]`
 
@@ -471,8 +523,10 @@ data file first, from names alone (any `.abf` such as cache.abf, `.pbi` and `dat
 `.parquet`, `.csv`, `.xlsx`, `.xls`, `.cache`), permanently, and warns; then detects the format (one model at a time;
 a `.pbix` can't be read), writes the contract and logs what it read and deleted in design/reviews/model-intake.md. `--open` only makes the folder and opens it in File
 Explorer for the user (it reads nothing).
-A Claude Code hook (tools/hooks/guard_model_folder.py, .claude/settings.json) stops the agent opening the folder
-itself; Copilot follows the same rule in its instructions.
+A Claude Code hook (tools/hooks/guard_model_folder.py, .claude/settings.json, run by the project folder so it works
+from any working folder, and failing closed) stops the agent opening the folder itself; Copilot follows the same rule in
+its instructions. Intake also recognises a model approved before by its table and column names (no values) in the
+pack folders: the project starts from that pack with no model approval, and never with a looser data class.
 
 ### Rule library, grouped approval, pack folders (`model packs`, `model rules`)
 
@@ -480,7 +534,9 @@ itself; Copilot follows the same rule in its instructions.
 connections, RLS and entity tables synthesized or not reproduced; small option tables with a label and an order column
 keep their rows, a person confirming them); `--no-library` skips it. The *Approve the model* summary groups the flags:
 "87 handled by rules, 20 option table(s) to keep, 5 need you"; it can't be prepared while any need a person.
-project.json `packFolders` (paths, or `{"path", "team": true}`) is where packs are found: `model packs` lists them,
+project.json `packFolders` (paths, or `{"path", "team": true}`) and the person's own settings (`model packs
+--add-folder <folder> [--team]`, %USERPROFILE%\.pbik\settings.json, so no machine path is committed) are where packs
+are found: `model packs` lists them,
 `project init --from-pack <model name>` starts from one, and `model intake` in a project started from a pack writes only
 the drift (design/specs/drift.json) for *Approve model changes*. Sharing to a team folder is the *Share the model pack*
 task; a team folder's `team.json` `{"registrars": {"<class>": [names]}}` limits who may share per data class.
@@ -496,12 +552,14 @@ report to the published model (Get data > Power BI semantic models), saves it as
 Both byConnection forms are read (the current connection string with `semanticmodelid`, and the older
 `pbiModelDatabaseName`). Verify at work: a real published model and Desktop 2.155's saved form.
 
-### `step start|end <step> [--outcome]`
+### `step start|end <step> [--outcome]`, `step note <what> --interaction`
 
-The agent marks each workflow step (.pbik/steps.jsonl, git-ignored); `python tools/usage.py` joins them with Claude
+The agent marks each workflow step (.pbik/steps.jsonl, git-ignored) and each interaction (a reply from the person or
+an approval window); `python tools/usage.py` joins them with Claude
 Code's session transcripts (each message's token usage, counted once) and writes design/reviews/usage.md: minutes and
 input, cache write, cache read and output tokens per step, with the Phase 1 targets (first setup 30-45 minutes, reuse
-about 10). Copilot usage is filled in by hand from GitHub's usage page (verify at work).
+about 10) and the interaction count, checked against the person's messages in the transcript. Copilot usage is filled
+in by hand from GitHub's usage page (verify at work).
 
 ## Synthetic to live (docs/design/synth-to-live.md)
 

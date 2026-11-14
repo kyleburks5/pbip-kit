@@ -3,6 +3,7 @@
     python tools\\pbik\\tests\\test_phase1.py
 """
 import json, os, pathlib, shutil, subprocess, sys, tempfile, unittest
+os.environ.setdefault("PBIK_HOME", tempfile.mkdtemp(prefix="pbik_home_"))   # never the person's own settings
 from unittest import mock
 
 HERE = pathlib.Path(__file__).resolve().parent

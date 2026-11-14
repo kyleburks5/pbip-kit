@@ -171,8 +171,9 @@ failing items. `pbik score` computes items 2-10 from the files and queries; the 
 
 **No forced chat or app switch:** `project init` creates the project inside the open folder, in `projects\<name>\`
 (git-ignored by the kit, its own git repository), so the agent keeps working in the same chat, inside its permitted
-folder, and VS Code shows it in the Explorer. pbik takes `--project <name>` (the agent passes it; the person never
-sees it). Where the project sits is decision D2.
+folder, and VS Code shows it in the Explorer. pbik takes `--in <name>` before the command (the agent passes it;
+the person never sees it). Where the project sits is decision D2. Pack folders can be the person's own settings
+(`model packs --add-folder`), so every new project finds them and no machine path is committed.
 
 **Project status file:** `design/status.json` (committed, no data): path taken, mode, report type, model pack, data
 class, approved plan hash, stage done and stage next, last polish score. `pbik status` gives the plain line. Rule for
@@ -286,7 +287,7 @@ a short report after each stage, continuing unless something needs a decision.
 
 | Stage | Items | What | Tests |
 | --- | --- | --- | --- |
-| a | 10, 6 | guard fix; `projects\` inside the open folder, `--project`; `design/status.json`, `pbik status` | hook from 3 working folders; status after each stage; a new chat's first line |
+| a | 10, 6 | guard fix; `projects\` inside the open folder, `--in`; `design/status.json`, `pbik status` | hook from 3 working folders; status after each stage; a new chat's first line |
 | b | 5 | `gate open` / `gate wait`, code as picture, refusals, screen-control marker hook | dialog stub; wrong code x3; changed hash; marker; no file holds the code |
 | c | 7, 8 | PLAIN-WORDS updates, question rules, interaction counting | user-facing text check; interaction counts on a scripted run |
 | d | 1 | `start detect`, `layout from-report`, fingerprint and pack match, starter layouts | each input kind detected; big-model report round trip; pack matched by fingerprint |
@@ -316,8 +317,8 @@ switch to live. Copilot follows the same rules through its instruction and promp
 and .github/prompts/, generated from CLAUDE.md, .claude/rules and .claude/commands by tools/copilot/sync.py), so it
 uses the same plain words, status line and question rules.
 
-- **Prompts:** new `.github/prompts/start.prompt.md` (the main flow: detect, plan picture, guided or quick build) and
-  `status.prompt.md` ("where am I"), mirrored from `.claude/commands/start.md` and `status.md`. A person never needs to
+- **Prompts:** new `.github/prompts/kit-start.prompt.md` (the main flow: detect, plan picture, guided or quick build)
+  and `kit-status.prompt.md` ("where am I"), mirrored from `.claude/commands/start.md` and `status.md`. A person never needs to
   type one: the instructions tell Copilot to follow the start flow when someone asks for a dashboard.
 - **Pictures:** the plan picture and the result screenshots are PNG files. Copilot chat shows an image only when it is
   attached, so the agent opens each PNG beside the chat in a VS Code editor tab (`code <png>` from its terminal, the

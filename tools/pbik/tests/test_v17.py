@@ -3,6 +3,7 @@
     python tools\\pbik\\tests\\test_v17.py
 """
 import json, os, pathlib, shutil, subprocess, sys, tempfile, unittest
+os.environ.setdefault("PBIK_HOME", tempfile.mkdtemp(prefix="pbik_home_"))   # never the person's own settings
 
 HERE = pathlib.Path(__file__).resolve().parent
 KIT = HERE.parents[2]
@@ -16,9 +17,10 @@ from pbikit import status as ST  # noqa: E402
 MODEL = "/".join(("design", "reference", "model"))           # spelled in parts: the guard reads tool calls
 
 
-def pbik(*args, cwd=None):
+def pbik(*args, cwd=None, env_home=None):
+    env = {**os.environ, **({"PBIK_HOME": str(env_home)} if env_home else {})}
     return subprocess.run([sys.executable, str(PBIK), *map(str, args)], capture_output=True, text=True,
-                          encoding="utf-8", cwd=cwd)
+                          encoding="utf-8", cwd=cwd, env=env)
 
 
 class Tmp(unittest.TestCase):
@@ -432,9 +434,10 @@ class StartTests(Tmp):
         b = self.tmp / "second"
         (b / "design" / "specs").mkdir(parents=True)
         DC.set_class(b, "restricted")
-        proj = DC.read_project(b)
-        proj["packFolders"] = [str(packs)]
-        S.write_json(DC.project_file(b), proj)
+        r = pbik("model", "packs", "--add-folder", packs, "--root", b,
+                 env_home=self.tmp / "home")                            # the person's own settings, any project
+        self.assertIn("Example Big: version 1", r.stdout)
+        self.assertNotIn("packFolders", json.dumps(DC.read_project(b)), "no machine path in a project file")
         drop = b / "design" / "reference" / "model"
         import big_model as BM
         BM.write(drop, "tmdl")
@@ -696,6 +699,42 @@ class DesktopCloseTests(Tmp):
         killed = []
         self.assertTrue(self.D.close(self.tmp, self.report, kill=killed.append, read_state=lambda: self.state))
         self.assertEqual(killed, [], "never closed on doubt")
+
+
+# ---------------------------------------------------------------- stage g
+class DocsTests(unittest.TestCase):
+    """A11, A15: the walkthrough, how-tos, main-flow command files and their Copilot mirrors."""
+
+    def text(self, rel):
+        return (KIT / rel).read_text(encoding="utf-8")
+
+    def test_walkthrough(self):
+        w = self.text("docs/PHASE1-WALKTHROUGH.md")
+        for need in ("Claude desktop app", "Claude Code in VS Code", "Copilot in VS Code", "pbik-walkthrough-inputs",
+                     "`1 made-up model`", "`2 made-up live pick`", "`3 made-up wireframe`", "`4 made-up requirements`",
+                     "Run A. Guided build", "Run B. Quick build", "Run C. No wireframe", "| Run | Build option | "
+                     "Polish score | Interactions |", "## Verify at work", "**Guided build.**", "**Quick build.**"):
+            self.assertIn(need, w)
+        self.assertNotRegex(w, r"\*You say:\*[^\n]*" + SLASH, "the person never types a slash command")
+        q = self.text("docs/QUICKSTART.md")
+        self.assertIn("**Guided build.**", q)
+        self.assertIn("**Quick build.**", q)
+
+    def test_main_flow_files_and_copilot(self):
+        start = self.text(".claude/commands/start.md")
+        for need in ("pbik status", "pbik start detect", "pbik plan show", "pbik plan open", "pbik plan approve",
+                     "pbik plan check", "pbik gate open", "pbik mode", "pbik score", "pbik desktop close",
+                     "--interaction", "Switch to live?"):
+            self.assertIn(need, start)
+        for name in ("start", "status"):
+            self.assertTrue((KIT / ".github" / "prompts" / f"kit-{name}.prompt.md").exists(), name)
+        claude = self.text("CLAUDE.md")
+        self.assertIn(".claude/commands/start.md", claude)
+        self.assertIn("pbik gate open", claude)
+        self.assertIn(".claude/commands/start.md", self.text(".github/copilot-instructions.md"))
+        r = subprocess.run([sys.executable, str(KIT / "tools" / "copilot" / "sync.py"), "--check"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout)
 
 
 if __name__ == "__main__":

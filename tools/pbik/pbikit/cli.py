@@ -179,6 +179,9 @@ def _main(argv=None):
     mi.add_argument("--open", action="store_true", help="make the drop folder and open it for the user (reads nothing)")
     mpk = mo.add_parser("packs", help="model packs in the project's pack folders (project.json packFolders)")
     mpk.add_argument("--root", default=".")
+    mpk.add_argument("--add-folder", help="remember a pack folder for every project (your own settings, not a file "
+                                          "in any repository)")
+    mpk.add_argument("--team", action="store_true", help="with --add-folder: it is the team folder")
     mrp = mo.add_parser("rules", help="rules a person made that the kit's rule library could learn")
     mrp.add_argument("--root", default=".")
     mr = mo.add_parser("register", help="save the approved contract, synthetic model and bind map as a model pack")
@@ -466,6 +469,9 @@ def _main(argv=None):
         info(args.report, args.json)
     elif c == "model" and args.sub == "packs":
         from . import packs as PK
+        if args.add_folder:
+            PK.add_pack_folder(args.add_folder, args.team)
+            print(f"I'll look for model packs in that {'team ' if args.team else ''}folder in every project.")
         found = PK.list_packs(args.root)
         for name, v, cls, folder, team in found:
             print(f"{name}: version {v}, data class {cls}{' (team folder)' if team else ''}")

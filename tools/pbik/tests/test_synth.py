@@ -5,6 +5,7 @@
 The sample model (tests/synth_sample/Example Live.SemanticModel) is invented: no real names, IDs, values or colours.
 """
 import json, os, pathlib, re, shutil, subprocess, sys, tempfile, unittest
+os.environ.setdefault("PBIK_HOME", tempfile.mkdtemp(prefix="pbik_home_"))   # never the person's own settings
 from unittest import mock
 
 HERE = pathlib.Path(__file__).resolve().parent

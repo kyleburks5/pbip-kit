@@ -7,6 +7,16 @@ catalog): docs/WORK-SETUP.md.
 
 Setup checked on VS Code 1.143.1 (2026-10-29): the /kit- prompts are listed; Copilot read and summarised the kit's workflow, visual-method ladder and data-safety rules correctly; powerbi-authoring-local and daxlib-mcp tools are visible once started. **Copilot end-to-end check: pending.** No /kit- command has been run in Copilot yet; `/kit-brd` and `/kit-plan` run at work on the first day (VERSIONS.md).
 
+## The main flow in Copilot (v1.7, verify at work)
+
+Copilot is the main work environment. Ask for a dashboard in Copilot Chat (agent mode); the instructions send it
+through the main flow (`.github/prompts/kit-start.prompt.md`, from .claude/commands/start.md): what you have, the plan
+as a picture, a guided or quick build, the result with the polish score, switching to live. The plan picture and the
+screenshots open beside the chat as editor tabs (Copilot chat shows an image only when it is attached). Approval
+windows open by themselves from Copilot's terminal: read them, type the code, click Yes or No. In a new chat, ask
+"where am I?" (or `/kit-status`). Nothing here has been run in Copilot yet: docs/PHASE1-WALKTHROUGH.md "Verify at
+work".
+
 ## What differs from Claude Code
 
 | Claude Code | Copilot Chat (Agent mode) |
