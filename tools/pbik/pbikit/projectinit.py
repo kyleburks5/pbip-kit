@@ -49,7 +49,10 @@ def init(name, parent=None, cls="internal", from_pack=None, kit=KIT, out=print):
     DC.set_class(target, cls)
     if from_pack:
         from . import packs
-        packs.project_new(target, from_pack, out=lambda *a: None)
+        pack = pathlib.Path(from_pack)
+        if not (pack / "pack.json").exists():         # a model name: look in the kit's pack folders
+            pack = packs.find(kit, from_pack)
+        packs.project_new(target, pack, out=lambda *a: None)
     git(target, "init", "-q")
     git(target, "add", "-A")
     r = git(target, "commit", "-q", "-m", f"project start: {target.name} (pbip-kit, data class {cls})")

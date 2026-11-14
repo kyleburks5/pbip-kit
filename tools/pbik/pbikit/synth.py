@@ -214,14 +214,18 @@ def apply_rules(contract):
     return filled
 
 
-def contract(source, root=".", out=None):
-    """Write design/specs/contract.json from a model; rules (and resolutions they cover) carry over."""
+def contract(source, root=".", out=None, library=True):
+    """Write design/specs/contract.json from a model; rules (and resolutions they cover) carry over, then the kit's
+    rule library (tools/pbik/rules/library.json) resolves what is still open (library=False: not)."""
     out = pathlib.Path(out) if out else specs(root) / "contract.json"
     c = build_contract(source, root)
     old = read_json(out)
     if old:
         c["rules"] = old.get("rules", [])
     apply_rules(c)
+    if library:
+        from . import rules as R
+        R.apply_library(c)
     write_json(out, c)
     return c, out
 

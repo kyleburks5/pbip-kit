@@ -473,6 +473,19 @@ a `.pbix` can't be read), writes the contract and logs what it read and deleted 
 A Claude Code hook (tools/hooks/guard_model_folder.py, .claude/settings.json) stops the agent opening the folder
 itself; Copilot follows the same rule in its instructions.
 
+### Rule library, grouped approval, pack folders (`model packs`, `model rules`)
+
+`synth contract` applies the project's own rules, then the kit's rule library (tools/pbik/rules/library.json: M code,
+connections, RLS and entity tables synthesized or not reproduced; small option tables with a label and an order column
+keep their rows, a person confirming them); `--no-library` skips it. The *Approve the model* summary groups the flags:
+"87 handled by rules, 20 option table(s) to keep, 5 need you"; it can't be prepared while any need a person.
+project.json `packFolders` (paths, or `{"path", "team": true}`) is where packs are found: `model packs` lists them,
+`project init --from-pack <model name>` starts from one, and `model intake` in a project started from a pack writes only
+the drift (design/specs/drift.json) for *Approve model changes*. Sharing to a team folder is the *Share the model pack*
+task; a team folder's `team.json` `{"registrars": {"<class>": [names]}}` limits who may share per data class.
+`model rules` writes design/reviews/rule-proposals.md: rules a person made for every table of a kind that the library
+doesn't have, for review at the next kit update.
+
 ## Synthetic to live (docs/design/synth-to-live.md)
 
 ### `project class [public|internal|restricted] [--guard dax|screenshot]`

@@ -49,8 +49,7 @@ def _contract_summary(root):
     g = R.groups(c)
     lines = [f"Model {c['model']}: {len(c['tables'])} tables, "
              f"{sum(len(t['measures']) for t in c['tables'].values())} measures, {len(c['relationships'])} relationships.",
-             f"{len(g['rules'])} handled by rules, {len(g['keep'])} option table(s) to keep (their rows are shown "
-             f"next), {len(g['you'])} need you."]
+             R.summary_line(c) + "." + (" The option tables' rows are shown below." if g["keep"] else "")]
     if g["you"]:
         raise GateError(f"{len(g['you'])} item(s) still need a decision before approval: "
                         + "; ".join(R.plain(f) for f in g["you"][:5]))
@@ -77,8 +76,11 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
                                          + list(m.get("fields", {}).items())[:30]))
         h = BD.map_hash(m)
     elif gate == "model-approve":
-        from . import packs as PK
-        d = read_json(pathlib.Path(pack) / "drift.json") if pack else None
+        pack = pack or (DC.read_project(root).get("pack") or {}).get("path")
+        df = specs(root) / "drift.json"
+        df = df if df.exists() else (pathlib.Path(pack) / "drift.json" if pack else None)
+        args.update(pack=pack, drift=str(df) if df else None)
+        d = read_json(df) if df else None
         if not d:
             raise GateError("no model changes are waiting for approval")
         text = f"{len(d['changes'])} change(s) to {d['contract']['model']} since the last approval:\n" + "\n".join(
@@ -111,9 +113,14 @@ def prepare(gate, root=".", report=None, pack=None, from_=None, workspace=None, 
                 + ("live queries and screenshots are allowed again." if old == "restricted" else "fewer limits apply."))
         h = _h(old, to_class)
     else:                                                   # pack-register
+        from . import packs as PK
         c = read_json(specs(root) / "contract.json")
+        to = to or next((str(p) for p, team in PK.pack_folders(root) if team), None)
         if not c or not to:
             raise GateError("there is no approved model to share, or no team folder")
+        args["to"] = to
+        if not PK.may_register(to, DC.data_class(root), approver(root)):
+            raise GateError(f"only people approved for {DC.data_class(root)} data may share packs in the team folder")
         text = (f"Share the approved setup of {c['model']} (data class {DC.data_class(root)}) in the team folder. "
                 "Only people approved for this data class may do this.")
         h = _h(content_hash(c), str(to))
@@ -220,7 +227,7 @@ def apply(gate, root, a, by):
         BD.map_approve(a["report"], by, root, ask=confirm_from_dialog, out=quiet)
     elif gate == "model-approve":
         from . import packs as PK
-        PK.approve(a["pack"], by, ask=confirm_from_dialog, out=quiet)
+        PK.approve(a["pack"], by, ask=confirm_from_dialog, out=quiet, drift_file=a.get("drift"))
     elif gate == "bind-live":
         from . import bind as BD
         BD.live(a["report"], by, a["workspace"], a["model"], a["mid"], a.get("from_"), root,

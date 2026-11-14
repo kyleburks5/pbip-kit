@@ -141,6 +141,10 @@ def _main(argv=None):
     mi = mo.add_parser("intake", help="the model drop folder: delete data files, detect the format, write the contract")
     mi.add_argument("--root", default=".")
     mi.add_argument("--folder", help="drop folder (default design/reference/model)")
+    mpk = mo.add_parser("packs", help="model packs in the project's pack folders (project.json packFolders)")
+    mpk.add_argument("--root", default=".")
+    mrp = mo.add_parser("rules", help="rules a person made that the kit's rule library could learn")
+    mrp.add_argument("--root", default=".")
     mr = mo.add_parser("register", help="save the approved contract, synthetic model and bind map as a model pack")
     mr.add_argument("project")
     mr.add_argument("--to", required=True, help="the packs folder (outside the kit and any git repository)")
@@ -195,6 +199,7 @@ def _main(argv=None):
     syc.add_argument("source")
     syc.add_argument("--root", default=".")
     syc.add_argument("--out")
+    syc.add_argument("--no-library", action="store_true", help="don't apply the kit's rule library")
     syr = sys_.add_parser("resolve", help="resolve a flag (or --every flag of a kind) and record the rule")
     syr.add_argument("flag", help="flag ID (F3), or a kind with --every")
     syr.add_argument("resolution")
@@ -331,6 +336,18 @@ def _main(argv=None):
     elif c == "info":
         from .info import info
         info(args.report, args.json)
+    elif c == "model" and args.sub == "packs":
+        from . import packs as PK
+        found = PK.list_packs(args.root)
+        for name, v, cls, folder, team in found:
+            print(f"{name}: version {v}, data class {cls}{' (team folder)' if team else ''}")
+        if not found:
+            print("no model packs in the pack folders")
+    elif c == "model" and args.sub == "rules":
+        from . import rules as R
+        from .synth import read_json, specs
+        props = R.write_proposals(args.root, R.propose(read_json(specs(args.root) / "contract.json") or {}))
+        print(f"{len(props)} rule(s) proposed for the library")
     elif c == "model" and args.sub == "intake":
         from . import intake as IN, synth as S3
         try:
@@ -500,7 +517,7 @@ def synth_cmd(args):
     from . import dataclass_ as DC, synth as S
     try:
         if args.sub == "contract":
-            c, out = S.contract(args.source, args.root, args.out)
+            c, out = S.contract(args.source, args.root, args.out, library=not args.no_library)
             print(f"{out}: {len(c['tables'])} table(s), {len(c['relationships'])} relationship(s), "
                   f"{len(c['flags'])} flag(s)")
             for f in c["flags"]:

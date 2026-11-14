@@ -1,0 +1,11 @@
+{
+  "_note": "Generic flag rules (docs/design/phase1-usability.md, section 4): applied after a project's own rules, to flags still open. match: maxRows, columns (each pattern must match a column name), table (pattern on the table name), all case-insensitive. A rule whose resolution keeps rows still needs a person's Yes. Add a rule only through review (pbik rules propose).",
+  "version": 1,
+  "rules": [
+    {"id": "L01", "kind": "m-code", "resolution": "synthesize", "why": "a table loaded by a query gets made-up rows of the same shape"},
+    {"id": "L02", "kind": "connection", "resolution": "synthesize", "why": "connections are never copied; the synthetic model has no source"},
+    {"id": "L03", "kind": "rls", "resolution": "not reproduced", "why": "roles aren't copied; the synthetic model has no roles"},
+    {"id": "L04", "kind": "entity", "resolution": "synthesize", "why": "account, member and other entity tables get made-up values only"},
+    {"id": "L05", "kind": "enter-data", "match": {"maxRows": 50, "columns": ["label|name|option|choice|caption|text|title", "order|sort|rank|seq|index|position"]}, "resolution": "keep rows: option labels", "why": "a small option table (a label and an order) keeps its labels and order; a person confirms them"}
+  ]
+}

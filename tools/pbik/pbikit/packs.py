@@ -157,7 +157,7 @@ def changes(old, new):
     return out
 
 
-def drift(pack, tmdl_source, out=print):
+def drift(pack, tmdl_source, out=print, drift_file=None):
     """Compare a new TMDL with the pack's contract: list only what changed; flags pre-filled from the saved rules."""
     vd = version_dir(pack)
     old = read_json(vd / "contract.json")
@@ -173,6 +173,8 @@ def drift(pack, tmdl_source, out=print):
         if prev and prev.get("resolution"):
             f["resolution"], f["rule"] = prev["resolution"], prev.get("rule")
     filled = apply_rules(new)
+    from . import rules as R
+    filled += R.apply_library(new)                    # what the pack's rules don't cover, the kit's library may
     for t, tb in old["tables"].items():              # kept option rows carry over while the table is unchanged
         if tb.get("rows") and t in new["tables"] and new["tables"][t]["columns"] == tb["columns"]:
             new["tables"][t]["rows"] = tb["rows"]
@@ -180,7 +182,7 @@ def drift(pack, tmdl_source, out=print):
     new_flags = [f for f in new["flags"] if (f["kind"], N.key(f.get("table"))) not in old_res]
     d = {"base": pack_info(pack)["current"], "contract": new, "changes": ch,
          "newFlags": [f["id"] for f in new_flags], "prefilled": [f["id"] for f in filled]}
-    write_json(pathlib.Path(pack) / "drift.json", d)
+    write_json(pathlib.Path(drift_file) if drift_file else pathlib.Path(pack) / "drift.json", d)
     for x in ch:
         out(f"{x['change']:8} {x['kind']:12} {x['what']}" + (f" ({x['detail']})" if x["detail"] else ""))
     for f in new_flags:
@@ -209,12 +211,13 @@ def affected_tables(c, ch, slice_):
     return sorted(t for t in slice_ if N.key(t) in hit)
 
 
-def approve(pack, by, ask=None, out=print):
+def approve(pack, by, ask=None, out=print, drift_file=None):
     """Person-only: approve the drift list, regenerate only the affected tables, bump the version."""
     from . import synthgen as G
     pack = pathlib.Path(pack)
     st = DC.stamp(by)
-    d = read_json(pack / "drift.json")
+    df = pathlib.Path(drift_file) if drift_file else pack / "drift.json"
+    d = read_json(df)
     if not d:
         raise PackError("no drift.json: run `pbik model drift <pack> <new TMDL>` first")
     info = pack_info(pack)
@@ -271,6 +274,44 @@ def approve(pack, by, ask=None, out=print):
                              "changes": len(d["changes"]), "regenerated": affected})
     info["current"] += 1
     write_json(pack / "pack.json", info)
-    (pack / "drift.json").unlink()
+    df.unlink()
     out(f"{c['model']} v{info['current']}: {len(d['changes'])} change(s), regenerated {', '.join(affected) or 'nothing'}")
     return info["current"], affected
+
+
+# ---------------------------------------------------------------- pack folders (Phase 1, stage d)
+def pack_folders(root):
+    """[(path, team?)] from project.json `packFolders` (strings, or {"path", "team"})."""
+    out = []
+    for x in DC.read_project(root).get("packFolders", []):
+        p, team = (x, False) if isinstance(x, str) else (x.get("path"), bool(x.get("team")))
+        if p:
+            out.append((pathlib.Path(p), team))
+    return out
+
+
+def list_packs(root):
+    """[(name, current version, data class, folder, team?)] of every pack in the project's pack folders."""
+    out = []
+    for folder, team in pack_folders(root):
+        for pj in sorted(folder.glob("*/pack.json")) if folder.is_dir() else []:
+            info = read_json(pj)
+            out.append((info["name"], info["current"], info.get("dataClass"), pj.parent, team))
+    return out
+
+
+def find(root, name):
+    """The pack folder of a model by name (case-insensitive), from the project's pack folders."""
+    hits = [p for p in list_packs(root) if N.same(p[0], name)]
+    if not hits:
+        raise PackError(f"no model pack named {name!r} in the pack folders")
+    return hits[0][3]
+
+
+def may_register(folder, cls, who):
+    """Team folders list who may register per data class in team.json {"registrars": {class: [names]}}."""
+    t = read_json(pathlib.Path(folder) / "team.json")
+    if not t:
+        return True
+    allowed = (t.get("registrars") or {}).get(cls, [])
+    return any(N.same(a, who) or N.key(a) in N.key(who) for a in allowed)

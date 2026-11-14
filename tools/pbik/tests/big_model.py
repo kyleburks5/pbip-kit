@@ -3,8 +3,9 @@
     write(folder, fmt) with fmt "tmdl" (a definition folder), "script" (one createOrReplace TMDL file), "semanticmodel"
     (a .SemanticModel folder with a fake cache.abf and .pbi folder) or "tmsl" (a .bim JSON export).
 
-60 tables: a calculated calendar, 10 facts, 8 dimensions, 6 account / member-like tables, 20 option tables (Enter
-data, 2-40 rows, a label and an order column), 15 other query tables; 400 measures; 3 RLS roles; M partitions with
+66 tables: a calculated calendar, 10 facts, 8 dimensions, 6 account / member-like tables, 20 option tables (Enter
+data, 2-40 rows, a label and an order column), 15 other query tables, 5 typed
+tables that aren't option lists; 400 measures; 3 RLS roles; M partitions with
 invented servers; relationships from every fact to the calendar and the dimensions.
 """
 import base64, json, pathlib, zlib
@@ -54,6 +55,12 @@ def tables():
         out.append((o, [("Label", "string"), ("Sort Order", "int64")], "m", src, []))
     for o in OTHER:
         out.append((o, [("Code", "string"), ("Description", "string")], "m", m_source(o), []))
+    for k in range(1, 6):                                      # typed tables that aren't option lists: a person decides
+        rows = [[f"Region {i}", str(100 * i)] for i in range(1, 4)]
+        src = (f'Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("{deflate(rows)}", '
+               f'BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = '
+               f'true]) in type table [#"Region Code" = _t, #"Target" = _t])')
+        out.append((f"Manual Targets {k}", [("Region Code", "string"), ("Target", "int64")], "m", src, []))
     measures = []
     for i in range(400):
         f = FACTS[i % len(FACTS)]

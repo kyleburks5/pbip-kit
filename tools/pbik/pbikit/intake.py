@@ -8,6 +8,8 @@ logs what it did in design/reviews/model-intake.md. Users drop a copy, never the
 """
 import datetime, json, pathlib, shutil
 
+from . import dataclass_ as DC
+
 DROP = pathlib.Path("design") / "reference" / "model"
 DATA_SUFFIX = {".abf", ".pbix", ".pbit", ".parquet", ".csv", ".xlsx", ".xls", ".cache"}
 DATA_DIRS = {".pbi", "data"}
@@ -87,6 +89,14 @@ def intake(root=".", folder=None, out=print):
     if len(models) > 1:
         raise IntakeError(f"{len(models)} models found; drop one at a time")
     fmt, path = models[0]
+    pack = (DC.read_project(root).get("pack") or {}).get("path")
+    if pack and pathlib.Path(pack, "pack.json").exists():  # reuse: only what changed since the pack
+        from . import packs as PK
+        d = PK.drift(pack, path, out=lambda *a: None, drift_file=S.specs(root) / "drift.json")
+        log(root, fmt, path.name, removed, d["contract"])
+        out(f"read the model ({fmt}): {len(d['changes'])} change(s) since the model pack"
+            + ("; approve them with the task 'Approve model changes'" if d["changes"] or d["newFlags"] else ""))
+        return {"format": fmt, "removed": removed, "contract": d["contract"], "drift": d}
     c, _ = S.contract(path, root)
     log(root, fmt, path.name, removed, c)
     out(f"read the model ({fmt}): {len(c['tables'])} tables, "

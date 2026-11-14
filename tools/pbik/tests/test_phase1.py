@@ -112,8 +112,8 @@ class GateTests(Tmp):
         opt = next(f["id"] for f in c["flags"] if f["table"] == "Option 03")
         S.resolve(self.tmp, opt, S.KEEP_ROWS, out=lambda *a: None)
         doc = self.GT.prepare("synth-approve", self.tmp)
-        self.assertIn("61 tables, 400 measures", doc["summary"])
-        self.assertIn("106 handled by rules, 1 option table(s) to keep", doc["summary"])
+        self.assertIn("66 tables, 400 measures", doc["summary"])
+        self.assertIn("111 handled by rules, 1 option table(s) to keep", doc["summary"])
         self.assertNotIn("Choice 1", json.dumps(doc), "the agent's prepared file never holds the rows")
         with mock.patch.dict(os.environ, {"CLAUDECODE": "1"}), self.assertRaises(self.GT.GateError):
             self.GT.run("synth-approve", self.tmp, dialog=self.dialog(True))
@@ -177,7 +177,7 @@ class IntakeTests(Tmp):
             BM.write(d, fmt)
             r = IN.intake(self.tmp, out=lambda *a: None)
             self.assertEqual(r["format"], name)
-            self.assertEqual(len(r["contract"]["tables"]), 61, fmt)
+            self.assertEqual(len(r["contract"]["tables"]), 66, fmt)
             self.assertEqual((d / ".gitignore").read_text(encoding="utf-8").strip(), "*")
 
     def test_data_deleted_before_any_read(self):
@@ -240,6 +240,94 @@ class IntakeTests(Tmp):
         self.assertEqual(r.returncode, 0, "file contents mentioning the folder aren't blocked")
         settings = json.loads((KIT / ".claude" / "settings.json").read_text(encoding="utf-8"))
         self.assertIn("guard_model_folder.py", json.dumps(settings["hooks"]["PreToolUse"]))
+
+
+class RuleLibraryTests(Tmp):
+    """Stage (d): the rule library pre-resolves most flags; grouped approval; plain explanations; proposals."""
+
+    def test_library_coverage_and_groups(self):
+        from pbikit import rules as R, gates as GT
+        big_project(self.tmp, resolve=False)
+        c = S.read_json(self.tmp / "design/specs/contract.json")
+        g = R.groups(c)
+        total = len(c["flags"])
+        self.assertEqual((total, len(g["rules"]), len(g["keep"]), len(g["you"])), (112, 87, 20, 5))
+        self.assertGreaterEqual((len(g["rules"]) + len(g["keep"])) / total, 0.9)
+        self.assertEqual(R.summary_line(c), "87 handled by rules, 20 option table(s) to keep, 5 need you")
+        self.assertTrue(all(f["table"].startswith("Manual Targets") for f in g["you"]))
+        self.assertTrue(all(f["table"].startswith("Option") for f in g["keep"]), "never an entity table")
+        self.assertTrue(all(f.get("source") == "library" for f in g["rules"] + g["keep"]))
+        self.assertEqual(R.plain(g["you"][0]), "Manual Targets 1: a small table someone typed into the model")
+        with self.assertRaises(GT.GateError) as cm:
+            GT.prepare("synth-approve", self.tmp)
+        self.assertIn("5 item(s) still need a decision", str(cm.exception))
+        for f in g["you"]:                                   # the person answered in chat; the agent records it
+            S.resolve(self.tmp, f["id"], "synthesize", why="typed targets: made-up values", out=lambda *a: None)
+        doc = GT.prepare("synth-approve", self.tmp)
+        self.assertIn("92 handled by rules, 20 option table(s) to keep, 0 need you", doc["summary"])
+        shown = []
+        GT.run("synth-approve", self.tmp, dialog=lambda t, x: shown.append(x) or True, person=True,
+               out=lambda *a: None)
+        self.assertEqual(shown[0].count(" keeps "), 20)
+        self.assertTrue(S.approved(S.read_json(self.tmp / "design/specs/contract.json")))
+
+    def test_proposals(self):
+        from pbikit import rules as R
+        big_project(self.tmp, resolve=False)
+        S.resolve(self.tmp, "enter-data", "drop", why="typed tables are left out here", every=True,
+                  out=lambda *a: None)
+        props = R.propose(S.read_json(self.tmp / "design/specs/contract.json"))
+        self.assertEqual([(p["kind"], p["resolution"]) for p in props], [("enter-data", "drop")])
+
+
+class PackReuseTests(Tmp):
+    """Stage (d): share through the gate to a team folder, start a new dashboard from the pack, automatic drift."""
+
+    def test_share_reuse_and_drift(self):
+        import time
+        from pbikit import gates as GT, intake as IN, packs as PK, projectinit as PI, rules as R
+        yes = lambda t, x: True                                                     # noqa: E731
+        a = self.tmp / "first"
+        big_project(a, resolve=False)
+        c = S.read_json(a / "design/specs/contract.json")
+        for f in R.groups(c)["you"]:
+            S.resolve(a, f["id"], "synthesize", why="typed targets", out=lambda *x: None)
+        GT.prepare("synth-approve", a)
+        GT.run("synth-approve", a, dialog=yes, person=True, out=lambda *x: None)
+        team = self.tmp / "team-packs"
+        team.mkdir()
+        S.write_json(team / "team.json", {"registrars": {"internal": ["Someone Else"]}})
+        proj = DC.read_project(a)
+        proj["packFolders"] = [{"path": str(team), "team": True}]
+        S.write_json(DC.project_file(a), proj)
+        with self.assertRaises(GT.GateError) as cm:
+            GT.prepare("pack-register", a)
+        self.assertIn("only people approved for internal data", str(cm.exception))
+        S.write_json(team / "team.json", {"registrars": {"internal": [GT.approver(a)]}})
+        GT.prepare("pack-register", a)
+        GT.run("pack-register", a, dialog=yes, person=True, out=lambda *x: None)
+        self.assertEqual([(n, v) for n, v, *_ in PK.list_packs(a)], [("Example Big", 1)])
+        self.assertEqual(PK.find(a, "example big"), team / "Example Big")
+        info = S.read_json(team / "Example Big" / "pack.json")
+        self.assertTrue(info["versions"][0]["approver"] and info["versions"][0]["date"])
+        # a new dashboard on the same model, then a newer model dropped: only the change reaches a person
+        start = time.time()
+        b = PI.init("Second Dashboard", self.tmp, from_pack=team / "Example Big", out=lambda *x: None)
+        self.assertTrue(S.approved(S.read_json(b / "design/specs/contract.json")))
+        drop = b / "design" / "reference" / "model"
+        drop.mkdir(parents=True)
+        src = BM.write(drop, "tmdl")
+        t = src / "definition" / "tables" / "Fact Orders.tmdl"
+        t.write_text(t.read_text(encoding="utf-8").replace("column Status", "column 'Order Status'"),
+                     encoding="utf-8")
+        r = IN.intake(b, out=lambda *x: None)
+        self.assertEqual(sorted(x["what"] for x in r["drift"]["changes"]),
+                         ["Fact Orders[Order Status]", "Fact Orders[Status]"])
+        doc = GT.prepare("model-approve", b)
+        self.assertIn("2 change(s) to Example Big", doc["summary"])
+        GT.run("model-approve", b, dialog=yes, person=True, out=lambda *x: None)
+        self.assertEqual(S.read_json(team / "Example Big" / "pack.json")["current"], 2)
+        self.assertLess(time.time() - start, 600, "reuse in under 10 minutes of tool time")
 
 
 if __name__ == "__main__":
