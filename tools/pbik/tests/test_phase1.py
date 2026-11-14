@@ -159,5 +159,88 @@ class GateTests(Tmp):
         self.assertTrue(all(t["args"][-1] in SM.GATES for t in tasks["tasks"]))
 
 
+class IntakeTests(Tmp):
+    """Stage (c): the model drop folder: data files deleted before anything reads it, every format detected."""
+
+    def drop(self):
+        d = self.tmp / "design" / "reference" / "model"
+        d.mkdir(parents=True)
+        (self.tmp / "design" / "specs").mkdir(parents=True, exist_ok=True)
+        return d
+
+    def test_every_format(self):
+        from pbikit import intake as IN
+        for fmt, name in (("tmdl", "TMDL folder"), ("script", "TMDL script"), ("semanticmodel", "semantic model folder"),
+                          ("tmsl", "TMSL export")):
+            shutil.rmtree(self.tmp, ignore_errors=True)
+            d = self.drop()
+            BM.write(d, fmt)
+            r = IN.intake(self.tmp, out=lambda *a: None)
+            self.assertEqual(r["format"], name)
+            self.assertEqual(len(r["contract"]["tables"]), 61, fmt)
+            self.assertEqual((d / ".gitignore").read_text(encoding="utf-8").strip(), "*")
+
+    def test_data_deleted_before_any_read(self):
+        from pbikit import intake as IN
+        d = self.drop()
+        BM.write(d, "semanticmodel")
+        (d / "Example Big.SemanticModel" / "data").mkdir()
+        (d / "Example Big.SemanticModel" / "data" / "rows.parquet").write_bytes(b"PAR1")
+        (d / "old report.pbix").write_bytes(b"PK made up")
+        events = []
+        real_unlink, real_read = pathlib.Path.unlink, pathlib.Path.read_text
+
+        def unlink(p, *a, **k):
+            events.append(("delete", p.name))
+            return real_unlink(p, *a, **k)
+
+        def read(p, *a, **k):
+            events.append(("read", p.name))
+            return real_read(p, *a, **k)
+        said = []
+        with mock.patch.object(pathlib.Path, "unlink", unlink), mock.patch.object(pathlib.Path, "read_text", read):
+            r = IN.intake(self.tmp, out=said.append)
+        self.assertEqual(sorted(r["removed"]), sorted(["Example Big.SemanticModel/.pbi/cache.abf",
+                                                       "Example Big.SemanticModel/.pbi/localSettings.json",
+                                                       "Example Big.SemanticModel/data/rows.parquet",
+                                                       "old report.pbix"]))
+        first_read = next(k for k, e in enumerate(events) if e[0] == "read")
+        self.assertTrue(all(e[0] == "delete" for e in events[:first_read]))
+        self.assertEqual(sum(1 for e in events[:first_read]), 4, "all four deleted before the first read")
+        self.assertFalse((d / "Example Big.SemanticModel" / ".pbi").exists())
+        self.assertIn("never your only file", said[0])
+        log = (self.tmp / "design/reviews/model-intake.md").read_text(encoding="utf-8")
+        self.assertIn("`old report.pbix`", log)
+
+    def test_refusals(self):
+        from pbikit import intake as IN
+        d = self.drop()
+        (d / "only.pbix").write_bytes(b"PK made up")
+        with self.assertRaises(IN.IntakeError) as cm:
+            IN.intake(self.tmp, out=lambda *a: None)
+        self.assertIn("Power BI project", str(cm.exception))
+        BM.write(d, "tmdl")
+        BM.write(d, "tmsl")
+        with self.assertRaises(IN.IntakeError):
+            IN.intake(self.tmp, out=lambda *a: None)
+
+    def test_hook_blocks_the_agent(self):
+        hook = KIT / "tools" / "hooks" / "guard_model_folder.py"
+        for event, code in ((("Read", {"file_path": "C:/p/design/reference/model/x.tmdl"}), 2),
+                            (("Grep", {"pattern": "measure", "path": r"design\reference\model"}), 2),
+                            (("Bash", {"command": r"type design\reference\model\x.bim"}), 2),
+                            (("Bash", {"command": "python tools/pbik/pbik.py model intake"}), 0),
+                            (("Read", {"file_path": "C:/p/design/reference/brd.md"}), 0)):
+            r = subprocess.run([sys.executable, str(hook)], input=json.dumps({"tool_name": event[0],
+                                                                              "tool_input": event[1]}),
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, code, event)
+        r = subprocess.run([sys.executable, str(hook)], input=json.dumps({"tool_name": "Edit", "tool_input": {
+            "file_path": "tools/x.py", "new_string": "see design/reference/model"}}), capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, "file contents mentioning the folder aren't blocked")
+        settings = json.loads((KIT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+        self.assertIn("guard_model_folder.py", json.dumps(settings["hooks"]["PreToolUse"]))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

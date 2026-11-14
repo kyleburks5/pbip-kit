@@ -463,6 +463,16 @@ a Windows dialog shows the summary (and, for the model, the rows kept) with Yes 
 approver from git's user name and the Windows login, and is logged in design/reviews/approvals.md. `gate run`
 refuses in an agent's shell or without a terminal, and when what is approved changed after `prepare`.
 
+### `model intake [--root] [--folder]`
+
+The model drop folder `design/reference/model/` (git-ignored, also in the root .gitignore): the user drops a copy of a
+TMDL folder, a TMDL `createOrReplace` script, a `.SemanticModel` folder or a TMSL / JSON export. Intake deletes every
+data file first, from names alone (any `.abf` such as cache.abf, `.pbi` and `data` folders, `.pbix`, `.pbit`,
+`.parquet`, `.csv`, `.xlsx`, `.xls`, `.cache`), permanently, and warns; then detects the format (one model at a time;
+a `.pbix` can't be read), writes the contract and logs what it read and deleted in design/reviews/model-intake.md.
+A Claude Code hook (tools/hooks/guard_model_folder.py, .claude/settings.json) stops the agent opening the folder
+itself; Copilot follows the same rule in its instructions.
+
 ## Synthetic to live (docs/design/synth-to-live.md)
 
 ### `project class [public|internal|restricted] [--guard dax|screenshot]`

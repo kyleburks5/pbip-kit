@@ -12,3 +12,5 @@ __pycache__/
 tools/wheels/
 # pbik bind backups and state (bind live / bind local)
 .pbik/
+# the model drop folder may hold data until pbik model intake runs (it deletes data files first)
+design/reference/model/

@@ -138,6 +138,9 @@ def _main(argv=None):
     mc = mo.add_parser("check", help="TMDL checks: descriptions, format strings, references, relationships")
     mc.add_argument("model")
     mc.add_argument("--folder", help="only measures in this display folder (e.g. Model)")
+    mi = mo.add_parser("intake", help="the model drop folder: delete data files, detect the format, write the contract")
+    mi.add_argument("--root", default=".")
+    mi.add_argument("--folder", help="drop folder (default design/reference/model)")
     mr = mo.add_parser("register", help="save the approved contract, synthetic model and bind map as a model pack")
     mr.add_argument("project")
     mr.add_argument("--to", required=True, help="the packs folder (outside the kit and any git repository)")
@@ -328,6 +331,13 @@ def _main(argv=None):
     elif c == "info":
         from .info import info
         info(args.report, args.json)
+    elif c == "model" and args.sub == "intake":
+        from . import intake as IN, synth as S3
+        try:
+            IN.intake(args.root, args.folder)
+        except (IN.IntakeError, S3.ContractError) as e:
+            print(f"pbik: {e}", file=sys.stderr)
+            return 2
     elif c == "model" and args.sub in ("register", "drift", "approve"):
         from . import dataclass_ as DC, packs as PK, synth as S
         try:
