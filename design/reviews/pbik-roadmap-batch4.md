@@ -68,7 +68,7 @@ Expect no proposals about button `general` paragraphs, matrix `active` or the ca
   the matrix's first row `active: true`, and the kpi-delta-card without `layout.verticalAlignment`.
 - **Per-step visual notes:** not recorded (the report back had placeholders for header/KPIs, hover icons, tables and
   buttons).
-- **Bookmark group: not confirmed.** Desktop's save reached the roundtrip with no group in bookmarks.json (no
-  bookmarks.json change but the final newline), so there was no Desktop-made group for the rebuild to leave alone;
-  the rebuild only put pbik's final newline back. "pbik leaves Desktop-made bookmark groups alone" stays unconfirmed
-  (smoke step 6, /smoke step 6): group both bookmarks, **save after grouping**, then roundtrip before rebuilding.
+- **Bookmark group: confirmed in Desktop** (second save, 2026-11-13). Desktop saved both bookmarks in a group
+  (`Group 1`, bookmarks.json `children`); the rebuild printed "bookmark … sits in Desktop group 'Group 1': left alone"
+  for both, left both bookmark files byte-identical and kept the group (bookmarks.json the same JSON, only pbik's
+  final newline back). Item 8 and batch 3 item 11's bookmark-group behaviour are confirmed.
