@@ -246,6 +246,18 @@ def refresh(folders, path=None, include_all=False, name=None, desktop=None, toda
 
 
 # ---------------------------------------------------------------- checks (pbik validate)
+# Settings pbik itself writes that no Desktop-saved file in the catalog holds yet, but that Desktop has shown as
+# intended (each with where it was seen). validate lists them as notes, not warnings, so a clean build reports 0.
+CONFIRMED_WRITES = {
+    "cardVisual referenceLabelTitle.titleContentType": "walkthrough 2026-11-14, Desktop 2.159.1231 (custom titles shown)",
+    "cardVisual referenceLabelTitle.titleText": "walkthrough 2026-11-14, Desktop 2.159.1231 (custom titles shown)",
+}
+
+
+def confirmed(why):
+    return any(why.startswith(k + " never seen") for k in CONFIRMED_WRITES)
+
+
 def check_entry(cat, visual_type, where, obj, prop, val, sel):
     """None if Desktop has saved this (object, property, value type, selector); else the reason."""
     if where == "visualContainerObjects":

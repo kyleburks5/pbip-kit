@@ -209,8 +209,11 @@ def measure_lines(m, src, planned):
     L = [f"\tmeasure {q(m)} = " + (body[0] if len(body) == 1 else "")]
     if len(body) > 1:
         L += ["\t\t\t" + ln.strip() for ln in body]
-    if (src or {}).get("formatString"):
-        L.append(f"\t\tformatString: {src['formatString']}")
+    fmt = (src or {}).get("formatString")
+    if not fmt and not re.search(r"%|share|rate|ratio|vs\b", m, re.I):
+        fmt = "#,0.00" if re.search(r"\bavg\b|average|mean", m, re.I) else "#,0"   # thousands separators (fix 8)
+    if fmt:
+        L.append(f"\t\tformatString: {thousands(fmt)}")
     L.append(f"\t\tlineageTag: {tag('measure', m)}")
     if planned:
         L += ["", "\t\tannotation PBIK_Planned = 1"]
@@ -275,8 +278,48 @@ def check_kept_rows(c, g):
             raise ContractError(f"{t}: kept rows without a 'keep rows: option labels' resolution, or entity data")
 
 
-def generate(root, name, out_folder=None):
-    """Write <name>.SemanticModel from the approved contract and generate.json. Returns the folder."""
+NUMBER_WORDS = {"no", "number", "num", "nr", "index", "idx", "sort", "order"}
+
+
+def _is_month_number(col):
+    k = N.key(col)
+    return "month" in k and bool(set(re.split(r"\W+", k)) & NUMBER_WORDS)
+
+
+def month_sorts(c, g):
+    """Month names sort by the month number (walkthrough fix 8): a text column named like Month with no sort-by column
+    gets the table's month-number column (Month No, MonthNumber, ...) as its sort-by column in the made-up model, the
+    number column joining the slice if it isn't in it. Returns plain lines: what was set, or exactly why not."""
+    notes = []
+    for t, sl in g["slice"].items():
+        tcols = c["tables"].get(t, {}).get("columns", {})
+        for x in list(sl.get("columns", [])):
+            col = tcols.get(x) or {}
+            if "month" not in N.key(x) or _is_month_number(x) or col.get("sortBy") or col.get("type") not in (None, "string"):
+                continue
+            sib = next((y for y in tcols if y != x and _is_month_number(y)
+                        and tcols[y].get("type") in ("int64", "double", "decimal")), None)
+            if not sib:
+                notes.append(f"{t}[{x}] will sort A to Z: the model has no month-number column beside it to sort by")
+                continue
+            if sib not in sl["columns"]:
+                sl["columns"].append(sib)
+            col["sortBy"] = sib
+            notes.append(f"{t}[{x}] sorts by {t}[{sib}] (month order, not A to Z)")
+    return notes
+
+
+def thousands(fmt):
+    """A whole-number or decimal format string with thousands separators ("0" -> "#,0", "0.00" -> "#,0.00");
+    percentages, dates, currency with its own grouping and text stay as they are."""
+    if not fmt or "%" in fmt or "," in fmt or re.search(r"[yMdhHsE\"@]", fmt):
+        return fmt
+    return re.sub(r"(^|;)([^;0#]*)([0#]+)", lambda m: m.group(1) + m.group(2) + "#,0", fmt)
+
+
+def generate(root, name, out_folder=None, notes=None):
+    """Write <name>.SemanticModel from the approved contract and generate.json. Returns the folder. `notes` collects
+    plain lines about what the kit set (month order)."""
     c = load_contract(root)
     g = read_json(specs(root) / "generate.json")
     if not g or "slice" not in g:
@@ -285,6 +328,10 @@ def generate(root, name, out_folder=None):
         raise ContractError("the slice was made from another contract: run `pbik synth slice` again")
     check_kept_rows(c, g)
     folder = pathlib.Path(out_folder) if out_folder else pathlib.Path(root) / f"{name}.SemanticModel"
+    chash = content_hash(c)                       # before month_sorts sets sort-by columns in memory
+    said = month_sorts(c, g)
+    if notes is not None:
+        notes.extend(said)
     d = folder / "definition"
     (d / "tables").mkdir(parents=True, exist_ok=True)
     vals = generate_values(c, g)
@@ -292,7 +339,7 @@ def generate(root, name, out_folder=None):
     write_text(d / "database.tmdl", "database\n\tcompatibilityLevel: 1606\n")
     tables = sorted(g["slice"])
     write_text(d / "model.tmdl", "model Model\n\tculture: en-US\n\tdefaultPowerBIDataSourceVersion: powerBI_V3\n\n"
-               f"annotation {DC.SYNTH_MARK} = {content_hash(c)}\n\n" + "".join(f"ref table {q(t)}\n" for t in tables))
+               f"annotation {DC.SYNTH_MARK} = {chash}\n\n" + "".join(f"ref table {q(t)}\n" for t in tables))
     written = set()
     for t in tables:
         f = d / "tables" / f"{t}.tmdl"

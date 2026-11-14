@@ -1042,6 +1042,51 @@ def apply_table(ctx, vid, v, d):
                  n(ctx.number(px, "container")))
 
 
+NUMERIC_TYPES = {"int64", "double", "decimal", "currency"}
+
+
+def _text_measure(ctx, f):
+    m = f["Measure"]
+    ref = m["Expression"]["SourceRef"]
+    name = m["Property"]
+    if ref.get("Schema") == "extension":
+        x = next((e for (t, nm), e in ctx.report.extensions().items() if nm == name), {})
+        return (x.get("dataType") or "").lower() == "text" or (x.get("dataCategory") or "").lower() == "imageurl"
+    model = ctx.report.model()
+    t = model.tables.get(ref.get("Entity")) if model else None
+    mm = t.measures.get(name) if t else None
+    return bool(mm and mm.is_text())
+
+
+def apply_number_headers(ctx, vid, v, d):
+    """Tables and matrices: each number column's header is right-aligned over its numbers (walkthrough fix 8), as
+    Desktop saves it: columnFormatting on the field's metadata selector, `alignment` 'Right' and `styleHeader` true
+    (Rep 7). On when tokens.json `table.alignNumberHeaders` is true (the kit's tokens, so new projects) or the visual
+    says `alignNumbers: true`; a column whose alignment layout.json sets itself (props
+    columnFormatting.alignment@<field>), a picture or text measure, or `alignNumbers: false` is left alone."""
+    if v["type"] not in ("tableEx", "pivotTable") or v.get("alignNumbers") is False:
+        return
+    if not v.get("alignNumbers") and not (ctx.tokens.get("table") or {}).get("alignNumberHeaders"):
+        return                        # the kit's tokens turn it on for new projects; older reps build as before
+    own = {k.split("@", 1)[1] for k in (v.get("props") or {}) if k.startswith("columnFormatting.alignment@")}
+    for role in ("Values",):
+        for it in (v.get("bindings") or {}).get(role, []):
+            text = it.get("field") if isinstance(it, dict) else it
+            if not isinstance(text, str) or text in own:
+                continue
+            f = ctx.field(text)
+            kind = next(iter(f))
+            numeric = kind in ("Measure", "Aggregation") or (kind == "Column" and
+                                                               ctx.res.column_type(f) in NUMERIC_TYPES)
+            if kind == "Measure" and _text_measure(ctx, f):
+                numeric = False       # an SVG picture or a text measure: no number to line up
+            if not numeric:
+                continue
+            sel = {"metadata": qref(f)}
+            set_prop(ctx, vid, d, "objects", "columnFormatting", sel, "alignment", s("Right"))
+            set_prop(ctx, vid, d, "objects", "columnFormatting", sel, "styleHeader", b(True))
+
+
 def apply_sync(ctx, vid, v, d):
     """sync: {group, fieldChanges, filterChanges} -> visual.syncGroup (sync slicers: slicers on several pages with the
     same group name share their selection; one group per field)."""
@@ -1964,6 +2009,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_cf(ctx, vid, v, d)
             apply_reference_labels(ctx, vid, v, d)
             apply_table(ctx, vid, v, d)
+            apply_number_headers(ctx, vid, v, d)
             apply_slicer_mode(ctx, vid, v, d)
             apply_sync(ctx, vid, v, d)
             apply_navigator(ctx, vid, v, d)

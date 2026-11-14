@@ -625,10 +625,11 @@ def _main(argv=None):
                     print(n)
             elif args.sub == "check":
                 if PL.changed_since_approval(args.root, args.layout):
-                    print("The plan changed after your OK (or wasn't approved yet).")
+                    ch = PL.changes_since_approval(args.root, args.layout)
+                    print("What you approved changed after your OK: " + "; ".join(ch) + ".")
                     print("next: I'll show you the plan picture again before building")
                     return 1
-                print("The plan is the one you approved.")
+                print("The plan is the one you approved (my own fixes and polish since then don't change it).")
             elif args.sub == "open":
                 files = args.files or sorted((pathlib.Path(args.root) / PL.PLAN_DIR).glob("page-*.png"))
                 if not files:
@@ -877,7 +878,10 @@ def synth_cmd(args):
                 print(f"  not in the contract or plannedMeasures: {x}")
             return 1 if missing else 0
         if args.sub == "generate":
-            print(f"wrote {G.generate(args.root, args.name)}")
+            said = []
+            print(f"wrote {G.generate(args.root, args.name, notes=said)}")
+            for x in said:
+                print(x)
             return 0
         errs, notes = G.verify(args.root, args.model)
         for x in notes:

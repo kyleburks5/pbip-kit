@@ -284,14 +284,46 @@ def record(path, version=None, today=None):
     return d
 
 
-def check(path, version=None):
+UPDATED = 6
+VERSIONS_MD = HERE.parents[2] / "VERSIONS.md"
+
+
+def tested_desktop(versions_md=None):
+    """The Power BI Desktop version the kit was last tested on (VERSIONS.md, the "Power BI Desktop" row), or None."""
+    f = pathlib.Path(versions_md) if versions_md else VERSIONS_MD
+    try:
+        text = f.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.search(r"^\|\s*Power BI Desktop\s*\|\s*(2\.\d+\.\d+(?:\.\d+)?)", text, re.M)
+    return m.group(1) if m else None
+
+
+def update_check(v, versions_md=None):
+    """A plain line when the installed Desktop is newer than the one the kit was tested on, else None (fix 9)."""
+    t = tested_desktop(versions_md)
+    if not v or not t or vtuple(v)[:3] <= vtuple(t)[:3]:      # an older Desktop (work: 2.155) is targetDesktop's job
+        return None
+    return (f"Power BI Desktop changed since the kit was last tested ({t} to {v}): I'll run the after-update checks "
+            "before building")
+
+
+def check(path, version=None, versions_md=None):
     """Installed Desktop against targetDesktop: 0 when they match, Desktop is older (a warning) or the target is
-    "latest"; 5 when Desktop is newer (run /update first); 3 when the version can't be found."""
+    "latest"; 5 when Desktop is newer (run /update first); 3 when the version can't be found; 6 when Desktop differs
+    from the version the kit was last tested on (VERSIONS.md): the after-update routine runs first, automatically, at
+    the start of a build (walkthrough fix 9)."""
     d = load_project(path) or {}
     target = str(d.get("targetDesktop", "latest"))
     v = desktop_version(version) if version else detect_desktop()
     if v and reload_issue(v):
         print(f"warning: {reload_issue(v)}")
+    said = update_check(v, versions_md)
+    if said:
+        print(said)
+        print("next: the after-update checks (record the version, refresh what Microsoft publishes, the regression "
+              "suite), then the build; the one-card smoke test in Desktop is listed as not done until it runs")
+        return UPDATED
     if target.lower() == "latest":
         print(f"ok: targetDesktop latest; Desktop {v or '(version not found)'}")
         return 0

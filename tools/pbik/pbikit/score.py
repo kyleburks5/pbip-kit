@@ -80,10 +80,13 @@ def built_visuals(report):
 
 
 def _fields(b):
+    """The bound field names. A measure is compared by its name only: layout.json may write `_Measures[X]` where the
+    built visual says `[X]` (the walkthrough's false "fields differ" on every card)."""
     out = set()
     for xs in (b or {}).values():
         for x in xs if isinstance(xs, list) else [xs]:
-            out.add((x.get("field") if isinstance(x, dict) else str(x)).replace("'", ""))
+            f = (x.get("field") if isinstance(x, dict) else str(x)) or ""
+            out.add("[" + f.replace("'", "").split("[", 1)[-1] if "[" in f else f.replace("'", ""))
     return out
 
 

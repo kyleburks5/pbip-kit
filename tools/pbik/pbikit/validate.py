@@ -43,7 +43,11 @@ TOL = 0.5
 
 class Findings:
     def __init__(self):
-        self.errors, self.warnings = [], []
+        self.errors, self.warnings, self.notes = [], [], []
+
+    def note(self, where, msg):
+        """Not a problem (a clean build reports 0): printed for the record only (walkthrough fix 6)."""
+        self.notes.append(f"{where}: {msg}")
 
     def err(self, where, msg):
         self.errors.append(f"{where}: {msg}")
@@ -203,6 +207,17 @@ def check_slicers(fd, slicers, lay, port, report_dir):
               f"(pass --port auto with Desktop open, or add `items` to layout.json)")
 
 
+def _newer_than_published(url_or_msg):
+    """True when a missing schema's version is newer than every version Microsoft has published for its kind
+    (schema-support.json): a 404, not a cache gap (visualContainer 2.14.0, Desktop 2.159)."""
+    m = re.search(r"/definition/([A-Za-z]+)/(\d+\.\d+\.\d+)/schema\.json", str(url_or_msg))
+    if not m:
+        return False
+    kinds = versions.load_support().get("kinds", {})
+    known = [versions.vtuple(k["version"]) for k in kinds.get(m.group(1), [])]
+    return bool(known) and versions.vtuple(m.group(2)) > max(known)
+
+
 def page_background(pd):
     for e in pd.get("objects", {}).get("background", []):
         return a11y._hex(e.get("properties", {}).get("color"))
@@ -245,7 +260,11 @@ def check_catalog(fd, rep, pages, layout, catalog_path):
                     hits.setdefault(why, []).append(vid)
     for why, vids in sorted(hits.items()):
         ids = sorted(set(vids))
-        fd.warn("catalog", f"{why} ({', '.join(ids[:6])}{' ...' if len(ids) > 6 else ''})")
+        line = f"{why} ({', '.join(ids[:6])}{' ...' if len(ids) > 6 else ''})"
+        if CAT.confirmed(why):              # pbik writes it, and Desktop has shown it as intended
+            fd.note("catalog", line + ": written by pbik and confirmed in Desktop")
+        else:
+            fd.warn("catalog", line)
 
 
 def check_deneb(fd, rep, denebs, lay, project=None):
@@ -489,6 +508,11 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
             res = checker.check(doc)
             for e in res or []:
                 fd.err(rel(f), f"schema: {e}")
+        unpublished = {m for m in checker.missing if _newer_than_published(m)}
+        if unpublished:
+            fd.note("schemas", f"{len(unpublished)} schema(s) Microsoft hasn't published yet (first: "
+                               f"{sorted(unpublished)[0]}): those files are checked once it is")
+        checker.missing -= unpublished
         if checker.missing:
             fd.warn("schemas", f"{len(checker.missing)} schema(s) not cached, those files were not schema-checked: "
                                f"run `pbik schemas fetch {rep.path.name}` (first: {sorted(checker.missing)[0]})")
@@ -773,6 +797,8 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
         print(f"error   {e}")
     for w in fd.warnings:
         print(f"warning {w}")
+    for n_ in fd.notes:
+        print(f"note    {n_}")
     nvis = sum(len(rep.visuals(p[2])) for p in pages)
     print(f"\n{rep.path.name}: {len(pages)} page(s), {nvis} visual(s): {len(fd.errors)} error(s), "
           f"{len(fd.warnings)} warning(s)")

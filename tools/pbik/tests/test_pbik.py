@@ -1512,8 +1512,11 @@ class PbikTests(unittest.TestCase):
         self.assertEqual(V.check(pj, "2.155.900.0"), 0, "a target of 2.155 matches every 2.155 build")
         self.assertEqual(V.check(pj, "2.156.1.0"), 5)
         pj.write_text(json.dumps({"targetDesktop": "latest", "catalog": "home"}), encoding="utf-8")
-        self.assertEqual(V.check(pj, "2.199.1.0"), 0)
-        self.assertEqual(V.check(self.tmp / "pin104c" / "missing.json", "2.199.1.0"), 0, "no project.json: latest")
+        nomd = self.tmp / "pin104c" / "no-versions.md"         # no tested Desktop on record: target checks only
+        self.assertEqual(V.check(pj, "2.199.1.0", versions_md=nomd), 0)
+        self.assertEqual(V.check(self.tmp / "pin104c" / "missing.json", "2.199.1.0", versions_md=nomd), 0,
+                         "no project.json: latest")
+        self.assertEqual(V.check(pj, "2.199.1.0"), V.UPDATED, "newer than the kit's tested Desktop: /update first")
         saved = V.detect_desktop
         V.detect_desktop = lambda: None
         try:

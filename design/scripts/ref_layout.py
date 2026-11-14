@@ -158,7 +158,12 @@ all.forEach(function (el) {
     var host = null; for (var p2 = el.parentElement; p2 && p2 !== document.body; p2 = p2.parentElement) if (isCard(p2)) { host = p2; break; }
     if (!host || box(host).w * box(host).h > area * 0.6) add(el, 'title', {text: own(el) || el.textContent.trim().slice(0, 60)});
   } else if (own(el) && BIG.test(own(el)) && parseFloat(getComputedStyle(el).fontSize) >= 24) {
-    add(el, 'kpi-value', {text: own(el)});
+    // the KPI's label, not its sample number ("Orders amount", never "4.2M"): the first other text beside it
+    var lab = '';
+    Array.prototype.forEach.call(el.parentElement ? el.parentElement.children : [], function (c) {
+      var x = (c.textContent || '').trim();
+      if (!lab && c !== el && x && !BIG.test(x) && !/^vs\b/i.test(x)) lab = x.slice(0, 60); });
+    add(el, 'kpi-value', {text: own(el), label: lab});
   }
 });
 // cards: the card-like boxes; a card holding visuals is a panel (or that visual's own container)
@@ -218,7 +223,7 @@ def boxes_from_dom(r, name):
         if len(members) == 1 and kinds[0] in ("chart", "table", "matrix", "kpi", "slicer", "buttons", "image"):
             m = members[0]                       # the card is this visual's container
             m.update({k: c[k] for k in ("x", "y", "w", "h")})
-            m["label"] = c.get("text") or m.get("text") or ""
+            m["label"] = c.get("text") or m.get("label") or m.get("text") or ""
             m["features"] = sorted(set(m.get("features", []) + c.get("features", [])))
             used_cards.add(ci)
         elif len(members) > 1 and all(k == "kpi" for k in kinds) and len(members) <= 6:
@@ -417,6 +422,9 @@ def map_reference(ref, page_offset=0):
                     entry["props"] = {"grid.rowPadding": 2}
             if kind == "chart" and (b.get("chart") in (None, "other")):
                 b.setdefault("features", []).append("chart type unclear")
+            if vt == "slicer" and entry["h"] < 76:       # a dropdown with its header needs 76px (lesson S-03)
+                notes.append(f"made {76 - entry['h']}px taller: a dropdown with its header needs 76px (S-03)")
+                entry["h"] = 76
             entry["build"] = {"method": "native", "step": 1, "reason": reason}
             for f in sorted(set(b.get("features") or [])):
                 native, step = GAPS.get(f, ("check by hand", 1))

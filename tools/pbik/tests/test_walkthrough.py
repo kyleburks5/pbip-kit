@@ -221,5 +221,237 @@ class ProgressTests(Tmp):
         self.assertNotIn("not ready", buf.getvalue().lower())
 
 
+# ---------------------------------------------------------------- MEDIUM 5: quick build approval
+WT = {"pages": {"P1": {"displayName": "Orders overview"}},
+      "visuals": [
+          {"id": "P1-V01", "name": "slicer", "page": "P1", "type": "slicer", "x": 1599, "y": 24, "w": 289, "h": 56,
+           "bindings": {"Values": ["Dim Region[Region Name]"]}},
+          {"id": "P1-V02", "name": "orders-amount", "page": "P1", "type": "cardVisual", "x": 32, "y": 120, "w": 446,
+           "h": 160, "container": {"title": "Orders amount"}, "bindings": {"Data": ["_Measures[Fact Orders Amount]"]},
+           "referenceLabels": {"labels": [{"title": "vs last year", "value": "_Measures[Orders Amount vs LY %]"}]}},
+          {"id": "P1-V03", "name": "regions", "page": "P1", "type": "tableEx", "x": 32, "y": 760, "w": 1856,
+           "h": 288, "bindings": {"Values": ["Dim Region[Region Name]", "_Measures[Fact Orders Amount]",
+                                             "_Measures[Orders Amount vs LY %]", "_Measures[Fact Orders Qty]",
+                                             "_Measures[Fact Orders Avg]", "_Measures[Fact Returns Amount]",
+                                             "_Measures[Returns Share %]"]}}]}
+
+
+class ApprovalTests(Tmp):
+    def setUp(self):
+        super().setUp()
+        from pbikit import status as ST
+        self.ST = ST
+        self.lf = self.tmp / "design" / "specs" / "layout.json"
+        self.lf.parent.mkdir(parents=True)
+        self.lf.write_text(json.dumps(WT), encoding="utf-8")
+        PL.show(self.tmp, purposes={"P1": "Are orders growing?"}, shoot=lambda h, png, *a: png.write_bytes(b"x"),
+                measure=lambda h: [])
+        PL.approve(self.tmp)
+        ST.update(self.tmp, mode="quick")
+
+    def change(self, fn):
+        lay = json.loads(self.lf.read_text(encoding="utf-8"))
+        fn({v["id"]: v for v in lay["visuals"]}, lay)
+        self.lf.write_text(json.dumps(lay), encoding="utf-8")
+
+    def test_the_kits_own_changes_keep_the_ok(self):
+        def polish(v, lay):
+            v["P1-V01"]["h"] = 76                                          # the slicer made taller (S-03)
+            v["P1-V02"]["props"] = {"label.show@default": False, "value.labelDisplayUnits@default": 1000000}
+            v["P1-V02"]["bindings"]["Data"] = [{"field": "_Measures[Fact Orders Amount]", "displayName": "Orders"}]
+            v["P1-V03"]["columnWidths"] = "fit"
+            v["P1-V02"]["container"]["title"] = "Orders amount (all years)"
+        self.change(polish)
+        self.assertFalse(PL.changed_since_approval(self.tmp))
+
+    def test_changes_to_what_was_approved_need_it_again(self):
+        self.change(lambda v, lay: v["P1-V02"]["bindings"].update(Data=["_Measures[Fact Orders Qty]"]))
+        self.assertTrue(PL.changed_since_approval(self.tmp))
+        self.assertIn("P1-V02 shows different numbers", PL.changes_since_approval(self.tmp))
+        self.change(lambda v, lay: lay["visuals"].pop())
+        self.assertIn("the tableEx P1-V03 is gone", PL.changes_since_approval(self.tmp))
+
+    def test_quick_build_never_says_pause(self):
+        for stage in ("plan", "theme", "build", "checks", "polish"):
+            self.ST.update(self.tmp, done=stage)
+            self.assertNotIn("Pause here", self.ST.line(self.tmp))
+        self.ST.update(self.tmp, mode="guided")
+        self.assertIn("Pause here", self.ST.line(self.tmp))
+
+
+# ---------------------------------------------------------------- MEDIUM 6: checks
+class CleanBuildTests(Tmp):
+    def test_main_flow_spec_satisfies_the_id_checks(self):
+        p = project(self.tmp)
+        lay = json.loads((p / "design" / "specs" / "layout.json").read_text(encoding="utf-8"))
+        PL.show(p, purposes={"P1": "Is the amount growing?"}, shoot=lambda h, png, *a: png.write_bytes(b"x"),
+                measure=lambda h: [])
+        PL.approve(p)
+        spec = (p / "design" / "specs" / "spec.md").read_text(encoding="utf-8")
+        for v in lay["visuals"]:
+            self.assertIn(v["id"], spec)
+        self.assertIn("## Fallback register", spec)
+        r = pbik("build", "Demo", "design/specs/layout.json", cwd=p)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        shutil.copytree(KIT / "design" / "scripts", p / "design" / "scripts",
+                        ignore=shutil.ignore_patterns("__pycache__", "test_*"))
+        a = subprocess.run([sys.executable, str(p / "design" / "scripts" / "audit_ids.py")], cwd=p,
+                           capture_output=True, text=True, encoding="utf-8")
+        out = a.stdout + a.stderr
+        self.assertIn("main flow", out)
+        self.assertEqual([x for x in out.splitlines() if "spec:" in x and "main flow" not in x], [], out)
+
+    def test_a_clean_build_reports_no_problems(self):
+        p = project(self.tmp)
+        f = p / "design" / "specs" / "layout.json"
+        lay = json.loads(f.read_text(encoding="utf-8"))
+        for v in lay["visuals"]:
+            v.setdefault("container", {})["altText"] = f"{v['name']} (made-up sample)"
+            if v["type"] in ("lineChart", "barChart"):
+                v["sort"] = {"field": v["bindings"]["Category"][0], "direction": "Ascending"}
+        f.write_text(json.dumps(lay), encoding="utf-8")
+        self.assertEqual(pbik("build", "Demo", "design/specs/layout.json", cwd=p).returncode, 0)
+        r = pbik("validate", "Demo.Report", "--layout", "design/specs/layout.json", cwd=p)
+        self.assertIn("0 error(s), 0 warning(s)", r.stdout, r.stdout)
+
+    def test_unpublished_schema_and_confirmed_writes_are_notes(self):
+        from pbikit import validate as V, catalog as CAT
+        self.assertTrue(V._newer_than_published(
+            "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/99.0.0/schema.json"))
+        self.assertFalse(V._newer_than_published(
+            "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.0.0/schema.json"))
+        self.assertTrue(CAT.confirmed("cardVisual referenceLabelTitle.titleText never seen in a Desktop-saved file"))
+        self.assertFalse(CAT.confirmed("cardVisual value.madeUp never seen in a Desktop-saved file"))
+
+    def test_score_compares_measures_by_name(self):
+        from pbikit import score as SC
+        self.assertEqual(SC._fields({"Data": ["_Measures[Orders]"]}), SC._fields({"Data": ["[Orders]"]}))
+        self.assertNotEqual(SC._fields({"Data": ["_Measures[Orders]"]}), SC._fields({"Data": ["[Qty]"]}))
+
+
+# ---------------------------------------------------------------- MEDIUM 7: plan list and picture
+class PlanListTests(Tmp):
+    def setUp(self):
+        super().setUp()
+        self.lf = self.tmp / "design" / "specs" / "layout.json"
+        self.lf.parent.mkdir(parents=True)
+        self.lf.write_text(json.dumps(WT), encoding="utf-8")
+
+    def show(self, **kw):
+        return PL.show(self.tmp, purposes={"P1": "Are orders growing?"},
+                       shoot=lambda h, png, *a: png.write_bytes(b"x"), **kw)
+
+    def test_compared_with_last_year_and_plain_names(self):
+        text = self.show(measure=lambda h: [])[1]
+        self.assertIn("| Orders amount | Fact Orders Amount | last year |", text)
+        self.assertNotIn("_Measures[", text)
+        self.assertNotIn("field, labels", text)
+
+    def test_assumptions_reset_on_each_redraw(self):
+        self.show(assumptions=["first"], measure=lambda h: [])
+        text = self.show(assumptions=["second"], measure=lambda h: [])[1]
+        self.assertIn("- second", text)
+        self.assertNotIn("- first", text)
+
+    def test_contrast_is_checked_on_the_picture(self):
+        notes = []
+        rows = [{"text": "Orders amount", "id": "P1-V07", "ratio": 3.53, "need": 4.5}]
+        text = self.show(measure=lambda h: rows, notes=notes)[1]
+        self.assertIn("Too faint to read", text)
+        self.assertTrue(any("3.5:1" in n for n in notes))
+
+    def test_preview_draws_example_values_every_column_and_no_raw_names(self):
+        import example_values as EV
+        d = EV.data_for(WT)["visuals"]
+        table = d["P1-V03"]
+        self.assertEqual(table["groups"], ["Region Name"])
+        self.assertEqual(len(table["values"]), 6, "every measure column, not 2 of 7")
+        self.assertTrue(all(isinstance(x, float) for x in table["rows"][0][1:]))
+        self.assertEqual(d["P1-V02"]["refs"][0][0] in "+-", True)
+        page = subprocess.run([sys.executable, str(KIT / "design" / "scripts" / "gen_wireframe_hf.py"), "--layout",
+                               str(self.lf), "--tokens", str(KIT / "design" / "tokens.json"), "--data", "example",
+                               "--out", str(self.tmp / "p.html"), "--vega", "offline"], capture_output=True, text=True)
+        self.assertEqual(page.returncode, 0, page.stderr)
+        html_ = (self.tmp / "p.html").read_text(encoding="utf-8")
+        self.assertIn("Example values", html_)
+        self.assertIn('"measure": true', html_)
+
+    def test_months_in_calendar_order(self):
+        import example_values as EV
+        self.assertEqual(EV.categories("Month")[:3], ["Jan", "Feb", "Mar"])
+        self.assertEqual(EV.categories("Region Name")[0], "Region 1")
+
+    def test_wireframe_cards_are_named_by_label_not_number(self):
+        import ref_layout as RL                                         # noqa: F401  (the JS is checked below)
+        src = (KIT / "design" / "scripts" / "ref_layout.py").read_text(encoding="utf-8")
+        self.assertIn("label: lab", src)
+        self.assertIn('m.get("label") or m.get("text")', src)
+
+
+# ---------------------------------------------------------------- MEDIUM 8: polish the kit does itself
+class PolishFixTests(Tmp):
+    def test_thousands_separators(self):
+        from pbikit import synthgen as G
+        self.assertEqual(G.thousands("0"), "#,0")
+        self.assertEqual(G.thousands("0.00"), "#,0.00")
+        self.assertEqual(G.thousands("0.0%"), "0.0%")
+        self.assertEqual(G.thousands("#,0"), "#,0")
+        self.assertIn("formatString: #,0", "\n".join(G.measure_lines("Orders Qty", {"expression": "1"}, False)))
+        self.assertNotIn("formatString", "\n".join(G.measure_lines("Returns Share %", {"expression": "1"}, False)))
+
+    def test_month_sorts_by_month_number(self):
+        from pbikit import synthgen as G
+        c = {"tables": {"Calendar": {"columns": {"Date": {"type": "dateTime"}, "Month": {"type": "string"},
+                                                 "Month No": {"type": "int64"}}}}}
+        g = {"slice": {"Calendar": {"columns": ["Date", "Month"], "measures": []}}}
+        said = G.month_sorts(c, g)
+        self.assertEqual(c["tables"]["Calendar"]["columns"]["Month"]["sortBy"], "Month No")
+        self.assertIn("Month No", g["slice"]["Calendar"]["columns"])
+        self.assertIn("month order", said[0])
+        c2 = {"tables": {"Calendar": {"columns": {"Month": {"type": "string"}}}}}
+        said = G.month_sorts(c2, {"slice": {"Calendar": {"columns": ["Month"], "measures": []}}})
+        self.assertIn("no month-number column", said[0])
+
+    def test_number_headers_right_aligned(self):
+        p = project(self.tmp)
+        lay = json.loads((p / "design" / "specs" / "layout.json").read_text(encoding="utf-8"))
+        lay["visuals"].append({"id": "P1-V06", "name": "areas", "page": "P1", "type": "tableEx", "x": 500, "y": 640,
+                               "w": 900, "h": 300, "bindings": {"Values": ["Area[Area Name]", "[Total Amount]"]}})
+        (p / "design" / "specs" / "layout.json").write_text(json.dumps(lay), encoding="utf-8")
+        r = pbik("build", "Demo", "design/specs/layout.json", cwd=p)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        d = json.loads(next(p.glob("Demo.Report/definition/pages/*/visuals/P1-V06_*/visual.json")).read_text(
+            encoding="utf-8"))
+        cf = d["visual"]["objects"]["columnFormatting"]
+        right = [e["selector"]["metadata"] for e in cf if e["properties"].get("alignment")]
+        self.assertEqual(len(right), 1)
+        self.assertIn("Total Amount", right[0])
+        self.assertEqual(cf[0]["properties"]["styleHeader"]["expr"]["Literal"]["Value"], "true")
+        tf = p / "design" / "tokens.json"                    # an older rep's tokens: builds exactly as before
+        t = json.loads(tf.read_text(encoding="utf-8"))
+        t["table"].pop("alignNumberHeaders")
+        tf.write_text(json.dumps(t), encoding="utf-8")
+        self.assertEqual(pbik("build", "Demo", "design/specs/layout.json", cwd=p).returncode, 0)
+        d = json.loads(next(p.glob("Demo.Report/definition/pages/*/visuals/P1-V06_*/visual.json")).read_text(
+            encoding="utf-8"))
+        self.assertNotIn("columnFormatting", d["visual"].get("objects", {}))
+
+
+# ---------------------------------------------------------------- MEDIUM 9: Desktop updated
+class DesktopUpdateTests(Tmp):
+    def test_a_changed_desktop_runs_the_after_update_checks_first(self):
+        from pbikit import versions as VS
+        md = self.tmp / "VERSIONS.md"
+        md.write_text("| Power BI Desktop | 2.159.883.0 (Microsoft Store), /smoke 2026-10-23 | x | Yes |\n",
+                      encoding="utf-8")
+        self.assertEqual(VS.tested_desktop(md), "2.159.883.0")
+        buf = io.StringIO()
+        with __import__("contextlib").redirect_stdout(buf):
+            code = VS.check(self.tmp / "project.json", "2.159.1231.0", versions_md=md)
+        self.assertEqual(code, VS.UPDATED)
+        self.assertIn("2.159.883.0 to 2.159.1231.0", buf.getvalue())
+        self.assertIsNone(VS.update_check("2.159.883.0", md))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

@@ -44,6 +44,7 @@ The box wireframe (gen_wireframe.py) is the fallback when this one can't be draw
 import argparse, base64, html, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))          # example_values.py beside this script
 
 TAGS = {"cardVisual": "Card (new)", "card": "Card", "multiRowCard": "Multi-row card", "kpi": "KPI",
         "lineChart": "Line chart", "areaChart": "Area chart", "stackedAreaChart": "Stacked area chart",
@@ -431,13 +432,19 @@ def text_runs(R, v):
     return out
 
 
+MEASURES = set()          # the model contract's measure names (build_html fills it), so _Measures[X] counts as one
+
+
 def labels_of(v):
+    import example_values as EV
     out = []
     for role, b in (v.get("bindings") or {}).items():
         for it in b if isinstance(b, list) else [b]:
             it = it if isinstance(it, dict) else {"field": it}
             name = it.get("displayName") or re.sub(r"^.*\[|\]\)?$", "", it.get("field", it.get("fieldParameter", "?")))
-            out.append({"role": role, "label": name, "field": it.get("field") or it.get("fieldParameter")})
+            fld = it.get("field") or it.get("fieldParameter")
+            out.append({"role": role, "label": name, "field": fld,
+                        "measure": EV.is_measure(fld, role, MEASURES) if fld else False})
     return out
 
 
@@ -733,6 +740,9 @@ def build_html(layout, tokens, theme, data, title="Wireframe", vega=None):
         raise SystemExit(f"vega: {layout.get('vega')!r} is not \"cdn\" or \"offline\"")
     R = Resolver(tokens, theme)
     R.images = Images(layout.get("_root", ROOT))
+    import example_values as EV
+    MEASURES.clear()
+    MEASURES.update(EV.contract_measures(layout.get("_root", ROOT)))
     member_of = {m: g["id"] for g in layout.get("visuals", []) if g["type"] == "group" for m in g.get("members", [])}
     specs = [spec_for(R, v, layout, member_of) for v in layout.get("visuals", [])
              if (v.get("build") or {}).get("method") != "page-background"]
@@ -761,7 +771,9 @@ def build_html(layout, tokens, theme, data, title="Wireframe", vega=None):
     accent = R.colour("primary", "#118DFF")
     js = lambda o: json.dumps(o, ensure_ascii=False).replace("</", "<\\/")   # noqa: E731
     have = data is not None
-    note = ("Numbers: aggregates from each visual's own bindings (wireframe_data.py), groups under "
+    example = bool((data or {}).get("example"))
+    note = ("Numbers: example values, made up for the preview (no data read)." if example else
+            "Numbers: aggregates from each visual's own bindings (wireframe_data.py), groups under "
             f"{(layout.get('privacy') or {}).get('minGroup', 5)} hidden. " + " | ".join(data.get("privacy", []))
             if have else "No data file: sample shapes, no numbers.")
     queries = "\n".join(f"[{k}] {q}" for k, q in (data or {}).get("queries", {}).items()).replace("--", "- -")
@@ -814,7 +826,7 @@ table.grid th:first-child, table.grid td:first-child, table.grid .l {{ text-alig
 </style></head>
 <body>
 <div id="bar"><span id="tabs"></span><button id="labels" class="on" type="button" aria-pressed="true" title="Show or hide every visual ID badge, visual-type tag and wireframe note">Labels</button><span class="hint">B ID badges · T visual tags · 1–9 pages · {html.escape("aggregates only, groups under 5 hidden" if have else "no data: sample shapes")}</span></div>
-{"" if have else '<div id="nodata-banner" role="alert">No data – placeholder values</div>'}
+{'<div id="nodata-banner" role="note" style="background:#5A6577">Example values – not your data</div>' if example else "" if have else '<div id="nodata-banner" role="alert">No data – placeholder values</div>'}
 <div id="stage">{static}</div>
 {"".join(f'<script src="{u}"></script>' for u in VEGA_CDN) if vega == "cdn" else ""}
 <script type="application/json" id="spec">{js({"pages": pages, "visuals": specs, "images": R.images.uris, "dataColors": R.data_colors, "vega": vega, "tokens": {"colors": R.C, "font": tokens.get("font", {})}})}</script>
@@ -901,10 +913,11 @@ function tickFmt(v, f, units, step) {
 // ---- sample rows when there is no data: deterministic shapes, no numbers
 function seed(id) { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return () => ((h = (h * 1103515245 + 12345) >>> 0) / 4294967296); }
 function sample(s, n) {
-  const r = seed(s.id), groups = s.fields.filter(f => /\[/.test(f.field || '') && !/^\[/.test(f.field || '')).map(f => f.label);
-  const vals = s.fields.filter(f => /^\[|\(/.test(f.field || '')).map(f => f.label);
+  const isM = f => f.measure != null ? f.measure : /^\[|\(/.test(f.field || '');
+  const r = seed(s.id), groups = s.fields.filter(f => /\[/.test(f.field || '') && !isM(f)).map(f => f.label);
+  const vals = s.fields.filter(isM).map(f => f.label);
   const cats = Array.from({length: n || 6}, (_, i) => 'Item ' + (i + 1));
-  return {groups: groups.length ? groups.slice(0, 1) : ['Category'], values: vals.length ? vals : ['Value'], formats: [],
+  return {groups: groups.length ? groups : ['Category'], values: vals.length ? vals : [s.fields.length ? s.fields[0].label : 'Value'], formats: [],
           cat: 0, leg: null, rows: cats.map(c => [c, ...(vals.length ? vals : [0]).map(() => 20 + r() * 80)]), hidden: 0, sample: true};
 }
 function dataOf(s, n) { return D[s.id] || sample(s, n); }
@@ -1018,7 +1031,8 @@ R.cardVisual = (s, el, w, h) => {
     const lab = c.label ? `<div style="font-family:'${c.labelFamily}';font-weight:${c.labelWeight};font-size:${c.labelSize}px;color:${c.labelColor};text-align:${lal};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nm)}</div>` : '';
     const val = c.value ? `<div style="font-family:'${c.family}';font-weight:${c.weight};font-size:${c.valueSize}px;color:${c.valueColor};line-height:1.15;text-align:${al};${c.wrap ? 'white-space:normal' : 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}">${esc(v)}</div>` : '';
     return `<div style="min-width:0">${c.labelPos === 'aboveValue' ? lab + val : val + lab}</div>`; });
-  const refs = (c.refs || []).map(r => `<span>${esc((r.title ? r.title + ' ' : '') + '[' + String(r.value).replace(/[\[\]]/g, '') + ']' + (r.detail ? ' · [' + String(r.detail).replace(/[\[\]]/g, '') + ']' : ''))}</span>`).join(' ');
+  // reference labels: the title and the value (example or data); never the measure's raw name
+  const refs = (c.refs || []).map((r, k) => `<span>${esc([r.title, (d.refs || [])[k] ?? (d.sample ? '–' : '')].filter(Boolean).join(' '))}</span>`).join(' ');
   el.insertAdjacentHTML('beforeend', `<div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:4px 16px;width:100%">${tiles.join('')}</div>` +
     (refs ? `<div style="font-size:${c.refSize}px;color:${c.refColor};margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:${al}">${refs}</div>` : '') +
     (c.image ? `<div class="nodata">image from data</div>` : ''));
@@ -1642,7 +1656,7 @@ def main(argv=None):
     ap.add_argument("--tokens", default=str(ROOT / "design" / "tokens.json"))
     ap.add_argument("--theme", help="theme JSON (default: layout.json `theme`, else design/themes/*.json)")
     ap.add_argument("--data", default=str(ROOT / "design" / "wireframes" / "wireframe-data.json"),
-                    help="wireframe_data.py output, or 'none'")
+                    help="wireframe_data.py output, 'example' (made-up example values: the plan preview), or 'none'")
     ap.add_argument("--out", default=str(ROOT / "design" / "wireframes" / "wireframe.html"))
     ap.add_argument("--vega", choices=sorted(VEGA_MODES),
                     help="Deneb specs (default: layout.json `vega`, else cdn): cdn draws with Vega-Lite itself from "
@@ -1665,7 +1679,10 @@ def main(argv=None):
                 th = str(f)
     theme = load(th) if th and pathlib.Path(th).exists() else None
     data = None
-    if a.data != "none" and pathlib.Path(a.data).exists():
+    if a.data == "example":                      # the fast preview: example values, no data read
+        import example_values as EV
+        data = EV.data_for(layout, base)
+    elif a.data != "none" and pathlib.Path(a.data).exists():
         data = load(a.data)
         if not data.get("privacy") or not any("passed" in x for x in data["privacy"]):
             sys.exit(f"{a.data}: no passed privacy check in the data file; rerun wireframe_data.py")

@@ -52,14 +52,21 @@ where it is ("in the projects folder of this kit") and offer to open it (`pbik -
    choosing defaults for everything only the person doesn't need to decide: which total measure, colour rules,
    default filters. Each default goes in the list as an assumption (`--assume`). Every headline number needs a
    comparison. A fallback (CLAUDE.md "Native first") goes in the list with the native option tried.
-2. `pbik plan show --purpose "P1=<what the page helps decide>" --assume "..."`. Show the pictures: in the Claude
-   desktop app in the chat; in VS Code (Copilot or Claude Code) `pbik plan open` opens them beside the chat. Give the
-   short list from design/plan/plan.md in plain words.
+2. `pbik plan show --purpose "P1=<what the page helps decide>" --assume "..."` (pass every assumption each time: the
+   list replaces the last one). The picture is the fast preview: the theme, tokens and the templates' look with
+   example values (never data). Show the pictures: in the Claude desktop app in the chat; in VS Code (Copilot or
+   Claude Code) `pbik plan open` opens them beside the chat. Give the short list from design/plan/plan.md in plain
+   words. If it lists a text too faint to read, fix it in layout.json and show the plan again before asking for the OK.
 3. Guided build: stop after the page purpose and after the plan for an OK. Quick build: this is the only stop.
 4. Changes in plain words: update layout.json or the plan, show it again. On OK: `pbik plan approve`.
 
 ## 3. Build (stages "theme", "build", "checks", "polish", "result")
-Run `pbik plan check` first: if the plan changed after the OK, show it again. Then, as /theme, /build, /review and /fix
+Run `pbik project check` first: if it says Desktop changed since the kit was last tested, run the after-update
+checks without asking (record the version, `pbik schemas support --refresh`, the regression suite, a changelog row in
+VERSIONS.md) and list the Desktop smoke test as not done yet in the result. Run `pbik plan check`: it fails only when
+what the person approved changed (which visuals, what they show, where they sit); the kit's own fixes and polish
+after the OK (a taller slicer, number formats, column widths, a legend) need no new OK, so never stop for them in a
+quick build; list them in the result. If it fails, show the plan again. Then, as /theme, /build, /review and /fix
 do (their files say how), with a check after each step and one fix and recheck when a check fails:
 - theme (the colours); build (`pbik build "<project name>" design/specs/layout.json`: the first build makes a clean,
   empty report folder itself; never copy another report); checks (`pbik validate`, audit_layout.py, audit_ids.py);
@@ -72,6 +79,9 @@ do (their files say how), with a check after each step and one fix and recheck w
   unsure: a check still failing after its fix, a fallback not in the plan, a measure the plan didn't name, two
   measures that fit one KPI, an approval window, a Desktop or bridge failure. Then ask one plain question with the
   default you would take.
+- The kit does these itself, without asking: months sort by month number (the made-up model gets the sort-by column;
+  a live model: say why not and give the Desktop clicks), number columns' headers right-aligned, thousands
+  separators in the made-up model's number formats.
 - Score: `pbik score --item 1=<your own judgment of the screenshots against the approved picture> --item 3=<every
   card's measure returns a value: DAX query> --item 7=<slicers filter, buttons go where they should> --final`.
 Result: the before and after screenshots (shown or opened as the plan pictures), the polish score, and what you

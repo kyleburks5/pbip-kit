@@ -280,6 +280,17 @@ pbik validate "Sales.Report" --layout design\specs\layout.json --port auto
 pbik validate "Sales.Report" --layout design\specs\layout.json --strict     rem schema misses are errors
 ```
 
+Three levels: errors, warnings and notes. Notes are for the record and never count as problems, so a clean build
+reports `0 error(s), 0 warning(s)` (v1.7 walkthrough fix 6): a schema version newer than any Microsoft has published
+(a 404, not a cache gap: visualContainer 2.14.0 under Desktop 2.159), and settings pbik itself writes that no
+Desktop-saved file in the catalog holds yet but that Desktop has shown as intended (`catalog.CONFIRMED_WRITES`, each
+with where it was seen). In the main flow, `plan approve` writes design/specs/spec.md with every visual by ID and the
+fallback register (marked as the main flow), and audit_ids.py doesn't ask it for the /plan-only sections.
+Tables and matrices built with the kit's tokens (`table.alignNumberHeaders` true) get each number column's header
+right-aligned over its numbers (`columnFormatting` alignment 'Right', styleHeader); picture and text measures, a
+column whose alignment layout.json sets, and `alignNumbers: false` are left alone. Older reps' tokens don't have the
+switch, so they build as before.
+
 ### `roundtrip <Report> [--rev REV] [--to REV] [--before <copy>] [--out <md>]`
 After a report pbik built is saved once in Desktop, lists what Desktop rewrote, by visual ID, as proposed pbik
 fixes: keys Desktop added (write them too), keys it dropped (stop writing them), values it rewrote, the same value in
@@ -503,6 +514,16 @@ landed elsewhere). While a page draws, a "Still drawing the plan picture" line e
 also in `.pbik/progress.txt`). If the browser still fails, a simpler preview (the boxes, drawn without a browser) is
 written instead, with the plain reason in the output: never an empty report (v1.7 walkthrough fixes 3 and 4).
 
+The picture is the fast preview (one of two renderers): layout.json, tokens, the theme and the templates' look, drawn
+with example values (design/scripts/example_values.py: made up from a seed per visual, the same measure the same in
+every visual, months in calendar order, never data), every table column, each card's comparison as its title and an
+example value (never a raw measure name). Its text contrast is checked on the picture itself (check_contrast.py), and
+a faint text is listed before the OK. `--assume` replaces the list each time. `plan check` compares only what the
+person approved (`plan.structure`: pages, and per visual its type, what it shows and its grid cell): the kit's own
+fixes and polish after the OK keep it, and a change says what moved, appeared, went or shows different numbers.
+`project check` exits 6 when the installed Desktop is newer than the one VERSIONS.md records as tested: the main flow
+runs the after-update checks first (walkthrough fix 9).
+
 ### `mode [guided|quick] [--report-type]`, `score [<Report>] [--item n=pass] [--final] [--hand-minutes N]`
 
 `mode` sets the build option, or without a value prints the default and why: guided until a quick build of that report
@@ -611,6 +632,11 @@ month ends), e.g. `"hints": {"Orders": {"rows": 3000, "trend": 0.1, "seasonality
 `annotation PBIK_Synthetic`, planned measures `PBIK_Planned`. `verify` compares it with the contract slice (types,
 DAX, relationships); a type change listed in generate.json `deviations` is a note. UNVERIFIED in Desktop until the
 smoke report opens on one.
+
+`synth generate` sorts month names by the month number (walkthrough fix 8): a text Month column without a sort-by
+column gets the table's Month No / MonthNumber column (added to the slice if needed), and says so; with no such column
+it says exactly why months will sort A to Z. Number measures without a format get one with thousands separators
+(`#,0`, averages `#,0.00`), and a whole-number or decimal format without separators gets them (`0` -> `#,0`).
 
 ### `bind check | prepare | live | local <Report>`
 

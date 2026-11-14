@@ -10,6 +10,9 @@ import datetime, json, pathlib
 STAGES = ["start", "model", "page purpose", "plan", "theme", "build", "checks", "polish", "result", "live", "wrap-up"]
 GUIDED_PAUSES = ["page purpose", "plan", "theme", "build", "checks", "polish"]
 QUICK_PAUSES = ["plan"]
+# stages whose end is a stop for a look in a guided build; the page purpose and the plan are done only on the
+# person's OK, so being past them is never a pause
+AFTER_LOOK = ["theme", "build", "checks", "polish"]
 PLAIN = {"start": "start (what the report is for, and what you have)", "model": "the model",
          "page purpose": "the page purpose", "plan": "the plan picture", "theme": "the colours", "build": "the build",
          "checks": "the checks", "polish": "the polish", "result": "the result",
@@ -85,8 +88,8 @@ def line(root):
     if doc.get("score") is not None:
         extra.append(f"polish {doc['score']}/10")
     text = head + (f" ({', '.join(extra)})" if extra else "")
-    if done and done[-1] in pauses(doc) and nxt:
-        text += " Pause here: show what changed and wait for an OK."
+    if doc.get("mode", "guided") == "guided" and done and done[-1] in AFTER_LOOK and nxt:
+        text += " Pause here: show what changed and wait for an OK."      # never in a quick build (fix 5)
     return text
 
 

@@ -480,7 +480,7 @@ class PlanPictureTests(Tmp):
                                 assumptions=["'Total' means [Revenue], not [Gross Revenue]"], shoot=self.shoot)
         self.assertEqual(len(pngs), 1)
         self.assertEqual(self.shots[0], (1920, 1080, "#shot&labels=off&page=1"), "no ID badges for a person")
-        for need in ('Page Executive summary: "Are we on track this month?"', "| Revenue | [Revenue] |",
+        for need in ('Page Executive summary: "Are we on track this month?"', "| Revenue | Revenue |",
                      "every headline number needs a comparison", "'Total' means [Revenue]",
                      "Fallbacks (OK on the plan approves them):", "native option tried: a native bar can't draw chips",
                      "Build: quick build", "Data: restricted"):
@@ -498,8 +498,13 @@ class PlanPictureTests(Tmp):
         self.assertFalse(PL.changed_since_approval(self.tmp))
         lay = json.loads(lf.read_text(encoding="utf-8"))
         lay["visuals"][1]["y"] += 8
+        lay["visuals"][1].setdefault("props", {})["label.show@default"] = False
         lf.write_text(json.dumps(lay), encoding="utf-8")
-        self.assertTrue(PL.changed_since_approval(self.tmp), "a change after OK means showing it again")
+        self.assertFalse(PL.changed_since_approval(self.tmp), "the kit's own nudges and polish keep the OK")
+        lay["visuals"][1]["y"] += 480
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        self.assertTrue(PL.changed_since_approval(self.tmp), "a move after OK means showing it again")
+        self.assertIn(f"{lay['visuals'][1]['id']} moved", PL.changes_since_approval(self.tmp))
 
     def test_no_purpose_no_approval(self):
         from pbikit import plan as PL

@@ -45,11 +45,69 @@ def save(path, doc):
     path.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+GRID_COL = (1920 - 64 - 11 * 24) / 12 + 24          # one grid column with its gutter
+
+
+def _measures(v):
+    """The fields a visual shows (bindings and reference labels), by name: what the person approved it shows."""
+    out = set()
+
+    def add(x):
+        f = x.get("field") if isinstance(x, dict) else x
+        if isinstance(f, str) and f:
+            out.add("[" + f.replace("'", "").split("[", 1)[-1] if "[" in f else f)
+    for xs in (v.get("bindings") or {}).values():
+        for x in xs if isinstance(xs, list) else [xs]:
+            add(x)
+    rl = v.get("referenceLabels")
+    if isinstance(rl, dict):
+        add(rl.get("field", ""))
+        for lab in rl.get("labels", []) or []:
+            add(lab.get("value", "") if isinstance(lab, dict) else "")
+    return sorted(out)
+
+
+def structure(layout):
+    """What the person approved on the plan picture: the pages, and per visual its type, what it shows and roughly where
+    it sits (grid column and row band). Not: pixels within a cell, formatting, titles' wording, colours, assumptions.
+    Changes the kit makes itself after the OK (polish, fixes, a slicer made taller) keep this the same, so a quick
+    build doesn't stop for them (walkthrough fix 5)."""
+    pages = {k: p.get("displayName", k) for k, p in (layout.get("pages") or {}).items()}
+    vis = {}
+    for v in layout.get("visuals", []):
+        if not v.get("id"):
+            continue
+        x, y, w, h = (float(v.get(k, 0) or 0) for k in ("x", "y", "w", "h"))
+        cell = (round((x - 32) / GRID_COL), round((x + w - 32) / GRID_COL), round(y / 120), round((y + h) / 120))
+        vis[v["id"]] = {"page": v.get("page"), "type": v.get("type"), "shows": _measures(v), "cell": cell}
+    return {"pages": pages, "visuals": vis}
+
+
 def plan_hash(layout, plan):
-    """What the person approves: the layout (positions, types, fields) and the plan's purposes and assumptions."""
-    keep = {k: v for k, v in layout.items() if not k.startswith("_")}
-    body = json.dumps([keep, plan.get("purposes", {}), plan.get("assumptions", [])], sort_keys=True)
+    """What the person approves: the layout's structure (`structure`) and the page purposes."""
+    body = json.dumps([structure(layout), plan.get("purposes", {})], sort_keys=True)
     return hashlib.sha1(body.encode("utf-8")).hexdigest()[:16]
+
+
+def what_changed(old, new):
+    """Plain lines: how the structure differs from the approved one."""
+    out = []
+    ov, nv = old.get("visuals", {}), new.get("visuals", {})
+    for vid in sorted(set(nv) - set(ov)):
+        out.append(f"a new {nv[vid]['type']} ({vid})")
+    for vid in sorted(set(ov) - set(nv)):
+        out.append(f"the {ov[vid]['type']} {vid} is gone")
+    for vid in sorted(set(ov) & set(nv)):
+        a, b = ov[vid], nv[vid]
+        if a["type"] != b["type"]:
+            out.append(f"{vid} is now a {b['type']}")
+        if a["shows"] != b["shows"]:
+            out.append(f"{vid} shows different numbers")
+        if list(a["cell"]) != list(b["cell"]) or a["page"] != b["page"]:
+            out.append(f"{vid} moved")
+    if old.get("pages") != new.get("pages"):
+        out.append("the pages changed")
+    return out
 
 
 def _plain_field(f):
@@ -67,12 +125,41 @@ def kpis(layout):
         fields = [_plain_field(f) for f in (v.get("bindings") or {}).get("Data", [])]
         if not fields:
             continue
-        refs = [_plain_field(r.get("field", r)) if isinstance(r, dict) else str(r)
-                for r in v.get("referenceLabels", []) or []]
-        label = (v.get("container") or {}).get("title") or fields[0].split("[")[-1].rstrip("]")
-        out.append((v["page"], label, fields[0], ", ".join(refs) or "nothing yet: every headline number needs a "
-                                                                      "comparison"))
+        label = (v.get("container") or {}).get("title") or plain_name(fields[0])
+        out.append((v["page"], label, plain_name(fields[0]),
+                    comparison(v) or "nothing yet: every headline number needs a comparison"))
     return out
+
+
+def plain_name(field):
+    """A measure or column as a person reads it: its name without the table or brackets (`_Measures[Orders]` ->
+    Orders)."""
+    f = _plain_field(field)
+    return f.split("[", 1)[-1].rstrip("]") if "[" in f else f
+
+
+COMPARE_WORDS = [(r"\b(LY|PY|SPLY|last year|prior year|previous year|year ago)\b", "last year"),
+                 (r"\b(LM|PM|last month|prior month|previous month)\b", "last month"),
+                 (r"\btarget|goal|plan\b", "target"), (r"\bbudget\b", "budget"), (r"\bforecast\b", "forecast"),
+                 (r"\b(avg|average)\b", "the average")]
+
+
+def comparison(v):
+    """What a card's number is compared with, in plain words ("last year"), from its reference labels' titles and
+    measures; "" when it has none."""
+    import re
+    rl = v.get("referenceLabels")
+    labels = (rl.get("labels") or []) if isinstance(rl, dict) else (rl or [])
+    found = []
+    for lab in labels:
+        text = " ".join(str(lab.get(k, "")) for k in ("title", "value", "detail")) if isinstance(lab, dict) \
+            else str(lab)
+        word = next((w for pat, w in COMPARE_WORDS if re.search(pat, text, re.I)), None)
+        if not word and isinstance(lab, dict) and lab.get("title"):
+            word = re.sub(r"^vs\.?\s+", "", str(lab["title"]), flags=re.I)
+        if word and word not in found:
+            found.append(word)
+    return ", ".join(found)
 
 
 def fallbacks(layout):
@@ -121,7 +208,7 @@ def picture(layout_path, out_folder, tokens=None, theme=None, shoot=None, notes=
     html = out_folder / "plan.html"
     tokens = tokens or _find_up(layout_path, "design/tokens.json") or KIT / "design" / "tokens.json"
     args = [sys.executable, str(SCRIPTS / "gen_wireframe_hf.py"), "--layout", str(layout_path),
-            "--tokens", str(tokens), "--data", "none", "--out", str(html), "--vega", "offline"]
+            "--tokens", str(tokens), "--data", "example", "--out", str(html), "--vega", "offline"]
     theme = theme or _first_theme(layout_path)
     if theme:
         args += ["--theme", str(theme)]
@@ -222,7 +309,7 @@ def _first_theme(layout_path):
     return None
 
 
-def show(root, layout=None, purposes=None, assumptions=None, shoot=None, notes=None):
+def show(root, layout=None, purposes=None, assumptions=None, shoot=None, notes=None, measure=None):
     """Draw the plan picture and write the short list; returns (pngs, list text, hash). `notes` collects plain
     lines about the drawing (a simpler preview, and why)."""
     root = pathlib.Path(root)
@@ -234,13 +321,42 @@ def show(root, layout=None, purposes=None, assumptions=None, shoot=None, notes=N
     if purposes:
         plan.setdefault("purposes", {}).update(purposes)
     if assumptions:
-        plan["assumptions"] = list(dict.fromkeys(plan.get("assumptions", []) + list(assumptions)))
+        plan["assumptions"] = list(dict.fromkeys(assumptions))     # the whole list each time: no old ones pile up
     save(plan_file(root), plan)
     out = root / PLAN_DIR
     pngs = picture(lf, out, shoot=shoot, notes=notes)
+    faint = contrast(out / "plan.html", measure=measure)
     text = short_list(root, lay, plan)
+    if faint:
+        text += "\nToo faint to read on the picture (fixed before the build, so the plan doesn't change after OK):\n" \
+                + "\n".join(f"- {x}" for x in faint) + "\n"
     (out / "plan.md").write_text(text, encoding="utf-8")
+    if notes is not None:
+        notes.extend(f"Contrast: {x}" for x in faint)
     return pngs, text, plan_hash(lay, plan)
+
+
+def contrast(html, measure=None):
+    """WCAG AA on the plan picture itself (check_contrast.py), so a faint text is caught before the OK, not after it
+    (walkthrough fix 7). Plain lines, one per failing text; [] when all pass or Edge isn't there (not checked)."""
+    from . import progress as PR
+    try:
+        if measure is None:
+            sys.path.insert(0, str(SCRIPTS))
+            import check_contrast, edge_page
+            if not edge_page.available():
+                return []
+            measure = check_contrast.measure
+        with PR.still("checking the picture's text contrast"):
+            rows = measure(pathlib.Path(html).read_text(encoding="utf-8"))
+    except (SystemExit, RuntimeError, OSError):
+        return []
+    out = []
+    for r in rows:
+        if r.get("ratio", 99) < r.get("need", 4.5):
+            out.append(f"\"{r.get('text', '')}\" ({r.get('id') or 'the page'}): {r['ratio']:.1f}:1, needs "
+                       f"{r['need']:g}:1")
+    return out
 
 
 def approve(root, layout=None):
@@ -256,6 +372,7 @@ def approve(root, layout=None):
         raise PlanError(f"{len(missing)} page(s) have no purpose yet: ask what each should help people decide")
     h = plan_hash(lay, plan)
     plan["approved"] = h
+    plan["approvedStructure"] = structure(lay)
     save(plan_file(root), plan)
     write_purpose(root, lay, plan)
     ST.update(root, done="plan", planHash=h)
@@ -271,21 +388,65 @@ def changed_since_approval(root, layout=None):
     return not lay or plan.get("approved") != plan_hash(lay, plan)
 
 
+def changes_since_approval(root, layout=None):
+    """Plain lines saying what changed in what the person approved (empty when nothing did)."""
+    lay = load(layout_file(root, layout))
+    plan = load(plan_file(root), {}) or {}
+    if not lay or not plan.get("approved"):
+        return ["the plan wasn't approved yet"]
+    if plan.get("approved") == plan_hash(lay, plan):
+        return []
+    lines = what_changed(plan.get("approvedStructure") or {}, structure(lay))
+    return lines or ["the page purposes changed"]
+
+
+MAIN_FLOW = "<!-- pbik main flow: the plan list (design/plan/plan.md) is the design spec -->"
+
+
+def _section(text, head, body):
+    """Replace or add a `## head` section."""
+    block = f"## {head}\n\n" + body.rstrip("\n") + "\n"
+    if f"## {head}" in text:
+        before, rest = text.split(f"## {head}", 1)
+        nxt = rest.find("\n## ")
+        return before + block + (rest[nxt + 1:] if nxt >= 0 else "")
+    return text.rstrip("\n") + "\n\n" + block
+
+
 def write_purpose(root, layout, plan):
-    """The "Page purpose" section of design/specs/spec.md (kept for the wrap-up and the numbers audit)."""
+    """design/specs/spec.md in the main flow: Page purpose (for the wrap-up and the numbers audit), every visual by ID
+    and the fallback register, so the ID checks have what they read; the plan list stands in for the /plan-only
+    sections (design ambition, pattern choices), which audit_ids.py then doesn't ask for (walkthrough fix 6)."""
     f = pathlib.Path(root) / "design" / "specs" / "spec.md"
     text = f.read_text(encoding="utf-8") if f.exists() else "# Spec\n"
-    section = ["## Page purpose", ""] + [
-        f"- {page.get('displayName', pk)} ({pk}): {plan['purposes'][pk]}" for pk, page in layout["pages"].items()]
-    block = "\n".join(section) + "\n"
-    if "## Page purpose" in text:
-        head, rest = text.split("## Page purpose", 1)
-        nxt = rest.find("\n## ")
-        text = head + block + (rest[nxt + 1:] if nxt >= 0 else "")
-    else:
-        text = text.rstrip("\n") + "\n\n" + block
+    if not f.exists() or MAIN_FLOW in text:
+        if MAIN_FLOW not in text:
+            text = text.rstrip("\n") + "\n\n" + MAIN_FLOW + "\n"
+        vis = [f"- {v['id']}: {_plain_type(v)}" + (f", {_title(v)}" if _title(v) else "")
+               for v in layout.get("visuals", [])]
+        text = _section(text, "Visuals", "\n".join(vis) or "- none")
+        fb = fallbacks(layout)
+        text = _section(text, "Fallback register", "\n".join(
+            f"- {vid}: {method} (step {step}); native option tried: {tried}; why: {reason}"
+            for vid, method, step, tried, reason in fb) or "- none: every visual is native")
+    text = _section(text, "Page purpose", "\n".join(
+        f"- {page.get('displayName', pk)} ({pk}): {plan['purposes'][pk]}" for pk, page in layout["pages"].items()))
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(text, encoding="utf-8")
+
+
+def _title(v):
+    c = v.get("container")
+    t = c.get("title") if isinstance(c, dict) else None
+    return t if isinstance(t, str) else ""
+
+
+def _plain_type(v):
+    return {"cardVisual": "KPI card", "card": "KPI card", "lineChart": "line chart", "barChart": "bar chart",
+            "clusteredBarChart": "bar chart", "columnChart": "column chart", "clusteredColumnChart": "column chart",
+            "tableEx": "table", "pivotTable": "matrix", "slicer": "filter", "advancedSlicerVisual": "button filter",
+            "textbox": "text", "shape": "shape", "image": "picture", "actionButton": "button"}.get(
+        v.get("type"), v.get("type", "visual"))
 
 
 def open_beside(files, run=None):

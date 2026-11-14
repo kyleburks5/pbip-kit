@@ -108,10 +108,13 @@ if spec.exists():
     for v in VIS:
         if (v.get("build") or {}).get("method") not in (None, "native", "page-background") and v["id"] not in register:
             issues.append(f"spec: {v['id']} ({v['build']['method']}) has no fallback register row")
-    issues.extend(ambition.spec_issues(text))
-    pc_issues, pc_warnings = pattern_choices.check(text, LAY, pattern_choices.created(spec))
-    issues.extend(pc_issues)
-    notes.extend(f"warning: {w}" for w in pc_warnings)
+    if "<!-- pbik main flow" in text:      # the plan list is the spec: no /plan-only sections asked for (fix 6)
+        notes.append("spec: main flow (the plan list stands in for design ambition and pattern choices)")
+    else:
+        issues.extend(ambition.spec_issues(text))
+        pc_issues, pc_warnings = pattern_choices.check(text, LAY, pattern_choices.created(spec))
+        issues.extend(pc_issues)
+        notes.extend(f"warning: {w}" for w in pc_warnings)
 else:
     notes.append("spec: not written yet")
 
