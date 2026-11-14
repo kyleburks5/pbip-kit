@@ -20,8 +20,45 @@ TARGETS = {"first setup": (30, 45), "reuse": (0, 10)}
 
 
 def transcript_folder(root):
-    slug = re.sub(r"[:\\/ .]", "-", str(pathlib.Path(root).resolve()))
-    return pathlib.Path.home() / ".claude" / "projects" / slug
+    """This project's Claude Code transcripts; a project in the kit's projects folder uses the kit's chat (v1.7)."""
+    here = pathlib.Path(root).resolve()
+    for folder in (here, *here.parents):
+        cand = pathlib.Path.home() / ".claude" / "projects" / re.sub(r"[:\\/ .]", "-", str(folder))
+        if cand.is_dir():
+            return cand
+    return pathlib.Path.home() / ".claude" / "projects" / re.sub(r"[:\\/ .]", "-", str(here))
+
+
+def person_messages(folder, since=None):
+    """Times of the person's own chat messages (not tool results) in the transcripts: the check on the
+    interactions the agent logged (`pbik step note --interaction`, v1.7 A9)."""
+    out = []
+    for f in sorted(pathlib.Path(folder).glob("*.jsonl")) if pathlib.Path(folder).is_dir() else []:
+        for ln in f.read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                d = json.loads(ln)
+            except ValueError:
+                continue
+            m = d.get("message") if isinstance(d.get("message"), dict) else None
+            if d.get("type") != "user" or not m or not d.get("timestamp") or d.get("isMeta"):
+                continue
+            content = m.get("content")
+            texts = [content] if isinstance(content, str) else [
+                c.get("text", "") for c in content or [] if isinstance(c, dict) and c.get("type") == "text"]
+            if not any(x.strip() for x in texts):
+                continue                                     # tool results only
+            at = datetime.datetime.fromisoformat(d["timestamp"].replace("Z", "+00:00"))
+            if since is None or at >= since:
+                out.append(at)
+    return sorted(out)
+
+
+def interaction_check(root, folder, since=None):
+    """{"logged": replies and windows the agent logged, "windows": of those, approval windows,
+    "transcript": the person's messages in the transcript} since a time."""
+    logged = ST.interactions(root, since)
+    return {"logged": len(logged), "windows": sum(1 for w, _ in logged if w.startswith("window")),
+            "transcript": len(person_messages(folder, since))}
 
 
 def usage_records(folder):
@@ -83,11 +120,17 @@ def main(argv=None):
     ap.add_argument("--transcripts", help="Claude Code transcript folder (default: this project's)")
     ap.add_argument("--out", default="design/reviews/usage.md")
     a = ap.parse_args(argv)
-    rows = per_step(a.root, a.transcripts or transcript_folder(a.root))
+    folder = a.transcripts or transcript_folder(a.root)
+    rows = per_step(a.root, folder)
     out = pathlib.Path(a.root) / a.out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(report(rows), encoding="utf-8")
-    print(f"{len(rows)} step(s), {sum(r['output_tokens'] for r in rows)} output tokens: wrote {a.out}")
+    ic = interaction_check(a.root, folder)
+    out.write_text(out.read_text(encoding="utf-8") + (
+        f"\n## Interactions\n\nLogged by the agent: {ic['logged']} ({ic['windows']} approval window(s)); "
+        f"the person's messages in the transcript: {ic['transcript']} (Copilot: logged only).\n"), encoding="utf-8")
+    print(f"{len(rows)} step(s), {sum(r['output_tokens'] for r in rows)} output tokens, {ic['logged']} "
+          f"interaction(s): wrote {a.out}")
     return 0
 
 

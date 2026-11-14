@@ -309,9 +309,11 @@ def _main(argv=None):
     sop.add_argument("--root", default=".")
 
     stp = sub.add_parser("step", help="mark a workflow step for token tracking (tools/usage.py)")
-    stp.add_argument("event", choices=["start", "end"])
+    stp.add_argument("event", choices=["start", "end", "note"])
     stp.add_argument("step")
     stp.add_argument("--outcome")
+    stp.add_argument("--interaction", action="store_true", help="with note: one reply from the person or one "
+                                                                 "approval window (the step names which)")
     stp.add_argument("--root", default=".")
     ga = sub.add_parser("gate", help="person-only steps: an approval window with a typed code (the agent opens it)")
     gas = ga.add_subparsers(dest="sub", required=True)
@@ -542,8 +544,15 @@ def _main(argv=None):
         print(f"Opened your project {folder.name} in File Explorer.")
     elif c == "step":
         from . import steps as STP
-        STP.mark(args.root, args.event, args.step, args.outcome)
-        print(f"step {args.step}: {args.event}")
+        if args.event == "note":
+            if not args.interaction:
+                print("pbik: step note needs --interaction", file=sys.stderr)
+                return 2
+            STP.interaction(args.root, args.step)
+            print(f"interactions so far: {len(STP.interactions(args.root))}")
+        else:
+            STP.mark(args.root, args.event, args.step, args.outcome)
+            print(f"step {args.step}: {args.event}")
     elif c == "gate":
         from . import gates as GT, synth as S2, dataclass_ as DC2
         try:

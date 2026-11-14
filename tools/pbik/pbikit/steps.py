@@ -23,6 +23,24 @@ def mark(root, event, step, outcome=None, now=None):
     return rec
 
 
+def interaction(root, what="reply", now=None):
+    """One interaction: a reply from the person or an approval window (v1.7, A9). The agent marks each one."""
+    return mark(root, "interaction", what, now=now)
+
+
+def interactions(root, since=None):
+    """The interactions logged (since a time, e.g. a build's start): [(what, at)]."""
+    f = log_file(root)
+    out = []
+    for ln in f.read_text(encoding="utf-8").splitlines() if f.exists() else []:
+        r = json.loads(ln)
+        if r["event"] == "interaction":
+            at = datetime.datetime.fromisoformat(r["at"])
+            if since is None or at >= since:
+                out.append((r["step"], at))
+    return out
+
+
 def windows(root):
     """[(step, start, end, outcome)] from the log; a step still open ends now."""
     f = log_file(root)
@@ -30,6 +48,8 @@ def windows(root):
     for ln in f.read_text(encoding="utf-8").splitlines() if f.exists() else []:
         r = json.loads(ln)
         at = datetime.datetime.fromisoformat(r["at"])
+        if r["event"] == "interaction":
+            continue
         if r["event"] == "start":
             opened[r["step"]] = at
         elif r["event"] == "end" and r["step"] in opened:

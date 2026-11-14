@@ -257,5 +257,69 @@ class WindowTests(Tmp):
             self.assertEqual(r.stdout.strip(), "0", r.stdout + r.stderr)
 
 
+# ---------------------------------------------------------------- stage c
+SLASH = r"(?<![\w./<])/(brd|model|plan|build|review|fix|wrapup|theme|smoke|tidy|validate|update)\b"
+
+
+class PlainWordsTests(Tmp):
+    """A9: plain words, grouped model summaries, no slash commands, few questions, interactions counted."""
+
+    def test_no_slash_commands_in_what_pbik_says(self):
+        import re
+        bad = []
+        for f in sorted((KIT / "tools" / "pbik" / "pbikit").glob("*.py")):
+            for n, ln in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                for s in re.findall(r"(?:out|print)\(f?\"([^\"]*)\"", ln) + re.findall(r"\"(next[^\"]*)\"", ln):
+                    if re.search(SLASH, s):
+                        bad.append(f"{f.name}:{n}: {s}")
+        self.assertEqual(bad, [], "pbik never tells the person to type a slash command")
+
+    def test_plain_words_rules(self):
+        import re
+        text = (KIT / "docs" / "PLAIN-WORDS.md").read_text(encoding="utf-8")
+        for need in ("Never suggest the model step after a model export", "type the code in its picture",
+                     "## Build options", "guided build", "quick build", "switch to guided",
+                     "finish the rest quickly", "Batch questions", "(my own judgment)"):
+            self.assertIn(need, text)
+        says = [ln for ln in text.splitlines() if ln.startswith("|")]
+        self.assertFalse([s for s in says if re.search(SLASH, s)], "no slash command in anything the agent says")
+
+    def test_intake_groups_and_never_says_slash_model(self):
+        from pbikit import intake as IN
+        import big_model as BM
+        drop = self.tmp / "design" / "reference" / "model"
+        BM.write(drop, "tmdl")
+        (self.tmp / "design" / "specs").mkdir(parents=True, exist_ok=True)
+        said = []
+        IN.intake(self.tmp, out=said.append)
+        text = "\n".join(said)
+        self.assertRegex(text, r"\d+ handled by rules, \d+ option table\(s\) to keep, \d+ need you\.")
+        self.assertNotRegex(text, SLASH)
+        self.assertIn("next:", text)
+        if "need you:" in text:
+            self.assertIn("  - ", text, "each item that needs the person is named with a plain reason")
+        self.assertLess(len(said), 20, "grouped, not one line per flag")
+
+    def test_interactions_logged_and_checked(self):
+        import datetime
+        from pbikit import steps as STP
+        import usage as US
+        STP.interaction(self.tmp, "reply")
+        STP.interaction(self.tmp, "window: Approve the model")
+        r = pbik("step", "note", "plan OK", "--interaction", "--root", self.tmp)
+        self.assertIn("interactions so far: 3", r.stdout)
+        self.assertEqual(STP.windows(self.tmp), [], "interactions aren't steps")
+        tr = self.tmp / "tr"
+        tr.mkdir()
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        lines = [{"type": "user", "timestamp": now, "message": {"role": "user", "content": "build me a dashboard"}},
+                 {"type": "user", "timestamp": now, "message": {"role": "user", "content": [
+                     {"type": "tool_result", "content": "ok"}]}},
+                 {"type": "user", "timestamp": now, "message": {"role": "user", "content": [
+                     {"type": "text", "text": "OK"}]}}]
+        (tr / "s.jsonl").write_text("\n".join(json.dumps(x) for x in lines), encoding="utf-8")
+        self.assertEqual(US.interaction_check(self.tmp, tr), {"logged": 3, "windows": 1, "transcript": 2})
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

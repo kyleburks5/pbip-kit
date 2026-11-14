@@ -301,7 +301,8 @@ def check(path, version=None):
     t = vtuple(target)
     have = vtuple(v)[:len(t)]                 # a target of 2.152 matches every 2.152.x build
     if have > t:
-        print(f"Desktop {v} is newer than targetDesktop {target}: run /update first", file=sys.stderr)
+        print(f"Desktop {v} is newer than targetDesktop {target}: the Desktop update routine comes first",
+              file=sys.stderr)
         return 5
     if have < t:
         print(f"warning: Desktop {v} is older than targetDesktop {target}: it may not open what pbik writes")

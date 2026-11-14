@@ -112,7 +112,30 @@ def intake(root=".", folder=None, out=print):
     log(root, fmt, path.name, removed, c)
     out(f"read the model ({fmt}): {len(c['tables'])} tables, "
         f"{sum(len(t['measures']) for t in c['tables'].values())} measures, {len(c['flags'])} flag(s)")
+    for ln in grouped_lines(c):                      # grouped by default, never a list by technical kind (A9)
+        out(ln)
     return {"format": fmt, "removed": removed, "contract": c}
+
+
+def grouped_lines(c, most=10):
+    """The plain, grouped summary of a model's flags: the counts, then each item that needs the person and why,
+    then the next step in words (never a slash command; v1.7 A9, walkthrough notes 8-10)."""
+    from . import rules as R
+    g = R.groups(c)
+    out = [R.summary_line(c) + "."]
+    if g["keep"]:
+        out.append(f"The {len(g['keep'])} option table(s) keep their exact labels and order; you'll see their rows in "
+                   "the approval window and just check them.")
+    if g["you"]:
+        out.append(f"{len(g['you'])} need you:")
+        out += [f"  - {R.plain(f)}" for f in g["you"][:most]]
+        if len(g["you"]) > most:
+            out.append(f"  - and {len(g['you']) - most} more of the same kinds")
+        out.append("next: tell me for each whether to make up values for it or leave it out; then I'll open the "
+                   "approval window")
+    else:
+        out.append("next: I'll open the approval window (Approve the model): check it, type the code, click Yes")
+    return out
 
 
 def log(root, fmt, name, removed, c):

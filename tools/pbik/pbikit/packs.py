@@ -117,7 +117,8 @@ def project_new(folder, pack, out=print):
     proj.update(dataClass=info.get("dataClass", DC.DEFAULT),
                 pack={"name": info["name"], "version": info["current"], "path": str(pathlib.Path(pack).resolve())})
     write_json(DC.project_file(folder), proj)
-    out(f"project at the plan step from {info['name']} v{info['current']} (data class {proj['dataClass']}): next, /plan")
+    out(f"project at the plan step from {info['name']} v{info['current']} (data class {proj['dataClass']})")
+    out("next: I'll draw the plan as a picture")
     return folder
 
 

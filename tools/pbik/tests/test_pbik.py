@@ -1503,7 +1503,7 @@ class PbikTests(unittest.TestCase):
         pj.parent.mkdir(parents=True)
         pj.write_text(json.dumps({"targetDesktop": "2.155.756.0", "catalog": "work"}), encoding="utf-8")
         newer = pbik("project", "check", "--project", pj, "--version", "2.159.883.0", ok=(5,))
-        self.assertIn("run /update first", newer.stderr)
+        self.assertIn("the Desktop update routine comes first", newer.stderr)
         self.assertIn("matches", pbik("project", "check", "--project", pj, "--version",
                                       "2.155.756.0 (26.06)+3f9c2a1b").stdout)
         self.assertIn("warning: Desktop 2.152.882.0 is older", pbik("project", "check", "--project", pj,
