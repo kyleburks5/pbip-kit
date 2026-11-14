@@ -93,17 +93,21 @@ class GuardTests(Tmp):
 class ProjectsFolderTests(Tmp):
     """A7, D2: projects inside the open folder, their own git, never tracked by the kit."""
 
-    def test_init_inside_projects_with_status(self):
+    def test_init_beside_the_kit_with_status(self):
+        """One folder = one project: `project init` makes its own folder beside the kit, never inside it."""
         from pbikit import projectinit as PI
         kit = fake_kit(self.tmp / "kit")
         said = []
         target = PI.init("Sales Overview", None, "restricted", kit=kit, out=said.append)
-        self.assertEqual(target, kit / "projects" / "Sales Overview")
+        self.assertEqual(target, self.tmp / "Sales Overview")
+        self.assertTrue((target / "Model").is_dir() and (target / "Reference").is_dir())
+        with self.assertRaises(PI.InitError):
+            PI.init("Inside", kit / "projects", kit=kit, out=said.append)
         self.assertTrue((target / ".git").is_dir(), "its own git repository")
         kit_status = subprocess.run(["git", "status", "--porcelain"], cwd=kit, capture_output=True, text=True).stdout
         self.assertEqual(kit_status.strip(), "", "the kit doesn't see the project")
-        self.assertIn("is ready in the projects folder", said[0])
-        self.assertIn("open it in File Explorer", said[0])
+        self.assertIn("is ready in its own folder beside the kit", said[0])
+        self.assertIn("Model and Reference folders", said[0])
         for s in said:
             self.assertNotIn("/", s.replace("and/or", ""), "no slash command or path")
             self.assertNotIn("\\", s)
@@ -111,6 +115,8 @@ class ProjectsFolderTests(Tmp):
         self.assertEqual((doc["dataClass"], doc["next"]), ("restricted", "start"))
 
     def test_export_check_flags_project_files(self):
+        if not (KIT / "tools" / "export_check.py").exists():
+            self.skipTest("a project: the export check is master-only")
         import export_check as EC
         found = {c: [] for c in EC.CHECKS}
         EC.scan_path("projects/Sales/design/specs/layout.json", [("*", "projects/*")], found)
@@ -204,13 +210,15 @@ class WindowTests(Tmp):
         self.assertEqual(self.GT.wait("synth-approve", self.tmp, timeout=0.2, poll=0.05)["result"], "not answered")
 
     def test_refusals(self):
-        self.marker("screen-control.json", 2)
-        for fn in (lambda: self.GT.open_window("synth-approve", self.tmp, launch=lambda c: None),
-                   lambda: self.GT.run("synth-approve", self.tmp, dialog=lambda *a: "yes")):
-            with self.assertRaises(self.GT.GateError) as cm:
-                fn()
-            self.assertIn("screen control", str(cm.exception))
-        self.marker("screen-control.json", 11)                    # 11 minutes ago: past the window
+        self.marker("screen-control.json", 2)                     # screen control on: the window asks for the code
+        asked = []
+        self.GT.run("synth-approve", self.tmp, dialog=lambda t, x, code=False: asked.append(code) or "no",
+                    out=lambda *a: None)
+        self.assertEqual(asked, [True])
+        self.marker("screen-control.json", 11)                    # 11 minutes ago: past the window, plain Yes / No
+        self.GT.run("synth-approve", self.tmp, dialog=lambda t, x, code=False: asked.append(code) or "no",
+                    out=lambda *a: None)
+        self.assertEqual(asked, [True, False])
         self.marker("gate-window.json", 1)
         with self.assertRaises(self.GT.GateError) as cm:
             self.GT.open_window("synth-approve", self.tmp, launch=lambda c: None)
@@ -279,7 +287,7 @@ class PlainWordsTests(Tmp):
     def test_plain_words_rules(self):
         import re
         text = (KIT / "docs" / "PLAIN-WORDS.md").read_text(encoding="utf-8")
-        for need in ("Never suggest the model step after a model export", "type the code in its picture",
+        for need in ("Never suggest the model step after a model export", "check it, then click Yes or No",
                      "## Build options", "guided build", "quick build", "switch to guided",
                      "finish the rest quickly", "Batch questions", "(my own judgment)"):
             self.assertIn(need, text)

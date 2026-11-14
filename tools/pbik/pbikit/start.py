@@ -32,7 +32,9 @@ class StartError(Exception):
 
 
 def inputs_dir(root):
-    return pathlib.Path(root) / INPUTS
+    """The Reference folder (pbikit/drops.py; design/reference/inputs in projects made before v1.7's one-folder setup)."""
+    from . import drops
+    return drops.reference_dir(root)
 
 
 def is_report(p):
@@ -51,8 +53,8 @@ def detect(root):
             found.append(("from report", p.name))
         elif p.is_file():
             ext = p.suffix.lower()
-            if p.name == ".gitignore":
-                continue
+            if p.name.lower() in ("readme.txt", ".gitignore", ".gitkeep", "desktop.ini", "thumbs.db"):
+                continue                                          # the kit's own notes, not the person's inputs
             if ext in (".pbix", ".pbit"):
                 refused.append(p.name)
             elif ext in HTML:
@@ -77,9 +79,9 @@ def say(d):
                                                                               for n in d["requirements"]]
         out.append(f"You gave me {len(what)} thing(s): " + "; ".join(what) + ".")
     else:
-        out.append("There's nothing in the inputs folder yet.")
+        out.append("There's nothing in the Reference folder yet.")
     for n in d["refused"]:
-        out.append(f"warning: I won't read {n}: it can hold data. Take it out of the inputs folder"
+        out.append(f"warning: I won't read {n}: it can hold data. Take it out of the Reference folder"
                    + (" and save the report as a Power BI project instead." if n.lower().endswith((".pbix", ".pbit"))
                       else "."))
     out.append(f"Path: {PLAIN[d['path']]}.")
@@ -92,12 +94,50 @@ def say(d):
 
 
 def open_inputs(root):
-    import os
-    folder = inputs_dir(root)
-    folder.mkdir(parents=True, exist_ok=True)
-    if hasattr(os, "startfile"):
-        os.startfile(str(folder))                                 # noqa: S606  File Explorer on Windows
-    return folder
+    """Make sure the Reference folder exists. It never opens File Explorer (one window per folder lost a copy in the
+    walkthrough): the agent names the folder instead."""
+    from . import drops
+    drops.make(root)
+    return inputs_dir(root)
+
+
+def check(root):
+    """At the start of every build: one plain line per drop folder, what it holds and what is missing, and one next
+    line. Lists names only: the Model folder is never read here (model intake deletes data files first)."""
+    from . import drops, synth as S
+    root = pathlib.Path(root)
+    drops.make(root)
+    lines = []
+    model = drops.entries(drops.model_dir(root))
+    contract = S.read_json(S.specs(root) / "contract.json") or {}
+    approved = bool((contract.get("approval") or {}).get("by"))
+    if model:
+        names = ", ".join(p.name for p in model)
+        lines.append(f"Model: {names}" + (" (read and approved)." if approved else
+                                          " (I'll read it now; any data files in it are deleted first)."))
+    elif contract:
+        lines.append("Model: the model you gave me before" + (" (approved)." if approved else "."))
+    else:
+        lines.append("Model: empty. Put a copy of your semantic model export in the Model folder (a .SemanticModel "
+                     "folder, a TMDL folder or a TMSL export).")
+    d = detect(root)
+    got = [f"{n} ({PLAIN[k].split(' (')[0]})" for k, n in d["inputs"]] + [f"{n} (requirements)"
+                                                                         for n in d["requirements"]]
+    if got:
+        lines.append("Reference: " + "; ".join(got) + ", kept in the Reference folder.")
+    else:
+        lines.append("Reference: empty, so I'll ask what the report should help people decide and show starter "
+                     "layouts. (A wireframe, screenshot, requirements or an existing report goes in the Reference "
+                     "folder.)")
+    for n in d["refused"]:
+        lines.append(f"warning: I won't read {n} in the Reference folder: it can hold data.")
+    if not model and not contract:
+        lines.append("next: put the model in the Model folder and say done")
+    elif not got:
+        lines.append("next: tell me what this report should help people decide")
+    else:
+        lines.append("next: I'll turn it into a plan and show it to you as a picture")
+    return lines
 
 
 # ---------------------------------------------------------------- starter layouts

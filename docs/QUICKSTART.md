@@ -6,12 +6,23 @@ Commands that start with `/` are typed in the assistant's chat.
 In GitHub Copilot the chat commands start with `/kit-`: `/kit-brd`, `/kit-model`, and so on. Set up VS Code first
 ([WORK-SETUP.md](WORK-SETUP.md)).
 
-## The easy way (v1.7): just ask
+## The easy way (v1.7): copy the kit, open the folder, put your model in Model
 
-Open the kit in the Claude desktop app, Claude Code in VS Code, or GitHub Copilot Chat (agent mode) and say what you
-want ("I want an orders dashboard; I have a wireframe"). The assistant makes the project, asks for copies of your files,
-shows the plan as a picture, and builds. You never need a terminal or a command; the sections below are the
-step-by-step way for experts. A walkthrough with made-up data: [PHASE1-WALKTHROUGH.md](PHASE1-WALKTHROUGH.md).
+One folder = one project.
+
+1. **Copy the kit** to a new folder for this report (in File Explorer: copy the kit folder, paste, rename it, e.g.
+   "Orders Dashboard"; or clone it). Pick a folder outside OneDrive.
+2. **Open that folder** in the Claude desktop app, Claude Code in VS Code, or GitHub Copilot Chat (agent mode), and
+   say what you want ("I want an orders dashboard"). On this first run the assistant turns the copy into your project:
+   its own save history, and two folders for your files, **Model** and **Reference**.
+3. **Put your model in Model**: a copy of the semantic model export (never your only file; the kit deletes any data
+   in it before reading anything). Put a wireframe, screenshots, requirements or an existing report in **Reference**,
+   or leave it empty to choose from starter layouts. Say "done".
+
+The assistant says in one line what it found in each folder and what is missing, shows the plan as a picture, and
+builds. It never opens File Explorer windows, and you never need a terminal or a command; the sections below are the
+step-by-step way for experts. Approval windows are a plain Yes / No (a code to type appears only when screen control
+is on). A walkthrough with made-up data: [PHASE1-WALKTHROUGH.md](PHASE1-WALKTHROUGH.md).
 
 **Guided build.** "We build it together, one step at a time." The assistant stops after the page purpose, the plan
 picture, the colours, the build, the checks and the polish, shows what changed, and waits for your OK or your changes.

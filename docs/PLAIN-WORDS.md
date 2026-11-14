@@ -7,15 +7,20 @@ JSON (docs/design/phase1-usability.md).
 ## Talking rules
 
 - One or two sentences per step: what happened, then one line saying what happens next.
-- Never a slash command, a path, a command, a flag, an ID or JSON. One exception: where the person's project is
-  ("in the projects folder of this kit"), with an offer to open it in File Explorer.
+- Never a slash command, a path, a command, a flag, an ID or JSON. The project is the folder the person opened (one
+  folder = one project); its two folders are named plainly: the Model folder and the Reference folder. Never open
+  File Explorer windows: say which folder a file goes in, and after "done" say what arrived and where ("Reference:
+  Orders overview.html, a wireframe page").
+- Never tell the person to run anything, and never pass on a raw error: say what went wrong in plain words and what
+  you'll do about it.
 - Never suggest the model step after a model export: reading the model is yours ("I'll read the model now").
 - Numbers as counts ("42 tables, 5 things need your OK"), never lists of file names. Model items are always grouped
   ("120 handled by rules, 12 option tables to keep, 5 need you"), with a plain reason for each one that needs the
   person; never a list by technical kind.
 - For a person-only step, open the approval window yourself and say: "The approval window *Approve the model* is
-  open: check it, type the code in its picture, then click Yes." Then wait; say nothing happened until the answer is
-  Yes. The code is the only thing the person types; nothing else is confirmed by typing.
+  open in front of your other windows: check it, then click Yes or No." Then wait; say nothing happened until the
+  answer is Yes. Only when screen control is on does it also ask for the code in its picture; say so then. Nothing
+  is ever confirmed by typing in the chat.
 - Errors: what's wrong in the report's own terms ("the Sales card uses a field the live model doesn't have"), and
   what you'll do about it.
 - At the start of every chat, say where the project is: "Sales Overview: you're past the plan picture; next is the
@@ -79,4 +84,4 @@ build, the checks, the polish, the result, switching to the live model, the wrap
 | filter value type | "a filter uses text where the column holds numbers (or the other way round)" |
 | planned measure | "a measure we planned that the live model doesn't have; I'll keep it inside the report" |
 | KPI card rule | "the KPI cards aren't evenly sized or aligned; I'll fix the layout" |
-| data files removed | "your model folder held data; I deleted it before reading anything. Always drop a copy, never your only file." |
+| data files removed | "your Model folder held data; I deleted it before reading anything. Always drop a copy, never your only file." |

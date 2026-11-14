@@ -324,8 +324,8 @@ class PackReuseTests(Tmp):
         start = time.time()
         b = PI.init("Second Dashboard", self.tmp, from_pack=team / "Example Big", out=lambda *x: None)
         self.assertTrue(S.approved(S.read_json(b / "design/specs/contract.json")))
-        drop = b / "design" / "reference" / "model"
-        drop.mkdir(parents=True)
+        drop = b / "Model"                              # the project's Model folder (one-folder setup)
+        drop.mkdir(parents=True, exist_ok=True)
         src = BM.write(drop, "tmdl")
         t = src / "definition" / "tables" / "Fact Orders.tmdl"
         t.write_text(t.read_text(encoding="utf-8").replace("column Status", "column 'Order Status'"),

@@ -70,14 +70,19 @@ def detect(folder):
     return found
 
 
-def open_drop(root=".", open_folder=True):
-    """Make the drop folder (git-ignored) and open it in File Explorer for the user; nothing in it is read."""
-    import os
-    d = pathlib.Path(root).resolve() / DROP
-    d.mkdir(parents=True, exist_ok=True)
+def drop_dir(root="."):
+    """The Model folder (pbikit/drops.py; design/reference/model in projects made before the one-folder setup)."""
+    from . import drops
+    return drops.model_dir(pathlib.Path(root).resolve())
+
+
+def open_drop(root=".", open_folder=False):
+    """Make the Model folder (git-ignored); nothing in it is read. It never opens File Explorer (walkthrough fix 10):
+    the agent names the folder."""
+    from . import drops
+    drops.make(root)
+    d = drop_dir(root)
     (d / ".gitignore").write_text("*\n", encoding="utf-8")
-    if open_folder and os.name == "nt":
-        os.startfile(str(d))                              # noqa: S606
     return d
 
 
@@ -85,9 +90,9 @@ def intake(root=".", folder=None, out=print):
     """Delete data files, detect the model, write the contract. Returns {format, removed, contract}."""
     from . import synth as S
     root = pathlib.Path(root).resolve()
-    folder = pathlib.Path(folder) if folder else root / DROP
+    folder = pathlib.Path(folder) if folder else drop_dir(root)
     if not folder.is_dir():
-        raise IntakeError("drop a copy of the model into the project's model folder first")
+        raise IntakeError("put a copy of the model in the Model folder first")
     (folder / ".gitignore").write_text("*\n", encoding="utf-8")
     removed = remove_data(folder)                   # before anything reads the folder
     if removed:
@@ -173,7 +178,7 @@ def grouped_lines(c, most=10):
         out.append("next: tell me for each whether to make up values for it or leave it out; then I'll open the "
                    "approval window")
     else:
-        out.append("next: I'll open the approval window (Approve the model): check it, type the code, click Yes")
+        out.append("next: I'll open the approval window (Approve the model): check it, then click Yes or No")
     return out
 
 

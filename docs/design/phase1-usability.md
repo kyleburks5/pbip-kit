@@ -348,6 +348,21 @@ uses the same plain words, status line and question rules.
 | 13 | Serious: no way to run approvals in the desktop app without a terminal | A8 |
 | 14 | A new chat in VS Code doesn't know what happened | A7 (status file and `pbik status` in every new chat) |
 
+## A17. Walkthrough revision (2026-11-14): one folder = one project, two drop folders, plain approvals
+
+Replaces the projects-folder approach of A7 and D2. The person copies or clones the master kit into a new folder and
+opens it; that folder is the project (no projects subfolder, no second folder, no chat switch). On first run
+`pbik project setup` turns the copy into the project: its own git, data class, status file, the master-only files
+removed, and two plainly named drop folders, **Model** (the semantic model export, git-ignored, data files deleted
+before reading) and **Reference** (wireframe, screenshot, requirements or an existing report, git-ignored).
+`pbik start check` says at the start of every build, one line per folder, what it holds and what is missing; the agent
+never opens File Explorer and asks for a missing file by folder name; an empty Reference folder means the one open
+question and the starter layouts. Approval windows are a plain Yes / No, in front of other windows; the typed code
+appears only when screen control is active. The export check fails if a project or a filled drop folder sits inside
+the master kit. The walkthrough, how-tos and QUICKSTART say "copy the kit, open the folder, put your model in Model".
+The plan picture is the fast preview (example values, never data); after the build a real Desktop screenshot is
+compared with the approved preview.
+
 ---
 
 # Part B: Phase 1 as built (stages a-f)

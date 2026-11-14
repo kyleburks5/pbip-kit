@@ -1,0 +1,4 @@
+# Files only the master kit needs (kit development). `pbik project setup` removes them from a fresh copy of the kit
+# and `pbik project init` leaves them out; the master kit keeps them. One glob per line, relative to the kit folder.
+tools/export_check.py
+tools/export_allow.txt

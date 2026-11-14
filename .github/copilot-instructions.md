@@ -14,8 +14,10 @@ Goal: build polished Power BI reports (PBIP + PBIR) from a requirements file (de
 - Chat only: run every pbik step yourself (`pbik --report json ...`) and answer in docs/PLAIN-WORDS.md words; never
   show me a path or a command. For a person-only step, open the approval window yourself (`pbik gate open`, then
   `pbik gate wait`); never send keys or clicks to it. At the start of every chat, run `pbik status` and say where the
-  project is. When someone asks for a dashboard, follow .claude/commands/start.md (the main flow).
-- Never open design/reference/model/ (it may hold data): run `pbik model intake`, which deletes data files first.
+  project is. One folder = one project: a fresh copy of the kit becomes the project (`pbik project setup`); never build
+  in the master kit. When someone asks for a dashboard, follow .claude/commands/start.md (the main flow).
+- Never open the Model folder (or design/reference/model/ in older projects; it may hold data): run
+  `pbik model intake`, which deletes data files first. Never open File Explorer: name the Model or Reference folder.
 - Canvas 1920x1080 (custom page size), 32px margin, 12-column grid, 24px gutters. Compute positions from the grid.
 - Read design/tokens.json before styling. Never hardcode colors or fonts.
 - Use only the powerbi-authoring modeling MCP server for model changes, plus the daxlib-mcp server (.mcp.json) only to

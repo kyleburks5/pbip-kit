@@ -479,6 +479,18 @@ sets the data class (default restricted), writes design/status.json and makes a 
 starts from a model pack at the plan step. The agent keeps working in the same chat with `pbik --in <name> ...` (before
 the command) and `open` opens the project folder in File Explorer.
 
+### `project setup [--name N] [--class C]`, `project master --here`
+
+One folder = one project (v1.7): the person copies or clones the master kit into a new folder and opens it; on first
+run `project setup` turns that folder into the project, in place (pbikit/projectsetup.py): the master-only files in
+tools/master-only.txt go (the master keeps them), the **Model** and **Reference** drop folders are made (git-ignored,
+each with a README; pbikit/drops.py), the data class (restricted unless said otherwise) and design/status.json are
+written, and the project gets its own git: a new repository for a plain copy; a clone keeps its history with its
+`origin` renamed `kit`. A `projects` folder copied from the old setup is left alone. `status` tells the master kit
+(`.pbik/master-here` holds its own path: written once by `project master --here`; a copy or clone lives elsewhere), a
+fresh copy and a project apart; it never builds in the master kit. `project init <name>` still makes a project for
+someone who'd rather the agent copied the kit: its own folder beside the kit, never inside it.
+
 ### `status [--done <stage>] [--mode] [--path] [--report-type] [--pack] [--class] [--plan-hash] [--score] [--json]`
 
 design/status.json (committed, no data): the stages done and the next one (start, model, page purpose, plan, theme,
@@ -498,6 +510,11 @@ dashboard, detail table: existing layouts and patterns only, on the 12-column gr
 design/specs/starters/<name>.layout.json. `layout from-report` reads an existing report's PBIR pages and visuals
 (positions, types, fields; never data) through the wireframe mapping (design/scripts/ref_layout.py) into a draft
 layout.json with the fields as bindings.
+
+`start check` (at the start of every build): one plain line per drop folder, what it holds by name and what is
+missing, then one next line. It lists names only (the Model folder is read by `model intake`, never here) and never
+opens File Explorer; `start inputs` and `model intake --open` only make the folders. Projects made before the
+one-folder setup keep design/reference/model and design/reference/inputs.
 
 ### `plan show | picture | open | check | approve`
 
@@ -548,6 +565,10 @@ from git's user name and the Windows login, and is logged in design/reviews/appr
 changed after `prepare`; screen control used in the last 10 minutes (the Claude Code hook tools/hooks/guard_gates.py
 leaves a marker; it also blocks key and window drivers while a window is open); another window open. `gate run` shows
 the same window in the foreground (the optional Command Palette tasks in .vscode/tasks.json, written by `gate tasks`).
+
+v1.7 walkthrough: the window is a plain Yes / No, brought in front of every other window (SetForegroundWindow from its
+own process). The 4-character code picture and box appear only when screen control is active (the hook's marker, or
+`PBIK_GATE_CODE=1`); then Yes needs the code and three wrong tries decline. Screen control no longer refuses the window.
 
 ### `model intake [--root] [--folder] [--open]`
 

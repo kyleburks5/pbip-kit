@@ -28,7 +28,7 @@ SECRETS = [("AWS key", r"AKIA[0-9A-Z]{16}"), ("GitHub token", r"gh[pousr]_[A-Za-
            ("connection secret", r"(?i)(AccountKey|SharedAccessKey|client_secret|SharedAccessSignature)\s*=\s*[^;\s\"']{8,}")]
 CHECKS = ["personal paths", "user names", "emails", "secrets", "data files", "smoke/sample/scratch folders",
           "report projects"]
-PROJECTS = re.compile(r"^projects/", re.I)   # pbik project init folders: never tracked by the kit (v1.7, D2)
+PROJECTS = re.compile(r"^(projects|Model|Reference)/", re.I)   # project files and drop folders: never in the kit
 
 
 def git(*args):
@@ -92,6 +92,23 @@ def scan_path(path, allow, found):
         found["report projects"].append(p)
 
 
+def folder_findings(root):
+    """One folder = one project (v1.7): projects never live inside the master kit, tracked or not, and its Model and
+    Reference drop folders hold nothing but their README."""
+    out = []
+    root = pathlib.Path(root)
+    pj = root / "projects"
+    if pj.is_dir() and any(pj.iterdir()):
+        out.append("projects/: a projects folder inside the master kit (move each project to a folder of its own)")
+    for name in ("Model", "Reference"):
+        d = root / name
+        extra = ([p.name for p in d.iterdir() if p.name.lower() not in ("readme.txt", ".gitignore")]
+                 if d.is_dir() else [])
+        if extra:
+            out.append(f"{name}/: holds {len(extra)} item(s) in the master kit (drop folders belong to projects)")
+    return out
+
+
 def upstream():
     u = git("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}").strip()
     return u or ("origin/main" if git("rev-parse", "--verify", "-q", "origin/main").strip() else None)
@@ -124,6 +141,8 @@ def run(extra_names=(), allow_path=ALLOW, out=print):
     for t in git("tag").split():
         if t not in remote_tags:
             scan_text(f"tag {t} message", git("tag", "-l", "--format=%(contents)", t), words, allow, found)
+    for x in folder_findings(KIT):
+        found["report projects"].append(x)
     found = {c: list(dict.fromkeys(v)) for c, v in found.items()}
     out(f"{'check':30} result  findings")
     for c in CHECKS:

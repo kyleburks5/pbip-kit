@@ -101,8 +101,20 @@ def projects(kit):
 
 
 def show(root, out=print):
-    """In a project: its line. In the kit folder: every project's line, the last one used first."""
+    """In a project: its line. In the master kit: how to start a project (copy the folder). In a fresh copy of the kit:
+    that it becomes the project now (one folder = one project). Older kits with a projects folder: each one's line."""
+    from . import projectsetup as PS
     root = pathlib.Path(root).resolve()
+    k = PS.kind(root)
+    if k == "master":
+        out("This is the master kit. For a report, copy this whole folder to a new folder (or clone it), open that "
+            "folder, and ask me there: that folder becomes the project.")
+        return
+    if k == "fresh copy":
+        out(f"This folder is a fresh copy of the kit: I'll make it your project {root.name} now, with a Model folder "
+            "and a Reference folder for your files.")
+        out("next: I'll set the project up, then ask what the report should help people decide")
+        return
     if status_file(root).exists() or not (root / "projects").is_dir():
         out(line(root))
         return

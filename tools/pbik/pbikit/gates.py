@@ -6,14 +6,16 @@
     pbik gate wait <gate>     the agent: waits (up to 30 minutes) for the person's answer
     pbik gate run <gate>      shows the window and waits (the optional Command Palette tasks use this)
 
-The window shows the summary, a 4-character code drawn as a picture (made inside the window's own process, never
-written to a file, stdout or the log), a box to type it, and Yes / No. Yes needs the code; three wrong tries close it
-with nothing changed. On Yes the step is applied, logged in design/reviews/approvals.md, and the answer written to
-.pbik/gates/<gate>.result.json. Refusals: what is approved changed after it was prepared (hash); screen control was
-used in the last few minutes (a Claude Code hook leaves a marker, tools/hooks/guard_gates.py); another approval window
-is open. Honest limit: this stops an agent approving by accident, on its own initiative or by sending key presses; an
-agent with screen control could read the picture, which is why the window refuses when that can be told. It isn't
-proof against a person who scripts around it.
+The window shows the summary and a plain Yes / No (v1.7 walkthrough: the typed code was the most disliked step). It
+opens in front of every other window. Only when screen control is active (computer use in a Claude Code chat in the
+last few minutes: the hook tools/hooks/guard_gates.py leaves a marker) does it also show a 4-character code drawn as a
+picture (made inside the window's own process, never written to a file, stdout or the log) and a box to type it: Yes
+then needs the code, and three wrong tries close it with nothing changed. PBIK_GATE_CODE=1 asks for the code always.
+On Yes the step is applied, logged in design/reviews/approvals.md, and the answer written to
+.pbik/gates/<gate>.result.json. Refusals: what is approved changed after it was prepared (hash); another approval
+window is open. Honest limit: without screen control an agent can't click the window (the hook also blocks key and
+window drivers while it is open); the code covers the case where it could. Neither is proof against a person who
+scripts around it.
 """
 import datetime, getpass, hashlib, json, os, pathlib, re, subprocess, sys, tempfile, time
 
@@ -155,6 +157,12 @@ DIALOG_PS = r"""
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 $text = [IO.File]::ReadAllText($args[1])
+$withCode = ($args[2] -eq 'code')
+Add-Type -Namespace PbikWin -Name Native -MemberDefinition @'
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int n);
+[DllImport("user32.dll")] public static extern bool FlashWindow(IntPtr h, bool invert);
+'@
 $letters = 'ACDEFHJKMNPRTUVWXY34679'
 $rng = New-Object Security.Cryptography.RNGCryptoServiceProvider
 $bytes = New-Object byte[] 4; $rng.GetBytes($bytes)
@@ -166,7 +174,7 @@ $t = New-Object Windows.Forms.TextBox
 $t.Multiline = $true; $t.ReadOnly = $true; $t.ScrollBars = 'Vertical'; $t.Text = $text; $t.TabStop = $false
 $t.SetBounds(16, 16, 732, 380); $t.Font = New-Object Drawing.Font('Segoe UI', 10)
 $l = New-Object Windows.Forms.Label
-$l.Text = 'To approve, type the code in the picture, then click Yes, approve.'
+$l.Text = if ($withCode) { 'Screen control is on in a chat, so: type the code in the picture, then click Yes, approve.' } else { 'Approve this? Click Yes, approve or No.' }
 $l.SetBounds(16, 410, 732, 22); $l.Font = New-Object Drawing.Font('Segoe UI', 10)
 $bmp = New-Object Drawing.Bitmap 220, 64
 $g = [Drawing.Graphics]::FromImage($bmp); $g.SmoothingMode = 'AntiAlias'; $g.Clear([Drawing.Color]::White)
@@ -190,6 +198,7 @@ $y = New-Object Windows.Forms.Button; $y.Text = 'Yes, approve'; $y.SetBounds(476
 $n = New-Object Windows.Forms.Button; $n.Text = 'No'; $n.SetBounds(620, 548, 128, 34)
 $script:result = 1; $script:tries = 0
 $y.Add_Click({
+  if (-not $withCode) { $script:result = 0; $f.Close(); return }
   if ($box.Text.Trim().ToUpper() -eq $code) { $script:result = 0; $f.Close() }
   else {
     $script:tries++
@@ -198,22 +207,28 @@ $y.Add_Click({
   }
 })
 $n.Add_Click({ $script:result = 1; $f.Close() })
-$f.Controls.AddRange(@($t, $l, $pic, $box, $msg, $y, $n)); $f.CancelButton = $n; $f.ActiveControl = $box
+if ($withCode) { $f.Controls.AddRange(@($t, $l, $pic, $box, $msg, $y, $n)); $f.ActiveControl = $box }
+else { $f.Controls.AddRange(@($t, $l, $y, $n)); $f.Height = 520; $y.Top = 440; $n.Top = 440; $f.ActiveControl = $n }
+$f.CancelButton = $n
+# in front of every other window, even when opened from a background process (walkthrough fix 14)
+$f.Add_Shown({ $f.TopMost = $true; $f.Activate(); $f.BringToFront()
+  [void][PbikWin.Native]::ShowWindow($f.Handle, 9); [void][PbikWin.Native]::SetForegroundWindow($f.Handle)
+  [void][PbikWin.Native]::FlashWindow($f.Handle, $true) })
 [void]$f.ShowDialog()
 exit $script:result
 """
 ANSWERS = {0: "yes", 1: "no", 2: "code"}
 
 
-def windows_dialog(title, text):
-    """The approval window: "yes" only when the person typed the code shown in the picture and clicked Yes;
-    "no" (No, or closed) or "code" (three wrong tries)."""
+def windows_dialog(title, text, code=False):
+    """The approval window: a plain Yes / No; with `code` (screen control active) "yes" only when the person typed
+    the code shown in the picture and clicked Yes. "no" (No, or closed) or "code" (three wrong tries)."""
     with tempfile.TemporaryDirectory() as d:
         script, body = pathlib.Path(d) / "gate.ps1", pathlib.Path(d) / "text.txt"
         script.write_text(DIALOG_PS, encoding="utf-8-sig")
         body.write_text(text.replace("\n", "\r\n"), encoding="utf-8-sig")
         r = subprocess.run(["powershell", "-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", str(script),
-                            title, str(body)])
+                            title, str(body), "code" if code else "plain"])
     return ANSWERS.get(r.returncode, "no")
 
 
@@ -247,6 +262,16 @@ def screen_control_active():
     return age is not None and age < SCREEN_CONTROL_MINUTES
 
 
+def needs_code():
+    """The typed code only when screen control is active (an agent could click Yes itself); otherwise a plain Yes / No
+    (VS Code with Claude Code or Copilot, the Claude desktop app with computer use off). PBIK_GATE_CODE=1 or 0
+    overrides, for a person who wants the code always, and for tests."""
+    env = os.environ.get("PBIK_GATE_CODE")
+    if env in ("0", "1"):
+        return env == "1"
+    return screen_control_active()
+
+
 def window_open():
     age = _age_minutes(user_dir() / "gate-window.json")
     return age is not None and age < WINDOW_MINUTES
@@ -270,9 +295,6 @@ def check_ready(gate, root):
     doc = read_json(gate_dir(root) / f"{gate}.json")
     if not doc:
         raise GateError("nothing is waiting for this approval: ask the agent to prepare it")
-    if screen_control_active():
-        raise GateError(f"screen control was used in this chat in the last {SCREEN_CONTROL_MINUTES} minutes, so the "
-                        "approval window won't open: turn screen control off, then ask again in a few minutes")
     if window_open():
         raise GateError("another approval window is open: answer it first")
     if current_hash(gate, root, doc["args"]) != doc["hash"]:
@@ -294,9 +316,14 @@ def run(gate, root=".", dialog=None, out=print, person=None):
     doc = check_ready(gate, root)
     extra = run_time_details(gate, root)
     text = doc["summary"] + ("\n\n" + extra if extra else "") + "\n\nApprove?"
+    code = needs_code()
     _lock(gate, True)
     try:
-        ans = _answer((dialog or windows_dialog)(doc["task"], text))
+        d = dialog or windows_dialog
+        try:
+            ans = _answer(d(doc["task"], text, code=code))
+        except TypeError:                                       # an older stub: (title, text)
+            ans = _answer(d(doc["task"], text))
     finally:
         _lock(gate, False)
     if ans != "yes":

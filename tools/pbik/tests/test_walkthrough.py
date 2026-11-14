@@ -453,5 +453,217 @@ class DesktopUpdateTests(Tmp):
         self.assertIsNone(VS.update_check("2.159.883.0", md))
 
 
+# ---------------------------------------------------------------- one folder = one project
+def git(folder, *args):
+    return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.com", *args], cwd=folder,
+                          capture_output=True, text=True)
+
+
+def mini_kit(root):
+    """A small stand-in for the master kit: CLAUDE.md, the pbik package folder, a master-only file, its own git."""
+    (root / "tools" / "pbik" / "pbikit").mkdir(parents=True)
+    (root / "tools" / "pbik" / "pbikit" / "__init__.py").write_text("", encoding="utf-8")
+    (root / "CLAUDE.md").write_text("# kit\n", encoding="utf-8")
+    (root / "tools" / "export_check.py").write_text("# master only\n", encoding="utf-8")
+    (root / "tools" / "master-only.txt").write_text("# list\ntools/export_check.py\n", encoding="utf-8")
+    (root / ".gitignore").write_text("projects/\n.pbik/\n", encoding="utf-8")
+    git(root, "init", "-q")
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "-m", "kit")
+    return root
+
+
+class OneFolderTests(Tmp):
+    def setUp(self):
+        super().setUp()
+        from pbikit import projectsetup as PS, status as ST
+        self.PS, self.ST = PS, ST
+        self.kit = mini_kit(self.tmp / "kit")
+        PS.mark_master(self.kit)
+
+    def test_master_copy_and_project_are_told_apart(self):
+        self.assertEqual(self.PS.kind(self.kit), "master")
+        copy = self.tmp / "Orders Dashboard"
+        shutil.copytree(self.kit, copy)                         # a File Explorer copy: the marker comes along
+        self.assertEqual(self.PS.kind(copy), "fresh copy")
+        said = []
+        self.ST.show(self.kit, out=said.append)
+        self.assertIn("This is the master kit", said[0])
+        said = []
+        self.ST.show(copy, out=said.append)
+        self.assertIn("fresh copy of the kit", said[0])
+        with self.assertRaises(self.PS.SetupError):
+            self.PS.setup(self.kit, out=lambda *a: None)
+
+    def test_setup_turns_a_copy_into_the_project(self):
+        copy = self.tmp / "Orders Dashboard"
+        r = git(self.tmp, "clone", "-q", str(self.kit), str(copy))      # a clone: origin is the master
+        self.assertEqual(r.returncode, 0, r.stderr)
+        (copy / "projects" / "Old").mkdir(parents=True)                # left over from the old setup: never deleted
+        said = []
+        self.PS.setup(copy, out=said.append)
+        self.assertEqual(self.PS.kind(copy), "project")
+        for name in ("Model", "Reference"):
+            self.assertTrue((copy / name / "README.txt").exists())
+        self.assertFalse((copy / "tools" / "export_check.py").exists(), "master-only files go")
+        self.assertTrue((self.kit / "tools" / "export_check.py").exists(), "the master keeps them")
+        self.assertTrue((copy / "projects" / "Old").is_dir())
+        self.assertEqual(git(copy, "remote").stdout.split(), ["kit"], "nothing is pushed to the master by mistake")
+        self.assertIn("project start", git(copy, "log", "-1", "--format=%s").stdout)
+        self.assertEqual(git(copy, "status", "--porcelain").stdout.strip(), "")
+        doc = self.ST.read(copy)
+        self.assertEqual((doc["project"], doc["dataClass"]), ("Orders Dashboard", "restricted"))
+        text = " ".join(said)
+        self.assertIn("Model", text)
+        self.assertIn("Reference", text)
+        self.assertNotIn("\\", text)
+        with self.assertRaises(self.PS.SetupError):
+            self.PS.setup(copy, out=lambda *a: None)
+
+    def test_a_plain_copy_gets_its_own_git(self):
+        copy = self.tmp / "Plain Copy"
+        shutil.copytree(self.kit, copy, ignore=shutil.ignore_patterns(".git"))
+        self.PS.setup(copy, out=lambda *a: None)
+        self.assertTrue((copy / ".git").is_dir())
+        self.assertEqual(git(copy, "rev-list", "--count", "HEAD").stdout.strip(), "1")
+
+
+class DropFolderTests(Tmp):
+    def test_start_check_says_what_each_folder_holds_and_opens_nothing(self):
+        from pbikit import start as SR
+        from unittest import mock
+        with mock.patch("os.startfile", create=True, side_effect=AssertionError("File Explorer opened")):
+            lines = SR.check(self.tmp)
+            self.assertTrue(lines[0].startswith("Model: empty. Put a copy"))
+            self.assertIn("Reference: empty", lines[1])
+            self.assertIn("Model folder", lines[-1])
+            import big_model as BM
+            BM.write(self.tmp / "Model", "semanticmodel")
+            shutil.copy(HERE.parent.parent.parent / "docs" / "layouts" / "grid.html",
+                        self.tmp / "Reference" / "Orders overview.html")
+            lines = SR.check(self.tmp)
+            self.assertIn("Model: Example Big.SemanticModel", lines[0])
+            self.assertIn("Reference: Orders overview.html (a wireframe page), kept in the Reference folder", lines[1])
+            self.assertIn("plan", lines[-1])
+            SR.open_inputs(self.tmp)
+            from pbikit import intake as IN
+            IN.open_drop(self.tmp)
+
+    def test_intake_reads_the_model_folder_and_deletes_the_cache_first(self):
+        from pbikit import intake as IN, drops
+        import big_model as BM
+        drops.make(self.tmp)
+        BM.write(self.tmp / "Model", "semanticmodel")
+        said = []
+        r = IN.intake(self.tmp, out=said.append)
+        self.assertIn(".pbi/cache.abf", " ".join(r["removed"]))
+        self.assertTrue(said[0].startswith("warning: the model folder held"))
+        self.assertFalse((self.tmp / "Model" / "Example Big.SemanticModel" / ".pbi").exists())
+
+    def test_old_projects_keep_their_folders(self):
+        from pbikit import drops
+        old = self.tmp / "design" / "reference" / "model"
+        old.mkdir(parents=True)
+        self.assertEqual(drops.model_dir(self.tmp), self.tmp / "design" / "reference" / "model")
+        self.assertEqual(drops.reference_dir(self.tmp), self.tmp / "Reference")
+
+    def test_the_guard_covers_the_model_folder(self):
+        sys.path.insert(0, str(KIT / "tools" / "hooks"))
+        import guard_model_folder as G
+        ev = lambda tool, inp, cwd="C:/p": G.blocked({"tool_name": tool, "tool_input": inp, "cwd": cwd})  # noqa
+        self.assertTrue(ev("Read", {"file_path": "C:/p/Model/x.tmdl"}))
+        self.assertTrue(ev("Glob", {"pattern": "**/*", "path": "C:/p/Model"}))
+        self.assertTrue(ev("PowerShell", {"command": "Get-ChildItem Model"}))
+        self.assertTrue(ev("Bash", {"command": "ls"}, "C:/p/Model"))
+        self.assertFalse(ev("PowerShell", {"command": "git commit -m \"Model approved\""}))
+        self.assertFalse(ev("Read", {"file_path": "C:/p/Demo.SemanticModel/definition/model.tmdl"}))
+        self.assertFalse(ev("PowerShell", {"command": "python tools/pbik/pbik.py model intake"}))
+
+    def test_export_check_keeps_projects_out_of_the_master(self):
+        if not (KIT / "tools" / "export_check.py").exists():
+            self.skipTest("a project: the export check is master-only")
+        sys.path.insert(0, str(KIT / "tools"))
+        import export_check as EC
+        self.assertEqual(EC.folder_findings(self.tmp), [])
+        (self.tmp / "projects" / "Sales").mkdir(parents=True)
+        (self.tmp / "Model").mkdir()
+        (self.tmp / "Model" / "x.bim").write_text("{}", encoding="utf-8")
+        found = EC.folder_findings(self.tmp)
+        self.assertEqual(len(found), 2)
+        f = {c: [] for c in EC.CHECKS}
+        EC.scan_path("Reference/Orders overview.html", [("*", "Reference/*")], f)
+        self.assertEqual(f["report projects"], ["Reference/Orders overview.html"])
+
+
+class ApprovalWindowTests(Tmp):
+    """Plain Yes / No unless screen control is active; No and a wrong code change nothing; the window comes forward."""
+
+    def setUp(self):
+        super().setUp()
+        from unittest import mock
+        from pbikit import gates as GT
+        sys.path.insert(0, str(HERE))
+        import test_phase1 as P1
+        self.GT, self.S = GT, P1.S
+        P1.big_project(self.tmp)
+        self.home = self.tmp / "home"
+        env = mock.patch.dict(os.environ, {"PBIK_HOME": str(self.home)})
+        env.start()
+        self.addCleanup(env.stop)
+        os.environ.pop("PBIK_GATE_CODE", None)
+        GT.prepare("synth-approve", self.tmp)
+
+    def screen_control(self):
+        import datetime
+        self.home.mkdir(parents=True, exist_ok=True)
+        (self.home / "screen-control.json").write_text(json.dumps(
+            {"at": datetime.datetime.now().isoformat(timespec="seconds")}), encoding="utf-8")
+
+    def ask(self, answer):
+        seen = []
+        res = self.GT.run("synth-approve", self.tmp, dialog=lambda t, x, code=False: seen.append(code) or answer,
+                          out=lambda *a: None)
+        return res, seen[0]
+
+    def test_plain_yes_no_without_screen_control(self):
+        self.assertEqual(self.ask("no"), ("declined", False))
+        self.assertFalse(self.S.approved(self.S.read_json(self.tmp / "design/specs/contract.json")))
+        self.assertEqual(self.ask("yes"), ("approved", False))
+
+    def test_code_only_with_screen_control_and_a_wrong_code_declines(self):
+        self.screen_control()
+        self.assertEqual(self.ask("code"), ("declined", True))
+        r = self.S.read_json(self.tmp / ".pbik/gates/synth-approve.result.json")
+        self.assertEqual(r["why"], "the code didn't match three times")
+        self.assertFalse(self.S.approved(self.S.read_json(self.tmp / "design/specs/contract.json")))
+
+    def test_the_window_script(self):
+        ps = self.GT.DIALOG_PS
+        self.assertIn("SetForegroundWindow", ps)
+        self.assertIn("$withCode = ($args[2] -eq 'code')", ps)
+        self.assertIn("if (-not $withCode) { $script:result = 0", ps)
+        with __import__("unittest").mock.patch.dict(os.environ, {"PBIK_GATE_CODE": "1"}):
+            self.assertTrue(self.GT.needs_code())
+
+
+class WalkthroughInputTests(Tmp):
+    def test_the_made_up_inputs_fit_together(self):
+        sys.path.insert(0, str(KIT / "tools" / "walkthrough"))
+        import make_inputs as MI, big_model as BM
+        out = MI.make(self.tmp / "inputs")
+        html_ = (out / "3 made-up wireframe" / "Orders overview.html").read_text(encoding="utf-8")
+        self.assertNotIn("Store", html_)
+        for col in MI.TABLE:
+            self.assertIn(f">{col}</th>", html_)
+        self.assertTrue((out / "1 made-up model" / "Example Big.SemanticModel" / ".pbi" / "cache.abf").exists())
+        rels = BM.tmdl_texts()["relationships.tmdl"]
+        _, table, key = MI.EXAMPLE_CHANGE
+        self.assertIn(f"'Fact Orders'.{key}", rels.replace('"', "'"))
+        self.assertIn("Model folder", (out / "README.txt").read_text(encoding="utf-8"))
+        doc = " ".join((KIT / "docs" / "PHASE1-WALKTHROUGH.md").read_text(encoding="utf-8").split())
+        self.assertIn(MI.EXAMPLE_CHANGE[0], doc)
+        self.assertNotIn("rank stores", doc)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

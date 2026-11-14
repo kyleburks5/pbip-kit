@@ -1,7 +1,8 @@
 r"""Claude Code PreToolUse hook: the agent never reads the model drop folder itself (docs/design/phase1-usability.md, B3).
 
-Blocks Read, Grep and Glob on design/reference/model, and shell commands naming it unless they run pbik (which deletes
-data files before reading). Exit 2 blocks the tool call and tells the agent why.
+Blocks Read, Grep and Glob on the Model folder (the project's top-level `Model` drop folder, v1.7 one-folder setup) and
+on design/reference/model (projects made before it), and shell commands naming either unless they run pbik (which
+deletes data files before reading). Exit 2 blocks the tool call and tells the agent why.
 
 Works from any working folder (v1.7, A10): .claude/settings.json runs it by the project folder ($CLAUDE_PROJECT_DIR),
 relative paths are resolved against the event's `cwd` (so `..\model\x` from design\reference is caught), and it
@@ -9,9 +10,12 @@ fails closed: if anything goes wrong while a tool call names a model folder, the
 """
 import json, os, re, sys
 
-FOLDER = re.compile(r"design[\\/]+reference[\\/]+model(?:[\\/]|$|\"|')", re.I)
+OLD = r"design[\\/]+reference[\\/]+model(?:[\\/]|$|\"|')"
+# the top-level Model folder: a path segment named Model, as a folder (a slash after it) or the last word
+NEW = r"(?:^|[\\/\"'\s=])Model(?:[\\/]|[\"']?\s*$)"
+FOLDER = re.compile(f"{OLD}|{NEW}", re.I)
 PATH_KEYS = ("file_path", "path", "notebook_path")
-MESSAGE = ("The model folder may hold data: don't open it. Run `pbik model intake` (it deletes data files first, "
+MESSAGE = ("The Model folder may hold data: don't open it. Run `pbik model intake` (it deletes data files first, "
            "then reads the model).")
 
 

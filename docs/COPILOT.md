@@ -13,7 +13,8 @@ Copilot is the main work environment. Ask for a dashboard in Copilot Chat (agent
 through the main flow (`.github/prompts/kit-start.prompt.md`, from .claude/commands/start.md): what you have, the plan
 as a picture, a guided or quick build, the result with the polish score, switching to live. The plan picture and the
 screenshots open beside the chat as editor tabs (Copilot chat shows an image only when it is attached). Approval
-windows open by themselves from Copilot's terminal: read them, type the code, click Yes or No. In a new chat, ask
+windows open by themselves from Copilot's terminal, in front of your other windows: read them, click Yes or No
+(Copilot has no screen control, so there is no code to type). In a new chat, ask
 "where am I?" (or `/kit-status`). Nothing here has been run in Copilot yet: docs/PHASE1-WALKTHROUGH.md "Verify at
 work".
 

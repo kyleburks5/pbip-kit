@@ -170,6 +170,10 @@ class ExportCheckTests(unittest.TestCase):
     """Batch 4 item 5: tools/export_check.py finds personal paths, names, emails, secrets, data files and smoke /
     sample / scratch folders in tracked files and unpushed commits; the allow-list needs a reason."""
 
+    def setUp(self):
+        if not (KIT / "tools" / "export_check.py").exists():
+            self.skipTest("a project: the export check is master-only (tools/master-only.txt)")
+
     def test_finds_planted_items_in_a_scratch_repo(self):
         sys.path.insert(0, str(KIT / "tools"))
         import export_check as EC

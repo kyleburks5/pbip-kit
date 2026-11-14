@@ -219,6 +219,14 @@ def _main(argv=None):
     pc.add_argument("--project", default=str(versions_default()))
     pc.add_argument("--version", help="Desktop version (default: detected from the installed Desktop)")
 
+    pst = pjs.add_parser("setup", help="first run in a fresh copy of the kit: make this folder the project (Model and "
+                                       "Reference folders, data class, status, its own git)")
+    pst.add_argument("--root", default=".")
+    pst.add_argument("--name", help="the project's name (default: the folder's name)")
+    pst.add_argument("--class", dest="cls", default="restricted", choices=["public", "internal", "restricted"])
+    pms = pjs.add_parser("master", help="(the maintainer) mark this folder as the master kit, so it is never set up")
+    pms.add_argument("--here", action="store_true", required=True)
+    pms.add_argument("--root", default=".")
     pin = pjs.add_parser("init", help="a new report project beside the kit: kit copy, git, data class")
     pin.add_argument("name")
     pin.add_argument("--parent", help="folder to create it in (default: beside the kit)")
@@ -299,8 +307,11 @@ def _main(argv=None):
     sas = sa.add_subparsers(dest="sub", required=True)
     sad = sas.add_parser("detect", help="what is in the inputs folder, and the path the kit takes")
     sad.add_argument("--root", default=".")
-    sai = sas.add_parser("inputs", help="open the inputs folder in File Explorer")
+    sai = sas.add_parser("inputs", help="make the Reference folder (never opens File Explorer)")
     sai.add_argument("--root", default=".")
+    sac = sas.add_parser("check", help="at the start of every build: what the Model and Reference folders hold, and "
+                                       "what is missing, one line each")
+    sac.add_argument("--root", default=".")
     sast = sas.add_parser("starters", help="the starter layouts, filled with the model's names")
     sast.add_argument("--root", default=".")
     sast.add_argument("--kpi", action="append", default=[], help="a measure for the next KPI slot (up to 4)")
@@ -489,7 +500,8 @@ def _main(argv=None):
         from . import intake as IN, synth as S3
         if args.open:
             IN.open_drop(args.root)
-            print("the model folder is open: drop a copy of the model there (never your only file), then say done")
+            print("Put a copy of your semantic model export in the Model folder of this project (never your only "
+                  "file), then say done.")
             return 0
         try:
             IN.intake(args.root, args.folder)
@@ -514,6 +526,19 @@ def _main(argv=None):
         return 1 if check(args.model, args.folder) else 0
     elif c == "project":
         from . import versions as V
+        if args.sub == "setup":
+            from . import projectsetup as PS
+            try:
+                PS.setup(args.root, args.name, args.cls)
+            except PS.SetupError as e:
+                print(f"pbik: {e}", file=sys.stderr)
+                return 2
+            return 0
+        if args.sub == "master":
+            from . import projectsetup as PS
+            PS.mark_master(args.root)
+            print("This folder is marked as the master kit: status says so, and it is never set up as a project.")
+            return 0
         if args.sub == "init":
             from . import projectinit as PI, packs as PK
             try:
@@ -598,8 +623,11 @@ def _main(argv=None):
                                                                if d["reportType"] else {}))
         elif args.sub == "inputs":
             SR.open_inputs(args.root)
-            print("I opened the inputs folder: drop a copy of your wireframe, screenshots, report or requirements "
-                  "there.")
+            print("Put a copy of your wireframe, screenshots, requirements or an existing report in the Reference "
+                  "folder of this project, then say done.")
+        elif args.sub == "check":
+            for ln in SR.check(args.root):
+                print(ln)
         else:
             fs = SR.write_starters(args.root, args.kpi, args.date, args.category, args.title)
             print(f"{len(fs)} starter layouts: " + ", ".join(SR.STARTER_NAMES.get(f.name.split('.')[0], f.stem)
@@ -736,13 +764,14 @@ def _main(argv=None):
                 d = GT.prepare(args.gate, args.root, args.report, args.pack, args.from_, args.workspace, args.model,
                                args.mid, args.to_class, args.to)
                 print(d["summary"])
-                print(f"next: I'll open the approval window ({d['task']}): type the code it shows, then click Yes")
+                print(f"next: I'll open the approval window ({d['task']}): check it, then click Yes or No")
             elif args.sub == "run":
                 GT.run(args.gate, args.root)
             elif args.sub == "open":
                 d = GT.open_window(args.gate, args.root)
-                print(f"The approval window ({d['task']}) is open: type the code in its picture, then click Yes "
-                      "or No.")
+                print(f"The approval window ({d['task']}) is open in front of your other windows: check it, then "
+                      "click Yes or No" + (" (screen control is on, so it also asks for the code in its picture)."
+                                           if GT.needs_code() else "."))
                 print("next: I'll wait for your answer")
             elif args.sub == "wait":
                 r = GT.wait(args.gate, args.root, timeout=args.minutes * 60)

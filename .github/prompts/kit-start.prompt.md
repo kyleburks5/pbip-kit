@@ -17,19 +17,21 @@ large build), say in one line what it is; run it so its "Still ..." lines reach 
 output) and pass one on at least every minute ("Still drawing the plan picture (1 min so far)."). If a step fails, say
 the plain reason it gives; never leave a reply empty.
 
-## 0. Where are we
+## 0. Where are we (one folder = one project)
 Run `pbik status`. In a project, say its line ("You're past the plan picture; next is the colours") and carry on from
-there. In the kit folder with several projects, name them by their lines and take the one the person means (or the
-last one used). With no project, make one: `pbik project init "<a short name from the request>"` (data class
-restricted unless the person said otherwise), then work in it with `pbik --in "<name>" ...`. Tell the person once
-where it is ("in the projects folder of this kit") and offer to open it (`pbik --in "<name>" open`).
+there. In a fresh copy of the kit, make this folder the project: `pbik project setup` (data class restricted unless
+the person said otherwise; the folder's name unless they gave one) and say its lines: the project's name and its two
+folders, Model and Reference. In the master kit, say its line (copy the kit to a new folder, open that, ask there)
+and stop: never build in the master kit. No projects subfolder, no second folder, no chat switch.
 
 ## 1. Start (stage "start")
-1. If they mention files, open the inputs folder (`pbik start inputs`) and ask them to drop a copy of each (wireframe,
-   screenshots, an existing report's folder, requirements). A picture pasted in the chat: read it there.
-2. `pbik start detect`: it names the path. Say what you got in one line. Never read a refused file.
-3. A model: if they have one, open the model folder for them (`pbik model intake --open`) and ask for a copy; then
-   `pbik model intake`. Say its grouped lines. A model approved before is recognised (no approval needed). Otherwise
+1. `pbik start check`, at the start of every build: one line for each folder, what it holds and what is missing,
+   and pass them on as they are. Never open File Explorer. If something is missing, ask the person to put a copy in
+   the named folder (Model: the semantic model export; Reference: a wireframe, screenshots, requirements or an
+   existing report's folder), then say done. A picture pasted in the chat: read it there.
+2. `pbik start detect`: it names the path. Say what you got in one line. Never read a refused file. With Reference
+   empty: ask the one open question ("What should this report help people decide?") and offer the starter layouts.
+3. The model: `pbik model intake` (it reads the Model folder, deleting data files first). Say its grouped lines. A model approved before is recognised (no approval needed). Otherwise
    the items that need the person are the only model questions; then prepare and open the approval window
    (`pbik gate prepare synth-approve`, `pbik gate open synth-approve`, `pbik gate wait synth-approve`). Mark stage
    "model" done (`pbik status --done model`).
