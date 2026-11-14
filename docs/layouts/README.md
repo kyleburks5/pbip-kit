@@ -15,3 +15,16 @@ ref_layout.py reads any HTML page this way (cards, tables, charts and their kind
 buttons, button groups, tab bars, rails). For an image the agent writes a boxes file (ref_layout.py docstring) and the
 same mapping runs. design/specs/reference-map.md lists, by visual ID, what Power BI can't reproduce and the native
 option used instead.
+
+## Starter layouts (v1.7)
+
+For a person with no wireframe or report: `starters/` holds three page layouts built only from the styles above and
+the patterns in docs/patterns/, with slots for the title, up to four KPIs, a date and a category
+(`pbik start starters` fills them from the model and the kit draws each as a picture; the person picks one and
+changes it in plain words).
+
+| Starter | Style | What it shows |
+| --- | --- | --- |
+| `executive-summary.json` | grid | title, four KPI cards, the main trend (direct labels), a ranked bar |
+| `trend-dashboard.json` | grid | title, a KPI strip, the main trend against its usual range (range band), small multiples by category |
+| `detail-table.json` | rail | title, two filters on the left, an exception list, a ranked bar |

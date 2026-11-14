@@ -1,0 +1,198 @@
+{
+ "_note": "Starter layout (v1.7, docs/design/phase1-usability.md A2): columns (col, span) on the 12-column grid; pbik start starters turns them into pixels and fills the slots {title} {kpi1}-{kpi4} {date} {category} from the model. Built only from the kit's page layouts (docs/layouts/) and patterns (docs/patterns/).",
+ "_purpose": "How is it moving over time, and is that normal? A strip of numbers, the main trend against its usual range, and the same trend per group.",
+ "_layoutStyle": "grid",
+ "pages": {
+  "P1": {
+   "displayName": "{title}",
+   "background": "background",
+   "active": true
+  }
+ },
+ "retired": [],
+ "visuals": [
+  {
+   "id": "P1-V01",
+   "name": "title",
+   "page": "P1",
+   "type": "textbox",
+   "col": 0,
+   "span": 12,
+   "y": 32,
+   "h": 56,
+   "z": 1,
+   "text": [
+    {
+     "runs": [
+      {
+       "text": "{title}",
+       "font": "semibold",
+       "size": "title"
+      }
+     ]
+    }
+   ],
+   "container": "off",
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Text box title"
+   }
+  },
+  {
+   "id": "P1-V02",
+   "name": "kpi-1",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 0,
+   "span": 3,
+   "y": 112,
+   "h": 120,
+   "z": 1,
+   "bindings": {
+    "Data": [
+     "{kpi1}"
+    ]
+   },
+   "container": {
+    "altText": "KPI 1: {kpi1} with its comparison"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card"
+   }
+  },
+  {
+   "id": "P1-V03",
+   "name": "kpi-2",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 3,
+   "span": 3,
+   "y": 112,
+   "h": 120,
+   "z": 1,
+   "bindings": {
+    "Data": [
+     "{kpi2}"
+    ]
+   },
+   "container": {
+    "altText": "KPI 2: {kpi2} with its comparison"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card"
+   }
+  },
+  {
+   "id": "P1-V04",
+   "name": "kpi-3",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 6,
+   "span": 3,
+   "y": 112,
+   "h": 120,
+   "z": 1,
+   "bindings": {
+    "Data": [
+     "{kpi3}"
+    ]
+   },
+   "container": {
+    "altText": "KPI 3: {kpi3} with its comparison"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card"
+   }
+  },
+  {
+   "id": "P1-V05",
+   "name": "kpi-4",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 9,
+   "span": 3,
+   "y": 112,
+   "h": 120,
+   "z": 1,
+   "bindings": {
+    "Data": [
+     "{kpi4}"
+    ]
+   },
+   "container": {
+    "altText": "KPI 4: {kpi4} with its comparison"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card"
+   }
+  },
+  {
+   "id": "P1-V06",
+   "name": "trend",
+   "page": "P1",
+   "type": "lineChart",
+   "col": 0,
+   "span": 12,
+   "y": 256,
+   "h": 448,
+   "z": 1,
+   "bindings": {
+    "Category": [
+     "{date}"
+    ],
+    "Y": [
+     "{kpi1}"
+    ]
+   },
+   "container": {
+    "altText": "{kpi1} by {date} against its usual range"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Line chart with a range band"
+   },
+   "pattern": "range-band"
+  },
+  {
+   "id": "P1-V07",
+   "name": "by-group",
+   "page": "P1",
+   "type": "lineChart",
+   "col": 0,
+   "span": 12,
+   "y": 728,
+   "h": 320,
+   "z": 1,
+   "bindings": {
+    "Category": [
+     "{date}"
+    ],
+    "Y": [
+     "{kpi1}"
+    ],
+    "Rows": [
+     "{category}"
+    ]
+   },
+   "container": {
+    "altText": "{kpi1} by {date}, one small chart per {category}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Small multiples"
+   },
+   "pattern": "small-multiples-expected"
+  }
+ ]
+}

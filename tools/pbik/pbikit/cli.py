@@ -219,7 +219,7 @@ def _main(argv=None):
     pin = pjs.add_parser("init", help="a new report project beside the kit: kit copy, git, data class")
     pin.add_argument("name")
     pin.add_argument("--parent", help="folder to create it in (default: beside the kit)")
-    pin.add_argument("--class", dest="cls", default="internal", choices=["public", "internal", "restricted"])
+    pin.add_argument("--class", dest="cls", default="restricted", choices=["public", "internal", "restricted"])
     pin.add_argument("--from-pack", dest="init_pack", help="start from this model pack, at the plan step")
     pnw = pjs.add_parser("new", help="start a project at the plan step from a model pack")
     pnw.add_argument("folder", nargs="?", default=".")
@@ -291,6 +291,23 @@ def _main(argv=None):
     blo.add_argument("--root")
     blo.add_argument("--restore-backup", action="store_true",
                      help="put the whole pre-live backup back (typed 'restore'; changes made while live are lost)")
+
+    sa = sub.add_parser("start", help="the start of a build: what the person gave, and the starter layouts")
+    sas = sa.add_subparsers(dest="sub", required=True)
+    sad = sas.add_parser("detect", help="what is in the inputs folder, and the path the kit takes")
+    sad.add_argument("--root", default=".")
+    sai = sas.add_parser("inputs", help="open the inputs folder in File Explorer")
+    sai.add_argument("--root", default=".")
+    sast = sas.add_parser("starters", help="the starter layouts, filled with the model's names")
+    sast.add_argument("--root", default=".")
+    sast.add_argument("--kpi", action="append", default=[], help="a measure for the next KPI slot (up to 4)")
+    sast.add_argument("--date", help="the date field, e.g. Calendar[Date]")
+    sast.add_argument("--category", help="the category field, e.g. Region[Name]")
+    sast.add_argument("--title")
+    la = sub.add_parser("layout", help="draft layouts from other sources").add_subparsers(dest="sub", required=True)
+    lfr = la.add_parser("from-report", help="an existing report (.Report folder) as a draft layout.json")
+    lfr.add_argument("report")
+    lfr.add_argument("--out", default="design/specs/layout.reference.json")
 
     sts = sub.add_parser("status", help="where the project is, in one plain line (design/status.json)")
     sts.add_argument("--root", default=".")
@@ -521,6 +538,37 @@ def _main(argv=None):
         return synth_cmd(args)
     elif c == "bind":
         return bind_cmd(args)
+    elif c == "start":
+        from . import start as SR, status as ST
+        if args.sub == "detect":
+            d = SR.detect(args.root)
+            for ln in SR.say(d):
+                print(ln)
+            ST.update(args.root, done=None, path=d["path"], **({"reportType": d["reportType"]}
+                                                               if d["reportType"] else {}))
+        elif args.sub == "inputs":
+            SR.open_inputs(args.root)
+            print("I opened the inputs folder: drop a copy of your wireframe, screenshots, report or requirements "
+                  "there.")
+        else:
+            fs = SR.write_starters(args.root, args.kpi, args.date, args.category, args.title)
+            print(f"{len(fs)} starter layouts: " + ", ".join(SR.STARTER_NAMES.get(f.name.split('.')[0], f.stem)
+                                                              for f in fs) + ".")
+            print("next: I'll show them as pictures; pick one and change it in plain words")
+    elif c == "layout":
+        from . import fromreport as FR
+        from .synth import write_json
+        try:
+            layout, findings, left_out = FR.from_report(args.report)
+        except FR.FromReportError as e:
+            print(f"pbik: {e}", file=sys.stderr)
+            return 2
+        write_json(pathlib.Path(args.out), layout)
+        print(f"read the report: {len(layout['pages'])} page(s), {len(layout['visuals'])} visual(s)"
+              + (f"; left out {len(left_out)}: " + "; ".join(left_out) if left_out else ""))
+        for vid, feat, native, _ in findings:
+            print(f"note {vid}: {feat}: {native}")
+        print("next: I'll turn it into a plan and show it to you as a picture")
     elif c == "status":
         from . import status as ST
         fields = dict(mode=args.mode, path=args.path_taken, reportType=args.report_type, pack=args.pack,

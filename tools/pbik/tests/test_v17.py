@@ -321,5 +321,133 @@ class PlainWordsTests(Tmp):
         self.assertEqual(US.interaction_check(self.tmp, tr), {"logged": 3, "windows": 1, "transcript": 2})
 
 
+# ---------------------------------------------------------------- stage d
+class StartTests(Tmp):
+    """A2: what the person gave picks the path; reports read into layouts; known models recognised; starters."""
+
+    def inputs(self, *names):
+        d = self.tmp / "design" / "reference" / "inputs"
+        d.mkdir(parents=True, exist_ok=True)
+        for n in names:
+            if n.endswith(".Report"):
+                (d / n / "definition" / "pages").mkdir(parents=True)
+                (d / n / "definition.pbir").write_text("{}", encoding="utf-8")
+            else:
+                (d / n).write_text("made up", encoding="utf-8")
+        return d
+
+    def test_detect_paths(self):
+        from pbikit import start as SR
+        self.assertEqual(SR.detect(self.tmp)["path"], "starter layouts")
+        self.inputs("needs.md")
+        d = SR.detect(self.tmp)
+        self.assertEqual((d["path"], d["requirements"]), ("starter layouts", ["needs.md"]))
+        self.inputs("shot.png")
+        self.assertEqual(SR.detect(self.tmp)["path"], "from picture")
+        self.inputs("mockup.html")
+        self.assertEqual(SR.detect(self.tmp)["path"], "from wireframe")
+        self.inputs("Old.Report", "old.pbix", "sales.csv")
+        d = SR.detect(self.tmp)
+        self.assertEqual(d["path"], "from report")
+        self.assertEqual(sorted(d["refused"]), ["old.pbix", "sales.csv"])
+        text = "\n".join(SR.say(d))
+        self.assertIn("I won't read old.pbix", text)
+        self.assertIn("save the report as a Power BI project", text)
+        r = pbik("--report", "json", "start", "detect", "--root", self.tmp)
+        doc = json.loads(r.stdout)
+        self.assertTrue(doc["ok"])
+        self.assertTrue(doc["next"][0].startswith("next: I'll turn it into a plan"))
+        self.assertEqual(ST.read(self.tmp)["path"], "from report")
+
+    def test_starters_on_the_grid_and_built(self):
+        from pbikit import start as SR
+        self.assertEqual(SR.starter_names(), ["executive-summary", "trend-dashboard", "detail-table"])
+        cols = {SR.col_x(i) for i in range(12)}
+        for name in SR.starter_names():
+            lay = SR.fill(name, ["Fact Orders Amount", "[Fact Orders Qty]"], "Calendar[Date]", "Region[Name]")
+            ids = [v["id"] for v in lay["visuals"]]
+            self.assertEqual(ids, [f"P1-V{i:02d}" for i in range(1, len(ids) + 1)], name)
+            for v in lay["visuals"]:
+                self.assertIn(v["x"], cols, (name, v["id"]))
+                edges = [SR.col_x(i) + SR.span_w(1) for i in range(12)]      # ref_layout.py rounds the same way
+                self.assertLessEqual(min(abs(v["x"] + v["w"] - e) for e in edges), 1, (name, v["id"]))
+                self.assertLessEqual(v["y"] + v["h"], 1048, (name, v["id"]))
+                self.assertEqual(v["y"] % 8, 0)
+                self.assertNotRegex(json.dumps(v), r"[{](kpi[0-9]|date|category|title)[}]", "every slot filled")
+                self.assertTrue(v["build"]["reason"] and v["build"]["step"] == 1, "native first")
+            self.assertTrue(lay["_purpose"])
+        lay = SR.fill("executive-summary")
+        self.assertEqual(lay["visuals"][1]["bindings"]["Data"], ["[KPI 1]"], "readable labels when unfilled")
+        r = pbik("start", "starters", "--root", self.tmp, "--kpi", "Fact Orders Amount", "--date", "Calendar[Date]")
+        self.assertIn("3 starter layouts: Executive summary, Trend dashboard, Detail table.", r.stdout)
+
+    def test_report_round_trip(self):
+        """A starter filled with a model's names, built into a report (the Rep 4 fixture: pbik build checks every
+        field against its model), read back: same pages, types, fields and grid positions."""
+        from pbikit import fromreport as FR, start as SR
+        src = KIT / "tools" / "fixtures" / "rep4"
+        work = self.tmp / "rep"
+        shutil.copytree(src, work)
+        lay = SR.fill("executive-summary", ["Revenue", "Units Sold", "Profit", "Margin %"], "Date[Date]",
+                      "stores[City]")
+        lay["pages"]["P1"]["displayName"] = "Starter"
+        lf = work / "design" / "specs" / "layout.json"
+        lf.parent.mkdir(parents=True, exist_ok=True)
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        report = work / "Toy Sales.Report"
+        for p in (report / "definition" / "pages").iterdir():
+            if p.is_dir():
+                shutil.rmtree(p)
+        (report / "definition" / "pages" / "pages.json").unlink(missing_ok=True)
+        r = pbik("build", report, lf, cwd=work)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        back, findings, left_out = FR.from_report(report)
+        self.assertEqual([p["displayName"] for p in back["pages"].values()], ["Starter"])
+        got = {(v["type"], json.dumps(v.get("bindings"), sort_keys=True)) for v in back["visuals"]}
+        for v in lay["visuals"]:
+            if v.get("bindings"):
+                self.assertIn((v["type"], json.dumps(v["bindings"], sort_keys=True)), got, v["id"])
+        for v in back["visuals"]:
+            mine = next(x for x in lay["visuals"] if x["type"] == v["type"] and x.get("bindings") == v.get("bindings"))
+            self.assertEqual((v["x"], v["w"]), (mine["x"], mine["w"]), v["id"])
+
+    def test_known_model_recognised(self):
+        from pbikit import gates as GT, intake as IN, packs as PK, rules as R, dataclass_ as DC, synth as S
+        import test_phase1 as P1
+        from unittest import mock
+        env = mock.patch.dict(os.environ, {"PBIK_HOME": str(self.tmp / "home")})
+        env.start()
+        self.addCleanup(env.stop)
+        a = self.tmp / "first"
+        P1.big_project(a, resolve=False)
+        c = S.read_json(a / "design/specs/contract.json")
+        for f in R.groups(c)["you"]:
+            S.resolve(a, f["id"], "synthesize", why="typed targets", out=lambda *x: None)
+        GT.prepare("synth-approve", a)
+        GT.run("synth-approve", a, dialog=lambda *x: "yes", out=lambda *x: None)
+        packs = self.tmp / "packs"
+        packs.mkdir()
+        PK.register(a, packs, out=lambda *x: None)
+        self.assertEqual(PK.fingerprint(c), PK.fingerprint(S.read_json(a / "design/specs/contract.json")))
+        b = self.tmp / "second"
+        (b / "design" / "specs").mkdir(parents=True)
+        DC.set_class(b, "restricted")
+        proj = DC.read_project(b)
+        proj["packFolders"] = [str(packs)]
+        S.write_json(DC.project_file(b), proj)
+        drop = b / "design" / "reference" / "model"
+        import big_model as BM
+        BM.write(drop, "tmdl")
+        said = []
+        IN.intake(b, out=said.append)
+        text = "\n".join(said)
+        self.assertIn("This is Example Big, the model you approved before", text)
+        self.assertIn("this project stays restricted", text, "a pack never loosens the data class")
+        self.assertTrue(S.approved(S.read_json(b / "design/specs/contract.json")))
+        self.assertEqual(DC.data_class(b), "restricted")
+        doc = ST.read(b)
+        self.assertEqual((doc["pack"], "model" in doc["done"]), ("Example Big", True))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

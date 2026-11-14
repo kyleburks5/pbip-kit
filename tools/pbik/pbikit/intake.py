@@ -106,15 +106,54 @@ def intake(root=".", folder=None, out=print):
         d = PK.drift(pack, path, out=lambda *a: None, drift_file=S.specs(root) / "drift.json")
         log(root, fmt, path.name, removed, d["contract"])
         out(f"read the model ({fmt}): {len(d['changes'])} change(s) since the model pack"
-            + ("; approve them with the task 'Approve model changes'" if d["changes"] or d["newFlags"] else ""))
+            + ("; I'll open the approval window Approve model changes" if d["changes"] or d["newFlags"] else
+               "; nothing to approve"))
         return {"format": fmt, "removed": removed, "contract": d["contract"], "drift": d}
     c, _ = S.contract(path, root)
     log(root, fmt, path.name, removed, c)
+    seen = recognise(root, c, out)                    # a model approved before: its pack, no model approval (A2)
+    if seen:
+        return intake(root, folder, out) if seen == "newer" else {"format": fmt, "removed": removed,
+                                                                  "contract": S.read_json(S.specs(root) /
+                                                                                          "contract.json"),
+                                                                  "pack": True}
     out(f"read the model ({fmt}): {len(c['tables'])} tables, "
         f"{sum(len(t['measures']) for t in c['tables'].values())} measures, {len(c['flags'])} flag(s)")
     for ln in grouped_lines(c):                      # grouped by default, never a list by technical kind (A9)
         out(ln)
     return {"format": fmt, "removed": removed, "contract": c}
+
+
+def recognise(root, c, out=print):
+    """Match the model against the pack folders by its tables and columns (no values). A match starts the project
+    from that pack: its approved setup, synthetic model and data class (never lower than the project's own: loosening
+    stays the person's approval). Returns "same", "newer" or None."""
+    from . import packs as PK, status as ST
+    try:
+        m = PK.match(root, c)
+    except (PK.PackError, OSError, ValueError):
+        return None
+    if not m:
+        return None
+    kind, folder, info = m
+    before = DC.data_class(root)
+    (pathlib.Path(root) / "design" / "specs" / "contract.json").unlink(missing_ok=True)
+    PK.project_new(root, folder, out=lambda *a: None)
+    after = DC.data_class(root)
+    if DC.CLASSES.index(after) < DC.CLASSES.index(before):
+        DC.set_class(root, before)
+        note = (f" Its data class is {after}; this project stays {before} unless you loosen it in the approval "
+                "window.")
+    else:
+        note = ""
+    ST.update(root, done="model" if kind == "same" else None, pack=info["name"], dataClass=DC.data_class(root))
+    if kind == "same":
+        out(f"This is {info['name']}, the model you approved before (version {info['current']}): no model approval "
+            f"needed.{note}")
+        out("next: I'll draw the plan as a picture")
+    else:
+        out(f"This looks like a newer version of {info['name']} (approved before); I'll check only what changed.{note}")
+    return kind
 
 
 def grouped_lines(c, most=10):

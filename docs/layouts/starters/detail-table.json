@@ -1,0 +1,149 @@
+{
+ "_note": "Starter layout (v1.7, docs/design/phase1-usability.md A2): columns (col, span) on the 12-column grid; pbik start starters turns them into pixels and fills the slots {title} {kpi1}-{kpi4} {date} {category} from the model. Built only from the kit's page layouts (docs/layouts/) and patterns (docs/patterns/).",
+ "_purpose": "Which items need attention? Filters on the left, the exceptions first, then every item ranked.",
+ "_layoutStyle": "rail",
+ "pages": {
+  "P1": {
+   "displayName": "{title}",
+   "background": "background",
+   "active": true
+  }
+ },
+ "retired": [],
+ "visuals": [
+  {
+   "id": "P1-V01",
+   "name": "title",
+   "page": "P1",
+   "type": "textbox",
+   "col": 0,
+   "span": 12,
+   "y": 32,
+   "h": 56,
+   "z": 1,
+   "text": [
+    {
+     "runs": [
+      {
+       "text": "{title}",
+       "font": "semibold",
+       "size": "title"
+      }
+     ]
+    }
+   ],
+   "container": "off",
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Text box title"
+   }
+  },
+  {
+   "id": "P1-V02",
+   "name": "filter-category",
+   "page": "P1",
+   "type": "slicer",
+   "col": 0,
+   "span": 3,
+   "y": 112,
+   "h": 200,
+   "z": 1,
+   "bindings": {
+    "Values": [
+     "{category}"
+    ]
+   },
+   "container": {
+    "altText": "Filter by {category}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "List slicer"
+   }
+  },
+  {
+   "id": "P1-V03",
+   "name": "filter-date",
+   "page": "P1",
+   "type": "slicer",
+   "col": 0,
+   "span": 3,
+   "y": 336,
+   "h": 200,
+   "z": 1,
+   "bindings": {
+    "Values": [
+     "{date}"
+    ]
+   },
+   "container": {
+    "altText": "Filter by {date}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Date slicer"
+   }
+  },
+  {
+   "id": "P1-V04",
+   "name": "exceptions",
+   "page": "P1",
+   "type": "tableEx",
+   "col": 3,
+   "span": 9,
+   "y": 112,
+   "h": 520,
+   "z": 1,
+   "bindings": {
+    "Values": [
+     "{category}",
+     "{kpi1}",
+     "{kpi2}"
+    ]
+   },
+   "container": {
+    "altText": "Items outside their normal range, worst first"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Table with conditional formatting"
+   },
+   "pattern": "exception-list"
+  },
+  {
+   "id": "P1-V05",
+   "name": "ranked",
+   "page": "P1",
+   "type": "clusteredBarChart",
+   "col": 3,
+   "span": 9,
+   "y": 656,
+   "h": 392,
+   "z": 1,
+   "bindings": {
+    "Category": [
+     "{category}"
+    ],
+    "Y": [
+     "{kpi1}"
+    ]
+   },
+   "container": {
+    "altText": "{kpi1} by {category}, highest first"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Ranked bar chart"
+   },
+   "sort": {
+    "field": "{kpi1}",
+    "direction": "Descending"
+   }
+  }
+ ]
+}

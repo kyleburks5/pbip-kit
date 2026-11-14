@@ -316,3 +316,32 @@ def may_register(folder, cls, who):
         return True
     allowed = (t.get("registrars") or {}).get(cls, [])
     return any(N.same(a, who) or N.key(a) in N.key(who) for a in allowed)
+
+
+# ---------------------------------------------------------------- recognising a model (v1.7, A2)
+def fingerprint(c):
+    """The model's shape, no values: sorted table and column names (case-insensitive)."""
+    import hashlib
+    return hashlib.sha1(json.dumps(sorted(_names(c))).encode("utf-8")).hexdigest()[:16]
+
+
+def _names(c):
+    return {f"{t.lower()}|{col.lower()}" for t, x in c.get("tables", {}).items() for col in x.get("columns", {})} | {
+        f"{t.lower()}|" for t in c.get("tables", {})}
+
+
+def match(root, c, near=0.8):
+    """The pack this model is, from the project's pack folders: ("same" | "newer", pack folder, info) or None.
+    "same": the same tables and columns; "newer": at least `near` of them shared (a changed model: drift)."""
+    mine, best = _names(c), None
+    for name, ver, cls, folder, team in list_packs(root):
+        pc = read_json(version_dir(folder) / "contract.json")
+        if not pc:
+            continue
+        theirs = _names(pc)
+        if theirs == mine:
+            return ("same", folder, pack_info(folder))
+        share = len(mine & theirs) / max(1, len(mine | theirs))
+        if share >= near and (not best or share > best[0]):
+            best = (share, folder)
+    return ("newer", best[1], pack_info(best[1])) if best else None
