@@ -66,6 +66,30 @@ class PrepareFirstTests(LiveBase):
         self.assertEqual(doc["args"]["report"], str(self.rep))
         self.assertEqual(self.go_live(), "approved")
 
+    def test_kit_colour_measures_move_as_text(self):
+        g = S.read_json(self.root / "design/specs/generate.json")
+        g["plannedMeasures"]["Amount Share"]["dataType"] = "string"          # as layout polish writes colour measures
+        S.write_json(self.root / "design/specs/generate.json", g)
+        self.add_planned_measure()
+        GT.prepare("bind-live", self.root, from_="picked")
+        ext = json.loads((self.rep / "definition/reportExtensions.json").read_text(encoding="utf-8"))
+        m = next(m for e in ext["entities"] for m in e["measures"] if m["name"] == "Amount Share")
+        self.assertEqual(m.get("dataType"), "Text")
+
+    def test_a_failed_prepare_changes_nothing(self):
+        self.add_planned_measure()
+        before = TB.tree(self.rep)
+        gen = (self.root / "design/specs/generate.json").read_bytes()
+        model = TB.tree(self.root / "Example Synthetic.SemanticModel")
+        from pbikit import extensions as X
+        with mock.patch.object(X, "add", side_effect=SystemExit("pbik: table '_Measures' is not in the model")), \
+                self.assertRaises(GT.GateError) as cm:
+            GT.prepare("bind-live", self.root, from_="picked")
+        self.assertIn("nothing was changed", str(cm.exception))
+        self.assertEqual(before, TB.tree(self.rep))
+        self.assertEqual(gen, (self.root / "design/specs/generate.json").read_bytes())
+        self.assertEqual(model, TB.tree(self.root / "Example Synthetic.SemanticModel"))
+
     def test_a_check_that_would_fail_opens_no_window(self):
         v = self.rep / "definition/pages/p1/visuals/P1-V01_amount-card/visual.json"
         d = json.loads(v.read_text(encoding="utf-8"))

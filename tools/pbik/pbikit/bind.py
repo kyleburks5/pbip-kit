@@ -299,11 +299,27 @@ def port_query(report, port):
     return query
 
 
+REPORT_TYPES = {"string": "Text", "text": "Text", "double": "Double", "decimal": "Decimal", "int64": "Integer",
+                "integer": "Integer", "boolean": "Boolean", "datetime": "DateTime", "currency": "Decimal"}
+
+
+def report_type(p):
+    """A planned measure's type as a report-level measure takes it (planned measures use the model's names: the
+    kit's own colour measures say "string"; v1.7 live replay)."""
+    t = str(p.get("dataType") or "Double")
+    return REPORT_TYPES.get(t.lower(), t)
+
+
 def X_add(X, rep, name, expr, p):
     import contextlib, io
-    with contextlib.redirect_stdout(io.StringIO()):
-        X.add(str(rep.path), name, expr, None, p.get("dataType", "Double"), p.get("table", "_Measures"),
-              p.get("formatString"), p.get("description"))
+    out = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            X.add(str(rep.path), name, expr, None, report_type(p), p.get("table", "_Measures"),
+                  p.get("formatString"), p.get("description"))
+    except SystemExit as e:                            # extensions.fail(): a plain BindError, never a raw exit
+        why = (out.getvalue().strip().splitlines() or [str(e.code)])[-1].replace("pbik: ", "").replace("error: ", "")
+        raise BindError(f"[{name}] couldn't become a report measure: {why}") from None
     rep.reset_cache()
 
 
@@ -575,10 +591,13 @@ def ready(report=None, root=".", desktop_open=None, query=None, out=print):
                      "switch")
     if probs:
         return probs
+    keep = _keep_for_prepare(root, rep_path, ctx)     # prepare is all or nothing too: put back on any failure
     try:
         moved = prepare(rep_path, root, query=query, out=lambda *a: None)
-    except (BindError, ContractError) as e:
-        return [f"the report-only measures couldn't be moved into the report ({e})"]
+    except (BindError, ContractError, SystemExit, OSError) as e:
+        keep()
+        why = e.code if isinstance(e, SystemExit) else e
+        return [f"the report-only measures couldn't be moved into the report ({why}); nothing was changed"]
     if moved:
         out(f"moved {len(moved)} report-only measure(s) into the report: {', '.join(moved)}")
     res = check(rep_path, root)
@@ -587,6 +606,32 @@ def ready(report=None, root=".", desktop_open=None, query=None, out=print):
         probs.append(f"{n} field(s) the report uses aren't in the live model's description"
                      + (": " + "; ".join(x.split(': ', 1)[-1] for x in res.lines()[:3]) if n else ""))
     return probs
+
+
+def _keep_for_prepare(root, rep_path, ctx):
+    """A copy of what bind prepare writes (the report, generate.json, the synthetic model); returns put_back()."""
+    import tempfile
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="pbik_prep_"))
+    places = [pathlib.Path(rep_path), specs(root) / "generate.json"]
+    if ctx.model_folder and DC.is_synthetic(ctx.model_folder):
+        places.append(pathlib.Path(ctx.model_folder))
+    saved = []
+    for i, p in enumerate(places):
+        if p.is_dir():
+            shutil.copytree(p, tmp / str(i))
+        elif p.exists():
+            shutil.copy2(p, tmp / str(i))
+        saved.append((p, tmp / str(i)))
+
+    def put_back():
+        for p, c in saved:
+            if c.is_dir():
+                shutil.rmtree(p, ignore_errors=True)
+                shutil.copytree(c, p)
+            elif c.exists():
+                shutil.copy2(c, p)
+        shutil.rmtree(tmp, ignore_errors=True)
+    return put_back
 
 
 def default_report(root):
