@@ -13,7 +13,11 @@
 - Same size as the other cards in the row; label, both values and the change line fill the card.
 
 ## Build (visual-method ladder)
-- 1 native: a new card (cardVisual) with two data fields.
+- 1 native: a new card (cardVisual) with two data fields, or one field split into two tiles by small multiples
+  (a two-member category on Rows, max 2, one row).
+- Template `cardVisual.two-kpi-card` (clean harvest, rail + panel study 2026-11-15; small-multiples form; confirm in
+  Desktop). `cardVisual.kpi-row-chips` is the three-value form with a detail chip per value (chip colours from
+  hex-returning measures with `cf`).
 - Template `cardVisual.two-kpi-card`: **needs a Desktop-saved sample.** Make it on the Patterns page in Desktop, save,
   and run
   `pbik templates harvest`; until then build from the plain type's template and the layout's own keys.

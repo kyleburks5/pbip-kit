@@ -14,12 +14,20 @@ number), then picks patterns from here and names them on each visual in layout.j
 | [Data freshness line](freshness-line.md) (`freshness-line`) | How current is this, and can I trust it today? | Text measure in a card + category-axis reference line | 1 native |
 | [Exception list](exception-list.md) (`exception-list`) | Which members need attention, worst first? | Table whose measures are blank for normal rows | 1 native |
 | [Direct labels instead of legends](direct-labels.md) (`direct-labels`) | Which line or bar is which, without a lookup? | Legend off; series / category labels on the marks | 1 native (line-end labels: series labels, to harvest) |
-| [Page header stack](page-header-stack.md) (`page-header-stack`) | Where am I, what is this page for, and what should I read first? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Page header stack](page-header-stack.md) (`page-header-stack`) | Where am I, what is this page for, and what should I read first? | stub: title card + rule (description line still to do) | 1 native (`cardVisual.header-title`, `shape.rule`: clean harvest, confirm in Desktop) |
 | [Headline banner](headline-banner.md) (`headline-banner`) | What is the one thing to know on this page right now? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
 | [Ranked bar table](ranked-bar-table.md) (`ranked-bar-table`) | Who ranks where, by how much, which way are they moving, and are they OK? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
-| [Two-KPI tinted card](two-kpi-card.md) (`two-kpi-card`) | How do two related numbers stand against each other (actual and target, this year and last)? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
-| [Tabs with underline](tabs-underline.md) (`tabs-underline`) | Which view am I on, and what else is there? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Two-KPI tinted card](two-kpi-card.md) (`two-kpi-card`) | How do two related numbers stand against each other (actual and target, this year and last)? | stub: new card, two small-multiple tiles | 1 native (`cardVisual.two-kpi-card`: clean harvest, confirm in Desktop) |
+| [Tabs with underline](tabs-underline.md) (`tabs-underline`) | Which view am I on, and what else is there? | stub: page navigator, or bookmark navigator + display-only bookmarks | 1 native (`bookmarkNavigator.tabs-underline`: clean harvest, confirm in Desktop) |
 | [Text link button](text-link-button.md) (`text-link-button`) | Where do I go for more? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [Shared panel](panel.md) (`panel`) | Which numbers and charts belong together? | One shape; the visuals on it have no background of their own | 1 native (`shape.panel`: clean harvest, confirm in Desktop) |
+| [Rail + panel layout](rail-panel.md) (`rail-panel`, a layout style) | Which member am I looking at, and what is its whole story? | Rail shape at the page edge with pickers; one panel; tabs | 1 native (preset `rail-panel`, optional) |
+
+## Styles: choosing the layout and preset
+
+/plan picks one style per page by its **Use when** / **Avoid when** lines in design/themes/presets/README.md
+("Styles"), names its preset in the Pattern choices row, and uses the style's layout pattern where it has one
+(`rail-panel`). Studies of other reports add styles here (from a project's design/reviews/WRAPUP-study-*.md).
 
 ## How a pattern page is laid out
 

@@ -1,0 +1,50 @@
+{
+  "_note": "Rail + panel preset (study 2026-11-15, GENERIC): a white rail on the left edge and one floating white panel on a light neutral canvas; monochrome chrome (tabs and selections in the text colour), colour kept for the data. Layout: docs/patterns/rail-panel.md. Optional, never the default. Colours are the kit's own choice, not taken from the studied report; /theme still checks every pair for AA.",
+  "name": "rail-panel",
+  "description": "Light neutral canvas, white rail and floating panel, soft shadow, no borders; text-coloured tab accents and selections; weight-led type.",
+  "mode": "light",
+  "brand": [
+    "primary=#1B1F27",
+    "brand=#2B67D3",
+    "bad=#C1403A",
+    "good=#2C7B4E",
+    "second=#8A93A3",
+    "#D98C1F"
+  ],
+  "colors": {
+    "background": "#F3F4F6",
+    "card": "#FFFFFF",
+    "border": "#E4E7EC",
+    "text": "#1B1F27",
+    "textMuted": "#5B6474",
+    "selected": "#1B1F27"
+  },
+  "container": {
+    "radius": 12,
+    "borderWidth": 0,
+    "padding": 20,
+    "paddingTop": 12,
+    "shadow": "0 1px 2px rgba(27,31,39,0.05), 0 8px 20px rgba(27,31,39,0.07)",
+    "pbiShadow": {
+      "_note": "One soft shadow on the panel only; cards on the panel have none (C-10 panel).",
+      "blur": 14,
+      "distance": 6,
+      "transparency": 86
+    }
+  },
+  "control": {
+    "radius": 12
+  },
+  "font": {
+    "weights": {
+      "_note": "Weight carries the hierarchy: titles and values semibold, the page title bold, body regular.",
+      "title": "Bold",
+      "cardTitle": "Semibold",
+      "header": "Semibold",
+      "kpi": "Semibold",
+      "body": "Regular",
+      "caption": "Regular",
+      "tableHeader": "Semibold"
+    }
+  }
+}

@@ -239,6 +239,7 @@ found by diffing every cached schema definition against the coverage map. Some r
 | 27 | **Visual group formatting**: a group's `objects` (background, `general.altText`, lockAspect) aren't written. pbik writes `displayName` and `groupMode` only, so a group that should be announced as one item can't get alt text. | Occasional (Reps 5-7 used groups) | `build.py:1094-1095` | S:visualContainer 2.13.0 #VisualGroupConfig, #VisualGroupFormattingObjects, #VisualGroupGeneralFormattingObjects |
 | 28 | **Bookmark display modes beyond hidden**: `spotlight`, `maximize` (focus mode) with `maximizedOptions.dataTable` `accessible` (opens the screen-reader table), and `elevation`. pbik writes only `hidden`. | Rare (*est.*); spotlight is a common storytelling bookmark | `bookmarks.py:104` writes `{"mode": "hidden"}` only | S:bookmark 2.1.0 #VisualContainerDisplayMode, #VisualContainerDisplayState; [L7] "Focus mode", "Show data table" |
 | 29 | **Cross-report drillthrough**: report `settings.useCrossReportDrillthrough` and page `pageBinding.referenceScope` `CrossReport`. This extends gap 7 to targets in other reports. | Rare | None recorded | S:report 3.3.0 #ExplorationSettings (`useCrossReportDrillthrough`); S:page 2.1.0 #PageBinding (`referenceScope`) |
+| 30 | **Saved default selection on the new slicers** (button slicer `advancedSlicerVisual`, `listSlicer`): layout `selection` writes `objects.general.filter` in the old slicer's form, as Desktop saves a clicked value. Needed by the rail + panel pickers, which must never open empty. | Occasional (rail + panel pages) | `build.py` `apply_selection`; rail + panel study (2026-11-15), Desktop check 5 | S:visualContainer #VisualObjects (general.filter) |
 
 ### Suggested order (revised 2026-11-10)
 
@@ -320,3 +321,4 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 4 | Done, confirmed in Desktop (second pass) | the range now shows as Advanced "is greater than or equal to 2025 ..." (2026-11-11); every filter form of gap 4 confirmed |
 | 9 | Done, confirmed in Desktop (second pass) | Average, Max, Count, Count of Category, Median, Standard deviation, Variance and Percentile.Inc render with unique native reference names (2026-11-11) |
 | 10 | Done, confirmed in Desktop (second pass) | the running total and the sparkline column render (2026-11-11) |
+| 30 | Written, UNVERIFIED in Desktop | rail + panel study M-3 (2026-11-15): `selection` on a new slicer writes general.filter with typed values; save a picker in Desktop and run `pbik roundtrip` |

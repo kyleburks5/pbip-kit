@@ -74,7 +74,8 @@ class PatternPageTests(unittest.TestCase):
             self.assertIn("- **Avoid when:** ", text, f.name)
 
     def test_stubs_mark_their_templates(self):
-        """Batch 4 item 6: each stub names its template, marked "needs a Desktop-saved sample" here and in the index."""
+        """Batch 4 item 6: each stub names its template, marked "needs a Desktop-saved sample" here and in the index,
+        until a clean harvest (study 2026-11-15) fills it: then the file exists and waits for a Desktop confirm."""
         idx = json.loads((KIT / "design" / "templates" / "index.json").read_text(encoding="utf-8"))["templates"]
         stubs = ["page-header-stack", "headline-banner", "ranked-bar-table", "two-kpi-card", "tabs-underline",
                  "text-link-button"]
@@ -84,8 +85,12 @@ class PatternPageTests(unittest.TestCase):
             self.assertIn("needs a Desktop-saved sample", text, name)
             tpl = next(k for k, v in idx.items() if v.get("pattern") == name)
             self.assertIn(f"`{tpl}`", text)
-            self.assertEqual(idx[tpl]["status"], "needs a Desktop-saved sample")
-            self.assertFalse((KIT / "design" / "templates" / f"{tpl}.json").exists(), "no file until the harvest")
+            if idx[tpl].get("clean"):
+                self.assertIn("confirm in Desktop", idx[tpl]["status"])
+                self.assertTrue((KIT / "design" / "templates" / f"{tpl}.json").exists(), "the harvested file")
+            else:
+                self.assertEqual(idx[tpl]["status"], "needs a Desktop-saved sample")
+                self.assertFalse((KIT / "design" / "templates" / f"{tpl}.json").exists(), "no file until the harvest")
             self.assertIn(f"({name}.md)", readme)
 
     def test_plan_asks_for_pattern_choices(self):
@@ -480,6 +485,11 @@ class VersionsTests(unittest.TestCase):
         self.assertIn("/update", (KIT / "CLAUDE.md").read_text(encoding="utf-8"))
 
     def test_kit_project_json(self):
+        """The kit's own settings file has no data class. A project copy (setup writes one) skips this; the master
+        kit and a fresh copy still run it (rail + panel study M-1)."""
+        from pbikit import projectsetup as PS
+        if PS.kind(KIT) == "project":
+            self.skipTest("a project copy: project setup writes the data class into project.json")
         from pbikit import versions as V
         d = json.loads((KIT / "design" / "specs" / "project.json").read_text(encoding="utf-8"))
         self.assertEqual(set(d) - {"targetDesktop", "catalog", "desktop", "customVisuals"}, set())

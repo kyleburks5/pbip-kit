@@ -14,6 +14,12 @@
 
 ## Build (visual-method ladder)
 - 1 native: a page navigator (or bookmark navigator) with the selected state's accent bar.
+- Bookmark navigator (views on one page): each bookmark is **display only** (Data unchecked: `suppressData`, and
+  `suppressActiveSection`) and targets the view groups it shows or hides, so switching tabs never resets filters
+  or slicers (.claude/rules/pbik.md; rail + panel study C-3).
+- Template `bookmarkNavigator.tabs-underline` (clean harvest, rail + panel study 2026-11-15; confirm in Desktop): no
+  fill or outline, accent bar at the bottom, hidden by default and shown on hover and selected, selected text in the
+  semibold weight.
 - Template `pageNavigator.tabs-underline`: **needs a Desktop-saved sample.** Make it on the Patterns page in Desktop,
   save, and run
   `pbik templates harvest`; until then build from the plain type's template and the layout's own keys.

@@ -113,6 +113,16 @@ feature("data-bookmarks", 5, "data bookmarks that save a slicer selection or a s
         _data_bookmark)
 
 
+def _picker_selection(kind, doc):
+    v = (doc.get("visual") or {}) if kind == "visual" else {}
+    return v.get("visualType") in ("advancedSlicerVisual", "listSlicer") and any(
+        "filter" in (e.get("properties") or {}) for e in (v.get("objects") or {}).get("general") or [])
+
+
+feature("picker-selection", 30, "a saved default selection on a new slicer (layout `selection` on a button or list "
+        "slicer: objects.general.filter, rail + panel study Desktop check 5)", _picker_selection)
+
+
 feature("tooltip-pages", 6, "report-page tooltips (page `tooltip`: type Tooltip and pageBinding; visual `tooltipPage`: "
         "visualTooltip section, without `type`)",
         lambda kind, doc: (kind == "page" and doc.get("type") == "Tooltip") or (kind == "visual" and any(

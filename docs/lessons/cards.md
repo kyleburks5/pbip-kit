@@ -16,7 +16,7 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 | C-07 | Card padding may be ignored: move content with the callout area | – |
 | C-08 | Small multiples grid settings | – |
 | C-09 | Colour small multiples through the header, not the accent bar | – |
-| C-10 | The KPI card is its own container | `pbik validate` warns (pbikit/kpicards.py); design/scripts/card_space.py flags empty space |
+| C-10 | The KPI card is its own container, or sits on a shared panel | `pbik validate` warns (pbikit/kpicards.py); design/scripts/card_space.py flags empty space |
 | C-11 | Background shapes keep their layer order | `pbik validate` warns (pbikit/kpicards.py `layer_order`) |
 <!-- /lessons:index -->
 
@@ -81,13 +81,17 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 - **Enforced by:** not enforced (read at /build)
 - **Source:** Rep 7
 
-## C-10 The KPI card is its own container
-- **Rule:** Put background, radius, border and shadow on the KPI card's own container formatting, with no shape behind
-  it (unless it matches within 1px); label, value and change line fill the card; cards in a row have equal width,
-  height and gaps, span the content width and line up with the row below (template `cardVisual.kpi-delta-card`).
-- **Why:** a shape behind a card drifts from it on every polish, and uneven rows or empty cards read as unfinished.
+## C-10 The KPI card is its own container, or sits on a shared panel
+- **Rule:** Either put background, radius, border and shadow on the KPI card's own container formatting, with no
+  shape behind it (unless it matches within 1px); or place the card on a shared panel (pattern `panel`: a shape with
+  `pattern: "panel"` or "panel" in its name) with no background of its own and one inset on the panel's left, right
+  and top. Label, value and change line fill the card; cards in a row have equal width, height and gaps, span the
+  content width (on a panel: the same inset left and right) and line up with the row below (templates
+  `cardVisual.kpi-delta-card`, `shape.panel`).
+- **Why:** a loose shape behind a card drifts from it on every polish, and uneven rows or empty cards read as
+  unfinished; a named panel holds a group of cards on one surface by design.
 - **Enforced by:** `pbik validate` warns (pbikit/kpicards.py); design/scripts/card_space.py flags empty space
-- **Source:** batch 3 item 10 (2026-11-13)
+- **Source:** batch 3 item 10 (2026-11-13); panel form: rail + panel study (2026-11-15)
 
 ## C-11 Background shapes keep their layer order
 - **Rule:** Set `container.keepLayerOrder: true` on every shape that sits behind other visuals.

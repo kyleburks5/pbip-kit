@@ -31,13 +31,15 @@ def _grid_edges():
 
 
 def check_grid(layout):
+    """Visual IDs off the 12-column grid. A full-width band may span 0..1920; a rail (pattern rail-panel, study
+    2026-11-15) may touch one page edge, with its inner edge on the grid; everything else sits on the grid."""
     lefts, rights = _grid_edges()
     bad = []
     for v in layout.get("visuals", []):
         x, w, y = v.get("x", 0), v.get("w", 0), v.get("y", 0)
-        full = x == 0 or x + w >= 1920
-        on_left = full or min(abs(x - e) for e in lefts) <= 1
-        on_right = full or min(abs(x + w - e) for e in rights) <= 1
+        at_l, at_r = x == 0, x + w >= 1920
+        on_left = at_l or min(abs(x - e) for e in lefts) <= 1
+        on_right = at_r or min(abs(x + w - e) for e in rights) <= 1
         if not (on_left and on_right) or (v.get("type") not in DECOR and y % 8):
             bad.append(v["id"])
     return bad

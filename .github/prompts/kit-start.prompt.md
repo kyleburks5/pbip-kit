@@ -49,9 +49,9 @@ and stop: never build in the master kit. No projects subfolder, no second folder
    - from wireframe or picture: design/scripts/ref_layout.py (an image: write its boxes file first), into
      design/specs/layout.json
    - starter layouts: ask "What should this report help people decide?" (with requirements, take the answer from
-     them and don't ask). Then `pbik start starters --kpi <measure> ... --date <field> --category <field>` with names
-     from the model, draw each (`pbik plan picture design/specs/starters/<name>.layout.json --out
-     design/plan/starters/<name>`), show the 2-3 pictures and let them pick one and adjust it in plain words; copy the
+     them and don't ask). Then `pbik start starters --kpi <measure> ... --date <field> --category <field>` (and
+     `--detail <field>`, the field inside the category, for the profile explorer) with names from the model, draw each (`pbik plan picture design/specs/starters/<name>.layout.json --out
+     design/plan/starters/<name>`), show the pictures (offer the profile explorer when the question is about one member at a time) and let them pick one and adjust it in plain words; copy the
      pick to design/specs/layout.json.
    Mark "start" done.
 

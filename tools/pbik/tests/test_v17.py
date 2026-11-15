@@ -371,25 +371,60 @@ class StartTests(Tmp):
 
     def test_starters_on_the_grid_and_built(self):
         from pbikit import start as SR
-        self.assertEqual(SR.starter_names(), ["executive-summary", "trend-dashboard", "detail-table"])
+        self.assertEqual(SR.starter_names(), ["executive-summary", "trend-dashboard", "detail-table", "profile-explorer"])
         cols = {SR.col_x(i) for i in range(12)}
         for name in SR.starter_names():
             lay = SR.fill(name, ["Fact Orders Amount", "[Fact Orders Qty]"], "Calendar[Date]", "Region[Name]")
             ids = [v["id"] for v in lay["visuals"]]
             self.assertEqual(ids, [f"P1-V{i:02d}" for i in range(1, len(ids) + 1)], name)
             for v in lay["visuals"]:
+                if v.get("pattern") == "rail-panel":                   # the rail: page edge, inner edge on the grid
+                    self.assertEqual((v["x"], v["y"], v["h"]), (0, 0, 1080), name)
+                    v = dict(v, x=SR.col_x(0), w=v["w"] - SR.col_x(0), h=1048)
                 self.assertIn(v["x"], cols, (name, v["id"]))
                 edges = [SR.col_x(i) + SR.span_w(1) for i in range(12)]      # ref_layout.py rounds the same way
                 self.assertLessEqual(min(abs(v["x"] + v["w"] - e) for e in edges), 1, (name, v["id"]))
                 self.assertLessEqual(v["y"] + v["h"], 1048, (name, v["id"]))
                 self.assertEqual(v["y"] % 8, 0)
-                self.assertNotRegex(json.dumps(v), r"[{](kpi[0-9]|date|category|title)[}]", "every slot filled")
+                self.assertNotRegex(json.dumps(v), r"[{](kpi[0-9]|date|category|detail|title)[}]", "every slot filled")
                 self.assertTrue(v["build"]["reason"] and v["build"]["step"] == 1, "native first")
             self.assertTrue(lay["_purpose"])
         lay = SR.fill("executive-summary")
         self.assertEqual(lay["visuals"][1]["bindings"]["Data"], ["[KPI 1]"], "readable labels when unfilled")
         r = pbik("start", "starters", "--root", self.tmp, "--kpi", "Fact Orders Amount", "--date", "Calendar[Date]")
-        self.assertIn("3 starter layouts: Executive summary, Trend dashboard, Detail table.", r.stdout)
+        self.assertIn("4 starter layouts: Executive summary, Trend dashboard, Detail table, Profile explorer.", r.stdout)
+
+    def test_profile_explorer_starter_builds_clean(self):
+        """Rail + panel study M-2: the profile explorer starter (rail with two pickers, tabs over display-only
+        bookmarks, one shared panel with the KPI row, profile card and chart) builds from the kit's clean templates,
+        rebuilds with no changes, validates with no errors and passes the grid and KPI-on-panel checks."""
+        from pbikit import kpicards as KC, score as SC, start as SR
+        work = self.tmp / "pe"
+        shutil.copytree(KIT / "tools" / "fixtures" / "rep4", work)
+        shutil.copytree(KIT / "design" / "templates", work / "design" / "templates", dirs_exist_ok=True)
+        lay = SR.fill("profile-explorer", ["Revenue", "Units Sold", "Profit", "Margin %"], "Date[Date]",
+                      "stores[City]", detail="products[Product_Name]")
+        self.assertEqual(lay["_layoutStyle"], "rail-panel")
+        self.assertEqual(SC.check_grid(lay), [], "the rail may touch the page edge")
+        rail = lay["visuals"][0]
+        self.assertEqual((rail["x"], rail["w"]), (0, SR.col_x(3) + SR.span_w(1)))
+        bms = lay["pages"]["P1"]["bookmarks"]
+        self.assertTrue(all(not b.get("data") for b in bms), "tabs are display only")
+        lf = work / "design" / "specs" / "layout.json"
+        lf.parent.mkdir(parents=True, exist_ok=True)
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        report = work / "Toy Sales.Report"
+        for p in (report / "definition" / "pages").iterdir():
+            if p.is_dir():
+                shutil.rmtree(p)
+        (report / "definition" / "pages" / "pages.json").unlink(missing_ok=True)
+        r = pbik("build", report, lf, cwd=work)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("No changes", pbik("build", report, lf, cwd=work).stdout)
+        r = pbik("validate", report, "--layout", lf, cwd=work)
+        self.assertIn(" 0 error(s)", r.stdout, r.stdout)
+        self.assertNotIn("C-10", r.stdout, "KPI cards sit on the shared panel")
+        self.assertNotIn("without keepLayerOrder", r.stdout, "rail and panel keep their layer order (C-11)")
 
     def test_report_round_trip(self):
         """A starter filled with a model's names, built into a report (the Rep 4 fixture: pbik build checks every

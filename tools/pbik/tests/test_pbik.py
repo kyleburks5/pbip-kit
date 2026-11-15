@@ -341,6 +341,28 @@ class PbikTests(unittest.TestCase):
         pbik("build", rep, lay)
         self.assertEqual(visual(rep, "P2-V05")["visual"]["query"], {"queryState": {}})
 
+    def test_80b_picker_saved_default_selection(self):
+        """Rail + panel study M-3: a new (button) slicer's saved default selection, typed like the column, in the
+        form Desktop saves a clicked value (objects.general.filter). VERIFY IN DESKTOP (study Desktop check 5)."""
+        rep, lay, L = self.work("picker")
+        L["visuals"].append({"id": "P2-V05", "name": "picker", "page": "P2", "type": "advancedSlicerVisual",
+                             "x": 32, "y": 660, "w": 400, "h": 40, "bindings": {"Values": ["stores[Store_ID]"]},
+                             "props": {"selection.singleSelect": True},
+                             "selection": {"field": "stores[Store_ID]", "values": [3, 4]}})
+        lay.write_text(json.dumps(L), encoding="utf-8")
+        r = pbik("build", rep, lay)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("P2-V05: single-select slicer with 2 saved values", r.stdout + r.stderr)
+        self.assertIn("UNVERIFIED in Desktop (roadmap gap 30)", r.stdout + r.stderr)
+        f = visual(rep, "P2-V05")["visual"]["objects"]["general"][0]["properties"]["filter"]["filter"]
+        cond = f["Where"][0]["Condition"]["In"]
+        self.assertEqual([v[0]["Literal"]["Value"] for v in cond["Values"]], ["3L", "4L"], "whole numbers typed L")
+        self.assertEqual(cond["Expressions"][0]["Column"]["Property"], "Store_ID")
+        L["visuals"][-1].update(id="P2-V06", type="cardVisual")
+        lay.write_text(json.dumps(L), encoding="utf-8")
+        r = pbik("build", rep, lay, ok=(1,))
+        self.assertIn("selection is a slicer's saved default", r.stdout + r.stderr)
+
     def test_81_empty_selectorless_entry_kept(self):
         rep, lay, L = self.work("empty")
         t_ = next(v for v in L["visuals"] if v["id"] == "P1-V05")

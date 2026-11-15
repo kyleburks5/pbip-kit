@@ -36,6 +36,19 @@ fails 4.5:1 is a build warning. Anything layout.json sets wins.
 pbik templates harvest "..\pbip-patterns\HR Overview.Report"
 ```
 
+### `templates harvest <Report> --clean [--page P] [--pick F] [--log F] [--label L]`
+For studying another report (pbikit/harvestclean.py; rail + panel study, 2026-11-15): works on any page (`--page`,
+default every page), or only the visuals a pick file names (`{"templates": {"<visual folder>": "<template name>"}}`).
+Removes the name, position, group, filters and query; every text (titles, subtitles, alt text, labels, card titles,
+"show blank as", tab and button text, the selected bookmark); saved selections (`general.filter`); images; every
+field- or measure-bound property; every entry whose selector names a field, data point or member; and axis start and
+end values. Maps every colour (literals and theme slots) to a tokens role by where it sits and how light it is, written
+as that role's colour in palette.json, so `pbik build` recolours it like any kit template. Keeps numbers, true/false,
+enum values, font families and state selectors. A leak check looks for every removed text in each output; a hit is an
+error and that file isn't written. Never writes the `<visualType>.json` defaults; adds its templates to index.json
+with `source` = the label. `--log` writes a Markdown report of what was removed and how colours were mapped (paths and
+reasons, no values).
+
 The kit's templates (`design/templates/`) come from the Patterns page of `..\pbip-patterns` (beside the kit folder; paths here are relative to the kit root,
 where you run pbik):
 `tools/patterns/build_patterns.py` makes it from a copy of Rep 8 (the best Desktop-saved example of each visual type
@@ -128,7 +141,7 @@ saves them) = Microsoft's #ExplorationSettings (`exportDataMode`, `hideVisualCon
 | top | `report: {filters: [...]}` | report-level filters in report.json `filterConfig` (any type above except a measure filter); pbik's own (`pbik_`) only, Desktop's stay. Confirmed in Desktop 2026-11-11 (roadmap gap 4) |
 | any filter | `displayName`, `ordinal`; and `filterOrder: ascending / descending / custom` on the visual, page or `report` | the filter card's name, its place when the order is custom (`ordinal`), and `filterConfig.filterSortOrder`. Confirmed in Desktop 2026-11-11 (roadmap gap 4) |
 | visual | `type: "htmlContent<GUID>"` (the HTML Content visual, any version) | `objects.compatibility.legacyRendering` true, and the visual in report.json `publicCustomVisuals` (pbikit/htmlcontent.py, from the visual's capabilities.json; not Desktop-tested yet). Under 43px tall: a build and validate warning. A custom visual: ladder step 4, uncertified until checked (docs/it-security.md) |
-| visual | `selection: {field, values}` | slicer default selection (`objects.general.filter`) |
+| visual | `selection: {field, values}` (or `value`) | slicer default selection (`objects.general.filter`, values typed like the column) on the slicer, the button slicer and the list slicer, so a picker never opens empty; warns when the field isn't the slicer's own or a single-select slicer gets several values. On the new slicers **UNVERIFIED in Desktop** (roadmap gap 30; rail + panel study Desktop check 5) |
 | visual | `referenceLines: [{axis: value, value2 or category; value: number or [Measure]; label, color, style, width, dataLabel}]` | `y1` / `y2` / `xAxisReferenceLine`; on a horizontal bar chart the value axis is still y1 (`x` there is an error) |
 | visual | `columnWidths: {field: px}` (tables, matrices) | `columnWidth` on each column's metadata selector |
 | visual | `columnWidths: "fit"`, or `"fit"` as a value next to fixed px (tables, matrices) | widths computed from the box (`pbikit/tablefit.py`): inner width = box less container padding less `tokens.table.scrollbarReserve` (16px); each column at least its header width at the header font, or 120 text / 64 number / 90 date / 100 image; columns of one kind share one width; the rest shared text 2 : others 1; whole pixels that add up exactly. A matrix sizes one stepped Rows column; fields on Columns, field parameters or a box too narrow are build errors |
@@ -505,8 +518,9 @@ first.
 `start detect` reads the inputs folder (design/reference/inputs/) and picks the path: from report (a `.Report` folder),
 from wireframe (HTML), from picture (an image: a wireframe or any report's screenshot), or starter layouts
 (requirements only, or nothing); a `.pbix`, `.pbit` or data file is named and never read. `start inputs` opens the
-folder. `start starters --kpi M ... --date F --category F` fills docs/layouts/starters/ (executive summary, trend
-dashboard, detail table: existing layouts and patterns only, on the 12-column grid) into
+folder. `start starters --kpi M ... --date F --category F [--detail F]` fills docs/layouts/starters/ (executive
+summary, trend dashboard, detail table, profile explorer: existing layouts and patterns only, on the 12-column grid;
+the profile explorer's rail starts at the page edge, `edge: left`, and `--detail` is its second picker) into
 design/specs/starters/<name>.layout.json. `layout from-report` reads an existing report's PBIR pages and visuals
 (positions, types, fields; never data) through the wireframe mapping (design/scripts/ref_layout.py) into a draft
 layout.json with the fields as bindings.

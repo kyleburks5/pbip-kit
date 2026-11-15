@@ -61,7 +61,7 @@ TAGS = {"cardVisual": "Card (new)", "card": "Card", "multiRowCard": "Multi-row c
         "treemap": "Treemap", "map": "Map", "filledMap": "Filled map", "ribbonChart": "Ribbon chart",
         "deneb": "Deneb"}
 PATTERNS = {"range-band", "dumbbell", "small-multiples-expected", "brushed-range", "partial-period", "freshness-line",
-            "exception-list", "direct-labels"}                       # docs/patterns/; one renderer each in JS (P)
+            "exception-list", "direct-labels", "rail-panel", "panel"}                       # docs/patterns/; one renderer each in JS (P)
 VEGA_MODES = {"cdn": "cdn", "auto": "cdn", "offline": "offline", "subset": "offline"}   # auto, subset: older names
 VEGA_CDN = ["https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js",
             "https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js",
@@ -519,6 +519,10 @@ def spec_for(R, v, layout, member_of):
                                     "alpha": 1 - (trs.get(st, 0 if st == "selected" else 100)) / 100}
                                for st in ("default", "hover", "selected")},
                     "current": layout.get("pages", {}).get(v["page"], {}).get("displayName")}
+        bms = [b.get("displayName") or b.get("name") for b in layout.get("pages", {}).get(v["page"], {}).get("bookmarks", [])
+               if b.get("displayName") or b.get("name")]
+        if t == "bookmarkNavigator" and bms:                    # tabs over the page's bookmarks, the first one current
+            s["nav"].update(pages=bms, current=bms[0], bookmarks=True)
     if t in ("slicer", "advancedSlicerVisual", "listSlicer"):
         sel = v.get("selection") or {}
         vals = sel.get("values") if isinstance(sel.get("values"), list) else ([sel["value"]] if "value" in sel else [])
@@ -543,7 +547,10 @@ def spec_for(R, v, layout, member_of):
                        "color": R.colour(prop(v, "value.fontColor") or prop(v, "items.fontColor"), R.C.get("text", "#252423")),
                        "selColor": R.colour(prop(v, "value.fontColor", sel_id), "#FFFFFF"),
                        "radius": R.number(prop(v, "shapeCustomRectangle.rectangleRoundedCurve"), "container", 4),
-                       "items": v.get("items")}
+                       "items": v.get("items"),
+                       # rail + panel pickers (templates image-list / image-cards): a picture per member
+                       "picker": next((k for k in ("list", "cards")
+                                       if str(v.get("template", "")).endswith(f".image-{k}")), None)}
     if t == "cardVisual":
         rl = v.get("referenceLabels") or {}
         vs = R.theme_style(t, "value")
@@ -1276,7 +1283,18 @@ R.tableEx = (s, el, w, h) => tableGrid(s, el, w, h, false);
 R.pivotTable = matrixGrid;
 function members(s, n) { const d = D[s.id]; if (d) return d.rows.map(r => String(r[0])); const it = s.slicer.items;
   return Array.isArray(it) ? it.map(String) : Array.from({length: typeof it === 'number' ? it : (n || 4)}, (_, i) => 'Item ' + (i + 1)); }
+// rail + panel pickers: image list (a round picture and the name per row), image cards (a picture over the name)
+function pickerTiles(s, el, w, h) {
+  const sl = s.slicer, cards = sl.picker === 'cards', items = members(s, cards ? 6 : 8);
+  const sel = new Set(sl.selected.length ? sl.selected : [items[0]]);
+  const pic = (sz, r) => `<div style="flex:none;width:${sz};height:${sz};border-radius:${r};background:${tint}"></div>`;
+  const tile = x => { const on = sel.has(x), bd = on ? `1px solid ${C.selected || C.text || '#252423'}` : '1px solid transparent';
+    return cards ? `<div data-item="${esc(x)}" style="display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:${sl.radius}px;border:${bd};background:${hexA(sl.fill, sl.fillAlpha)}">${pic('100%', sl.radius + 'px').replace('height:100%', 'aspect-ratio:4/3')}<div style="font-size:${sl.size || 13}px;font-weight:${on ? 600 : sl.weight};color:${sl.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x)}</div></div>`
+      : `<div data-item="${esc(x)}" style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:${sl.radius}px;border:${bd};background:${hexA(sl.fill, sl.fillAlpha)}">${pic('32px', '50%')}<div style="font-size:${sl.size || 13}px;font-weight:${on ? 600 : sl.weight};color:${sl.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x)}</div></div>`; };
+  el.insertAdjacentHTML('beforeend', `<div style="flex:1;display:grid;gap:8px;align-content:start;grid-template-columns:repeat(${cards ? 2 : 1},1fr);overflow:hidden">` + items.map(tile).join('') + '</div>');
+}
 R.advancedSlicerVisual = (s, el, w, h) => {
+  if (s.slicer.picker) return pickerTiles(s, el, w, h);
   const sl = s.slicer, items = members(s, 4), cols = sl.cols || items.length, rows = sl.rows || Math.ceil(items.length / cols);
   const head = sl.headerShow ? `<div style="font-size:12px;font-weight:600;color:${muted};margin-bottom:4px">${esc(sl.header)}</div>` : '';
   const sel = new Set(sl.selected.length ? sl.selected : []);
@@ -1302,7 +1320,7 @@ R.pageNavigator = (s, el, w, h) => {
   el.insertAdjacentHTML('beforeend', n.pages.map(p => { const st = n.states[p === n.current ? 'selected' : 'default'];
     const fill = st.alpha > 0 ? n.fill : 'transparent';
     return `<div data-goto="${esc(p)}" style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:${n.radius}px;background:${fill};opacity:1;color:${st.color};font-size:${n.size}px;border:${p === n.current ? '1px solid ' + n.outline : '0'};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p)}</div>`; }).join(''));
-  el.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => show(S.pages.findIndex(p => p.name === b.dataset.goto)));
+  if (!n.bookmarks) el.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => show(S.pages.findIndex(p => p.name === b.dataset.goto)));
 };
 R.bookmarkNavigator = R.pageNavigator;
 R.actionButton = (s, el, w, h) => {
@@ -1414,6 +1432,12 @@ P['partial-period'] = (s, el, w, h) => {
   add(g, 'text', {x: X(n - 1) + 10, y: Y(v[n - 1]) + 4, 'font-size': 11, fill: muted}, 'partial');
   if (!d.sample) cats.forEach((c, i) => { if (i % Math.ceil(n / 12) === 0) add(g, 'text', {x: X(i), y: h - 6, 'font-size': 10, fill: muted, 'text-anchor': 'middle'}, String(c).slice(0, 8)); });
 };
+// rail + panel (docs/patterns/rail-panel.md, panel.md): the rail at the page edge with a rule on its inner edge;
+// the shared panel with the container radius and one soft shadow
+P['rail-panel'] = (s, el, w, h) => { if (!R[s.type] || !s.shape) return (R[s.type] || R._unknown)(s, el, w, h);
+  R.shape(s, el); el.style.borderRadius = '0'; el.style.borderRight = `1px solid ${C.border || '#E4E7EC'}`; };
+P['panel'] = (s, el, w, h) => { if (!R[s.type] || !s.shape) return (R[s.type] || R._unknown)(s, el, w, h);
+  R.shape(s, el); el.style.boxShadow = '0 1px 2px rgba(0,0,0,.05), 0 8px 20px rgba(0,0,0,.07)'; };
 P['freshness-line'] = (s, el, w, h) => {
   if (s.type === 'cardVisual' || s.type === 'card') { const d = D[s.id], row = d && d.rows[0];
     const text = row ? String(row[d.groups.length]) : 'Data to dd mmm yyyy';

@@ -1,8 +1,11 @@
 """KPI card rule (batch 3 item 10, docs/lessons/cards.md C-10).
 
 The KPI card visual is its own container: background, radius, border and shadow on its own container formatting,
-no separate shape behind it (unless the shape matches the card within 1px). Cards in a row have equal width, height
-and gaps, span the content width and line up with the row below. `check` is the pbik validate part (warnings);
+no separate shape behind it (unless the shape matches the card within 1px). Or (pattern `panel`, study 2026-11-15)
+it sits on a shared panel: a shape named or patterned "panel" that holds it, with no background of its own, and the
+panel's cards keep the same inset on the left, right and top. Cards in a row have equal width, height and gaps, span
+the content width (on a panel: the same inset left and right) and line up with the row below. `check` is the pbik
+validate part (warnings);
 `empty_space` is the polish-loop screenshot part (scripts call it on a PNG of a synthetic or sample-data page).
 """
 import re, struct, zlib
@@ -17,6 +20,13 @@ def is_kpi(folder, d, layout_entry=None):
     if layout_entry and (layout_entry.get("kpi") or "kpi" in str(layout_entry.get("template", "")).lower()):
         return True
     return "kpi" in folder.lower()
+
+
+def is_panel(folder, layout_entry=None):
+    """A shared panel shape (pattern `panel`): layout.json `pattern: "panel"`, or a folder name with "panel"."""
+    if layout_entry and layout_entry.get("pattern") is not None:
+        return layout_entry.get("pattern") == "panel"
+    return "panel" in folder.split("_", 1)[-1].lower()
 
 
 def box(d):
@@ -63,26 +73,54 @@ def check_page(page, visuals, page_w, margin=32, layout=None):
         vid = folder.split("_", 1)[0]
         items.append({"folder": folder, "d": d, "box": box(d), "type": (d.get("visual") or {}).get("visualType"),
                       "kpi": is_kpi(folder, d, lay.get(vid))})
+    for s in items:
+        s["panel"] = s["type"] in SHAPES and is_panel(s["folder"], lay.get(s["folder"].split("_", 1)[0]))
     cards = [x for x in items if x["kpi"]]
+    on_panel = {}
     for c in cards:
         x, y, w, h, z = c["box"]
+        c["on"] = None
         for s in items:
             if s["type"] not in SHAPES:
                 continue
             sx, sy, sw, sh, sz = s["box"]
             behind = sz <= z and sx <= x + TOL and sy <= y + TOL and sx + sw >= x + w - TOL and sy + sh >= y + h - TOL
-            if behind and not all(near(a, b) for a, b in zip((sx, sy, sw, sh), (x, y, w, h))):
-                out.append(f"{page}/{c['folder']}: shape {s['folder']} sits behind the KPI card; the card is the "
-                           "container (its own background, radius, border, shadow): remove the shape, or match the "
-                           "card within 1px (C-10)")
-        if not own_container(c["d"]):
+            if not behind or all(near(a, b) for a, b in zip((sx, sy, sw, sh), (x, y, w, h))):
+                continue
+            if s["panel"]:
+                c["on"] = s
+                on_panel.setdefault(s["folder"], (s, []))[1].append(c)
+                continue
+            out.append(f"{page}/{c['folder']}: shape {s['folder']} sits behind the KPI card; the card is the "
+                       "container (its own background, radius, border, shadow): remove the shape, match the card "
+                       "within 1px, or make the shape a shared panel (pattern panel) (C-10)")
+        if c["on"]:
+            if own_container(c["d"]):
+                out.append(f"{page}/{c['folder']}: KPI card on panel {c['on']['folder']} draws its own background; "
+                           "on a shared panel the card has no background of its own (C-10 panel)")
+        elif not own_container(c["d"]):
             out.append(f"{page}/{c['folder']}: KPI card has its container background off; put background, radius, "
-                       "border and shadow on the card itself (C-10)")
+                       "border and shadow on the card itself, or place it on a shared panel (C-10)")
+    for pf, (s, pcards) in on_panel.items():
+        sx, sy, sw, sh, _ = s["box"]
+        ins = {"left": min(c["box"][0] for c in pcards) - sx,
+               "right": sx + sw - max(c["box"][0] + c["box"][2] for c in pcards),
+               "top": min(c["box"][1] for c in pcards) - sy}
+        if max(ins.values()) - min(ins.values()) > TOL:
+            out.append(f"{page}/{pf}: cards on this panel sit at different insets "
+                       f"({', '.join(f'{k} {v:g}' for k, v in ins.items())}); keep one padding on every side (C-10 panel)")
     content_l, content_r = margin, page_w - margin
     for row in rows_of(cards):
         if len(row) < 2:
             continue
         name = f"{page}: KPI row at y {row[0]['box'][1]:g}"
+        panel = row[0].get("on")
+        if panel and all(c.get("on") is panel for c in row):
+            sx, _, sw, _, _ = panel["box"]
+            gl = row[0]["box"][0] - sx                      # the same inset on the right (padding consistency)
+            content_l, content_r = sx + gl, sx + sw - gl
+        else:
+            content_l, content_r = margin, page_w - margin
         ws = [c["box"][2] for c in row]
         hs = [c["box"][3] for c in row]
         gaps = [row[k + 1]["box"][0] - (row[k]["box"][0] + row[k]["box"][2]) for k in range(len(row) - 1)]

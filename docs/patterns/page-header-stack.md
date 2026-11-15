@@ -17,6 +17,9 @@
 
 ## Build (visual-method ladder)
 - 1 native: text boxes, a shape for the rule, a page navigator for the tabs.
+- Or the title as a new card bound to one measure (label = eyebrow, value = title), so it follows the selection:
+  templates `cardVisual.header-title` and `shape.rule` (clean harvest, rail + panel study 2026-11-15; confirm in
+  Desktop). Mute the eyebrow with `textMuted`, never with transparency (A-02).
 - Template `textbox.page-header-stack`: **needs a Desktop-saved sample.** Make it on the Patterns page in Desktop,
   save, and run
   `pbik templates harvest`; until then build from the plain type's template and the layout's own keys.

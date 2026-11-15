@@ -68,6 +68,41 @@ class KpiCardTests(unittest.TestCase):
         self.assertEqual(KC.check_page("Overview", [card("P1-V01_total", 32, 32, 900, 150, bg=False)], 1920), [],
                          "not a KPI card")
 
+    def test_cards_on_a_shared_panel(self):
+        """Study 2026-11-15: a card is its own container, OR sits on a shared panel with consistent padding and no
+        background of its own."""
+        def panel_row(bg=False, inset=24):
+            w = (1200 - 2 * inset - 2 * 24) / 3
+            return [card(f"P1-V0{k + 2}_kpi-{k}", 680 + inset + k * (w + 24), 176 + inset, w, 150, bg=bg)
+                    for k in range(3)]
+        panel = other("P1-V01_panel", "shape", 680, 176, 1200, 800)
+        self.assertEqual(KC.check_page("Overview", [panel] + panel_row(), 1920), [], "cards on a panel pass")
+        w = KC.check_page("Overview", [panel] + panel_row(bg=True), 1920)
+        self.assertTrue(any("draws its own background" in x for x in w), w)
+        uneven = panel_row()
+        for c in uneven:
+            c[1]["position"]["y"] += 16                                 # top inset 40, sides 24
+        w = KC.check_page("Overview", [panel] + uneven, 1920)
+        self.assertTrue(any("different insets" in x for x in w), w)
+        layout = {"visuals": [{"id": "P1-V01", "pattern": "panel"}]}
+        named = other("P1-V01_surface", "shape", 680, 176, 1200, 800)
+        self.assertEqual(KC.check_page("Overview", [named] + panel_row(), 1920, layout=layout), [],
+                         "layout pattern panel marks the shape")
+        w = KC.check_page("Overview", [named] + panel_row(), 1920)
+        self.assertTrue(any("sits behind the KPI card" in x for x in w), "an unmarked shape is still flagged")
+
+    def test_rail_may_touch_the_page_edge(self):
+        """Study 2026-11-15: a rail touches one page edge with its inner edge on the grid; the rest stays on it."""
+        from pbikit import score as SC
+        col = (1920 - 64 - 11 * 24) / 12
+        rail_r = 32 + 3 * (col + 24) + col                          # right edge of column 4
+        lay = {"visuals": [
+            {"id": "P1-V01", "type": "shape", "x": 0, "y": 0, "w": round(rail_r, 2), "h": 1080, "pattern": "rail-panel"},
+            {"id": "P1-V02", "type": "shape", "x": 0, "y": 0, "w": 1920, "h": 96},
+            {"id": "P1-V03", "type": "shape", "x": 0, "y": 0, "w": 610, "h": 1080},
+            {"id": "P1-V04", "type": "cardVisual", "x": 37, "y": 200, "w": 300, "h": 160}]}
+        self.assertEqual(SC.check_grid(lay), ["P1-V03", "P1-V04"])
+
     def test_background_shapes_keep_layer_order(self):
         panel = other("P1-V09_panel", "shape", 16, 16, 1888, 300, z=0)
         vis = kpi_row() + [panel]

@@ -15,6 +15,24 @@
     "P2": {
       "displayName": "Deneb",
       "background": "background"
+    },
+    "P3": {
+      "displayName": "Rail + panel",
+      "background": "background",
+      "bookmarks": [
+        {
+          "name": "trend",
+          "displayName": "Trend",
+          "show": [],
+          "hide": []
+        },
+        {
+          "name": "breakdown",
+          "displayName": "Breakdown",
+          "show": [],
+          "hide": []
+        }
+      ]
     }
   },
   "retired": [],
@@ -591,6 +609,144 @@
         "step": 3,
         "nativeTried": "Between slicer",
         "reason": "Brush directly on the chart"
+      }
+    },
+    {
+      "id": "P3-V01",
+      "name": "rail",
+      "page": "P3",
+      "type": "shape",
+      "pattern": "rail-panel",
+      "decorative": true,
+      "x": 0,
+      "y": 0,
+      "w": 635,
+      "h": 1080,
+      "z": 0,
+      "style": {
+        "fill": "card"
+      },
+      "container": {
+        "keepLayerOrder": true
+      }
+    },
+    {
+      "id": "P3-V02",
+      "name": "tabs",
+      "page": "P3",
+      "type": "bookmarkNavigator",
+      "template": "bookmarkNavigator.tabs-underline",
+      "pattern": "tabs-underline",
+      "x": 1288,
+      "y": 32,
+      "w": 600,
+      "h": 56,
+      "z": 2
+    },
+    {
+      "id": "P3-V03",
+      "name": "picker",
+      "page": "P3",
+      "type": "advancedSlicerVisual",
+      "template": "advancedSlicerVisual.image-list",
+      "x": 32,
+      "y": 112,
+      "w": 288,
+      "h": 936,
+      "z": 2,
+      "bindings": {
+        "Values": [
+          "Member[Name]"
+        ]
+      },
+      "items": [
+        "Member A",
+        "Member B",
+        "Member C",
+        "Member D",
+        "Member E"
+      ],
+      "selection": {
+        "field": "Member[Name]",
+        "values": [
+          "Member A"
+        ]
+      }
+    },
+    {
+      "id": "P3-V04",
+      "name": "sub-picker",
+      "page": "P3",
+      "type": "advancedSlicerVisual",
+      "template": "advancedSlicerVisual.image-cards",
+      "x": 344,
+      "y": 112,
+      "w": 291,
+      "h": 936,
+      "z": 2,
+      "bindings": {
+        "Values": [
+          "Detail[Name]"
+        ]
+      }
+    },
+    {
+      "id": "P3-V05",
+      "name": "panel",
+      "page": "P3",
+      "type": "shape",
+      "pattern": "panel",
+      "decorative": true,
+      "x": 659,
+      "y": 112,
+      "w": 1229,
+      "h": 936,
+      "z": 0,
+      "style": {
+        "fill": "card"
+      },
+      "container": {
+        "keepLayerOrder": true
+      }
+    },
+    {
+      "id": "P3-V06",
+      "name": "kpi-1",
+      "page": "P3",
+      "type": "cardVisual",
+      "x": 659,
+      "y": 112,
+      "w": 600,
+      "h": 144,
+      "z": 2,
+      "bindings": {
+        "Data": [
+          "[KPI 1]"
+        ]
+      },
+      "container": {
+        "background": false,
+        "altText": "KPI 1 for the selected member"
+      }
+    },
+    {
+      "id": "P3-V07",
+      "name": "kpi-2",
+      "page": "P3",
+      "type": "cardVisual",
+      "x": 1288,
+      "y": 112,
+      "w": 600,
+      "h": 144,
+      "z": 2,
+      "bindings": {
+        "Data": [
+          "[KPI 2]"
+        ]
+      },
+      "container": {
+        "background": false,
+        "altText": "KPI 2 for the selected member"
       }
     }
   ]

@@ -457,8 +457,21 @@ class PatternTests(unittest.TestCase):
         for name in G.PATTERNS:
             self.assertIn(f"P['{name}'] = ", out, name)
             self.assertTrue((KIT / "docs" / "patterns" / f"{name}.md").exists(), name)
-        self.assertEqual({s["pattern"] for s in spec["visuals"]}, G.PATTERNS)
+        self.assertEqual({s["pattern"] for s in spec["visuals"]} - {None}, G.PATTERNS)  # P3: pickers, cards too
         self.assertIn("pattern: ${esc(s.pattern)}", out)
+
+    def test_rail_panel_pickers_and_bookmark_tabs(self):
+        """Rail + panel study M-2: the rail and the panel draw by their patterns, the image-list and image-cards
+        pickers draw picture tiles (the saved selection marked), and a bookmark navigator's tabs are the page's
+        bookmarks, the first one current."""
+        out, spec = self.gallery()
+        by = {s["id"]: s for s in spec["visuals"]}
+        self.assertEqual((by["P3-V01"]["pattern"], by["P3-V05"]["pattern"]), ("rail-panel", "panel"))
+        self.assertEqual((by["P3-V03"]["slicer"]["picker"], by["P3-V04"]["slicer"]["picker"]), ("list", "cards"))
+        self.assertEqual(by["P3-V03"]["slicer"]["selected"], ["Member A"])
+        self.assertIsNone(by["P1-V05"]["slicer"]["picker"], "a plain slicer keeps its own renderer")
+        self.assertEqual((by["P3-V02"]["nav"]["pages"], by["P3-V02"]["nav"]["current"]), (["Trend", "Breakdown"], "Trend"))
+        self.assertIn("if (s.slicer.picker) return pickerTiles(s, el, w, h);", out)
 
     def test_unknown_pattern_falls_back_to_the_type(self):
         lay = {"pages": {"P1": {}}, "visuals": [{"id": "P1-V01", "page": "P1", "type": "lineChart", "pattern": "nope"}]}

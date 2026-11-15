@@ -39,6 +39,16 @@
       "visualType": "advancedSlicerVisual",
       "source": "P4-V27_button-slicer-single"
     },
+    "advancedSlicerVisual.image-cards": {
+      "visualType": "advancedSlicerVisual",
+      "source": "rail-panel",
+      "clean": true
+    },
+    "advancedSlicerVisual.image-list": {
+      "visualType": "advancedSlicerVisual",
+      "source": "rail-panel",
+      "clean": true
+    },
     "barChart": {
       "visualType": "barChart",
       "source": "P4-V19_stacked-bar",
@@ -48,6 +58,11 @@
     "barChart.stacked-bar": {
       "visualType": "barChart",
       "source": "P4-V19_stacked-bar"
+    },
+    "bookmarkNavigator.tabs-underline": {
+      "visualType": "bookmarkNavigator",
+      "source": "rail-panel",
+      "clean": true
     },
     "cardVisual": {
       "visualType": "cardVisual",
@@ -63,19 +78,35 @@
       "visualType": "cardVisual",
       "source": "P4-V07_card-reference-labels"
     },
+    "cardVisual.header-title": {
+      "visualType": "cardVisual",
+      "source": "rail-panel",
+      "clean": true
+    },
     "cardVisual.kpi-delta-card": {
       "visualType": "cardVisual",
       "source": "written by hand (batch 3 item 10)"
+    },
+    "cardVisual.kpi-row-chips": {
+      "visualType": "cardVisual",
+      "source": "rail-panel",
+      "clean": true
     },
     "cardVisual.pill-label": {
       "visualType": "cardVisual",
       "source": "P4-V06_pill-label"
     },
+    "cardVisual.profile-card": {
+      "visualType": "cardVisual",
+      "source": "rail-panel",
+      "clean": true
+    },
     "cardVisual.two-kpi-card": {
       "visualType": "cardVisual",
-      "source": null,
-      "status": "needs a Desktop-saved sample",
-      "pattern": "two-kpi-card"
+      "source": "rail-panel",
+      "status": "clean harvest (rail-panel): confirm in Desktop",
+      "pattern": "two-kpi-card",
+      "clean": true
     },
     "clusteredBarChart": {
       "visualType": "clusteredBarChart",
@@ -147,6 +178,11 @@
       "visualType": "image",
       "source": "P4-V26_image"
     },
+    "image.titled": {
+      "visualType": "image",
+      "source": "rail-panel",
+      "clean": true
+    },
     "lineChart": {
       "visualType": "lineChart",
       "source": "P4-V13_line",
@@ -193,6 +229,11 @@
       "visualType": "pivotTable",
       "source": "P4-V18_matrix"
     },
+    "scatterChart.on-image": {
+      "visualType": "scatterChart",
+      "source": "rail-panel",
+      "clean": true
+    },
     "shape": {
       "visualType": "shape",
       "source": "P4-V01_shape-band",
@@ -208,6 +249,16 @@
       "source": null,
       "status": "needs a Desktop-saved sample",
       "pattern": "headline-banner"
+    },
+    "shape.panel": {
+      "visualType": "shape",
+      "source": "rail-panel",
+      "clean": true
+    },
+    "shape.rule": {
+      "visualType": "shape",
+      "source": "rail-panel",
+      "clean": true
     },
     "shape.shape-band": {
       "visualType": "shape",

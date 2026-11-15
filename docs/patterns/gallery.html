@@ -31,9 +31,12 @@ html, body { margin: 0; background: #2b3138; font-family: 'Segoe UI', 'Segoe UI'
 .ptn { position: absolute; bottom: 2px; left: 2px; z-index: 40; font: 600 10px/1 'Segoe UI'; padding: 3px 7px; border-radius: 10px; color: #3b4a5a; background: #e3e8ef; }
 body.notag .ptn { display: none; }
 .vlnote { position: absolute; left: 4px; bottom: 3px; font-size: 10px; color: #8a5b00; }
-body.nobadge .badge, body.notag .tag { display: none; }
+body.nobadge .badge, body.notag .tag, body.notag .nodata, body.notag .hiddenrows, body.notag .vlnote { display: none; }
+body.shot #bar, body.shot #nodata-banner { display: none; }
+#nodata-banner { position: sticky; top: 0; z-index: 49; background: #C62828; color: #fff; font-weight: 600; font-size: 14px; padding: 8px 16px; text-align: center; }
+body.shot #stage { padding: 0; }
 .nodata { position: absolute; right: 4px; bottom: 3px; font-size: 10px; color: #8a96a3; }
-.hiddenrows { position: absolute; left: 4px; bottom: 3px; font-size: 10px; color: #8a96a3; }
+.hiddenrows { position: absolute; right: 4px; bottom: 3px; z-index: 40; font-size: 10px; color: #6b7682; background: rgba(255,255,255,.85); padding: 1px 4px; border-radius: 4px; }
 svg { display: block; overflow: visible; }
 svg text { font-family: 'Segoe UI', sans-serif; }
 table.grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -42,10 +45,11 @@ table.grid th:first-child, table.grid td:first-child, table.grid .l { text-align
 .placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px dashed #b0b8c2; background: repeating-linear-gradient(45deg, rgba(0,0,0,.025) 0 8px, transparent 8px 16px); color: #6b7682; font-size: 13px; }
 </style></head>
 <body>
-<div id="bar"><span id="tabs"></span><button id="labels" class="on" type="button" aria-pressed="true" title="Show or hide every visual ID badge and visual-type tag">Labels</button><span class="hint">B ID badges · T visual tags · 1–9 pages · no data: sample shapes</span></div>
-<div id="stage"><div class="page" data-page="P1"><div class="v" data-id="P1-V01"></div><div class="v" data-id="P1-V02"></div><div class="v" data-id="P1-V03"></div><div class="v" data-id="P1-V04"></div><div class="v" data-id="P1-V05"></div><div class="v" data-id="P1-V06"></div><div class="v" data-id="P1-V07"></div><div class="v" data-id="P1-V08"></div><div class="v" data-id="P1-V09"></div><div class="v" data-id="P1-V10"></div></div><div class="page" data-page="P2"><div class="v" data-id="P2-V01"></div><div class="v" data-id="P2-V02"></div><div class="v" data-id="P2-V03"></div></div></div>
-
-<script type="application/json" id="spec">{"pages": [{"key": "P1", "name": "Patterns", "bg": "#EEF1F6", "w": 1920, "h": 1080}, {"key": "P2", "name": "Deneb", "bg": "#EEF1F6", "w": 1920, "h": 1080}], "visuals": [{"id": "P1-V01", "name": "freshness", "type": "cardVisual", "page": "P1", "x": 1306, "y": 24, "w": 582, "h": 40, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Data", "label": "Freshness", "field": "[Freshness]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Card (new)", "method": "native", "known": true, "pattern": "freshness-line", "card": {"valueSize": 36.0, "valueColor": "#1D2733", "align": "center", "label": true, "labelPos": "belowValue", "labelColor": "#5A6577", "tile": null, "accent": null, "radius": 0, "refs": [], "refSize": 13.3, "refColor": "#5A6577", "image": false, "pad": [8, 16, 8, 16]}}, {"id": "P1-V02", "name": "range-band", "type": "lineChart", "page": "P1", "x": 32, "y": 80, "w": 600, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Range band with current-period dots", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]"}, {"role": "Y", "label": "Band Low", "field": "[Band Low]"}, {"role": "Y", "label": "Band High", "field": "[Band High]"}, {"role": "Y", "label": "Value", "field": "[Value]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Line chart", "method": "native", "known": true, "pattern": "range-band"}, {"id": "P1-V03", "name": "dumbbell", "type": "tableEx", "page": "P1", "x": 660, "y": 80, "w": 600, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Dumbbell rows with change labels", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Values", "label": "Region", "field": "Region[Region]"}, {"role": "Values", "label": "Dumbbell SVG", "field": "[Dumbbell SVG]"}, {"role": "Values", "label": "Change label", "field": "[Change label]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "SVG in Table", "method": "svg-measure", "known": true, "pattern": "dumbbell", "widths": null}, {"id": "P1-V04", "name": "small-multiples", "type": "lineChart", "page": "P1", "x": 1288, "y": 80, "w": 600, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Small multiples against an expected line", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]"}, {"role": "Y", "label": "Actual", "field": "[Actual]"}, {"role": "Y", "label": "Expected", "field": "[Expected]"}, {"role": "Rows", "label": "Region", "field": "Region[Region]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Line chart", "method": "native", "known": true, "pattern": "small-multiples-expected"}, {"id": "P1-V05", "name": "date-range", "type": "slicer", "page": "P1", "x": 32, "y": 412, "w": 600, "h": 60, "z": 1, "hidden": false, "group": null, "box": {"bg": "#FFFFFF", "border": "#DCE2EA", "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Values", "label": "Date", "field": "'Date'[Date]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "mode": "between", "tag": "Slicer (between)", "method": "native", "known": true, "pattern": "brushed-range", "slicer": {"selected": [], "header": "Date", "headerShow": true, "rows": null, "cols": null, "single": false, "fill": "#FFFFFF", "selFill": "#12343B", "outline": "#DCE2EA", "color": "#1D2733", "selColor": "#FFFFFF", "radius": 4, "items": null}}, {"id": "P1-V06", "name": "overview", "type": "lineChart", "page": "P1", "x": 32, "y": 472, "w": 600, "h": 220, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Brushed range selection", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Date", "field": "'Date'[Date]"}, {"role": "Y", "label": "Value", "field": "[Value]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Line chart", "method": "native", "known": true, "pattern": "brushed-range"}, {"id": "P1-V07", "name": "partial", "type": "lineChart", "page": "P1", "x": 660, "y": 412, "w": 600, "h": 280, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Partial-period marker", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]"}, {"role": "Y", "label": "Value complete", "field": "[Value complete]"}, {"role": "Y", "label": "Value partial", "field": "[Value partial]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Line chart", "method": "native", "known": true, "pattern": "partial-period"}, {"id": "P1-V08", "name": "exceptions", "type": "tableEx", "page": "P1", "x": 1288, "y": 412, "w": 600, "h": 280, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Exception list", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Values", "label": "Store", "field": "Store[Store]"}, {"role": "Values", "label": "Gap (exc)", "field": "[Gap (exc)]"}, {"role": "Values", "label": "Value (exc)", "field": "[Value (exc)]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Table", "method": "native", "known": true, "pattern": "exception-list", "widths": null}, {"id": "P1-V09", "name": "direct-labels", "type": "lineChart", "page": "P1", "x": 32, "y": 724, "w": 900, "h": 324, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Direct labels instead of a legend", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]"}, {"role": "Y", "label": "Online", "field": "[Online]"}, {"role": "Y", "label": "Stores", "field": "[Stores]"}, {"role": "Y", "label": "Wholesale", "field": "[Wholesale]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": false, "aboveLabels": false, "refStyle": [], "tag": "Line chart", "method": "native", "known": true, "pattern": "direct-labels"}, {"id": "P1-V10", "name": "freshness-chart", "type": "clusteredColumnChart", "page": "P1", "x": 960, "y": 724, "w": 928, "h": 324, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Data freshness line on a time chart", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]"}, {"role": "Y", "label": "Value", "field": "[Value]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Clustered column chart", "method": "native", "known": true, "pattern": "freshness-line"}, {"id": "P2-V01", "name": "deneb-range", "type": "deneb", "page": "P2", "x": 32, "y": 80, "w": 900, "h": 420, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Deneb: range per region with the current value", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "dataset", "label": "Region", "field": "Region[Region]"}, {"role": "dataset", "label": "Band Low", "field": "[Band Low]"}, {"role": "dataset", "label": "Band High", "field": "[Band High]"}, {"role": "dataset", "label": "Value", "field": "[Value]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Deneb", "method": "deneb", "known": true, "pattern": "range-band", "deneb": {"spec": {"data": {"name": "dataset"}, "encoding": {"y": {"field": "Region", "type": "nominal", "axis": {"title": null}}}, "layer": [{"mark": {"type": "rule", "strokeWidth": 10, "color": {"expr": "pbiColor(5)"}}, "encoding": {"x": {"field": "Band Low", "type": "quantitative"}, "x2": {"field": "Band High"}}}, {"mark": {"type": "point", "filled": true, "size": 90, "color": {"expr": "pbiColor(0)"}}, "encoding": {"x": {"field": "Value", "type": "quantitative"}}}]}, "provider": "vegaLite"}}, {"id": "P2-V02", "name": "deneb-partial", "type": "deneb", "page": "P2", "x": 960, "y": 80, "w": 928, "h": 420, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Deneb: hollow points and a brush", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "dataset", "label": "Month", "field": "'Date'[Month]"}, {"role": "dataset", "label": "Value", "field": "[Value]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Deneb", "method": "deneb", "known": true, "pattern": "partial-period", "deneb": {"spec": {"data": {"name": "dataset"}, "encoding": {"x": {"field": "Month", "type": "ordinal"}, "y": {"field": "Value", "type": "quantitative"}}, "params": [{"name": "brush", "select": {"type": "interval", "encodings": ["x"]}}], "layer": [{"mark": {"type": "line", "color": {"expr": "pbiColor(0)"}}}, {"mark": {"type": "point", "filled": false, "size": 80, "color": {"expr": "pbiColor(0)"}}}]}, "provider": "vegaLite"}}, {"id": "P2-V03", "name": "deneb-brush", "type": "deneb", "page": "P2", "x": 32, "y": 532, "w": 1856, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Deneb: drag on the chart to pick a range", "measure": false, "size": 17.3, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "dataset", "label": "Date", "field": "'Date'[Date]"}, {"role": "dataset", "label": "Value", "field": "[Value]"}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Deneb", "method": "deneb", "known": true, "pattern": "brushed-range", "deneb": {"spec": {"data": {"name": "dataset"}, "params": [{"name": "brush", "select": {"type": "interval", "encodings": ["x"]}}], "mark": {"type": "line", "color": {"expr": "pbiColor(0)"}}, "encoding": {"x": {"field": "Date", "type": "temporal", "title": null}, "y": {"field": "Value", "type": "quantitative", "title": null}}}, "provider": "vegaLite"}}], "dataColors": ["#038D96", "#A84545", "#5D6B8A", "#12343B", "#8CCFD3", "#B8C2D6"], "vega": "subset", "tokens": {"colors": {"_note": "Neutral default (from Rep 5): slate-teal primary, teal for the current period and improvements, red for declines, slate as the neutral accent. All text pairs are 4.5:1 or better on card and background; teal and slate/slateLight are for marks only. primary/accent/warning/good/bad/card/border/background/text/textMuted are the names gen_theme.py reads. /plan replaces this palette per rep.", "primary": "#12343B", "teal": "#038D96", "tealDark": "#026E75", "selected": "#037C84", "tealLight": "#8CCFD3", "tealMid": "#4DB0B7", "tealTint": "#E7F3F5", "red": "#A84545", "redLight": "#E3A6A6", "redTint": "#F6EDED", "slate": "#5D6B8A", "slateLight": "#B8C2D6", "slateTint": "#EDF0F6", "good": "#026E75", "goodTint": "#E7F3F5", "bad": "#A84545", "badTint": "#F6EDED", "accent": "#A84545", "warning": "#5D6B8A", "neutral": "#5A6577", "neutralTint": "#EEF1F6", "background": "#EEF1F6", "card": "#FFFFFF", "border": "#DCE2EA", "text": "#1D2733", "textMuted": "#5A6577", "onDarkMuted": "#B9D9DC", "onDark": "#FFFFFF", "html": "#7A4FA0", "htmlTint": "#F2ECF8"}, "font": {"_note": "px, for the HTML wireframe.", "family": "Segoe UI", "title": 30, "cardTitle": 17, "label": 13, "body": 14, "kpi": 36, "caption": 12, "hero": 40}}}</script>
+<div id="bar"><span id="tabs"></span><button id="labels" class="on" type="button" aria-pressed="true" title="Show or hide every visual ID badge, visual-type tag and wireframe note">Labels</button><span class="hint">B ID badges · T visual tags · 1–9 pages · no data: sample shapes</span></div>
+<div id="nodata-banner" role="alert">No data – placeholder values</div>
+<div id="stage"><div class="page" data-page="P1"><div class="v" data-id="P1-V01"></div><div class="v" data-id="P1-V02"></div><div class="v" data-id="P1-V03"></div><div class="v" data-id="P1-V04"></div><div class="v" data-id="P1-V05"></div><div class="v" data-id="P1-V06"></div><div class="v" data-id="P1-V07"></div><div class="v" data-id="P1-V08"></div><div class="v" data-id="P1-V09"></div><div class="v" data-id="P1-V10"></div></div><div class="page" data-page="P2"><div class="v" data-id="P2-V01"></div><div class="v" data-id="P2-V02"></div><div class="v" data-id="P2-V03"></div></div><div class="page" data-page="P3"><div class="v" data-id="P3-V01"></div><div class="v" data-id="P3-V02"></div><div class="v" data-id="P3-V03"></div><div class="v" data-id="P3-V04"></div><div class="v" data-id="P3-V05"></div><div class="v" data-id="P3-V06"></div><div class="v" data-id="P3-V07"></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
+<script type="application/json" id="spec">{"pages": [{"key": "P1", "name": "Patterns", "bg": "#EEF1F6", "w": 1920, "h": 1080, "walls": []}, {"key": "P2", "name": "Deneb", "bg": "#EEF1F6", "w": 1920, "h": 1080, "walls": []}, {"key": "P3", "name": "Rail + panel", "bg": "#EEF1F6", "w": 1920, "h": 1080, "walls": []}], "visuals": [{"id": "P1-V01", "name": "freshness", "type": "cardVisual", "page": "P1", "x": 1306, "y": 24, "w": 582, "h": 40, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Data", "label": "Freshness", "field": "[Freshness]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Card (new)", "method": "native", "known": true, "pattern": "freshness-line", "card": {"valueSize": 36.0, "valueColor": "#1D2733", "value": true, "precision": null, "align": "center", "labelAlign": "center", "valign": "middle", "family": "Segoe UI", "weight": 600, "labelFamily": "Segoe UI", "labelWeight": 400, "labelSize": 13.3, "wrap": false, "units": null, "cols": null, "label": true, "labelPos": "belowValue", "labelColor": "#5A6577", "tile": null, "accent": null, "radius": 0, "refs": [], "refSize": 13.3, "refColor": "#5A6577", "image": false, "pad": [8, 16, 8, 16]}}, {"id": "P1-V02", "name": "range-band", "type": "lineChart", "page": "P1", "x": 32, "y": 80, "w": 600, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Range band with current-period dots", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]", "measure": false}, {"role": "Y", "label": "Band Low", "field": "[Band Low]", "measure": true}, {"role": "Y", "label": "Band High", "field": "[Band High]", "measure": true}, {"role": "Y", "label": "Value", "field": "[Value]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "chart": {"labels": {"show": false, "showBy": {}, "color": "#1D2733", "colorBy": {}, "font": {"family": "Segoe UI", "weight": 400}, "size": 12.0, "position": null, "precision": null, "units": null}, "totals": {"show": false, "color": "#1D2733", "font": {"family": "Segoe UI", "weight": 600}}, "cat": {"color": "#5A6577", "font": {"family": "Segoe UI", "weight": 400}, "size": 16.0, "type": null}, "val": {"color": "#5A6577", "units": null, "size": 16.0, "grid": false, "gridColor": "#DCE2EA", "start": null, "end": null, "secStart": null, "secEnd": null, "secShow": true}, "legend": {"position": "TopRight", "color": "#5A6577"}, "line": {"width": 3, "widthBy": {}, "marker": false}}, "tag": "Line chart", "method": "native", "known": true, "pattern": "range-band"}, {"id": "P1-V03", "name": "dumbbell", "type": "tableEx", "page": "P1", "x": 660, "y": 80, "w": 600, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Dumbbell rows with change labels", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Values", "label": "Region", "field": "Region[Region]", "measure": false}, {"role": "Values", "label": "Dumbbell SVG", "field": "[Dumbbell SVG]", "measure": true}, {"role": "Values", "label": "Change label", "field": "[Change label]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "SVG in Table", "method": "svg-measure", "known": true, "pattern": "dumbbell", "widths": null, "grid": {"values": {"color": "#1D2733", "bg": null, "family": "Segoe UI", "weight": 400, "size": 14.7, "align": null}, "colHead": {"color": "#5A6577", "bg": "#FFFFFF", "family": "Segoe UI", "weight": 600, "size": 13.3, "align": "auto"}, "rowHead": {"color": "#1D2733", "bg": null, "family": "Segoe UI", "weight": 400, "size": 13.3, "align": null}, "h": 1, "hColor": "#DCE2EA", "v": 0, "vColor": "#EEF1F6", "rowPadding": 6}}, {"id": "P1-V04", "name": "small-multiples", "type": "lineChart", "page": "P1", "x": 1288, "y": 80, "w": 600, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Small multiples against an expected line", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]", "measure": false}, {"role": "Y", "label": "Actual", "field": "[Actual]", "measure": true}, {"role": "Y", "label": "Expected", "field": "[Expected]", "measure": true}, {"role": "Rows", "label": "Region", "field": "Region[Region]", "measure": false}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "chart": {"labels": {"show": false, "showBy": {}, "color": "#1D2733", "colorBy": {}, "font": {"family": "Segoe UI", "weight": 400}, "size": 12.0, "position": null, "precision": null, "units": null}, "totals": {"show": false, "color": "#1D2733", "font": {"family": "Segoe UI", "weight": 600}}, "cat": {"color": "#5A6577", "font": {"family": "Segoe UI", "weight": 400}, "size": 16.0, "type": null}, "val": {"color": "#5A6577", "units": null, "size": 16.0, "grid": false, "gridColor": "#DCE2EA", "start": null, "end": null, "secStart": null, "secEnd": null, "secShow": true}, "legend": {"position": "TopRight", "color": "#5A6577"}, "line": {"width": 3, "widthBy": {}, "marker": false}}, "tag": "Line chart", "method": "native", "known": true, "pattern": "small-multiples-expected"}, {"id": "P1-V05", "name": "date-range", "type": "slicer", "page": "P1", "x": 32, "y": 412, "w": 600, "h": 60, "z": 1, "hidden": false, "group": null, "box": {"bg": "#FFFFFF", "border": "#DCE2EA", "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Values", "label": "Date", "field": "'Date'[Date]", "measure": false}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "mode": "between", "tag": "Slicer (between)", "method": "native", "known": true, "pattern": "brushed-range", "slicer": {"selected": [], "header": "Date", "headerShow": true, "rows": null, "cols": null, "single": false, "fill": "#FFFFFF", "selFill": "#12343B", "outline": "#DCE2EA", "selOutline": null, "fillAlpha": 1.0, "family": "Segoe UI", "weight": 400, "size": 13.3, "color": "#1D2733", "selColor": "#FFFFFF", "radius": 4, "items": null, "picker": null}}, {"id": "P1-V06", "name": "overview", "type": "lineChart", "page": "P1", "x": 32, "y": 472, "w": 600, "h": 220, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Brushed range selection", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Date", "field": "'Date'[Date]", "measure": false}, {"role": "Y", "label": "Value", "field": "[Value]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "chart": {"labels": {"show": false, "showBy": {}, "color": "#1D2733", "colorBy": {}, "font": {"family": "Segoe UI", "weight": 400}, "size": 12.0, "position": null, "precision": null, "units": null}, "totals": {"show": false, "color": "#1D2733", "font": {"family": "Segoe UI", "weight": 600}}, "cat": {"color": "#5A6577", "font": {"family": "Segoe UI", "weight": 400}, "size": 16.0, "type": null}, "val": {"color": "#5A6577", "units": null, "size": 16.0, "grid": false, "gridColor": "#DCE2EA", "start": null, "end": null, "secStart": null, "secEnd": null, "secShow": true}, "legend": {"position": "TopRight", "color": "#5A6577"}, "line": {"width": 3, "widthBy": {}, "marker": false}}, "tag": "Line chart", "method": "native", "known": true, "pattern": "brushed-range"}, {"id": "P1-V07", "name": "partial", "type": "lineChart", "page": "P1", "x": 660, "y": 412, "w": 600, "h": 280, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Partial-period marker", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]", "measure": false}, {"role": "Y", "label": "Value complete", "field": "[Value complete]", "measure": true}, {"role": "Y", "label": "Value partial", "field": "[Value partial]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "chart": {"labels": {"show": false, "showBy": {}, "color": "#1D2733", "colorBy": {}, "font": {"family": "Segoe UI", "weight": 400}, "size": 12.0, "position": null, "precision": null, "units": null}, "totals": {"show": false, "color": "#1D2733", "font": {"family": "Segoe UI", "weight": 600}}, "cat": {"color": "#5A6577", "font": {"family": "Segoe UI", "weight": 400}, "size": 16.0, "type": null}, "val": {"color": "#5A6577", "units": null, "size": 16.0, "grid": false, "gridColor": "#DCE2EA", "start": null, "end": null, "secStart": null, "secEnd": null, "secShow": true}, "legend": {"position": "TopRight", "color": "#5A6577"}, "line": {"width": 3, "widthBy": {}, "marker": false}}, "tag": "Line chart", "method": "native", "known": true, "pattern": "partial-period"}, {"id": "P1-V08", "name": "exceptions", "type": "tableEx", "page": "P1", "x": 1288, "y": 412, "w": 600, "h": 280, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Exception list", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Values", "label": "Store", "field": "Store[Store]", "measure": false}, {"role": "Values", "label": "Gap (exc)", "field": "[Gap (exc)]", "measure": true}, {"role": "Values", "label": "Value (exc)", "field": "[Value (exc)]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Table", "method": "native", "known": true, "pattern": "exception-list", "widths": null, "grid": {"values": {"color": "#1D2733", "bg": null, "family": "Segoe UI", "weight": 400, "size": 14.7, "align": null}, "colHead": {"color": "#5A6577", "bg": "#FFFFFF", "family": "Segoe UI", "weight": 600, "size": 13.3, "align": "auto"}, "rowHead": {"color": "#1D2733", "bg": null, "family": "Segoe UI", "weight": 400, "size": 13.3, "align": null}, "h": 1, "hColor": "#DCE2EA", "v": 0, "vColor": "#EEF1F6", "rowPadding": 6}}, {"id": "P1-V09", "name": "direct-labels", "type": "lineChart", "page": "P1", "x": 32, "y": 724, "w": 900, "h": 324, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Direct labels instead of a legend", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]", "measure": false}, {"role": "Y", "label": "Online", "field": "[Online]", "measure": true}, {"role": "Y", "label": "Stores", "field": "[Stores]", "measure": true}, {"role": "Y", "label": "Wholesale", "field": "[Wholesale]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": false, "aboveLabels": false, "refStyle": [], "chart": {"labels": {"show": false, "showBy": {}, "color": "#1D2733", "colorBy": {}, "font": {"family": "Segoe UI", "weight": 400}, "size": 12.0, "position": null, "precision": null, "units": null}, "totals": {"show": false, "color": "#1D2733", "font": {"family": "Segoe UI", "weight": 600}}, "cat": {"color": "#5A6577", "font": {"family": "Segoe UI", "weight": 400}, "size": 16.0, "type": null}, "val": {"color": "#5A6577", "units": null, "size": 16.0, "grid": false, "gridColor": "#DCE2EA", "start": null, "end": null, "secStart": null, "secEnd": null, "secShow": true}, "legend": {"position": "TopRight", "color": "#5A6577"}, "line": {"width": 3, "widthBy": {}, "marker": false}}, "tag": "Line chart", "method": "native", "known": true, "pattern": "direct-labels"}, {"id": "P1-V10", "name": "freshness-chart", "type": "clusteredColumnChart", "page": "P1", "x": 960, "y": 724, "w": 928, "h": 324, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Data freshness line on a time chart", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "Category", "label": "Month", "field": "'Date'[Month]", "measure": false}, {"role": "Y", "label": "Value", "field": "[Value]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "chart": {"labels": {"show": false, "showBy": {}, "color": "#1D2733", "colorBy": {}, "font": {"family": "Segoe UI", "weight": 400}, "size": 12.0, "position": null, "precision": null, "units": null}, "totals": {"show": false, "color": "#1D2733", "font": {"family": "Segoe UI", "weight": 600}}, "cat": {"color": "#5A6577", "font": {"family": "Segoe UI", "weight": 400}, "size": 16.0, "type": null}, "val": {"color": "#5A6577", "units": null, "size": 16.0, "grid": true, "gridColor": "#DCE2EA", "start": null, "end": null, "secStart": null, "secEnd": null, "secShow": true}, "legend": {"position": "Top", "color": "#5A6577"}, "line": {"width": 3, "widthBy": {}, "marker": false}}, "tag": "Clustered column chart", "method": "native", "known": true, "pattern": "freshness-line"}, {"id": "P2-V01", "name": "deneb-range", "type": "deneb", "page": "P2", "x": 32, "y": 80, "w": 900, "h": 420, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Deneb: range per region with the current value", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "dataset", "label": "Region", "field": "Region[Region]", "measure": false}, {"role": "dataset", "label": "Band Low", "field": "[Band Low]", "measure": true}, {"role": "dataset", "label": "Band High", "field": "[Band High]", "measure": true}, {"role": "dataset", "label": "Value", "field": "[Value]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Deneb", "method": "deneb", "known": true, "pattern": "range-band", "deneb": {"spec": {"data": {"name": "dataset"}, "encoding": {"y": {"field": "Region", "type": "nominal", "axis": {"title": null}}}, "layer": [{"mark": {"type": "rule", "strokeWidth": 10, "color": {"expr": "pbiColor(5)"}}, "encoding": {"x": {"field": "Band Low", "type": "quantitative"}, "x2": {"field": "Band High"}}}, {"mark": {"type": "point", "filled": true, "size": 90, "color": {"expr": "pbiColor(0)"}}, "encoding": {"x": {"field": "Value", "type": "quantitative"}}}]}, "provider": "vegaLite"}}, {"id": "P2-V02", "name": "deneb-partial", "type": "deneb", "page": "P2", "x": 960, "y": 80, "w": 928, "h": 420, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Deneb: hollow points and a brush", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "dataset", "label": "Month", "field": "'Date'[Month]", "measure": false}, {"role": "dataset", "label": "Value", "field": "[Value]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Deneb", "method": "deneb", "known": true, "pattern": "partial-period", "deneb": {"spec": {"data": {"name": "dataset"}, "encoding": {"x": {"field": "Month", "type": "ordinal"}, "y": {"field": "Value", "type": "quantitative"}}, "params": [{"name": "brush", "select": {"type": "interval", "encodings": ["x"]}}], "layer": [{"mark": {"type": "line", "color": {"expr": "pbiColor(0)"}}}, {"mark": {"type": "point", "filled": false, "size": 80, "color": {"expr": "pbiColor(0)"}}}]}, "provider": "vegaLite"}}, {"id": "P2-V03", "name": "deneb-brush", "type": "deneb", "page": "P2", "x": 32, "y": 532, "w": 1856, "h": 300, "z": 1, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": {"text": "Deneb: drag on the chart to pick a range", "measure": false, "size": 20.0, "color": "#1D2733", "weight": 600, "family": "Segoe UI", "align": "left"}, "subtitle": null}, "fields": [{"role": "dataset", "label": "Date", "field": "'Date'[Date]", "measure": false}, {"role": "dataset", "label": "Value", "field": "[Value]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Deneb", "method": "deneb", "known": true, "pattern": "brushed-range", "deneb": {"spec": {"data": {"name": "dataset"}, "params": [{"name": "brush", "select": {"type": "interval", "encodings": ["x"]}}], "mark": {"type": "line", "color": {"expr": "pbiColor(0)"}}, "encoding": {"x": {"field": "Date", "type": "temporal", "title": null}, "y": {"field": "Value", "type": "quantitative", "title": null}}}, "provider": "vegaLite"}}, {"id": "P3-V01", "name": "rail", "type": "shape", "page": "P3", "x": 0, "y": 0, "w": 635, "h": 1080, "z": 0, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": true, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Shape", "method": "native", "known": true, "pattern": "rail-panel", "shape": {"fill": "#FFFFFF", "alpha": 1.0, "outline": null, "radius": 0}}, {"id": "P3-V02", "name": "tabs", "type": "bookmarkNavigator", "page": "P3", "x": 1288, "y": 32, "w": 600, "h": 56, "z": 2, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Bookmark navigator", "method": "native", "known": true, "pattern": null, "nav": {"pages": ["Trend", "Breakdown"], "fill": "#FFFFFF", "outline": "#DCE2EA", "radius": 18, "size": 14.7, "states": {"default": {"color": "#1D2733", "alpha": 0.0}, "hover": {"color": "#1D2733", "alpha": 0.0}, "selected": {"color": "#1D2733", "alpha": 1.0}}, "current": "Trend", "bookmarks": true}}, {"id": "P3-V03", "name": "picker", "type": "advancedSlicerVisual", "page": "P3", "x": 32, "y": 112, "w": 288, "h": 936, "z": 2, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Values", "label": "Name", "field": "Member[Name]", "measure": false}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Button slicer", "method": "native", "known": true, "pattern": null, "slicer": {"selected": ["Member A"], "header": "Name", "headerShow": false, "rows": null, "cols": null, "single": false, "fill": "#FFFFFF", "selFill": "#12343B", "outline": "#DCE2EA", "selOutline": null, "fillAlpha": 1.0, "family": "Segoe UI", "weight": 400, "size": 13.3, "color": "#1D2733", "selColor": "#FFFFFF", "radius": 4, "items": ["Member A", "Member B", "Member C", "Member D", "Member E"], "picker": "list"}}, {"id": "P3-V04", "name": "sub-picker", "type": "advancedSlicerVisual", "page": "P3", "x": 344, "y": 112, "w": 291, "h": 936, "z": 2, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Values", "label": "Name", "field": "Detail[Name]", "measure": false}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Button slicer", "method": "native", "known": true, "pattern": null, "slicer": {"selected": [], "header": "Name", "headerShow": false, "rows": null, "cols": null, "single": false, "fill": "#FFFFFF", "selFill": "#12343B", "outline": "#DCE2EA", "selOutline": null, "fillAlpha": 1.0, "family": "Segoe UI", "weight": 400, "size": 13.3, "color": "#1D2733", "selColor": "#FFFFFF", "radius": 4, "items": null, "picker": "cards"}}, {"id": "P3-V05", "name": "panel", "type": "shape", "page": "P3", "x": 659, "y": 112, "w": 1229, "h": 936, "z": 0, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": true, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Shape", "method": "native", "known": true, "pattern": "panel", "shape": {"fill": "#FFFFFF", "alpha": 1.0, "outline": null, "radius": 0}}, {"id": "P3-V06", "name": "kpi-1", "type": "cardVisual", "page": "P3", "x": 659, "y": 112, "w": 600, "h": 144, "z": 2, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Data", "label": "KPI 1", "field": "[KPI 1]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Card (new)", "method": "native", "known": true, "pattern": null, "card": {"valueSize": 36.0, "valueColor": "#1D2733", "value": true, "precision": null, "align": "center", "labelAlign": "center", "valign": "middle", "family": "Segoe UI", "weight": 600, "labelFamily": "Segoe UI", "labelWeight": 400, "labelSize": 13.3, "wrap": false, "units": null, "cols": null, "label": true, "labelPos": "belowValue", "labelColor": "#5A6577", "tile": null, "accent": null, "radius": 0, "refs": [], "refSize": 13.3, "refColor": "#5A6577", "image": false, "pad": [8, 16, 8, 16]}}, {"id": "P3-V07", "name": "kpi-2", "type": "cardVisual", "page": "P3", "x": 1288, "y": 112, "w": 600, "h": 144, "z": 2, "hidden": false, "group": null, "box": {"bg": null, "border": null, "bw": 1, "radius": 0, "shadow": false, "pad": [0, 0, 0, 0], "title": null, "subtitle": null}, "fields": [{"role": "Data", "label": "KPI 2", "field": "[KPI 2]", "measure": true}], "colors": {}, "catAxis": true, "valAxis": true, "legend": true, "aboveLabels": false, "refStyle": [], "tag": "Card (new)", "method": "native", "known": true, "pattern": null, "card": {"valueSize": 36.0, "valueColor": "#1D2733", "value": true, "precision": null, "align": "center", "labelAlign": "center", "valign": "middle", "family": "Segoe UI", "weight": 600, "labelFamily": "Segoe UI", "labelWeight": 400, "labelSize": 13.3, "wrap": false, "units": null, "cols": null, "label": true, "labelPos": "belowValue", "labelColor": "#5A6577", "tile": null, "accent": null, "radius": 0, "refs": [], "refSize": 13.3, "refColor": "#5A6577", "image": false, "pad": [8, 16, 8, 16]}}], "images": {}, "dataColors": ["#038D96", "#A84545", "#5D6B8A", "#12343B", "#8CCFD3", "#B8C2D6"], "vega": "cdn", "tokens": {"colors": {"_note": "From /theme (preset clean), mode light: generated by design/scripts/gen_tokens.py; every text and state pair is WCAG 2.1 AA (design/reviews/theme.md). Roles: primary (bands, with onDark text; primaryText as text), brand (marks; brandText as text), bad / badMark, good, second (warning as text), selected + onSelected. teal*/red*/slate*/accent/neutral follow their roles so layouts written for the clean palette re-skin unchanged.", "primary": "#12343B", "background": "#EEF1F6", "card": "#FFFFFF", "border": "#DCE2EA", "text": "#1D2733", "textMuted": "#5A6577", "brand": "#038D96", "brandText": "#026E75", "brandTint": "#E7F3F5", "brandLight": "#8CCFD3", "brandMid": "#4DB0B7", "selected": "#037C84", "badMark": "#A84545", "bad": "#A84545", "badLight": "#E3A6A6", "badTint": "#F6EDED", "good": "#026E75", "goodTint": "#E7F3F5", "second": "#5D6B8A", "secondLight": "#B8C2D6", "secondTint": "#EDF0F6", "warning": "#5D6B8A", "warningText": "#845011", "warningTint": "#F3EDE7", "neutralTint": "#EEF1F6", "html": "#7A4FA0", "htmlTint": "#F2ECF8", "teal": "#038D96", "tealDark": "#026E75", "tealLight": "#8CCFD3", "tealMid": "#4DB0B7", "tealTint": "#E7F3F5", "red": "#A84545", "redLight": "#E3A6A6", "redTint": "#F6EDED", "slate": "#5D6B8A", "slateLight": "#B8C2D6", "slateTint": "#EDF0F6", "accent": "#A84545", "neutral": "#5A6577", "onDarkMuted": "#B9D9DC", "onDark": "#FFFFFF", "primaryText": "#12343B", "shadow": "#12343B", "onSelected": "#FFFFFF"}, "font": {"_note": "px, for the HTML wireframe.", "family": "Segoe UI", "title": 30, "cardTitle": 17, "label": 13, "body": 14, "kpi": 36, "caption": 12, "hero": 40, "weights": {"_note": "Font weight per text role (rail + panel study, 2026-11-15): Regular, Light, Semibold or Bold, written by gen_theme.py as '<family> <weight>' (Regular: the family alone). Hierarchy can come from weight as well as size.", "title": "Regular", "cardTitle": "Semibold", "header": "Semibold", "kpi": "Semibold", "body": "Regular", "caption": "Regular", "tableHeader": "Semibold"}}}}</script>
 <script type="application/json" id="data">{}</script>
 <script>
 
@@ -64,6 +68,7 @@ function fmt(v, f) {
   f = (f || '#,0').replace(/\\(.)/g, '$1');
   const parts = f.split(';'); let p = parts[0];
   if (v < 0 && parts[1] !== undefined) { p = parts[1]; v = -v; } else if (v === 0 && parts[2] !== undefined) p = parts[2];
+  if (!/[#0]/.test(p)) return p.replace(/"/g, '');
   const lit = p.match(/"([^"]*)"/g) || []; let pre = '', post = '';
   const core = p.replace(/"[^"]*"/g, m => { return ''; });
   const m = core.match(/^([^#0,.%]*)([#0,.]+)([^#0,.]*)$/);
@@ -79,13 +84,54 @@ function fmt(v, f) {
   return (v < 0 ? '−' : '') + pre.replace(/[+]/, v > 0 ? '+' : '') + s + post.replace(/%+/, '%');
 }
 
+// a visual's decimal places (value.labelPrecision) replace the format string's: '0.0%' at 0 -> '0%'
+function precision(f, p) {
+  if (p == null) return f;
+  const dec = p > 0 ? '.' + '0'.repeat(p) : '';      // every section, so a format's negative section stays
+  return (f || '#,0').split(';').map(x => /[0#]\.[0#]+/.test(x) ? x.replace(/([0#])\.[0#]+/, '$1' + dec) :
+    /[0#]/.test(x) ? x.replace(/([0#])(?![\s\S]*[0#])/, '$1' + dec) : x).join(';');
+}
+
+// display units (labelDisplayUnits): 1000 K, 1e6 M, 1e9 bn, 1e12 T; none (1) and auto (0) show the full number
+function unitFmt(v, f, u, p) {
+  const k = {1000: 'K', 1000000: 'M', 1000000000: 'bn', 1000000000000: 'T'}[u];
+  if (!k || typeof v !== 'number' || /%/.test((f || '').split(';')[0])) return fmt(v, precision(f, p));
+  const x = v / u; return fmt(x, precision((f || '#,0').split(';')[0].replace(/,+$/, ''), p == null ? (Math.abs(x) < 10 && x % 1 ? 1 : 0) : p)) + k;
+}
+
+// round axis ticks (1, 2, 2.5, 5 x 10^n) covering lo..hi; a fixed start or end (valueAxis.start / end) is kept as is
+// the step is the 1-2-5 value nearest range / n, as Desktop picks it (85 -> 20, 32K -> 10K)
+function ticks(lo, hi, n, fixLo, fixHi) {
+  if (!(hi > lo)) hi = lo + 1;
+  const m = (hi - lo) / (n || 4), e = Math.pow(10, Math.floor(Math.log10(m)));
+  const step = [1, 2, 5, 10].map(k => k * e).reduce((a, c) => Math.abs(Math.log(c / m)) < Math.abs(Math.log(a / m)) ? c : a);
+  const a = fixLo != null ? fixLo : Math.floor(lo / step + 1e-9) * step, b = fixHi != null ? fixHi : Math.ceil(hi / step - 1e-9) * step;
+  const out = []; for (let v = Math.ceil(a / step - 1e-9) * step; v <= b + step * 1e-6; v += step) out.push(+(Math.round(v / step) * step).toPrecision(12));
+  return {lo: a, hi: b, ticks: out};
+}
+// the value axis range: valueAxis start / end (secStart / secEnd), literal in props or a measure (d.axis), else the data
+// a fixed end keeps the data's own start (Desktop doesn't widen it to a tick)
+function valueRange(min, max, ch, d, sec, zero) {
+  const ax = (d && d.axis) || {}, V = (ch || {}).val || {};
+  const s0 = sec ? (ax.secStart ?? V.secStart) : (ax.start ?? V.start), e0 = sec ? (ax.secEnd ?? V.secEnd) : (ax.end ?? V.end);
+  if (!isFinite(min) || !isFinite(max)) { min = 0; max = 1; }
+  const lo = s0 != null ? +s0 : (zero ? Math.min(0, min) : min), hi = e0 != null ? +e0 : (zero ? Math.max(0, max) : max);
+  return ticks(lo, hi > lo ? hi : lo + 1, 4, s0 != null ? +s0 : (e0 != null ? lo : null), e0 != null ? +e0 : null);
+}
+// an axis label: the format's decimals cut to the tick step's (Desktop draws +80, not +80.0)
+function tickFmt(v, f, units, step) {
+  const dec = step > 0 && step < 1 ? Math.min(6, Math.ceil(-Math.log10(step) - 1e-9)) : 0;
+  return unitFmt(v, f, units, /[0#]\.[0#]/.test((f || '').split(';')[0]) && !/%/.test(f || '') ? dec : null);
+}
+
 // ---- sample rows when there is no data: deterministic shapes, no numbers
 function seed(id) { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return () => ((h = (h * 1103515245 + 12345) >>> 0) / 4294967296); }
 function sample(s, n) {
-  const r = seed(s.id), groups = s.fields.filter(f => /\[/.test(f.field || '') && !/^\[/.test(f.field || '')).map(f => f.label);
-  const vals = s.fields.filter(f => /^\[|\(/.test(f.field || '')).map(f => f.label);
+  const isM = f => f.measure != null ? f.measure : /^\[|\(/.test(f.field || '');
+  const r = seed(s.id), groups = s.fields.filter(f => /\[/.test(f.field || '') && !isM(f)).map(f => f.label);
+  const vals = s.fields.filter(isM).map(f => f.label);
   const cats = Array.from({length: n || 6}, (_, i) => 'Item ' + (i + 1));
-  return {groups: groups.length ? groups.slice(0, 1) : ['Category'], values: vals.length ? vals : ['Value'], formats: [],
+  return {groups: groups.length ? groups : ['Category'], values: vals.length ? vals : [s.fields.length ? s.fields[0].label : 'Value'], formats: [],
           cat: 0, leg: null, rows: cats.map(c => [c, ...(vals.length ? vals : [0]).map(() => 20 + r() * 80)]), hidden: 0, sample: true};
 }
 function dataOf(s, n) { return D[s.id] || sample(s, n); }
@@ -98,7 +144,7 @@ function nice(m) { if (!(m > 0)) return 1; const e = Math.pow(10, Math.floor(Mat
 const color = (s, label, i) => s.colors[label] || s.colors['*'] || S.dataColors[i % S.dataColors.length];
 const label = (d, v) => d.sample ? '' : v;
 
-// series: [{name, values per category}] from rows
+// series: [{name, measure, values per category, rows: the data row of each point}] from rows
 function series(d) {
   const nG = d.groups.length, cats = [], idx = {};
   const ci = d.cat ?? 0;
@@ -106,105 +152,242 @@ function series(d) {
   const out = [];
   if (d.leg != null && d.values.length) {
     const legs = [...new Set(d.rows.map(r => r[d.leg]))];
-    for (const l of legs) { const vals = cats.map(() => null); for (const r of d.rows) if (r[d.leg] === l) vals[idx[r[ci]]] = r[nG]; out.push({name: String(l), values: vals, format: d.formats[0]}); }
+    for (const l of legs) { const vals = cats.map(() => null), ix = cats.map(() => null);
+      d.rows.forEach((r, j) => { if (r[d.leg] === l) { vals[idx[r[ci]]] = r[nG]; ix[idx[r[ci]]] = j; } });
+      out.push({name: String(l), measure: d.values[0], values: vals, rows: ix, format: d.formats[0]}); }
   } else {
-    d.values.forEach((v, k) => { const vals = cats.map(() => null); for (const r of d.rows) vals[idx[nG ? r[ci] : '']] = r[nG + k]; out.push({name: v, values: vals, format: d.formats[k]}); });
+    d.values.forEach((v, k) => { const vals = cats.map(() => null), ix = cats.map(() => null);
+      d.rows.forEach((r, j) => { const i = idx[nG ? r[ci] : '']; vals[i] = r[nG + k]; ix[i] = j; });
+      out.push({name: v, measure: v, values: vals, rows: ix, format: d.formats[k]}); });
   }
   return {cats, series: out};
 }
 
-// ---- renderers (one per visual type)
-const R = {};
-R.cardVisual = (s, el, w, h) => {
-  const d = dataOf(s, 1), c = s.card, row = d.rows[0] || [];
-  if (c.tile) { el.style.background = c.tile; el.style.borderRadius = c.radius + 'px'; }
-  const v = d.sample ? '–' : fmt(row[d.groups.length], d.formats[0]);
-  const lab = esc(d.values[0] || (s.fields[0] || {}).label || '');
-  const align = {left: 'flex-start', right: 'flex-end'}[c.align] || 'center';
-  el.style.justifyContent = 'center'; el.style.alignItems = align; el.style.padding = (c.pad || [8, 16, 8, 16]).map(p => PX(p) + 'px').join(' ');
-  if (c.accent) el.style.borderLeft = `4px solid ${c.accent}`;
-  const labHtml = c.label ? `<div style="font-size:${PX(13)}px;color:${c.labelColor}">${lab}</div>` : '';
-  const refs = (c.refs || []).map(r => `<span>${esc((r.title ? r.title + ' ' : '') + '[' + String(r.value).replace(/[\[\]]/g, '') + ']' + (r.detail ? ' · [' + String(r.detail).replace(/[\[\]]/g, '') + ']' : ''))}</span>`).join(' ');
-  el.insertAdjacentHTML('beforeend', (c.labelPos === 'aboveValue' ? labHtml : '') +
-    `<div style="font-size:${c.valueSize}px;font-weight:600;color:${c.valueColor};line-height:1.1">${v}</div>` +
-    (c.labelPos !== 'aboveValue' ? labHtml : '') +
-    (refs ? `<div style="font-size:${c.refSize}px;color:${c.refColor};margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${refs}</div>` : '') +
-    (c.image ? `<div class="nodata">image from data</div>` : ''));
-};
-R.card = R.cardVisual;
-function axisChart(s, el, w, h, horizontal, mode, dIn) {
-  const d = dIn || dataOf(s, horizontal ? 6 : 8), sr = series(d), cats = sr.cats;
-  const ss = s.aboveLabels ? sr.series.filter(x => x.values.some(v => v)) : sr.series;   // drop the zero spacer
-  const above = s.aboveLabels && horizontal;
-  const g = svg(w, h); el.appendChild(g);
-  const catAx = s.catAxis !== false, valAx = s.valAxis !== false;
-  const padL = horizontal ? (catAx ? Math.min(140, w * .32) : 4) : (valAx ? 36 : 6), padB = horizontal ? (valAx ? 18 : 4) : (catAx ? 22 : 4), padT = ss.length > 1 ? 18 : 6, padR = 8;
-  const W = Math.max(w - padL - padR, 4), H = Math.max(h - padT - padB, 4), n = Math.max(cats.length, 1);
-  let max = 0, min = 0;
-  cats.forEach((_, i) => {
-    if (mode === 'stack' || mode === 'pct') { let p = 0, q = 0; ss.forEach(x => { const v = x.values[i] || 0; v >= 0 ? p += v : q += v; }); max = Math.max(max, p); min = Math.min(min, q); }
-    else ss.forEach(x => { max = Math.max(max, x.values[i] || 0); min = Math.min(min, x.values[i] || 0); });
-  });
-  if (mode === 'pct') { max = 1; min = 0; }
-  max = nice(max); const span = (max - min) || 1;
-  const sc = v => (v - min) / span * (horizontal ? W : H);
-  if (ss.length > 1 && s.legend !== false) ss.forEach((x, k) => { add(g, 'rect', {x: padL + k * 110, y: 2, width: 9, height: 9, rx: 2, fill: color(s, x.name, k)}); add(g, 'text', {x: padL + k * 110 + 13, y: 10, 'font-size': 11, fill: muted}, x.name); });
-  for (let t = 0; t <= 4; t++) { const v = min + span * t / 4, p = sc(v);
-    if (horizontal) add(g, 'line', {x1: padL + p, x2: padL + p, y1: padT, y2: padT + H, stroke: grid});
-    else if (valAx) { add(g, 'line', {x1: padL, x2: padL + W, y1: padT + H - p, y2: padT + H - p, stroke: grid}); if (!d.sample) add(g, 'text', {x: padL - 4, y: padT + H - p + 4, 'font-size': 10, fill: muted, 'text-anchor': 'end'}, fmt(v, (ss[0] || {}).format)); } }
-  const band = (horizontal ? H : W) / n, inner = band * (above ? .42 : .7), bw = (mode === 'cluster') ? inner / Math.max(ss.length, 1) : inner;
-  cats.forEach((c, i) => {
-    let tot = 0; if (mode === 'pct') ss.forEach(x => tot += Math.abs(x.values[i] || 0));
-    let acc = 0;
-    ss.forEach((x, k) => {
-      let v = x.values[i] || 0; if (mode === 'pct') v = tot ? v / tot : 0;
-      const o = band * i + band * (above ? .48 : .15) + (mode === 'cluster' ? k * bw : 0), a = (mode === 'cluster') ? 0 : acc, len = sc(v + a) - sc(a); acc += (mode === 'cluster') ? 0 : v;
-      const r = horizontal ? {x: padL + sc(a) - sc(0) + sc(0), y: padT + o, width: Math.max(len, 0), height: bw} :
-                             {x: padL + o, y: padT + H - sc(a) - Math.max(len, 0), width: bw, height: Math.max(len, 0)};
-      const pc = (d.colours && ss.length === 1 && d.colours[i]) ? d.colours[i] : color(s, x.name, k);
-      add(g, 'rect', {...r, rx: 2, fill: pc, opacity: d.sample ? .35 : 1});
-      if (!d.sample && mode === 'cluster' && horizontal && ss.length === 1) add(g, 'text', {x: r.x + r.width + 4, y: r.y + bw / 2 + 4, 'font-size': 11, fill: txt}, fmt(x.values[i], x.format));
-    });
-    const lab = String(c ?? ''); const sh = lab.length > 18 ? lab.slice(0, 17) + '…' : lab;
-    if (above && !d.sample) add(g, 'text', {x: padL, y: padT + band * i + band * .42, 'font-size': 11, fill: txt}, sh);
-    if (!catAx) return;
-    if (horizontal) add(g, 'text', {x: padL - 6, y: padT + band * i + band / 2 + 4, 'font-size': 11, fill: txt, 'text-anchor': 'end'}, label(d, sh));
-    else if (n <= 14 || i % Math.ceil(n / 12) === 0) add(g, 'text', {x: padL + band * i + band / 2, y: h - 6, 'font-size': 10, fill: muted, 'text-anchor': 'middle'}, label(d, sh.slice(0, 10)));
-  });
-  // reference lines: category-axis constant lines on numeric categories (interpolated), value-axis lines
+// data labels: a label measure's text (d.labels, wireframe_data.py) where there is one, else the value; '' when off
+function labelOf(d, x, i) {
+  const L = d.labels; if (!L || x.rows[i] == null) return undefined;
+  const set = L[x.name] || L[x.measure] || L['*']; return set ? set[x.rows[i]] : undefined;
+}
+function dataLabel(s, d, x, i, v) {
+  const L = (s.chart || {}).labels || {}, by = L.showBy || {};
+  const show = by[x.name] ?? by[x.measure] ?? by[''] ?? L.show;
+  if (!show || d.sample) return '';
+  const m = labelOf(d, x, i); if (m !== undefined) return m == null ? '' : String(m);
+  return v == null ? '' : unitFmt(v, x.format, L.units, L.precision);
+}
+function labelStyle(s, x) { const L = (s.chart || {}).labels || {}, c = L.colorBy || {}, f = L.font || {};
+  return {fill: c[x.name] || c[x.measure] || L.color || txt, 'font-size': L.size || 12, 'font-family': f.family || FONT, 'font-weight': f.weight || 400}; }
+const tw = (t, px) => String(t ?? '').length * (px || 12) * .55;      // text width estimate
+
+// the legend (legend.position); returns the room it takes
+function legend(s, g, names, w, h, colourOf) {
+  const L = (s.chart || {}).legend || {}, pos = String(L.position || 'Top'), lc = L.color || muted;
+  if (names.length < 2 || s.legend === false) return {top: 0, bottom: 0, left: 0, right: 0};
+  const ws = names.map(n => tw(n, 12) + 22), total = ws.reduce((a, b) => a + b, 0);
+  if (/^(Right|Left)/.test(pos)) { const lw = Math.min(Math.max(...ws), w * .3), x0 = /^Right/.test(pos) ? w - lw : 0;
+    names.forEach((n, k) => { const y = 14 + k * 18; add(g, 'circle', {cx: x0 + 5, cy: y - 4, r: 5, fill: colourOf(n, k)}); add(g, 'text', {x: x0 + 14, y, 'font-size': 12, fill: lc}, n); });
+    return {top: 0, bottom: 0, left: /^Left/.test(pos) ? lw + 8 : 0, right: /^Right/.test(pos) ? lw + 8 : 0}; }
+  const bottom = /^Bottom/.test(pos); let x = /Center/.test(pos) ? Math.max((w - total) / 2, 0) : 4; const y = bottom ? h - 6 : 12;
+  names.forEach((n, k) => { add(g, 'circle', {cx: x + 5, cy: y - 4, r: 5, fill: colourOf(n, k)}); add(g, 'text', {x: x + 14, y, 'font-size': 12, fill: lc}, n); x += ws[k]; });
+  return {top: bottom ? 0 : 22, bottom: bottom ? 22 : 0, left: 0, right: 0};
+}
+
+// reference lines (layout referenceLines): category-axis lines on numeric categories, value-axis lines; the label
+// as the layout says (dataLabel off: none; labelText Name / Value, else both)
+function refLines(s, d, g, f) {
   (d.refLines || []).forEach((rl, k) => {
     if (rl.value == null || d.sample) return;
-    const st = (s.refStyle || [])[k] || {color: txt, dash: true}, v = +rl.value;
-    const lab = (rl.label ? rl.label + ': ' : '') + (Math.abs(v) < 100 ? v.toFixed(2) : fmt(v));
-    let pos = null;
+    const st = (s.refStyle || [])[k] || {color: txt, dash: true, dataLabel: true}, v = +rl.value;
+    const lab = !st.dataLabel ? '' : st.labelText === 'Name' ? (rl.label || '') : st.labelText === 'Value' ? f.fmt(v) : [rl.label, f.fmt(v)].filter(Boolean).join(' ');
+    const ln = {stroke: st.color, 'stroke-width': st.width || 1, 'stroke-dasharray': st.dash ? '4 3' : ''};
     if (rl.axis === 'category' || rl.axis === 'x') {
-      const nums = cats.map(Number); if (nums.some(isNaN) || !nums.length) return;
-      let j = nums.findIndex((c, i) => i === nums.length - 1 || (v >= c && v < nums[i + 1]));
-      if (v < nums[0]) j = 0;
-      const step = j < nums.length - 1 ? nums[j + 1] - nums[j] : 1, f = (v - nums[j]) / (step || 1);
-      pos = band * (j + .5) + band * f;
-      if (horizontal) { const y = padT + pos; add(g, 'line', {x1: padL, x2: padL + W, y1: y, y2: y, stroke: st.color, 'stroke-dasharray': st.dash ? '4 3' : null}); }
-      else { const x = padL + pos; add(g, 'line', {x1: x, x2: x, y1: padT, y2: padT + H, stroke: st.color, 'stroke-width': 1, 'stroke-dasharray': st.dash ? '4 3' : ''});
-             add(g, 'text', {x: x + 4, y: padT + 10, 'font-size': 10, fill: st.color}, lab); }
+      const nums = f.cats.map(Number); if (nums.some(isNaN) || !nums.length) return;
+      let j = nums.findIndex((c, i) => i === nums.length - 1 || (v >= c && v < nums[i + 1])); if (v < nums[0]) j = 0;
+      const step = j < nums.length - 1 ? nums[j + 1] - nums[j] : 1, pos = f.band * (j + .5) + f.band * (v - nums[j]) / (step || 1);
+      if (f.horizontal) add(g, 'line', {x1: f.padL, x2: f.padL + f.W, y1: f.padT + pos, y2: f.padT + pos, ...ln});
+      else { const x = f.padL + pos; add(g, 'line', {x1: x, x2: x, y1: f.padT, y2: f.padT + f.H, ...ln}); if (lab) add(g, 'text', {x: x + 4, y: f.padT + 10, 'font-size': 11, fill: st.color}, lab); }
     } else {
-      pos = sc(v);
-      if (horizontal) { const x = padL + pos; add(g, 'line', {x1: x, x2: x, y1: padT, y2: padT + H, stroke: st.color, 'stroke-dasharray': st.dash ? '4 3' : ''}); add(g, 'text', {x: x + 4, y: padT + 10, 'font-size': 10, fill: st.color}, lab); }
-      else { const y = padT + H - pos; add(g, 'line', {x1: padL, x2: padL + W, y1: y, y2: y, stroke: st.color, 'stroke-dasharray': st.dash ? '4 3' : ''}); add(g, 'text', {x: padL + W - 4, y: y - 4, 'font-size': 10, fill: st.color, 'text-anchor': 'end'}, lab); }
+      const pos = f.sc(v);
+      if (f.horizontal) { const x = f.padL + pos; add(g, 'line', {x1: x, x2: x, y1: f.padT, y2: f.padT + f.H, ...ln}); if (lab) add(g, 'text', {x: x - 4, y: f.padT + 10, 'font-size': 11, fill: st.color, 'text-anchor': 'end'}, lab); }
+      else { const y = f.padT + f.H - pos; add(g, 'line', {x1: f.padL, x2: f.padL + f.W, y1: y, y2: y, ...ln}); if (lab) add(g, 'text', {x: f.padL + f.W - 4, y: y - 4, 'font-size': 11, fill: st.color, 'text-anchor': 'end'}, lab); }
     }
   });
 }
-function lineChart(s, el, w, h, area) {
-  const d = dataOf(s, 12), {cats, series: ss} = series(d);
+
+// an ImageUrl value as Power BI reads it: %-decoded unless a raw % is in it (.claude/rules/svg.md), then re-encoded
+function svgSrc(uri) {
+  const s = String(uri || ''), i = s.indexOf(',');
+  if (!/^data:image\/svg\+xml/i.test(s) || i < 0 || /;base64/i.test(s.slice(0, i))) return s;
+  let body = s.slice(i + 1);
+  if (!/%(?![0-9A-Fa-f]{2})/.test(body)) { try { body = decodeURIComponent(body); } catch (e) { /* keep it raw */ } }
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(body);
+}
+const isImg = x => typeof x === 'string' && /^data:image\//i.test(x);
+
+// ---- renderers (one per visual type)
+const R = {};
+R.cardVisual = (s, el, w, h) => {
+  const d = dataOf(s, 1), c = s.card, row = d.rows[0] || [], nG = d.groups.length;
+  if (c.tile) { el.style.background = c.tile; el.style.borderRadius = c.radius + 'px'; }
+  el.style.justifyContent = {top: 'flex-start', bottom: 'flex-end'}[c.valign] || 'center';
+  el.style.padding = (c.pad || [8, 16, 8, 16]).map(p => PX(p) + 'px').join(' ');
+  if (c.accent) el.style.borderLeft = `4px solid ${c.accent}`;
+  const img = (d.images || [])[0];
+  if (c.image && isImg(img)) {                      // the SVG the image measure returned (wireframe_data.py)
+    el.insertAdjacentHTML('beforeend', `<img alt="" src="${esc(svgSrc(img))}" style="display:block;flex:1;min-height:0;width:100%;object-fit:contain">`);
+    return;
+  }
+  const names = d.values.length ? d.values : s.fields.map(f => f.label), n = Math.max(names.length, 1);
+  const cols = Math.max(1, Math.min(c.cols || n, n)), al = c.align === 'left' || c.align === 'right' ? c.align : 'center';
+  const lal = c.labelAlign === 'left' || c.labelAlign === 'right' ? c.labelAlign : 'center', shown = [];
+  const tiles = names.map((nm, k) => {
+    const v = d.sample ? '–' : unitFmt(row[nG + k], d.formats[k], c.units, c.precision); shown.push(v);
+    const lab = c.label ? `<div style="font-family:'${c.labelFamily}';font-weight:${c.labelWeight};font-size:${c.labelSize}px;color:${c.labelColor};text-align:${lal};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nm)}</div>` : '';
+    const val = c.value ? `<div style="font-family:'${c.family}';font-weight:${c.weight};font-size:${c.valueSize}px;color:${c.valueColor};line-height:1.15;text-align:${al};${c.wrap ? 'white-space:normal' : 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}">${esc(v)}</div>` : '';
+    return `<div style="min-width:0">${c.labelPos === 'aboveValue' ? lab + val : val + lab}</div>`; });
+  // reference labels: the title and the value (example or data); never the measure's raw name
+  const refs = (c.refs || []).map((r, k) => { const det = (d.refDetails || [])[k];
+    const dc = det && det.good != null ? (det.good ? (C.good || '#197982') : (C.bad || '#B94642')) : c.refColor;
+    return `<span>${esc([r.title, (d.refs || [])[k] ?? (d.sample ? '–' : '')].filter(Boolean).join(' '))}</span>` +
+      (det ? ` <span style="color:${dc};font-weight:600">${esc(det.text)}</span>` : ''); }).join(' ');
+  el.insertAdjacentHTML('beforeend', `<div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:4px 16px;width:100%">${tiles.join('')}</div>` +
+    (refs ? `<div style="font-size:${c.refSize}px;color:${c.refColor};margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:${al}">${refs}</div>` : '') +
+    (c.image ? `<div class="nodata">image from data</div>` : ''));
+  el.dataset.main = c.value && !d.sample ? shown.join(' | ') : '';
+};
+R.card = R.cardVisual;
+// HTML Content (any htmlContent<GUID> type): the measure's HTML in a sandboxed frame (no scripts, no network)
+const HTML_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:";
+R.htmlContent = (s, el) => {
+  const d = D[s.id], nG = d ? d.groups.length : 0;
+  const parts = d ? d.rows.map(r => r.slice(nG).filter(x => typeof x === 'string').join('')).filter(Boolean) : [];
+  if (!parts.length) {
+    el.insertAdjacentHTML('beforeend', `<div class="placeholder"><div><b>HTML Content</b><br>${esc(s.fields.map(f => f.label).join(', '))}<br><small>${d ? 'the measure returned no HTML' : 'no data: the HTML shows here with data'}</small></div></div>`);
+    return;
+  }
+  const f = document.createElement('iframe');
+  f.setAttribute('sandbox', '');                    // no scripts, forms, popups or same-origin access
+  f.setAttribute('referrerpolicy', 'no-referrer');
+  f.title = 'HTML Content ' + s.id;
+  f.srcdoc = `<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${HTML_CSP}"><style>body{margin:0;font-family:'${FONT}',sans-serif;color:${txt}}</style>` + parts.join('');
+  Object.assign(f.style, {border: '0', width: '100%', height: '100%', display: 'block', background: 'transparent'});
+  el.appendChild(f);
+};
+function axisChart(s, el, w, h, horizontal, mode, dIn, secRoom) {
+  const d = dIn || dataOf(s, horizontal ? 6 : 8), sr = series(d), cats = sr.cats, ch = s.chart || {};
+  const CA = ch.cat || {}, VA = ch.val || {}, TT = ch.totals || {}, LB = ch.labels || {};
+  const ss = s.aboveLabels ? sr.series.filter(x => x.values.some(v => v)) : sr.series;   // drop the zero spacer
+  const above = s.aboveLabels && horizontal;
   const g = svg(w, h); el.appendChild(g);
-  const padL = 40, padB = 22, padT = ss.length > 1 ? 18 : 6, W = Math.max(w - padL - 8, 4), H = Math.max(h - padT - padB, 4);
-  let max = 0; ss.forEach(x => x.values.forEach(v => max = Math.max(max, v || 0))); max = nice(max);
-  for (let t = 0; t <= 4; t++) { const y = padT + H - H * t / 4; add(g, 'line', {x1: padL, x2: padL + W, y1: y, y2: y, stroke: grid}); if (!d.sample) add(g, 'text', {x: padL - 4, y: y + 4, 'font-size': 10, fill: muted, 'text-anchor': 'end'}, fmt(max * t / 4, (ss[0] || {}).format)); }
-  const X = i => padL + (cats.length > 1 ? W * i / (cats.length - 1) : W / 2), Y = v => padT + H - (v || 0) / max * H;
-  if (ss.length > 1) ss.forEach((x, k) => { add(g, 'rect', {x: padL + k * 110, y: 2, width: 9, height: 9, rx: 2, fill: color(s, x.name, k)}); add(g, 'text', {x: padL + k * 110 + 13, y: 10, 'font-size': 11, fill: muted}, x.name); });
-  ss.forEach((x, k) => { const pts = x.values.map((v, i) => `${X(i)},${Y(v)}`).join(' ');
-    if (area) add(g, 'polygon', {points: `${X(0)},${padT + H} ${pts} ${X(cats.length - 1)},${padT + H}`, fill: color(s, x.name, k), opacity: .2});
-    add(g, 'polyline', {points: pts, fill: 'none', stroke: color(s, x.name, k), 'stroke-width': 3, opacity: d.sample ? .4 : 1}); });
-  cats.forEach((c, i) => { if (cats.length <= 14 || i % Math.ceil(cats.length / 12) === 0) add(g, 'text', {x: X(i), y: h - 6, 'font-size': 10, fill: muted, 'text-anchor': 'middle'}, label(d, String(c ?? '').slice(0, 10))); });
+  const catAx = s.catAxis !== false, valAx = s.valAxis !== false, cpx = CA.size || 12, vpx = VA.size || 12;
+  const lg = legend(s, g, ss.map(x => x.name), w, h, (n, k) => color(s, n, k));
+  let max = 0, min = 0; const tot = cats.map(() => 0);
+  cats.forEach((_, i) => {
+    if (mode === 'stack' || mode === 'pct') { let p = 0, q = 0; ss.forEach(x => { const v = x.values[i] || 0; v >= 0 ? p += v : q += v; }); max = Math.max(max, p); min = Math.min(min, q); tot[i] = p + q; }
+    else ss.forEach(x => { max = Math.max(max, x.values[i] || 0); min = Math.min(min, x.values[i] || 0); });
+  });
+  const rg = mode === 'pct' ? ticks(0, 1, 4, 0, 1) : valueRange(min, max, ch, d, false, true), lo = rg.lo, span = (rg.hi - lo) || 1;
+  const step = rg.ticks.length > 1 ? rg.ticks[1] - rg.ticks[0] : 1;
+  const vf = v => mode === 'pct' ? fmt(v, '0%') : tickFmt(v, (ss[0] || {}).format, VA.units, step);
+  // category labels: all of them, turned 45 degrees when they don't fit side by side, thinned only when too dense
+  const cw = Math.max(0, ...cats.map(c => tw(String(c ?? '').slice(0, 10), cpx))), bandE = w * .9 / Math.max(cats.length, 1);
+  const rot = !horizontal && catAx && !d.sample && cw > bandE - 4 && bandE >= cpx * .9;
+  const inside = /^Inside/.test(LB.position || '');           // no position on a stack: Auto (below)
+  const outside = (LB.show && !inside) || (TT.show && mode === 'stack');
+  const longest = Math.max(0, ...cats.map(c => tw(c, cpx)));
+  const padL = lg.left + (horizontal ? (catAx && !above ? Math.min(w * .32, longest + 10) : 4) : (valAx ? Math.max(...rg.ticks.map(v => tw(vf(v), vpx))) + 8 : 6));
+  const padB = lg.bottom + (horizontal ? (valAx ? vpx + 6 : 4) : (catAx ? (rot ? cw * .72 + cpx : cpx + 8) : 4));
+  const padT = lg.top + (!horizontal && outside ? 18 : 6), padR = lg.right + (horizontal && outside ? 48 : 8) + (secRoom || 0);
+  const W = Math.max(w - padL - padR, 4), H = Math.max(h - padT - padB, 4), n = Math.max(cats.length, 1);
+  const sc = v => (Math.min(Math.max(v, lo), rg.hi) - lo) / span * (horizontal ? W : H);
+  rg.ticks.forEach(v => { const p = sc(v);
+    if (horizontal) { if (VA.grid !== false) add(g, 'line', {x1: padL + p, x2: padL + p, y1: padT, y2: padT + H, stroke: VA.gridColor || grid});
+                      if (valAx && !d.sample) add(g, 'text', {x: padL + p, y: h - lg.bottom - 4, 'font-size': vpx, fill: VA.color || muted, 'text-anchor': 'middle'}, vf(v)); }
+    else { if (VA.grid !== false) add(g, 'line', {x1: padL, x2: padL + W, y1: padT + H - p, y2: padT + H - p, stroke: VA.gridColor || grid});
+           if (valAx && !d.sample) add(g, 'text', {x: padL - 6, y: padT + H - p + 4, 'font-size': vpx, fill: VA.color || muted, 'text-anchor': 'end'}, vf(v)); } });
+  const band = (horizontal ? H : W) / n, inner = band * (above ? .42 : .7), bw = (mode === 'cluster') ? inner / Math.max(ss.length, 1) : inner;
+  const lpx = LB.size || 12, base = sc(0);
+  cats.forEach((c, i) => {
+    let ttl = 0; if (mode === 'pct') ss.forEach(x => ttl += Math.abs(x.values[i] || 0));
+    const top = ss.reduce((a, x, k) => (x.values[i] || 0) > 0 ? k : a, -1);      // the stack's top segment
+    let up = 0, dn = 0, end = base;
+    ss.forEach((x, k) => {
+      const raw = x.values[i]; let v = raw || 0; if (mode === 'pct') v = ttl ? v / ttl : 0;
+      const a = mode === 'cluster' ? 0 : (v >= 0 ? up : dn); if (mode !== 'cluster') { if (v >= 0) up += v; else dn += v; }
+      const p0 = sc(a), p1 = sc(a + v), lo_ = Math.min(p0, p1), len = Math.abs(p1 - p0);
+      const o = band * i + band * (above ? .48 : .15) + (mode === 'cluster' ? k * bw : 0);
+      const r = horizontal ? {x: padL + lo_, y: padT + o, width: len, height: bw} : {x: padL + o, y: padT + H - lo_ - len, width: bw, height: len};
+      const pc = (d.colours && d.colours[x.rows[i]]) ? d.colours[x.rows[i]] : color(s, x.name, k);
+      add(g, 'rect', {...r, rx: 2, fill: pc, opacity: d.sample ? .35 : 1});
+      end = horizontal ? Math.max(end, lo_ + len) : Math.max(end, lo_ + len);
+      const t = dataLabel(s, d, x, i, raw); if (!t) return;
+      const st = labelStyle(s, x), neg = v < 0;
+      const fits = horizontal ? tw(t, lpx) + 6 <= len && lpx <= bw : lpx + 8 <= len && tw(t, lpx) <= bw + 2;
+      const auto = mode !== 'cluster' && !LB.position;            // Auto: inside where it fits, else past the top
+      if (inside || (auto && (fits || k !== top || mode === 'pct'))) {
+        if (!fits) return;
+        if (horizontal) add(g, 'text', {...st, x: r.x + r.width / 2, y: r.y + bw / 2 + lpx * .35, 'text-anchor': 'middle'}, t);
+        else add(g, 'text', {...st, x: r.x + bw / 2, y: r.y + r.height / 2 + lpx * .35, 'text-anchor': 'middle'}, t);
+      } else if (horizontal) add(g, 'text', {...st, x: neg ? r.x - 4 : r.x + r.width + 4, y: r.y + bw / 2 + lpx * .35, 'text-anchor': neg ? 'end' : 'start'}, t);
+      else add(g, 'text', {...st, x: r.x + bw / 2, y: neg ? r.y + r.height + lpx + 2 : r.y - 4, 'text-anchor': 'middle'}, t);
+    });
+    if (TT.show && mode === 'stack' && !d.sample) {                   // totals (totals.show) at the end of the stack
+      const tf = TT.font || {}, at = {fill: TT.color || muted, 'font-size': lpx, 'font-family': tf.family || FONT, 'font-weight': tf.weight || 600};
+      const t = unitFmt(tot[i], (ss[0] || {}).format, LB.units, LB.precision);
+      if (horizontal) add(g, 'text', {...at, x: padL + sc(up) + 6, y: padT + band * i + band * .15 + bw / 2 + lpx * .35}, t);
+      else add(g, 'text', {...at, x: padL + band * i + band * .15 + bw / 2, y: padT + H - sc(up) - 6, 'text-anchor': 'middle'}, t);
+    }
+    const lab = String(c ?? ''); const sh = lab.length > 18 ? lab.slice(0, 17) + '…' : lab;
+    const cf = CA.font || {}, ct = {'font-size': cpx, fill: CA.color || muted, 'font-family': cf.family || FONT, 'font-weight': cf.weight || 400};
+    if (above && !d.sample) add(g, 'text', {...ct, x: padL, y: padT + band * i + band * .42}, sh);
+    if (!catAx) return;
+    if (horizontal) add(g, 'text', {...ct, x: padL - 6, y: padT + band * i + band / 2 + cpx * .35, 'text-anchor': 'end'}, label(d, sh));
+    else if (rot) { const x = padL + band * i + band / 2, y = padT + H + cpx; add(g, 'text', {...ct, x, y, 'text-anchor': 'end', transform: `rotate(-45 ${x} ${y})`}, label(d, sh.slice(0, 10))); }
+    else if (cw <= band - 4 || i % Math.ceil(n / Math.max(1, Math.floor(W / (cw + 8)))) === 0) add(g, 'text', {...ct, x: padL + band * i + band / 2, y: h - lg.bottom - 6, 'text-anchor': 'middle'}, label(d, sh.slice(0, 10)));
+  });
+  const geo = {g, padL, padT, W, H, band, n, cats, horizontal, sc, fmt: vf};
+  refLines(s, d, g, geo);
+  return geo;
+}
+function lineChart(s, el, w, h, area) {
+  const d = dataOf(s, 12), {cats, series: ss} = series(d), ch = s.chart || {}, CA = ch.cat || {}, VA = ch.val || {}, LN = ch.line || {};
+  const g = svg(w, h); el.appendChild(g);
+  const catAx = s.catAxis !== false, valAx = s.valAxis !== false, cpx = CA.size || 12, vpx = VA.size || 12, lpx = ((ch.labels || {}).size) || 12;
+  const lg = legend(s, g, ss.map(x => x.name), w, h, (n, k) => color(s, n, k));
+  let min = Infinity, max = -Infinity; ss.forEach(x => x.values.forEach(v => { if (v != null) { min = Math.min(min, v); max = Math.max(max, v); } }));
+  const rg = valueRange(min, max, ch, d, false, area), lo = rg.lo, span = (rg.hi - lo) || 1;
+  const vf = v => tickFmt(v, (ss[0] || {}).format, VA.units, rg.ticks.length > 1 ? rg.ticks[1] - rg.ticks[0] : 1);
+  const n = cats.length, first = ss.map(x => x.values.findIndex(v => v != null)), last = ss.map(x => { let i = x.values.length - 1; while (i > 0 && x.values[i] == null) i--; return i; });
+  const texts = ss.map((x, k) => x.values.map((v, i) => v == null ? '' : dataLabel(s, d, x, i, v)));
+  const room = side => Math.max(0, ...ss.map((x, k) => { const i = side ? last[k] : first[k]; return i >= 0 && texts[k][i] && (side ? i === n - 1 : i === 0) ? tw(texts[k][i], lpx) + 12 : 0; }));
+  const padL = lg.left + Math.max(valAx ? Math.max(...rg.ticks.map(v => tw(vf(v), vpx))) + 8 : 6, room(0));
+  const padR = lg.right + Math.max(8, room(1)), padT = lg.top + 10 + (texts.some(a => a.some((t, i) => t && i > 0 && i < n - 1)) ? lpx : 0);
+  const padB = lg.bottom + (catAx ? cpx + 8 : 4), W = Math.max(w - padL - padR, 4), H = Math.max(h - padT - padB, 4);
+  const nums = cats.map(Number), continuous = CA.type !== 'Categorical' && n > 2 && nums.every(x => isFinite(x)) && !d.sample;
+  const X = i => continuous ? padL + (nums[n - 1] > nums[0] ? (nums[i] - nums[0]) / (nums[n - 1] - nums[0]) : .5) * W : padL + W * (i + .5) / Math.max(n, 1);
+  const Y = v => padT + H - (v - lo) / span * H;
+  rg.ticks.forEach(v => { const y = Y(v); if (VA.grid !== false) add(g, 'line', {x1: padL, x2: padL + W, y1: y, y2: y, stroke: VA.gridColor || grid});
+    if (valAx && !d.sample) add(g, 'text', {x: padL - 6, y: y + 4, 'font-size': vpx, fill: VA.color || muted, 'text-anchor': 'end'}, vf(v)); });
+  const ends = {0: [], 1: []};
+  ss.forEach((x, k) => {
+    const c = color(s, x.name, k), sw = (LN.widthBy || {})[x.name] ?? (LN.widthBy || {})[x.measure] ?? LN.width ?? 3;
+    let seg = [];
+    const flush = () => { if (seg.length > 1 || (seg.length && LN.marker)) {
+      if (area) add(g, 'polygon', {points: `${seg[0][0]},${Y(Math.max(lo, 0))} ${seg.map(p => p.join(',')).join(' ')} ${seg[seg.length - 1][0]},${Y(Math.max(lo, 0))}`, fill: c, opacity: .2});
+      if (sw > 0) add(g, 'polyline', {points: seg.map(p => p.join(',')).join(' '), fill: 'none', stroke: c, 'stroke-width': sw, opacity: d.sample ? .4 : 1}); } seg = []; };
+    x.values.forEach((v, i) => { if (v == null) flush(); else seg.push([X(i), Y(v)]); }); flush();
+    x.values.forEach((v, i) => { if (v == null) return;
+      if (LN.marker || sw === 0 || n === 1) add(g, 'circle', {cx: X(i), cy: Y(v), r: 4, fill: c});
+      const t = texts[k][i]; if (!t) return;
+      if (i === 0 && n > 1) ends[0].push({x: X(i) - 8, y: Y(v) + lpx * .35, t, x_: x});
+      else if (i === n - 1 && n > 1) ends[1].push({x: X(i) + 8, y: Y(v) + lpx * .35, t, x_: x});
+      else add(g, 'text', {...labelStyle(s, x), x: X(i), y: Y(v) - 8, 'text-anchor': 'middle'}, t); });
+  });
+  [0, 1].forEach(side => ends[side].sort((a, b) => a.y - b.y).forEach((e, k, a) => { if (k && e.y - a[k - 1].y < lpx + 1) e.y = a[k - 1].y + lpx + 1;
+    add(g, 'text', {...labelStyle(s, e.x_), x: e.x, y: e.y, 'text-anchor': side ? 'start' : 'end'}, e.t); }));
+  const cf = CA.font || {}, ct = {'font-size': cpx, fill: CA.color || muted, 'font-family': cf.family || FONT, 'font-weight': cf.weight || 400, 'text-anchor': 'middle'};
+  if (catAx) cats.forEach((c, i) => { if (n <= 14 || i % Math.ceil(n / 12) === 0) add(g, 'text', {...ct, x: X(i), y: h - lg.bottom - 6}, label(d, String(c ?? '').slice(0, 10))); });
+  refLines(s, d, g, {padL, padT, W, H, band: W / Math.max(n, 1), n, cats, horizontal: false, sc: v => (v - lo) / span * H, fmt: vf});
 }
 R.lineChart = (s, el, w, h) => lineChart(s, el, w, h, false);
 R.areaChart = (s, el, w, h) => lineChart(s, el, w, h, true);
@@ -216,19 +399,27 @@ R.clusteredColumnChart = (s, el, w, h) => axisChart(s, el, w, h, false, 'cluster
 R.columnChart = (s, el, w, h) => axisChart(s, el, w, h, false, 'stack');
 R.hundredPercentStackedColumnChart = (s, el, w, h) => axisChart(s, el, w, h, false, 'pct');
 R.ribbonChart = R.columnChart;
+// combo: columns on the value axis, lines (Y2) on the secondary axis, its range from secStart / secEnd when set
 function combo(s, el, w, h, mode) {
-  const d = dataOf(s, 12), nG = d.groups.length;
+  const d = dataOf(s, 12), nG = d.groups.length, ch = s.chart || {}, VA = ch.val || {};
   const y2 = s.fields.filter(f => f.role === 'Y2').map(f => f.label);
-  const keep = d.values.map((v, k) => !y2.includes(v));
+  const keep = d.values.map(v => !y2.includes(v));
   const cols = {...d, values: d.values.filter((_, k) => keep[k]), formats: d.formats.filter((_, k) => keep[k]),
                 rows: d.rows.map(r => r.filter((_, k) => k < nG || keep[k - nG]))};
-  axisChart(s, el, w, h, false, mode, cols);
-  const {cats, series: ss} = series(d), lines = ss.filter(x => y2.includes(x.name));
+  const {series: all} = series(d), lines = all.filter(x => y2.includes(x.name));
+  let min = 0, max = 0; lines.forEach(x => x.values.forEach(v => { if (v != null) { min = Math.min(min, v); max = Math.max(max, v); } }));
+  const rg = valueRange(min, max, ch, d, true, true), span = (rg.hi - rg.lo) || 1;
+  const vf = v => tickFmt(v, (lines[0] || {}).format, VA.units, rg.ticks.length > 1 ? rg.ticks[1] - rg.ticks[0] : 1), showSec = VA.secShow !== false && s.valAxis !== false && lines.length && !d.sample;
+  const f = axisChart(s, el, w, h, false, mode, cols, showSec ? Math.max(...rg.ticks.map(v => tw(vf(v), VA.size || 12))) + 8 : 0);
   if (!lines.length) return;
-  const g = el.querySelector('svg'), padL = 36, padT = 18, W = Math.max(w - padL - 8, 4), H = Math.max(h - padT - 22, 4);
-  let max = 0; lines.forEach(x => x.values.forEach(v => max = Math.max(max, v || 0))); max = nice(max);
-  const band = W / Math.max(cats.length, 1);
-  lines.forEach((x, k) => add(g, 'polyline', {points: x.values.map((v, i) => `${padL + band * i + band / 2},${padT + H - (v || 0) / max * H}`).join(' '), fill: 'none', stroke: color(s, x.name, k + 3), 'stroke-width': 3, opacity: d.sample ? .4 : 1}));
+  const g = f.g, X = i => f.padL + f.band * i + f.band / 2, Y = v => f.padT + f.H - (Math.min(Math.max(v, rg.lo), rg.hi) - rg.lo) / span * f.H;
+  if (showSec) rg.ticks.forEach(v => add(g, 'text', {x: f.padL + f.W + 6, y: Y(v) + 4, 'font-size': VA.size || 12, fill: VA.color || muted}, vf(v)));
+  const LN = ch.line || {};
+  lines.forEach((x, k) => { const c = color(s, x.name, k + cols.values.length), sw = (LN.widthBy || {})[x.name] ?? LN.width ?? 3;
+    const pts = x.values.map((v, i) => v == null ? null : [X(i), Y(v)]).filter(Boolean);
+    add(g, 'polyline', {points: pts.map(p => p.join(',')).join(' '), fill: 'none', stroke: c, 'stroke-width': sw, opacity: d.sample ? .4 : 1});
+    if (LN.marker) pts.forEach(p => add(g, 'circle', {cx: p[0], cy: p[1], r: 3.5, fill: c}));
+    x.values.forEach((v, i) => { const t = v == null ? '' : dataLabel(s, d, x, i, v); if (t) add(g, 'text', {...labelStyle(s, x), x: X(i), y: Y(v) - 8, 'text-anchor': i === x.values.length - 1 ? 'end' : 'middle'}, t); }); });
 }
 R.lineStackedColumnComboChart = (s, el, w, h) => combo(s, el, w, h, 'stack');
 R.lineClusteredColumnComboChart = (s, el, w, h) => combo(s, el, w, h, 'cluster');
@@ -252,35 +443,80 @@ R.gauge = (s, el, w, h) => {
   if (t != null) { const f = Math.min(t / max, 1), a = Math.PI * (1 - f); add(g, 'line', {x1: cx + (r - r * .18) * Math.cos(a), y1: cy - (r - r * .18) * Math.sin(a), x2: cx + (r + r * .18) * Math.cos(a), y2: cy - (r + r * .18) * Math.sin(a), stroke: s.gauge.target, 'stroke-width': 2}); }
   add(g, 'text', {x: cx, y: cy - 6, 'font-size': Math.max(14, r * .32), 'font-weight': 600, fill: txt, 'text-anchor': 'middle'}, d.sample ? '–' : fmt(v, d.formats[0]));
 };
+function cellCss(p) { return p ? `font-family:'${p.family}';font-weight:${p.weight};font-size:${p.size}px;color:${p.color}${p.bg ? ';background:' + p.bg : ''}` : ''; }
 function tableGrid(s, el, w, h, matrix) {
   const d = dataOf(s, 8), nG = d.groups.length, head = [...(matrix ? d.groups.slice(0, 1) : d.groups), ...d.values];
-  const rows = matrix ? d.rows.map(r => [r[0], ...r.slice(nG)]) : d.rows;
+  const rows = matrix ? d.rows.map(r => [r[0], ...r.slice(nG)]) : d.rows, G = s.grid || {}, pad = G.rowPadding ?? 3;
   const wd = s.widths ? Object.values(s.widths) : null;
-  let h2 = `<div style="position:absolute;inset:0;overflow:hidden"><table class="grid" style="font-size:${PX(14)}px;color:${txt}">` +
+  let h2 = `<div style="position:absolute;inset:0;overflow:hidden"><table class="grid" style="${cellCss(G.values)};color:${(G.values || {}).color || txt}">` +
     (wd ? '<colgroup>' + wd.map(x => `<col style="width:${x}px">`).join('') + '</colgroup>' : '') +
-    `<tr>${head.map((x, k) => `<th class="${k < (matrix ? 1 : nG) ? 'l' : ''}" style="color:${muted};font-weight:600;border-bottom:1px solid ${grid}">${esc(x)}</th>`).join('')}</tr>`;
-  for (const r of rows.slice(0, 40)) h2 += `<tr>${r.map((x, k) => { const vk = k - (matrix ? 1 : nG);
-      return `<td class="${vk < 0 ? 'l' : ''}" style="border-bottom:1px solid ${C.neutralTint || '#F3F2F1'}">${d.sample ? (vk < 0 ? '—' : '') : esc(vk < 0 ? x : fmt(x, d.formats[vk]))}</td>`; }).join('')}</tr>`;
+    `<tr>${head.map((x, k) => `<th class="${k < (matrix ? 1 : nG) ? 'l' : ''}" style="${cellCss(G.colHead) || 'color:' + muted + ';font-weight:600'};border-bottom:1px solid ${grid}">${esc(x)}</th>`).join('')}</tr>`;
+  rows.slice(0, 40).forEach((r, j) => { h2 += `<tr>${r.map((x, k) => { const vk = k - (matrix ? 1 : nG);
+      const on = t_ => vk >= 0 && (!t_ || t_ === head[k]);         // a cf colour on its target column only
+      const fc = d.fonts && on(d.fontTarget) ? d.fonts[j] : null, bc = d.backs && on(d.backTarget) ? d.backs[j] : null;
+      const body = d.sample ? (vk < 0 ? '—' : '') : isImg(x) ? `<img alt="" src="${esc(svgSrc(x))}" style="height:${(G.values || {}).size * 1.6 || 20}px;max-width:100%;vertical-align:middle">` : esc(vk < 0 ? x : fmt(x, d.formats[vk]));
+      return `<td class="${vk < 0 ? 'l' : ''}" style="padding:${pad}px 8px;border-bottom:${G.h ?? 1}px solid ${G.hColor || C.neutralTint || '#F3F2F1'}${fc ? ';color:' + fc : ''}${bc ? ';background:' + bc : ''}">${body}</td>`; }).join('')}</tr>`; });
   el.insertAdjacentHTML('beforeend', h2 + '</table></div>');
 }
+// a matrix with a field on Columns: rows x columns, each cell's colours from its cf measures; a cell without a value
+// (none, or hidden as a small group) shows an en dash
+function matrixGrid(s, el, w, h) {
+  const d = dataOf(s, 8);
+  if (d.sample || d.leg == null || d.groups.length < 2) return tableGrid(s, el, w, h, true);
+  const ri = d.cat ?? 0, ci = d.leg, nG = d.groups.length, G = s.grid || {}, lv = d.levels || [], K = '\u0001';
+  const rowsK = lv[ri] ? [...lv[ri]] : [...new Set(d.rows.map(r => r[ri]))], colsK = lv[ci] ? [...lv[ci]] : [...new Set(d.rows.map(r => r[ci]))];
+  const at = {}; d.rows.forEach((r, j) => at[r[ri] + K + r[ci]] = j);
+  if (s.sort && d.values.includes(s.sort.field)) {   // rows by their total (wireframe_data.py rowTotals), else the cells'
+    const RT = d.rowTotals || {};
+    const tot = k => RT[k] != null ? RT[k] : colsK.reduce((a, c) => { const j = at[k + K + c], v = j == null ? 0 : d.rows[j][nG]; return a + (typeof v === 'number' && v > 0 ? v : 0); }, 0);
+    rowsK.sort((a, b) => s.sort.desc ? tot(b) - tot(a) : tot(a) - tot(b)); }
+  const fRow = s.fields.find(f => f.role === 'Rows'), fVal = s.fields.find(f => f.role === 'Values'), wd = s.widths || {};
+  const gap = G.v || 0, rw = fRow && wd[fRow.field] && wd[fRow.field] - gap, vw = fVal && wd[fVal.field] && wd[fVal.field] - gap, pad = G.rowPadding ?? 3;
+  const V = G.values || {}, CH = G.colHead || {}, RH = G.rowHead || {};
+  const width = rw && vw ? `width:${rw + vw * colsK.length + (G.v || 0) * (colsK.length + 2)}px` : 'width:100%';
+  let t = `<div style="position:absolute;inset:0;overflow:hidden"><table style="border-collapse:separate;border-spacing:${G.v || 0}px ${G.h || 0}px;table-layout:fixed;${width};margin:-${G.h || 0}px -${G.v || 0}px">` +
+    `<colgroup><col style="width:${rw ? rw + 'px' : '14%'}">${colsK.map(() => `<col${vw ? ` style="width:${vw}px"` : ''}>`).join('')}</colgroup>` +
+    `<tr><th style="${cellCss(CH)};text-align:left;padding:${pad}px 6px;white-space:nowrap;overflow:hidden">${esc(d.groups[ri])}</th>` +
+    colsK.map(c => `<th style="${cellCss(CH)};text-align:${CH.align || 'right'};padding:${pad}px 6px;white-space:nowrap;overflow:hidden">${esc(c)}</th>`).join('') + '</tr>';
+  for (const r of rowsK) {
+    t += `<tr><th style="${cellCss(RH)};text-align:left;padding:${pad}px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r)}</th>`;
+    for (const c of colsK) { const j = at[r + K + c], v = j == null ? null : d.rows[j][nG];
+      const fc = j != null && d.fonts ? d.fonts[j] : null, bc = j != null && d.backs ? d.backs[j] : null;
+      t += `<td style="${cellCss(V)};text-align:${V.align || 'right'};padding:${pad}px 6px;white-space:nowrap;overflow:hidden${j == null ? ';color:' + muted : ''}${fc ? ';color:' + fc : ''}${bc ? ';background:' + bc : ''}">${esc(j == null || v == null ? '–' : fmt(v, d.formats[0]))}</td>`; }
+    t += '</tr>'; }
+  el.insertAdjacentHTML('beforeend', t + '</table></div>');
+}
 R.tableEx = (s, el, w, h) => tableGrid(s, el, w, h, false);
-R.pivotTable = (s, el, w, h) => tableGrid(s, el, w, h, true);
+R.pivotTable = matrixGrid;
 function members(s, n) { const d = D[s.id]; if (d) return d.rows.map(r => String(r[0])); const it = s.slicer.items;
   return Array.isArray(it) ? it.map(String) : Array.from({length: typeof it === 'number' ? it : (n || 4)}, (_, i) => 'Item ' + (i + 1)); }
+// rail + panel pickers: image list (a round picture and the name per row), image cards (a picture over the name)
+function pickerTiles(s, el, w, h) {
+  const sl = s.slicer, cards = sl.picker === 'cards', items = members(s, cards ? 6 : 8);
+  const sel = new Set(sl.selected.length ? sl.selected : [items[0]]);
+  const pic = (sz, r) => `<div style="flex:none;width:${sz};height:${sz};border-radius:${r};background:${tint}"></div>`;
+  const tile = x => { const on = sel.has(x), bd = on ? `1px solid ${C.selected || C.text || '#252423'}` : '1px solid transparent';
+    return cards ? `<div data-item="${esc(x)}" style="display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:${sl.radius}px;border:${bd};background:${hexA(sl.fill, sl.fillAlpha)}">${pic('100%', sl.radius + 'px').replace('height:100%', 'aspect-ratio:4/3')}<div style="font-size:${sl.size || 13}px;font-weight:${on ? 600 : sl.weight};color:${sl.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x)}</div></div>`
+      : `<div data-item="${esc(x)}" style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:${sl.radius}px;border:${bd};background:${hexA(sl.fill, sl.fillAlpha)}">${pic('32px', '50%')}<div style="font-size:${sl.size || 13}px;font-weight:${on ? 600 : sl.weight};color:${sl.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(x)}</div></div>`; };
+  el.insertAdjacentHTML('beforeend', `<div style="flex:1;display:grid;gap:8px;align-content:start;grid-template-columns:repeat(${cards ? 2 : 1},1fr);overflow:hidden">` + items.map(tile).join('') + '</div>');
+}
 R.advancedSlicerVisual = (s, el, w, h) => {
+  if (s.slicer.picker) return pickerTiles(s, el, w, h);
   const sl = s.slicer, items = members(s, 4), cols = sl.cols || items.length, rows = sl.rows || Math.ceil(items.length / cols);
   const head = sl.headerShow ? `<div style="font-size:12px;font-weight:600;color:${muted};margin-bottom:4px">${esc(sl.header)}</div>` : '';
   const sel = new Set(sl.selected.length ? sl.selected : []);
+  const paint = (b, on) => { b.dataset.on = on ? '1' : ''; b.style.background = on ? sl.selFill : hexA(sl.fill, sl.fillAlpha); b.style.color = on ? sl.selColor : sl.color;
+    const o = on ? sl.selOutline || (sl.outline ? sl.selFill : null) : sl.outline; b.style.border = o ? `1px solid ${o}` : '0'; };
   el.insertAdjacentHTML('beforeend', head + `<div style="flex:1;display:grid;gap:6px;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">` +
-    items.slice(0, cols * rows).map(x => { const on = sel.has(x); return `<div data-item="${esc(x)}" style="display:flex;align-items:center;justify-content:center;border:1px solid ${on ? sl.selFill : sl.outline};background:${on ? sl.selFill : sl.fill};color:${on ? sl.selColor : sl.color};border-radius:${sl.radius}px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;cursor:pointer">${esc(x)}</div>`; }).join('') + '</div>');
-  el.querySelectorAll('[data-item]').forEach(b => b.onclick = () => { const on = b.style.background === sl.selFill; if (sl.single) el.querySelectorAll('[data-item]').forEach(o => { o.style.background = sl.fill; o.style.color = sl.color; o.style.borderColor = sl.outline; });
-    b.style.background = on ? sl.fill : sl.selFill; b.style.color = on ? sl.color : sl.selColor; b.style.borderColor = on ? sl.outline : sl.selFill; });
+    items.slice(0, cols * rows).map(x => `<div data-item="${esc(x)}" style="display:flex;align-items:center;justify-content:center;border-radius:${sl.radius}px;font-family:'${sl.family}';font-weight:${sl.weight};font-size:${sl.size || 13}px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;cursor:pointer">${esc(x)}</div>`).join('') + '</div>');
+  el.querySelectorAll('[data-item]').forEach(b => { paint(b, sel.has(b.dataset.item));
+    b.onclick = () => { const on = !b.dataset.on; if (sl.single) el.querySelectorAll('[data-item]').forEach(o => paint(o, false)); paint(b, on); }; });
 };
 R.slicer = (s, el, w, h) => {
   const sl = s.slicer, items = members(s, 5);
   const head = sl.headerShow ? `<div style="font-size:12px;font-weight:600;color:${muted};margin-bottom:4px">${esc(sl.header)}</div>` : '';
   if (s.mode === 'dropdown') {
-    el.insertAdjacentHTML('beforeend', head + `<div style="height:32px;border:1px solid ${grid};border-radius:8px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:13px;color:${sl.color};background:#fff"><span>${esc(sl.selected.join(', ') || 'All')}</span><span>⌄</span></div>`);
+    el.insertAdjacentHTML('beforeend', head + `<div style="height:32px;border:1px solid ${grid};border-radius:8px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:13px;color:${sl.color};background:transparent"><span>${esc(sl.selected.join(', ') || 'All')}</span><span>⌄</span></div>`);
   } else {
     el.insertAdjacentHTML('beforeend', head + items.slice(0, 12).map(x => `<div style="font-size:13px;color:${sl.color};padding:2px 0"><span style="display:inline-block;width:12px;height:12px;border:1px solid ${muted};border-radius:2px;margin-right:6px;vertical-align:-1px;background:${sl.selected.includes(x) ? (C.primary || '#118DFF') : 'transparent'}"></span>${esc(x)}</div>`).join(''));
   }
@@ -291,7 +527,7 @@ R.pageNavigator = (s, el, w, h) => {
   el.insertAdjacentHTML('beforeend', n.pages.map(p => { const st = n.states[p === n.current ? 'selected' : 'default'];
     const fill = st.alpha > 0 ? n.fill : 'transparent';
     return `<div data-goto="${esc(p)}" style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:${n.radius}px;background:${fill};opacity:1;color:${st.color};font-size:${n.size}px;border:${p === n.current ? '1px solid ' + n.outline : '0'};cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p)}</div>`; }).join(''));
-  el.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => show(S.pages.findIndex(p => p.name === b.dataset.goto)));
+  if (!n.bookmarks) el.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => show(S.pages.findIndex(p => p.name === b.dataset.goto)));
 };
 R.bookmarkNavigator = R.pageNavigator;
 R.actionButton = (s, el, w, h) => {
@@ -307,7 +543,12 @@ R.textbox = (s, el) => {
 };
 R.shape = (s, el) => { const sh = s.shape; el.style.background = hexA(sh.fill, sh.alpha); el.style.borderRadius = sh.radius + 'px'; if (sh.outline) el.style.border = `1px solid ${sh.outline}`; };
 R.basicShape = R.shape;
-R.image = (s, el) => el.insertAdjacentHTML('beforeend', `<div class="placeholder" style="border-style:solid">🖼 image</div>`);
+// static images (image visuals, page and container backgrounds): the files embedded once each in S.images
+function imgCss(el, im) { Object.assign(el.style, {backgroundImage: `url("${S.images[im.src]}")`, backgroundSize: im.scaling || '100% 100%',
+  backgroundRepeat: 'no-repeat', backgroundPosition: 'center'}); }
+R.image = (s, el) => { const im = s.img;
+  if (im && im.src && S.images[im.src]) return imgCss(el, im);
+  el.insertAdjacentHTML('beforeend', `<div class="placeholder" style="border-style:solid">🖼 image${im ? '<br><small>not found: ' + esc(im.name) + '</small>' : ''}</div>`); };
 R._unknown = (s, el) => el.insertAdjacentHTML('beforeend', `<div class="placeholder"><div><b>${esc(s.tag)}</b><br>${esc(s.fields.map(f => f.label).join(', '))}<br><small>no wireframe renderer for this type</small></div></div>`);
 
 // ---- pattern renderers (docs/patterns/): layout.json `pattern` picks one over the visual type's renderer
@@ -398,11 +639,17 @@ P['partial-period'] = (s, el, w, h) => {
   add(g, 'text', {x: X(n - 1) + 10, y: Y(v[n - 1]) + 4, 'font-size': 11, fill: muted}, 'partial');
   if (!d.sample) cats.forEach((c, i) => { if (i % Math.ceil(n / 12) === 0) add(g, 'text', {x: X(i), y: h - 6, 'font-size': 10, fill: muted, 'text-anchor': 'middle'}, String(c).slice(0, 8)); });
 };
+// rail + panel (docs/patterns/rail-panel.md, panel.md): the rail at the page edge with a rule on its inner edge;
+// the shared panel with the container radius and one soft shadow
+P['rail-panel'] = (s, el, w, h) => { if (!R[s.type] || !s.shape) return (R[s.type] || R._unknown)(s, el, w, h);
+  R.shape(s, el); el.style.borderRadius = '0'; el.style.borderRight = `1px solid ${C.border || '#E4E7EC'}`; };
+P['panel'] = (s, el, w, h) => { if (!R[s.type] || !s.shape) return (R[s.type] || R._unknown)(s, el, w, h);
+  R.shape(s, el); el.style.boxShadow = '0 1px 2px rgba(0,0,0,.05), 0 8px 20px rgba(0,0,0,.07)'; };
 P['freshness-line'] = (s, el, w, h) => {
   if (s.type === 'cardVisual' || s.type === 'card') { const d = D[s.id], row = d && d.rows[0];
     const text = row ? String(row[d.groups.length]) : 'Data to dd mmm yyyy';
     el.style.justifyContent = 'center';
-    el.insertAdjacentHTML('beforeend', `<div style="text-align:${(s.card || {}).align || 'right'};font-size:13px;color:${muted};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(text)}</div>`); return; }
+    el.insertAdjacentHTML('beforeend', `<div style="text-align:${(s.card || {}).align || 'right'};font-size:13px;color:${muted};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(text)}</div>`); if (row) el.dataset.main = text; return; }
   (R[s.type] || R._unknown)(s, el, w, h);
   const g = el.querySelector('svg'); if (!g) return; const x = w * .86;
   add(g, 'line', {x1: x, x2: x, y1: 4, y2: h - 22, stroke: muted, 'stroke-dasharray': '4 3'});
@@ -420,12 +667,14 @@ P['exception-list'] = (s, el, w, h) => {
 P['direct-labels'] = (s, el, w, h) => {
   if (!/line|area/i.test(s.type)) return (R[s.type] || R._unknown)(s, el, w, h);
   const d = dataOf(s, 12), ss0 = series(d).series;
+  if (d.labels && !d.sample) return (R[s.type] || R.lineChart)(s, el, w, h);
   const ss = d.sample ? s.fields.filter(f => f.role === 'Y').map((fl, k) => ({name: fl.label, values: seasonal(s, 12, fl.label).map(v => v + k * 15)})) : ss0;
   if (!ss.length) return (R[s.type] || R._unknown)(s, el, w, h);
   const longest = Math.max(...ss.map(x => String(x.name).length)), g = svg(w, h); el.appendChild(g);
   const f = frame(w, h, 40, 22, 8, Math.min(longest * 7 + 14, w * .3));
-  let max = 0; ss.forEach(x => x.values.forEach(v => max = Math.max(max, v || 0))); max = nice(max);
-  const n = Math.max(...ss.map(x => x.values.length)), X = i => f.padL + (n > 1 ? f.W * i / (n - 1) : f.W / 2), Y = v => f.padT + f.H - (v || 0) / max * f.H;
+  let lo = Infinity, hi = -Infinity; ss.forEach(x => x.values.forEach(v => { if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }));
+  const rg = valueRange(lo, hi, null, d, false, lo >= 0), span = (rg.hi - rg.lo) || 1;
+  const n = Math.max(...ss.map(x => x.values.length)), X = i => f.padL + (n > 1 ? f.W * i / (n - 1) : f.W / 2), Y = v => f.padT + f.H - ((v ?? rg.lo) - rg.lo) / span * f.H;
   gridLines(g, f);
   const ends = [];
   ss.forEach((x, k) => { const c = color(s, x.name, k); add(g, 'polyline', {points: x.values.map((v, i) => `${X(i)},${Y(v)}`).join(' '), fill: 'none', stroke: c, 'stroke-width': 3});
@@ -435,9 +684,11 @@ P['direct-labels'] = (s, el, w, h) => {
 };
 
 // ---- Deneb: the visual's Vega-Lite spec over its own aggregated dataset (sample records without data).
-// --vega cdn renders with Vega-Lite itself; the default is a subset renderer (marks bar, line, area, point, circle,
-// square, tick, rule, rect, text; encodings x, y, x2, y2, color, size, opacity, text, strokeDash; layer; an x
-// interval selection in params is shaded). Anything else is listed under the visual as not drawn.
+// Vega-Lite itself draws it when its pinned scripts loaded (vega "cdn", online); otherwise (or vega "offline") a subset renderer does
+// (marks bar, line, area, point, circle, square, tick, rule, rect, text; encodings x, y, x2, y2, color, size, opacity,
+// text, strokeDash with conditions; transforms calculate and filter; layer; an x interval selection in params is
+// shaded). Anything else is listed under the visual as not drawn.
+const READY = [];                                  // renders still running (Vega-Lite): window.pageReady waits for them
 function denebData(s) {
   const d = D[s.id];
   if (d) { const names = [...d.groups, ...d.values]; return {rows: d.rows.map(r => Object.fromEntries(names.map((n, k) => [n, r[k]]))), sample: false}; }
@@ -466,20 +717,41 @@ R.deneb = (s, el, w, h) => {
   if (S.vega === 'cdn' && window.vegaEmbed) {
     const full = {...spec, data: {values: data.rows}, width: w - 10, height: h - 10, autosize: {type: 'fit', contains: 'padding'}};
     const box = document.createElement('div'); el.appendChild(box);
-    window.vegaEmbed(box, full, {actions: false, renderer: 'svg'}).catch(e => { box.remove(); vlSubset(s, el, w, h, spec, data.rows);
-      el.insertAdjacentHTML('beforeend', `<span class="vlnote" style="bottom:14px">Vega-Lite: ${esc(e.message)}</span>`); });
+    READY.push(window.vegaEmbed(box, full, {actions: false, renderer: 'svg'}).catch(e => { box.remove(); vlSubset(s, el, w, h, spec, data.rows);
+      el.insertAdjacentHTML('beforeend', `<span class="vlnote" style="bottom:14px">Vega-Lite: ${esc(e.message)}</span>`); }));
     return;
   }
   vlSubset(s, el, w, h, spec, data.rows);
+  if (S.vega === 'cdn') el.insertAdjacentHTML('beforeend', '<span class="vlnote" style="bottom:14px">offline: drawn by the Vega-Lite subset renderer</span>');
 };
 const VL_ENC = ['x', 'y', 'x2', 'y2', 'color', 'size', 'opacity', 'text', 'strokeDash', 'tooltip', 'order', 'detail', 'shape'];
-function vlSubset(s, el, w, h, spec, rows) {
+const VLX = {indexof: (a, v) => (a || []).indexOf(v), isValid: x => x != null && !Number.isNaN(x), toNumber: Number, toString: String,
+             abs: Math.abs, round: Math.round, floor: Math.floor, ceil: Math.ceil, min: Math.min, max: Math.max};
+function vlExpr(expr) { try { return new Function('datum', 'VLX', 'with (VLX) { return (' + expr + '); }'); } catch (e) { return null; } }
+function vlRun(f, r) { try { return f(r, VLX); } catch (e) { return null; } }
+function vlTransform(rows, ts, skipped) {
+  for (const t of ts || []) {
+    if (t.calculate != null && t.as) { const f = vlExpr(t.calculate); if (!f) { skipped.add('transform calculate'); continue; }
+      rows = rows.map(r => ({...r, [t.as]: vlRun(f, r)})); }
+    else if (typeof t.filter === 'string') { const f = vlExpr(t.filter); if (!f) { skipped.add('transform filter'); continue; } rows = rows.filter(r => vlRun(f, r)); }
+    else if (t.filter && t.filter.field) { const F = t.filter;
+      rows = rows.filter(r => { const x = r[F.field]; return F.equal !== undefined ? x === F.equal : F.oneOf ? F.oneOf.includes(x) : F.range ? x >= F.range[0] && x <= F.range[1] : true; }); }
+    else skipped.add('transform ' + Object.keys(t)[0]);
+  }
+  return rows;
+}
+function vlChan(c, r, dflt) {                      // a channel's value for one row: its conditions, then its value
+  if (!c) return dflt;
+  for (const k of [].concat(c.condition || [])) { const f = k.test && vlExpr(k.test); if (f && vlRun(f, r)) return k.value; }
+  return c.value !== undefined ? c.value : dflt;
+}
+function vlSubset(s, el, w, h, spec, rows0) {
   const skipped = new Set(), g = svg(w, h); el.appendChild(g);
   ['facet', 'repeat', 'concat', 'hconcat', 'vconcat'].forEach(k => { if (spec[k]) skipped.add(k); });
   const layers = [];
-  (function walk(node, enc) { const e = {...enc, ...(node.encoding || {})};
-    (node.transform || []).forEach(t => skipped.add('transform ' + Object.keys(t)[0]));
-    if (node.layer) node.layer.forEach(l => walk(l, e)); else if (node.mark) layers.push({mark: typeof node.mark === 'string' ? {type: node.mark} : node.mark, enc: e}); })(spec, {});
+  (function walk(node, enc, rows) { const e = {...enc, ...(node.encoding || {})}, rs = vlTransform(rows, node.transform, skipped);
+    if (node.layer) node.layer.forEach(l => walk(l, e, rs)); else if (node.mark) layers.push({mark: typeof node.mark === 'string' ? {type: node.mark} : node.mark, enc: e, rows: rs}); })(spec, {}, rows0);
+  const all = layers.length ? layers.flatMap(l => l.rows) : rows0;
   const f = frame(w, h, 44, 24, 10, 10);
   const field = c => c && (c.field != null ? String(c.field).replace(/\\\./g, '.') : null);
   function scale(axis) {
@@ -487,19 +759,19 @@ function vlSubset(s, el, w, h, spec, rows) {
     if (!encs.length) return null;
     const len = axis === 'x' ? f.W : f.H;
     if (encs.some(c => c.type === 'quantitative' || c.aggregate)) {
-      const vals = encs.flatMap(c => rows.map(r => +r[field(c)]).filter(isFinite));
+      const vals = encs.flatMap(c => all.map(r => +r[field(c)]).filter(isFinite));
       const zero = !encs.some(c => c.scale && c.scale.zero === false);
       let lo = zero ? Math.min(0, ...vals) : Math.min(...vals), hi = nice(Math.max(0, ...vals)); if (!vals.length) { lo = 0; hi = 1; }
       const sp = (hi - lo) || 1;
       return {q: true, lo, hi, bw: 0, f: v => axis === 'x' ? f.padL + (v - lo) / sp * len : f.padT + len - (v - lo) / sp * len};
     }
-    const dom = [...new Set(rows.map(r => r[field(encs[0])]))]; if (/^(descending|-[xy])$/.test(encs[0].sort || '')) dom.reverse();
+    const dom = [...new Set(all.map(r => r[field(encs[0])]))]; if (/^(descending|-[xy])$/.test(encs[0].sort || '')) dom.reverse();
     const bw = len / Math.max(dom.length, 1);
     return {q: false, dom, bw, f: v => (axis === 'x' ? f.padL : f.padT) + bw * Math.max(dom.indexOf(v), 0) + bw / 2};
   }
   const sx = scale('x'), sy = scale('y');
-  const colEnc = layers.map(l => l.enc.color).find(c => c && field(c) != null), colDom = colEnc ? [...new Set(rows.map(r => r[field(colEnc)]))] : [];
-  const colour = (l, r) => { const c = l.enc.color; if (c && c.value) return c.value;
+  const colEnc = layers.map(l => l.enc.color).find(c => c && field(c) != null), colDom = colEnc ? [...new Set(all.map(r => r[field(colEnc)]))] : [];
+  const colour = (l, r) => { const c = l.enc.color; if (c && (c.value !== undefined || c.condition)) return vlChan(c, r, l.mark.color || S.dataColors[0]);
     if (c && field(c) != null) return (c.scale && c.scale.range && c.scale.range[Math.max(colDom.indexOf(r[field(c)]), 0)]) || S.dataColors[Math.max(colDom.indexOf(r[field(c)]), 0) % S.dataColors.length];
     return l.mark.color || l.mark.fill || l.mark.stroke || S.dataColors[0]; };
   if (sy) { if (sy.q) for (let t = 0; t <= 4; t++) { const v = sy.lo + (sy.hi - sy.lo) * t / 4, y = sy.f(v); add(g, 'line', {x1: f.padL, x2: f.padL + f.W, y1: y, y2: y, stroke: grid}); add(g, 'text', {x: f.padL - 4, y: y + 4, 'font-size': 10, fill: muted, 'text-anchor': 'end'}, fmt(v)); }
@@ -508,35 +780,36 @@ function vlSubset(s, el, w, h, spec, rows) {
             else sx.dom.forEach((v, i) => { if (sx.dom.length <= 14 || i % Math.ceil(sx.dom.length / 12) === 0) add(g, 'text', {x: sx.f(v), y: h - 6, 'font-size': 10, fill: muted, 'text-anchor': 'middle'}, String(v).slice(0, 10)); }); }
   (spec.params || []).forEach(p => { if (p.select && (p.select === 'interval' || p.select.type === 'interval')) add(g, 'rect', {x: f.padL + f.W * .4, y: f.padT, width: f.W * .25, height: f.H, fill: C.tealTint || '#E7F3F5', opacity: .8}); });
   const pos = (sc, enc, r) => enc && field(enc) != null ? (sc ? sc.f(sc.q ? +r[field(enc)] : r[field(enc)]) : null) : (enc && enc.value != null ? enc.value : null);
-  layers.forEach(l => { const m = l.mark, t = m.type, e = l.enc;
+  layers.forEach(l => { const m = l.mark, t = m.type, e = l.enc, rows = l.rows;
     Object.keys(e).forEach(k => { if (!VL_ENC.includes(k)) skipped.add('encoding ' + k); });
-    const op = () => (e.opacity && e.opacity.value != null) ? e.opacity.value : (m.opacity ?? 1);
+    const op = r => vlChan(e.opacity, r, m.opacity ?? 1);
     const dash = (e.strokeDash && e.strokeDash.value) || m.strokeDash;
     if (t === 'line' || t === 'area') {
       const groups = {}; rows.forEach(r => { const k = e.color && field(e.color) != null ? r[field(e.color)] : '_'; (groups[k] = groups[k] || []).push(r); });
-      Object.values(groups).forEach(gr => { const pts = gr.map(r => [pos(sx, e.x, r), pos(sy, e.y, r)]).filter(p => p[0] != null && p[1] != null && isFinite(p[1]));
+      Object.values(groups).forEach(gr => { const pts = gr.map(r => [pos(sx, e.x, r), pos(sy, e.y, r), pos(sy, e.y2, r)]).filter(p => p[0] != null && p[1] != null && isFinite(p[1]));
         if (!pts.length) return; pts.sort((a, b) => a[0] - b[0]); const c = colour(l, gr[0]);
-        if (t === 'area') add(g, 'polygon', {points: [...pts.map(p => p.join(',')), `${pts[pts.length - 1][0]},${f.padT + f.H}`, `${pts[0][0]},${f.padT + f.H}`].join(' '), fill: c, opacity: m.opacity ?? .3});
-        else add(g, 'polyline', {points: pts.map(p => p.join(',')).join(' '), fill: 'none', stroke: c, 'stroke-width': m.strokeWidth || 2, 'stroke-dasharray': dash ? dash.join(' ') : ''});
+        if (t === 'area') { const lower = pts.map(p => [p[0], p[2] != null ? p[2] : f.padT + f.H]).reverse();
+          add(g, 'polygon', {points: [...pts.map(p => p[0] + ',' + p[1]), ...lower.map(p => p.join(','))].join(' '), fill: c, opacity: m.opacity ?? (e.y2 ? 1 : .3)}); }
+        else add(g, 'polyline', {points: pts.map(p => p[0] + ',' + p[1]).join(' '), fill: 'none', stroke: c, 'stroke-width': m.strokeWidth || 2, 'stroke-dasharray': dash ? dash.join(' ') : ''});
         if (m.point) pts.forEach(p => add(g, 'circle', {cx: p[0], cy: p[1], r: 3, fill: c})); });
       return; }
     rows.forEach(r => { const c = colour(l, r), x = pos(sx, e.x, r), y = pos(sy, e.y, r), x2 = pos(sx, e.x2, r), y2 = pos(sy, e.y2, r);
       if (t === 'bar') { const horiz = sx && sx.q && sy && !sy.q;
-        if (horiz && x != null) { const x0 = x2 != null ? x2 : sx.f(Math.max(sx.lo, 0)); add(g, 'rect', {x: Math.min(x, x0), y: y - sy.bw * .35, width: Math.abs(x - x0), height: sy.bw * .7, fill: c, opacity: op(), rx: 2}); }
-        else if (sx && sy && y != null) { const y0 = y2 != null ? y2 : sy.f(Math.max(sy.lo, 0)); add(g, 'rect', {x: x - sx.bw * .35, y: Math.min(y, y0), width: sx.bw * .7, height: Math.abs(y - y0), fill: c, opacity: op(), rx: 2}); } }
+        if (horiz && x != null) { const x0 = x2 != null ? x2 : sx.f(Math.max(sx.lo, 0)); add(g, 'rect', {x: Math.min(x, x0), y: y - sy.bw * .35, width: Math.abs(x - x0), height: sy.bw * .7, fill: c, opacity: op(r), rx: 2}); }
+        else if (sx && sy && y != null) { const y0 = y2 != null ? y2 : sy.f(Math.max(sy.lo, 0)); add(g, 'rect', {x: x - sx.bw * .35, y: Math.min(y, y0), width: sx.bw * .7, height: Math.abs(y - y0), fill: c, opacity: op(r), rx: 2}); } }
       else if (t === 'rect') { const xa = x2 != null ? Math.min(x, x2) : x != null ? x - (sx ? sx.bw / 2 : 0) : f.padL, ya = y2 != null ? Math.min(y, y2) : y != null ? y - (sy ? sy.bw / 2 : 0) : f.padT;
-        add(g, 'rect', {x: xa, y: ya, width: x2 != null ? Math.abs(x2 - x) : (sx ? sx.bw || 4 : f.W), height: y2 != null ? Math.abs(y2 - y) : (sy ? sy.bw || 4 : f.H), fill: c, opacity: op()}); }
+        add(g, 'rect', {x: xa, y: ya, width: x2 != null ? Math.abs(x2 - x) : (sx ? sx.bw || 4 : f.W), height: y2 != null ? Math.abs(y2 - y) : (sy ? sy.bw || 4 : f.H), fill: c, opacity: op(r)}); }
       else if (t === 'rule') add(g, 'line', {x1: x ?? f.padL, x2: x2 ?? x ?? f.padL + f.W, y1: y ?? f.padT, y2: y2 ?? y ?? f.padT + f.H, stroke: c, 'stroke-width': m.strokeWidth || 1.5, 'stroke-dasharray': dash ? dash.join(' ') : ''});
       else if (t === 'tick') { if (y != null) add(g, 'line', {x1: (x ?? f.padL) - 6, x2: (x ?? f.padL) + 6, y1: y, y2: y, stroke: c, 'stroke-width': 2}); }
       else if (t === 'point' || t === 'circle' || t === 'square') { if (x == null || y == null) return;
-        const sz = (e.size && e.size.value) || m.size || 50, rr = Math.sqrt(sz / Math.PI), filled = t !== 'point' ? m.filled !== false : m.filled === true;
+        const sz = vlChan(e.size, r, m.size || 50), rr = Math.sqrt(sz / Math.PI), filled = t !== 'point' ? m.filled !== false : m.filled === true;
         if (t === 'square') add(g, 'rect', {x: x - rr, y: y - rr, width: rr * 2, height: rr * 2, fill: filled ? c : '#fff', stroke: c, 'stroke-width': 2});
-        else add(g, 'circle', {cx: x, cy: y, r: rr, fill: filled ? c : '#fff', stroke: c, 'stroke-width': 2, opacity: op()}); }
-      else if (t === 'text') { const tv = e.text ? (field(e.text) != null ? r[field(e.text)] : e.text.value) : m.text;
-        add(g, 'text', {x: (x ?? f.padL) + (m.dx || 0), y: (y ?? f.padT) + (m.dy || 0) + 4, 'font-size': m.fontSize || 11, fill: (e.color && e.color.value) || m.color || txt,
+        else add(g, 'circle', {cx: x, cy: y, r: rr, fill: filled ? c : '#fff', stroke: c, 'stroke-width': filled ? 0 : 2, opacity: op(r)}); }
+      else if (t === 'text') { const tv = e.text ? (field(e.text) != null ? r[field(e.text)] : vlChan(e.text, r, '')) : m.text;
+        add(g, 'text', {x: (x ?? f.padL) + (m.dx || 0), y: (y ?? f.padT) + (m.dy || 0) + 4, 'font-size': m.fontSize || 11, 'font-weight': m.fontWeight || 400, fill: vlChan(e.color, r, null) || m.color || txt,
                         'text-anchor': m.align === 'left' ? 'start' : m.align === 'right' ? 'end' : 'middle'}, typeof tv === 'number' ? fmt(tv, e.text && e.text.format) : String(tv ?? '')); }
       else skipped.add('mark ' + t); }); });
-  if (skipped.size) el.insertAdjacentHTML('beforeend', `<span class="vlnote">not drawn (subset renderer; --vega cdn draws all): ${esc([...skipped].join(', '))}</span>`);
+  if (skipped.size) el.insertAdjacentHTML('beforeend', `<span class="vlnote">not drawn (subset renderer; Vega-Lite online draws all): ${esc([...skipped].join(', '))}</span>`);
 }
 
 function hexA(hex, a) { if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return hex || 'transparent'; const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a == null ? 1 : a})`; }
@@ -551,13 +824,16 @@ function draw(s, el) {
   if (isGroup) { return; }
   Object.assign(el.style, {left: s.x + 'px', top: s.y + 'px', width: s.w + 'px', height: s.h + 'px', zIndex: s.z * 1000 + parseInt(s.id.split('V')[1])});
   if (b.bg) el.style.background = hexA(b.bg, b.bgAlpha);
+  if (b.bgImage && b.bgImage.src && S.images[b.bgImage.src]) imgCss(el, b.bgImage);
   if (b.border) el.style.border = `${b.bw}px solid ${b.border}`;
   el.style.borderRadius = (b.radius || 0) + 'px';
   if (b.shadow) el.style.boxShadow = '0 1px 2px rgba(0,0,0,.06), 0 6px 16px rgba(0,0,0,.08)';
   el.style.padding = b.pad.map(p => p + 'px').join(' ');
   el.dataset.bg = b.bg || '#ffffff';
+  const T = (D[s.id] || {}).titles || {};            // title measures evaluated by wireframe_data.py
+  const ttl = k => b[k] && T[k] != null ? {...b[k], text: String(T[k]), measure: false} : b[k];
   const add_t = t => t && el.insertAdjacentHTML('beforeend', `<div class="ttl" style="font-family:'${t.family}';font-weight:${t.weight};font-size:${t.size}px;color:${t.color};text-align:${t.align}${t.measure ? ';font-style:italic' : ''}">${esc(t.text)}</div>`);
-  add_t(b.title); add_t(b.subtitle);
+  const title = ttl('title'); add_t(title); add_t(ttl('subtitle'));
   const body = document.createElement('div'); body.className = 'body'; el.appendChild(body);
   body.style.display = 'flex'; body.style.flexDirection = 'column';
   const tagCls = s.type === 'deneb' || s.method === 'deneb' ? 'deneb' : s.method && /svg/.test(s.method) ? 'svg' : (s.method && /html/.test(s.method) ? 'html' : (s.known ? '' : 'unknown'));
@@ -565,12 +841,21 @@ function draw(s, el) {
     (s.pattern ? `<span class="ptn">pattern: ${esc(s.pattern)}</span>` : ''));
   {
     const w = Math.max(body.clientWidth, 10), h = Math.max(body.clientHeight, 10);
-    try { (s.type === 'deneb' ? R.deneb : (s.pattern && P[s.pattern]) || R[s.type] || R._unknown)(s, body, w, h); } catch (e) { body.insertAdjacentHTML('beforeend', `<div class="placeholder">render error: ${esc(e.message)}</div>`); console.error(s.id, e); }
+    try { (s.type === 'deneb' ? R.deneb : (s.pattern && P[s.pattern]) || R[s.render || s.type] || R._unknown)(s, body, w, h); } catch (e) { body.insertAdjacentHTML('beforeend', `<div class="placeholder">render error: ${esc(e.message)}</div>`); console.error(s.id, e); }
     const d = D[s.id]; if (!HAVE && !['textbox', 'shape', 'basicShape', 'actionButton', 'pageNavigator', 'bookmarkNavigator', 'group', 'image', 'deneb'].includes(s.type) && s.fields.length) body.insertAdjacentHTML('beforeend', '<span class="nodata">sample shape · no data</span>');
     if (d && d.hidden) body.insertAdjacentHTML('beforeend', `<span class="hiddenrows">${d.hidden} group(s) under the minimum hidden</span>`);
   }
+  // what fidelity_check.py compares with Desktop: the visual type and its main text
+  el.dataset.type = s.type;
+  const own = ['textbox', 'actionButton', 'cardVisual', 'card'].includes(s.type);
+  el.dataset.main = s.type === 'textbox' ? [...body.children].map(p => p.textContent).join(' ').replace(/\s+/g, ' ').trim() :
+    s.type === 'actionButton' ? ((s.button || {}).text || '') : own ? (body.dataset.main || '') : ((title && title.text) || '');
+  if (!own && title && title.measure) el.dataset.mainMeasure = '1';
 }
-S.pages.forEach((p, i) => { const el = pagesEl[i]; Object.assign(el.style, {width: p.w + 'px', height: p.h + 'px', background: p.bg}); });
+S.pages.forEach((p, i) => { const el = pagesEl[i]; Object.assign(el.style, {width: p.w + 'px', height: p.h + 'px', background: p.bg});
+  (p.walls || []).filter(im => im.src && S.images[im.src]).forEach(im => { const wl = document.createElement('div'); wl.className = 'wall';
+    Object.assign(wl.style, {position: 'absolute', left: im.x + 'px', top: im.y + 'px', width: im.w + 'px', height: im.h + 'px', zIndex: 0, pointerEvents: 'none'});
+    imgCss(wl, im); el.insertBefore(wl, el.firstChild); }); });
 pagesEl.forEach(p => p.classList.add('on'));             // measure every page while it is shown, then hide
 document.querySelectorAll('[data-id][hidden]').forEach(g => { g.hidden = false; g.dataset.wasHidden = '1'; });
 document.querySelectorAll('[data-id]').forEach(el => { const s = byId[el.dataset.id]; if (s) draw(s, el); });
@@ -578,7 +863,7 @@ document.querySelectorAll('[data-was-hidden]').forEach(g => g.hidden = true);
 // group members: positions are page coordinates in layout.json; groups are full-page layers
 const tabs = document.getElementById('tabs');
 S.pages.forEach((p, i) => { const b = document.createElement('button'); b.textContent = `${i + 1} ${p.name}`; b.onclick = () => show(i); tabs.appendChild(b); });
-function fit() { const on = pagesEl.find(p => p.classList.contains('on')); if (!on) return; const k = Math.min(1, (window.innerWidth - 32) / on.offsetWidth); on.style.transform = `scale(${k})`; document.getElementById('stage').style.height = (on.offsetHeight * k + 32) + 'px'; }
+function fit() { const on = pagesEl.find(p => p.classList.contains('on')); if (!on) return; const k = document.body.classList.contains('shot') ? 1 : Math.min(1, (window.innerWidth - 32) / on.offsetWidth); on.style.transform = `scale(${k})`; document.getElementById('stage').style.height = (on.offsetHeight * k + 32) + 'px'; }
 function show(i) { if (i < 0 || i >= pagesEl.length) return; pagesEl.forEach((p, k) => p.classList.toggle('on', k === i)); [...tabs.children].forEach((b, k) => b.classList.toggle('on', k === i)); fit(); }
 window.addEventListener('resize', fit);
 // Labels button: hides or shows the ID badges and the visual-type tags together (B and T still toggle each one)
@@ -590,7 +875,12 @@ labelsBtn.onclick = () => { const hide = labelsShown(); document.body.classList.
 document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.toLowerCase();
   if (k === 'b') { document.body.classList.toggle('nobadge'); syncLabels(); } else if (k === 't') { document.body.classList.toggle('notag'); syncLabels(); }
   else if (/^[1-9]$/.test(k)) show(+k - 1); });
-show(0);
+// URL hash: page=<n or key or name>, labels=off, shot (1:1, no toolbar: fidelity_check.py screenshots)
+const HP = new URLSearchParams(location.hash.slice(1)), P0 = HP.get('page');
+if (HP.get('labels') === 'off') { document.body.classList.add('nobadge', 'notag'); syncLabels(); }
+if (HP.has('shot')) document.body.classList.add('shot');
+show(P0 ? (/^\d+$/.test(P0) ? +P0 - 1 : S.pages.findIndex(p => p.key === P0 || p.name === P0)) : 0);
+window.pageReady = Promise.allSettled(READY);
 
 </script>
 </body></html>

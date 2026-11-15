@@ -18,8 +18,8 @@ option used instead.
 
 ## Starter layouts (v1.7)
 
-For a person with no wireframe or report: `starters/` holds three page layouts built only from the styles above and
-the patterns in docs/patterns/, with slots for the title, up to four KPIs, a date and a category
+For a person with no wireframe or report: `starters/` holds four page layouts built only from the styles above and
+the patterns in docs/patterns/, with slots for the title, up to four KPIs, a date, a category and a detail field inside it
 (`pbik start starters` fills them from the model and the kit draws each as a picture; the person picks one and
 changes it in plain words).
 
@@ -28,3 +28,4 @@ changes it in plain words).
 | `executive-summary.json` | grid | title, four KPI cards, the main trend (direct labels), a ranked bar |
 | `trend-dashboard.json` | grid | title, a KPI strip, the main trend against its usual range (range band), small multiples by category |
 | `detail-table.json` | rail | title, two filters on the left, an exception list, a ranked bar |
+| `profile-explorer.json` | rail + panel (docs/patterns/rail-panel.md) | a rail at the page edge with two pickers (category, then detail), tabs over display-only bookmarks, one shared panel with four KPIs, a profile card and the chart (trend or breakdown) |

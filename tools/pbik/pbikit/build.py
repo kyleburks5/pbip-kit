@@ -1196,12 +1196,35 @@ def apply_props(ctx, vid, v, d):
         set_prop(ctx, vid, d, where, obj, selector, prop, prop_value(ctx, prop, val))
 
 
+PICKERS = ("slicer", "advancedSlicerVisual", "listSlicer")
+
+
 def apply_selection(ctx, vid, v, d):
+    """`selection: {field, values}` (or `value`): the picker's saved default selection, so the page never opens empty
+    (rail + panel study M-3). Written as Desktop saves a clicked value, `objects.general.filter` with the values typed
+    like the column, on the slicer, the list slicer and the button slicer (new slicers). On the new slicers it is
+    VERIFY IN DESKTOP (study Desktop check 5): the old slicer's form, not yet round-tripped on a new slicer."""
     sel = v.get("selection")
     if not sel:
         return
+    if v["type"] not in PICKERS:
+        raise BuildError(f"{vid}: selection is a slicer's saved default ({', '.join(PICKERS)}), not {v['type']}")
+    if not sel.get("field"):
+        raise BuildError(f"{vid}: selection needs a field (the slicer's own field)")
     fld = ctx.field(sel["field"])
     vals = sel["values"] if isinstance(sel.get("values"), list) else [sel.get("value")]
+    if not vals or any(x is None for x in vals):
+        raise BuildError(f"{vid}: selection needs values (a list) or value")
+    bound = [it if isinstance(it, str) else it.get("field") for b in (v.get("bindings") or {}).values()
+             for it in (b if isinstance(b, list) else [b])]
+    if bound and sel["field"] not in bound:
+        ctx.res.warnings.append(f"{vid}: selection field {sel['field']} isn't the slicer's field ({', '.join(map(str, bound))}); "
+                                "Desktop ignores a saved selection on another field")
+    single = (v.get("props") or {}).get("selection.singleSelect")
+    if single is True and len(vals) > 1:
+        ctx.res.warnings.append(f"{vid}: single-select slicer with {len(vals)} saved values; Desktop keeps one")
+    if v["type"] != "slicer":
+        ctx.unverified.add("picker-selection")
     set_prop(ctx, vid, d, "objects", "general", None, "filter",
              {"filter": F.selection_filter(fld, ctx.res.column_type(fld), vals)})
 

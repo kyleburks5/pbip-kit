@@ -67,10 +67,17 @@ def _main(argv=None):
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     t = sub.add_parser("templates", help="visual templates").add_subparsers(dest="sub", required=True)
-    h = t.add_parser("harvest", help="copy the visuals on the 'Patterns' page into design/templates/")
+    h = t.add_parser("harvest", help="copy the visuals on the 'Patterns' page (or, with --clean, any page) into "
+                                     "design/templates/")
     h.add_argument("report")
     h.add_argument("--out", default="design/templates")
-    h.add_argument("--page", default="Patterns")
+    h.add_argument("--page", help="page name or display name (default: Patterns; with --clean, every page)")
+    h.add_argument("--clean", action="store_true",
+                   help="strip titles, alt text, saved selections, images, bindings, names and per-member formatting; "
+                        "map colours to tokens; leak-check; never touch the <type>.json defaults")
+    h.add_argument("--pick", help="--clean: JSON file {\"templates\": {\"<visual folder>\": \"<template name>\"}}")
+    h.add_argument("--log", help="--clean: Markdown report of what was removed and mapped")
+    h.add_argument("--label", default="study", help="--clean: the source label written to index.json and the report")
 
     b = sub.add_parser("build", help="create or update pages and visuals from layout.json")
     b.add_argument("report")
@@ -320,6 +327,8 @@ def _main(argv=None):
     sast.add_argument("--kpi", action="append", default=[], help="a measure for the next KPI slot (up to 4)")
     sast.add_argument("--date", help="the date field, e.g. Calendar[Date]")
     sast.add_argument("--category", help="the category field, e.g. Region[Name]")
+    sast.add_argument("--detail", help="the field inside the category (the profile explorer's second picker), "
+                                       "e.g. Store[Name]")
     sast.add_argument("--title")
     pl = sub.add_parser("plan", help="the plan as a picture: drawn pages and a short list")
     pls = pl.add_subparsers(dest="sub", required=True)
@@ -443,8 +452,12 @@ def _main(argv=None):
     args = ap.parse_args(argv)
     c = args.cmd
     if c == "templates":
-        from .templates import harvest
-        harvest(args.report, args.out, args.page)
+        if args.clean:
+            from .harvestclean import harvest_clean
+            harvest_clean(args.report, args.out, args.page, args.pick, args.log, args.label)
+        else:
+            from .templates import harvest
+            harvest(args.report, args.out, args.page or "Patterns")
     elif c == "build":
         from .build import build
         build(args.report, args.layout, prune=args.prune, reset=args.reset, map_path=args.map,
@@ -658,7 +671,7 @@ def _main(argv=None):
             for ln in SR.check(args.root):
                 print(ln)
         else:
-            fs = SR.write_starters(args.root, args.kpi, args.date, args.category, args.title)
+            fs = SR.write_starters(args.root, args.kpi, args.date, args.category, args.title, args.detail)
             print(f"{len(fs)} starter layouts: " + ", ".join(SR.STARTER_NAMES.get(f.name.split('.')[0], f.stem)
                                                               for f in fs) + ".")
             print("next: I'll show them as pictures; pick one and change it in plain words")

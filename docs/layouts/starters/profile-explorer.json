@@ -1,0 +1,402 @@
+{
+ "_note": "Starter layout (rail + panel study M-2, 2026-11-15; style rail-panel, docs/patterns/rail-panel.md): columns (col, span) on the 12-column grid; `edge: left` puts the rail at x 0 with its inner edge on the grid. pbik start starters fills {title} {kpi1}-{kpi4} {date} {category} {detail} from the model. Pickers: give each a saved default `selection` once the values are known, so the page never opens empty. Tabs: display-only bookmarks (Data unchecked).",
+ "_purpose": "Which member am I looking at, and what is its whole story? Pick one member in the rail, then one inside it; its numbers, profile and chart read together on one panel, with tabs for the trend and the breakdown.",
+ "_layoutStyle": "rail-panel",
+ "_preset": "rail-panel",
+ "pages": {
+  "P1": {
+   "displayName": "{title}",
+   "background": "background",
+   "active": true,
+   "bookmarks": [
+    {
+     "name": "trend",
+     "displayName": "Trend",
+     "show": [
+      "P1-V12"
+     ],
+     "hide": [
+      "P1-V13"
+     ]
+    },
+    {
+     "name": "breakdown",
+     "displayName": "Breakdown",
+     "show": [
+      "P1-V13"
+     ],
+     "hide": [
+      "P1-V12"
+     ]
+    }
+   ]
+  }
+ },
+ "retired": [],
+ "visuals": [
+  {
+   "id": "P1-V01",
+   "name": "rail",
+   "page": "P1",
+   "type": "shape",
+   "edge": "left",
+   "col": 0,
+   "span": 4,
+   "y": 0,
+   "h": 1080,
+   "z": 0,
+   "pattern": "rail-panel",
+   "decorative": true,
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Shape: the rail at the left page edge (the one visual that may touch it)"
+   },
+   "container": {
+    "keepLayerOrder": true
+   },
+   "style": {
+    "fill": "card"
+   }
+  },
+  {
+   "id": "P1-V02",
+   "name": "title",
+   "page": "P1",
+   "type": "textbox",
+   "col": 0,
+   "span": 4,
+   "y": 32,
+   "h": 56,
+   "z": 2,
+   "text": [
+    {
+     "runs": [
+      {
+       "text": "{title}",
+       "font": "semibold",
+       "size": "title"
+      }
+     ]
+    }
+   ],
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "{title}"
+   },
+   "pattern": "page-header-stack",
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Text box title on the rail"
+   }
+  },
+  {
+   "id": "P1-V03",
+   "name": "tabs",
+   "page": "P1",
+   "type": "bookmarkNavigator",
+   "col": 8,
+   "span": 4,
+   "y": 32,
+   "h": 56,
+   "z": 2,
+   "template": "bookmarkNavigator.tabs-underline",
+   "pattern": "tabs-underline",
+   "container": {
+    "altText": "Views of the selected {detail}: Trend and Breakdown"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Bookmark navigator over display-only bookmarks"
+   }
+  },
+  {
+   "id": "P1-V04",
+   "name": "picker",
+   "page": "P1",
+   "type": "advancedSlicerVisual",
+   "col": 0,
+   "span": 2,
+   "y": 112,
+   "h": 936,
+   "z": 2,
+   "template": "advancedSlicerVisual.image-list",
+   "bindings": {
+    "Values": [
+     "{category}"
+    ]
+   },
+   "props": {
+    "selection.singleSelect": true
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Button slicer as an image list: pick the member"
+   }
+  },
+  {
+   "id": "P1-V05",
+   "name": "sub-picker",
+   "page": "P1",
+   "type": "advancedSlicerVisual",
+   "col": 2,
+   "span": 2,
+   "y": 112,
+   "h": 936,
+   "z": 2,
+   "template": "advancedSlicerVisual.image-cards",
+   "bindings": {
+    "Values": [
+     "{detail}"
+    ]
+   },
+   "props": {
+    "selection.singleSelect": true
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Button slicer as picture cards: pick inside the member"
+   }
+  },
+  {
+   "id": "P1-V06",
+   "name": "panel",
+   "page": "P1",
+   "type": "shape",
+   "col": 4,
+   "span": 8,
+   "y": 112,
+   "h": 936,
+   "z": 0,
+   "template": "shape.panel",
+   "pattern": "panel",
+   "decorative": true,
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Shape: the one shared panel"
+   },
+   "container": {
+    "keepLayerOrder": true
+   },
+   "style": {
+    "fill": "card",
+    "shadow": true
+   }
+  },
+  {
+   "id": "P1-V07",
+   "name": "kpi-1",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 4,
+   "span": 2,
+   "y": 112,
+   "h": 144,
+   "z": 2,
+   "bindings": {
+    "Data": [
+     "{kpi1}"
+    ]
+   },
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "KPI 1: {kpi1} for the selected {detail}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card on the shared panel (no background of its own, C-10 panel)"
+   }
+  },
+  {
+   "id": "P1-V08",
+   "name": "kpi-2",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 6,
+   "span": 2,
+   "y": 112,
+   "h": 144,
+   "z": 2,
+   "bindings": {
+    "Data": [
+     "{kpi2}"
+    ]
+   },
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "KPI 2: {kpi2} for the selected {detail}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card on the shared panel (no background of its own, C-10 panel)"
+   }
+  },
+  {
+   "id": "P1-V09",
+   "name": "kpi-3",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 8,
+   "span": 2,
+   "y": 112,
+   "h": 144,
+   "z": 2,
+   "bindings": {
+    "Data": [
+     "{kpi3}"
+    ]
+   },
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "KPI 3: {kpi3} for the selected {detail}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card on the shared panel (no background of its own, C-10 panel)"
+   }
+  },
+  {
+   "id": "P1-V10",
+   "name": "kpi-4",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 10,
+   "span": 2,
+   "y": 112,
+   "h": 144,
+   "z": 2,
+   "bindings": {
+    "Data": [
+     "{kpi4}"
+    ]
+   },
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "KPI 4: {kpi4} for the selected {detail}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card on the shared panel (no background of its own, C-10 panel)"
+   }
+  },
+  {
+   "id": "P1-V11",
+   "name": "profile",
+   "page": "P1",
+   "type": "cardVisual",
+   "col": 4,
+   "span": 3,
+   "y": 280,
+   "h": 768,
+   "z": 2,
+   "template": "cardVisual.profile-card",
+   "bindings": {
+    "Data": [
+     "{kpi1}"
+    ]
+   },
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "altText": "Profile of the selected {detail}: {kpi1}"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "New card as the profile card"
+   }
+  },
+  {
+   "id": "P1-V12",
+   "name": "trend",
+   "page": "P1",
+   "type": "lineChart",
+   "col": 7,
+   "span": 5,
+   "y": 280,
+   "h": 768,
+   "z": 2,
+   "bindings": {
+    "Category": [
+     "{date}"
+    ],
+    "Y": [
+     "{kpi1}"
+    ]
+   },
+   "sort": {
+    "field": "{date}",
+    "direction": "Ascending"
+   },
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "title": "{kpi1} over time",
+    "altText": "Trend of {kpi1} by {date} for the selected {detail}"
+   },
+   "pattern": "direct-labels",
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Line chart (the Trend tab)"
+   }
+  },
+  {
+   "id": "P1-V13",
+   "name": "breakdown",
+   "page": "P1",
+   "type": "clusteredBarChart",
+   "col": 7,
+   "span": 5,
+   "y": 280,
+   "h": 768,
+   "z": 2,
+   "hidden": true,
+   "bindings": {
+    "Category": [
+     "{detail}"
+    ],
+    "Y": [
+     "{kpi1}"
+    ]
+   },
+   "sort": {
+    "field": "{kpi1}",
+    "direction": "Descending"
+   },
+   "container": {
+    "background": false,
+    "border": false,
+    "shadow": false,
+    "title": "{kpi1} by {detail}",
+    "altText": "{kpi1} by {detail}, highest first"
+   },
+   "build": {
+    "method": "native",
+    "step": 1,
+    "reason": "Ranked bar chart (the Breakdown tab)"
+   }
+  }
+ ]
+}

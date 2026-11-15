@@ -31,7 +31,7 @@ enforces everything below.
 | C-07 | Card padding may be ignored: move content with the callout area | [cards.md](cards.md) | – |
 | C-08 | Small multiples grid settings | [cards.md](cards.md) | – |
 | C-09 | Colour small multiples through the header, not the accent bar | [cards.md](cards.md) | – |
-| C-10 | The KPI card is its own container | [cards.md](cards.md) | yes |
+| C-10 | The KPI card is its own container, or sits on a shared panel | [cards.md](cards.md) | yes |
 | C-11 | Background shapes keep their layer order | [cards.md](cards.md) | yes |
 | S-01 | Short button slicers need Custom padding | [slicers.md](slicers.md) | yes |
 | S-02 | Button slicers need a grid sized for their items | [slicers.md](slicers.md) | yes |

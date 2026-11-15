@@ -25,6 +25,14 @@ REGION_INDEX = {r: {"main": i, "tint": len(REGIONS) + i} for i, r in enumerate(R
 
 FONT = F["family"]
 SEMIBOLD = f"{FONT} Semibold"
+# Font weights per text role (tokens font.weights, rail + panel study 2026-11-15); the defaults keep the earlier theme.
+WEIGHTS = {"title": "Regular", "cardTitle": "Semibold", "header": "Semibold", "kpi": "Semibold", "body": "Regular",
+           "caption": "Regular", "tableHeader": "Semibold", **{k: v for k, v in F.get("weights", {}).items() if not k.startswith("_")}}
+
+
+def face(role):
+    w = WEIGHTS.get(role, "Regular")
+    return FONT if w in ("Regular", "Normal", "") else f"{FONT} {w}"
 
 
 def solid(hex_):
@@ -83,13 +91,13 @@ theme = {
     "neutral": C["warning"],
     "textClasses": {
         # Rep 2: the report title is regular weight and near-black, as in the reference.
-        "largeTitle": {"fontFace": FONT, "fontSize": P["title"], "color": C["text"]},
-        "title": {"fontFace": SEMIBOLD, "fontSize": P["cardTitle"], "color": C["text"]},
-        "header": {"fontFace": SEMIBOLD, "fontSize": P["body"], "color": C["text"]},
-        "callout": {"fontFace": SEMIBOLD, "fontSize": P["kpi"], "color": C["text"]},
-        "label": {"fontFace": FONT, "fontSize": P["body"], "color": C["text"]},
-        "smallLabel": {"fontFace": FONT, "fontSize": P["caption"], "color": C["textMuted"]},
-        "lightLabel": {"fontFace": FONT, "fontSize": P["body"], "color": C["textMuted"]},
+        "largeTitle": {"fontFace": face("title"), "fontSize": P["title"], "color": C["text"]},
+        "title": {"fontFace": face("cardTitle"), "fontSize": P["cardTitle"], "color": C["text"]},
+        "header": {"fontFace": face("header"), "fontSize": P["body"], "color": C["text"]},
+        "callout": {"fontFace": face("kpi"), "fontSize": P["kpi"], "color": C["text"]},
+        "label": {"fontFace": face("body"), "fontSize": P["body"], "color": C["text"]},
+        "smallLabel": {"fontFace": face("caption"), "fontSize": P["caption"], "color": C["textMuted"]},
+        "lightLabel": {"fontFace": face("body"), "fontSize": P["body"], "color": C["textMuted"]},
     },
     "visualStyles": {
         # Rep 2: visuals sit inside card shapes, so by default they carry no container styling of their own.
@@ -98,7 +106,7 @@ theme = {
             "border": [{"show": False}],
             "dropShadow": [{"show": False}],
             "padding": [{"top": 0, "bottom": 0, "left": 0, "right": 0}],
-            "title": [{"show": False, "fontFamily": SEMIBOLD, "fontSize": P["cardTitle"],
+            "title": [{"show": False, "fontFamily": face("cardTitle"), "fontSize": P["cardTitle"],
                        "fontColor": solid(C["text"]), "alignment": "left"}],
             # batch 4 item 2: no visual header (the hover icons) on any visual type; validate flags a visual
             # whose own formatting turns it back on
@@ -159,7 +167,7 @@ theme = {
             "referenceLabel": [{"$id": "default", "backgroundShow": False, "paddingUniform": 0}],
             "label": [{"$id": "default", "show": True, "position": "aboveValue", "horizontalAlignment": "left",
                        "fontFamily": FONT, "fontSize": P["label"], "fontColor": solid(C["text"])}],
-            "value": [{"$id": "default", "horizontalAlignment": "left", "fontFamily": SEMIBOLD, "fontSize": P["kpi"],
+            "value": [{"$id": "default", "horizontalAlignment": "left", "fontFamily": face("kpi"), "fontSize": P["kpi"],
                        "fontColor": solid(C["text"]), "labelDisplayUnits": 1}],  # Rep 2: measures carry their own formats
             "referenceLabelLayout": [{"$id": "default", "position": "below", "horizontalAlignment": "left",
                                       "style": "sentence", "customizePadding": True, "outerPadding": 0,
@@ -178,7 +186,7 @@ theme = {
         # Detail table: muted semibold caption headers, body-size values, horizontal rules only, no banding/totals.
         "tableEx": {"*": {
             "columnHeaders": [{"alignment": "Auto",  # text headers left, numeric headers right (match values)
-                               "fontFamily": SEMIBOLD, "fontSize": P["caption"], "fontColor": solid(C["textMuted"]),
+                               "fontFamily": face("tableHeader"), "fontSize": P["caption"], "fontColor": solid(C["textMuted"]),
                                "backColor": solid(C["card"]), "outlineColor": solid(C["border"]),
                                "outlineStyle": 2}],  # 2 = bottom only
             "values": [{"fontFamily": FONT, "fontSize": P["body"], "wordWrap": False, "fontColorPrimary": solid(C["text"]),

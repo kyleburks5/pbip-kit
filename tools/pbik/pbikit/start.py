@@ -2,7 +2,7 @@
 
     pbik start detect            what is in the inputs folder, and the path the kit takes
     pbik start inputs            open the inputs folder in File Explorer ("drop a copy here")
-    pbik start starters [--kpi M ...] [--date F] [--category F] [--title T]
+    pbik start starters [--kpi M ...] [--date F] [--category F] [--detail F] [--title T]
                                  the 2-3 starter layouts, filled with the model's names, as layout files to draw
 
 Paths: from report (a .Report folder), from wireframe (HTML), from picture (a wireframe image or a screenshot of any
@@ -22,7 +22,7 @@ PLAIN = {"from report": "an existing report", "from wireframe": "a wireframe pag
          "from picture": "a picture (a wireframe image or a report screenshot)",
          "starter layouts": "no layout yet: I'll show you starter layouts"}
 STARTER_NAMES = {"executive-summary": "Executive summary", "trend-dashboard": "Trend dashboard",
-                 "detail-table": "Detail table"}
+                 "detail-table": "Detail table", "profile-explorer": "Profile explorer"}
 GRID = {"width": 1920, "margin": 32, "columns": 12, "gutter": 24}
 
 
@@ -177,14 +177,16 @@ def _plain(field):
     return s[s.index("[") + 1:-1] if "[" in s and s.endswith("]") else s
 
 
-def fill(name, kpis=(), date=None, category=None, title=None):
+def fill(name, kpis=(), date=None, category=None, title=None, detail=None):
     """A starter (docs/layouts/starters/<name>.json) as a layout.json: columns to pixels on the grid, slots filled
-    with the model's names; unfilled slots keep a readable label ("KPI 2")."""
+    with the model's names; unfilled slots keep a readable label ("KPI 2"). `detail` is the field inside a category
+    (the profile explorer's second picker). A visual with `edge: left` starts at the page edge (x 0) and ends on its
+    last column's edge: the rail of the rail + panel style."""
     src = json.loads((STARTERS / f"{name}.json").read_text(encoding="utf-8"))
     slots = {f"kpi{i}": f"[KPI {i}]" for i in range(1, 5)}
     slots.update({f"kpi{i}": (k if k.startswith("[") or "[" in k else f"[{k}]") for i, k in enumerate(kpis, 1)})
     slots.update(date=date or "Calendar[Date]", category=category or "Category[Name]",
-                 title=title or STARTER_NAMES.get(name, name))
+                 detail=detail or "Detail[Name]", title=title or STARTER_NAMES.get(name, name))
     out = {k: v for k, v in src.items() if k not in ("visuals", "_slots")}
     out["visuals"] = []
     plain = {k: _plain(s) for k, s in slots.items()}                 # words people read: "Revenue", not "[Revenue]"
@@ -194,13 +196,15 @@ def fill(name, kpis=(), date=None, category=None, title=None):
         words = {k: v.pop(k) for k in ("container", "text") if k in v}
         v = _fill_text(v, slots)
         v.update(_fill_text(words, plain))
-        col, span = v.pop("col"), v.pop("span")
+        col, span, edge = v.pop("col"), v.pop("span"), v.pop("edge", None)
         v["x"], v["w"] = col_x(col), span_w(span)
+        if edge == "left":
+            v["x"], v["w"] = 0, col_x(col + span - 1) + span_w(1)
         out["visuals"].append(v)
     return out
 
 
-def write_starters(root, kpis=(), date=None, category=None, title=None):
+def write_starters(root, kpis=(), date=None, category=None, title=None, detail=None):
     """design/specs/starters/<name>.layout.json for each starter; returns the paths."""
     folder = pathlib.Path(root) / "design" / "specs" / "starters"
     if folder.exists():
@@ -209,7 +213,7 @@ def write_starters(root, kpis=(), date=None, category=None, title=None):
     out = []
     for name in starter_names():
         f = folder / f"{name}.layout.json"
-        f.write_text(json.dumps(fill(name, kpis, date, category, title), indent=1, ensure_ascii=False) + "\n",
+        f.write_text(json.dumps(fill(name, kpis, date, category, title, detail), indent=1, ensure_ascii=False) + "\n",
                      encoding="utf-8")
         out.append(f)
     return out
