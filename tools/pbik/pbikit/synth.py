@@ -195,8 +195,15 @@ def build_contract(source, root=None):
     for r in model.relationships:
         if r.from_column and r.to_column:
             rels.append({"from": f"{r.from_column[0]}[{r.from_column[1]}]", "to": f"{r.to_column[0]}[{r.to_column[1]}]"})
-    return {"version": 1, "model": name, "source": rel, "tables": tables, "relationships": rels, "flags": flags,
-            "rules": [], "approval": None}
+    out = {"version": 1, "model": name, "source": rel, "tables": tables, "relationships": rels, "flags": flags,
+           "rules": [], "approval": None}
+    if src.is_dir():                                   # DAX functions (UDF study G-04): names and the kit's mark
+        from . import udf as U
+        fns = U.model_functions(model.folder)
+        if fns:
+            out["functions"] = fns
+            out["compatibilityLevel"] = U.compatibility_level(model.folder)
+    return out
 
 
 def option_table(c, f):

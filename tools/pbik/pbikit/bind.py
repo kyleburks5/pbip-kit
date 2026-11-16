@@ -162,7 +162,72 @@ def check(report, root=None, ctx=None):
                               "list it in bind-map.json acceptDax")
         if not N.find(ctx.contract["tables"], ctx.mapper.table(t)):
             res.errors.append(f"reportExtensions.json: entity {t} (live {ctx.mapper.table(t)}) is not in the contract")
+    check_udfs(ctx, res, ext, planned)
     return res
+
+
+def dax_sites(ctx, ext, planned):
+    """[(who, DAX)]: report-level measures, visual calculations and planned measures."""
+    out = [(f"report measure [{n}]", m.get("expression", "")) for (t, n), m in ext.items()]
+    for rel, doc in json_docs(ctx.rep):
+        vid = re.search(r"/visuals/([^/_]+)", rel)
+        who = vid.group(1) if vid else rel
+
+        def walk(node):
+            if isinstance(node, dict):
+                vc = node.get("NativeVisualCalculation")
+                if isinstance(vc, dict) and vc.get("Expression"):
+                    out.append((f"{who} (visual calculation {vc.get('Name', '')})", vc["Expression"]))
+                for v in node.values():
+                    walk(v)
+            elif isinstance(node, list):
+                for v in node:
+                    walk(v)
+        walk(doc)
+    out += [(f"planned measure [{n}]", (v or {}).get("expression", "")) for n, v in planned.items()]
+    return out
+
+
+def check_udfs(ctx, res, ext, planned):
+    """UDF study 7.3: a call to a kit library function the live model doesn't have (or has in another version) is an
+    error unless it was inlined (an inlined card has no call left); so is a model table the function reads."""
+    from . import udf as U
+    by = U.load(ctx.root)
+    if not by:
+        return
+    live = ctx.contract.get("functions", {}) or {}
+    seen = set()
+    for who, expr in dax_sites(ctx, ext, planned):
+        for name in U.calls_in(expr, by):
+            if (who, name) in seen:
+                continue
+            seen.add((who, name))
+            have = next((k for k in live if k.lower() == name.lower()), None)
+            if not have:
+                res.errors.append(f"{who} uses the DAX function {name}, which the live model doesn't have: inline it "
+                                  "(the card then works without the function), or add it to your model")
+                continue
+            mark = (live[have] or {}).get("kit")
+            if mark and mark.split(":")[-1] != by[name]["sha256"]:
+                res.errors.append(f"{who} uses {name}, but the live model has another version of it: inline it, or "
+                                  "add the kit's version to your model again")
+            elif not mark:
+                res.notes.append(f"{who} uses {name}: the live model has a function with that name that the kit "
+                                 "didn't add, so its version can't be confirmed")
+        segs = U.segments(expr or "")                 # a table read by name, e.g. an inlined card's 'Date'
+        for k, (kind, text) in enumerate(segs):
+            nxt = segs[k + 1] if k + 1 < len(segs) else ("code", "")
+            if kind != "quoted" or nxt[0] == "bracket" or (nxt[0] == "code" and nxt[1].lstrip().startswith("[")):
+                continue
+            t = text[1:-1].replace("''", "'")
+            if (who, t) not in seen and not N.find(ctx.contract["tables"], ctx.mapper.table(t)):
+                seen.add((who, t))
+                res.errors.append(f"{who} reads the table '{t}', which the live model doesn't have")
+        for name in U.calls_in(expr, by):
+            for r in U.tables_needed(by, [name]):
+                if not N.find(ctx.contract["tables"], ctx.mapper.table(r["table"])):
+                    res.errors.append(f"{who} uses {name}, which needs a table '{r['table']}' the live model "
+                                      f"doesn't have ({r['why']})")
 
 
 def check_field(ctx, res, where, kind, ent, prop, planned):

@@ -59,6 +59,11 @@ def _measures(v):
     for xs in (v.get("bindings") or {}).values():
         for x in xs if isinstance(xs, list) else [xs]:
             add(x)
+    uc = v.get("udfCard")                       # a UDF KPI card shows the measures it is given
+    if isinstance(uc, dict):
+        for a in (uc.get("args") or {}).values():
+            if isinstance(a, str) and a.startswith("["):
+                add(a)
     rl = v.get("referenceLabels")
     if isinstance(rl, dict):
         add(rl.get("field", ""))
@@ -500,6 +505,8 @@ def _title(v):
 
 
 def _plain_type(v):
+    if v.get("udfCard"):
+        return "designed KPI card"
     return {"cardVisual": "KPI card", "card": "KPI card", "lineChart": "line chart", "barChart": "bar chart",
             "clusteredBarChart": "bar chart", "columnChart": "column chart", "clusteredColumnChart": "column chart",
             "tableEx": "table", "pivotTable": "matrix", "slicer": "filter", "advancedSlicerVisual": "button filter",

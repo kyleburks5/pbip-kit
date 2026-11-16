@@ -537,6 +537,8 @@ def apply_query(ctx, v, d):
                 p = {"field": f, "queryRef": q, "nativeQueryRef": native_ref(f)}   # the field's name, not displayName
                 if spec.get("displayName"):
                     p["displayName"] = spec["displayName"]
+                if spec.get("hidden"):          # a field the visual needs but doesn't show (UDF card, calc mode)
+                    p["hidden"] = True
                 if spec.get("active") or (not projs and (role == "Category" or (role == "Values" and v["type"] in (
                         "slicer", "listSlicer")))):     # listSlicer: as Desktop saved it (pbik-smoke-bulk, 2026-11-11)
                     p["active"] = True          # Desktop marks the first category (and classic slicer) field active
@@ -1700,6 +1702,17 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             print("project.json customVisuals false: building each Deneb visual's fallback (as --no-custom-visuals)")
     layout = load(layout_path)
     design = layout_path.parent.parent
+    udf_measures = {}
+    if any("udfCard" in v for v in layout.get("visuals", [])):        # UDF study 7.4: a whole UDF card in one step
+        from . import udf as U
+        try:
+            tokens_for_udf = U.load_tokens(design.parent)
+            layout["visuals"], udf_measures, udf_errors = U.expand_layout(layout, U.load(design.parent),
+                                                                          tokens_for_udf)
+        except U.UdfError as e:
+            udf_errors = [str(e)]
+        if udf_errors:
+            fail("UDF cards: " + "; ".join(udf_errors))
     tokens_path = pathlib.Path(tokens_path) if tokens_path else design / "tokens.json"
     tokens = load(tokens_path) if tokens_path.exists() else {}
     templates = pathlib.Path(templates) if templates else design / "templates"
@@ -1747,6 +1760,13 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         image_changed += [c for c in ch if c not in image_changed]
     rep = Report(report_path)
     rep.project = project
+    if any("udf" in v for v in layout.get("visuals", [])):
+        from . import udf as U
+        try:
+            U.check_installed(rep, layout)
+            image_changed += U.write_measures(rep, udf_measures, layout.get("measureTable"))
+        except U.UdfError as e:
+            fail(f"UDF cards: {e}")
     rep.changed.extend(theme_changed + [c for c in image_changed if c not in theme_changed])
     ctx = Ctx(rep, layout, tokens)
     ctx.images = images

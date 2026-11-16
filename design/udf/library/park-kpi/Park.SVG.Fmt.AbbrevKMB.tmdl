@@ -1,0 +1,13 @@
+function 'Park.SVG.Fmt.AbbrevKMB' =
+		(
+		        _Val : NUMERIC VAL
+		    ) =>
+		    SWITCH(
+		        TRUE(),
+		        _Val < 1E3,   FORMAT( _Val, "#,0" ),
+		        _Val < 1E6,   FORMAT( DIVIDE( _Val, 1E3  ), "#,0.0K" ),
+		        _Val < 1E9,   FORMAT( DIVIDE( _Val, 1E6  ), "#,,0.0M" ),
+		        _Val < 1E12,  FORMAT( DIVIDE( _Val, 1E9  ), "#,,,0.0bn" ),
+		        _Val < 1E15,  FORMAT( DIVIDE( _Val, 1E12 ), "#,,,,0.0T" ),
+		                        FORMAT( _Val, "#,0" )
+		    )

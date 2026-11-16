@@ -1,0 +1,120 @@
+function 'Park.SVG.Micro.BarinBarColor' =
+		/*
+		  KPI 7 — Past bars (grey) + Current bars with conditional color (per row)
+		  FULL SVG (Image URL ready). Uses shared helpers for base, geometry, and axes.
+		
+		  Parameters (9 total — keep all three color args):
+		    _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		    _PastBarColor, _UpColor, _DownColor,
+		    _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr   : NUMERIC EXPR,
+		  _PastExpr      : NUMERIC EXPR,
+		  _DateNum       : ANYREF  EXPR,   // numeric order key
+		  _DateText      : ANYREF  EXPR,   // display text
+		  _UpColor       : STRING  VAL,    // Current ≥ Past
+		  _PastBarColor  : STRING  VAL,    // grey-ish for Past bars (default "{{colors.secondLight}}")
+		  _DownColor     : STRING  VAL,    // Current < Past
+		  _AxisFont      : STRING  VAL,    // e.g. "{{font.family}}"
+		  _AxisFontSize  : NUMERIC VAL     // e.g. 15
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __SvgW    = 400
+		VAR __SvgH    = 170
+		VAR __PadL    = 55
+		VAR __PadR    = 30
+		VAR __Ticks   = 5
+		
+		VAR __PastClr  = IF( NOT ISBLANK(_PastBarColor), _PastBarColor, "{{colors.secondLight}}" )
+		VAR __UpClr    = IF( NOT ISBLANK(_UpColor),      _UpColor,      "{{colors.good}}" )
+		VAR __DownClr  = IF( NOT ISBLANK(_DownColor),    _DownColor,    "{{colors.bad}}" )
+		VAR __Font     = IF( NOT ISBLANK(_AxisFont),     _AxisFont,     "{{font.family}}" )
+		VAR __FS       = IF( NOT ISBLANK(_AxisFontSize), _AxisFontSize, 15 )
+		
+		/* 1) Base via helper (single grouped table) */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText
+		    )
+		VAR __Empty  = COUNTROWS(_Base) = 0
+		VAR MinValue = 0
+		VAR MaxValue = MAXX(_Base, MAX([PY], [CY]))
+		
+		/* 2) Geometry via helper (adds Xc, Y_Past, Y_Curr, Y0 per point) */
+		VAR _Geo =
+		    Park.SVG.Tab.Geo_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr,
+		        _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR
+		    )
+		
+		/* 3) Bar widths (keep template’s 12-slot rule) */
+		VAR _AvailW    = __SvgW - __PadL - __PadR
+		VAR _PastBarW  = DIVIDE(_AvailW, 12, 0) * 0.8
+		VAR _CurrBarW  = _PastBarW * 0.4
+		
+		/* 4) Bars (single pass): Past bar + Current bar (conditional color) */
+		VAR _Bars =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        ADDCOLUMNS(
+		          _Geo,
+		          "Col", IF([CY] - [PY] >= 0, __UpClr, __DownClr)
+		        ),
+		        VAR x  = [Xc]
+		        VAR yp = [Y_Past]
+		        VAR yc = [Y_Curr]
+		        RETURN
+		            // Past bar
+		            "<rect x='" & (x - _PastBarW/2) &
+		            "' y='" & yp &
+		            "' width='" & _PastBarW &
+		            "' height='" & ([Y0] - yp) &
+		            "' fill='" & __PastClr & "' opacity='0.8' />" &
+		            // Current bar (in-bar, thinner)
+		            "<rect x='" & (x - _CurrBarW/2) &
+		            "' y='" & yc &
+		            "' width='" & _CurrBarW &
+		            "' height='" & ([Y0] - yc) &
+		            "' fill='" & [Col] & "' opacity='1' />",
+		        " ",
+		        _DateNum, ASC
+		      )
+		    )
+		
+		/* 5) Axes via shared helpers */
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.YLabels_FromRange(
+		        MinValue, MaxValue, __Ticks,
+		        __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		/* 6) Assemble FULL SVG */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    _Bars &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)

@@ -93,6 +93,13 @@ do (their files say how), with a check after each step and one fix and recheck w
   unsure: a check still failing after its fix, a fallback not in the plan, a measure the plan didn't name, two
   measures that fit one KPI, an approval window, a Desktop or bridge failure. Then ask one plain question with the
   default you would take.
+- UDF KPI cards (`udfCard` in layout.json, only when the plan or the person picked one): one step builds the
+  function call, its measure, the visual and its image settings. Run `pbik udf desktop` first and say its result in
+  plain words (the preview switch on 2.155 and 2.159 is still "verify in Desktop"). Guided build: the card is in the
+  plan picture and stopped on like any visual. Quick build: no extra stop, unless the card's mode is `calc` or
+  `measure` and the model lacks the function: then ask one question, defaulting to inline (the card then works on
+  any model). On the synthetic model, `pbik udf install <function>` is always allowed; the person's own model only
+  when they ask.
 - The kit does these itself, without asking: months sort by month number (the made-up model gets the sort-by column;
   a live model: say why not and give the Desktop clicks), number columns' headers right-aligned, thousands
   separators in the made-up model's number formats.

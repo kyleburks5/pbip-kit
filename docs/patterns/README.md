@@ -20,6 +20,7 @@ number), then picks patterns from here and names them on each visual in layout.j
 | [Two-KPI tinted card](two-kpi-card.md) (`two-kpi-card`) | How do two related numbers stand against each other (actual and target, this year and last)? | stub: new card, two small-multiple tiles | 1 native (`cardVisual.two-kpi-card`: clean harvest, confirm in Desktop) |
 | [Tabs with underline](tabs-underline.md) (`tabs-underline`) | Which view am I on, and what else is there? | stub: page navigator, or bookmark navigator + display-only bookmarks | 1 native (`bookmarkNavigator.tabs-underline`: clean harvest, confirm in Desktop) |
 | [Text link button](text-link-button.md) (`text-link-button`) | Where do I go for more? | stub: see the page | 1 native (template needs a Desktop-saved sample) |
+| [SVG KPI card](svg-kpi-card.md) (`svg-kpi-card`) | What is the headline number, how did it change, and what is its trend? | stub: new card with a reference label first | 2 SVG (optional: a card function from the kit UDF library as a `udfCard`, inline by default; `cardVisual.svg-kpi-card`: clean harvest, confirm in Desktop) |
 | [Shared panel](panel.md) (`panel`) | Which numbers and charts belong together? | One shape; the visuals on it have no background of their own | 1 native (`shape.panel`: clean harvest, confirm in Desktop) |
 | [Rail + panel layout](rail-panel.md) (`rail-panel`, a layout style) | Which member am I looking at, and what is its whole story? | Rail shape at the page edge with pickers; one panel; tabs | 1 native (preset `rail-panel`, optional) |
 

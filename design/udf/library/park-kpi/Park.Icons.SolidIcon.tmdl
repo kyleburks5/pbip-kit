@@ -1,0 +1,24 @@
+function 'Park.Icons.SolidIcon' =
+		(
+		    iconName : STRING EXPR,  // e.g. "Arrows.arrow-down-box-fill"
+		    color    : STRING EXPR   // fill/stroke color
+		)
+		=>
+		VAR rawSvg =
+		    LOOKUPVALUE ( icons[Content], icons[Name], iconName )
+		VAR svg =
+		    Park.icons.cleansvg( rawSvg )
+		
+		VAR hasStroke =
+		    OR(
+		        CONTAINSSTRING( svg, "stroke=" ),
+		        CONTAINSSTRING( rawSvg, " fill=""none""" ) || CONTAINSSTRING( rawSvg, " fill='none'" )
+		    )
+		
+		VAR styleFillIcon  = "<style type='text/css'>path{fill:" & color & ";} </style>"
+		VAR styleStrokeIcon= "<style type='text/css'>path{fill:none;stroke:" & color & ";} </style>"
+		VAR styleBlock     = IF( hasStroke, styleStrokeIcon, styleFillIcon )
+		
+		RETURN
+		    "data:image/svg+xml;utf8," &
+		    SUBSTITUTE( svg, "<path", styleBlock & "<path", 1 )

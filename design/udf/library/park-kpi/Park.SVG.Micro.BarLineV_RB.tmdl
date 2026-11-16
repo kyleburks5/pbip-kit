@@ -1,0 +1,147 @@
+function 'Park.SVG.Micro.BarLineV_RB' =
+		
+		/*
+		  KPI 14 — Vertical bars (Current) with past/target benchmark line.
+		  FULL SVG (Image URL ready). Uses shared base + geometry helpers.
+		  Y-axis labels are nudged DOWN by +10px to avoid overlap with bottom dots.
+		
+		  Parameters (exactly 9):
+		    _CurrentExpr, _PastExpr, _DateNumber, _DateVal,
+		    _ColorUp, _ColorDown, _ColorNeutral,
+		    _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr   : NUMERIC EXPR,
+		  _PastExpr      : NUMERIC EXPR,
+		  _DateNumber    : ANYREF  EXPR,   // numeric order
+		  _DateVal       : ANYREF  EXPR,   // display text
+		  _ColorUp       : STRING  VAL,    // bar color when Current ≥ Past
+		  _ColorDown     : STRING  VAL,    // bar color when Current < Past
+		  _ColorNeutral  : STRING  VAL,    // target/benchmark line color
+		  _AxisFont      : STRING  VAL,
+		  _AxisFontSize  : NUMERIC VAL
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __SvgW     = 400
+		VAR __SvgH     = 170
+		VAR __PadL     = 55
+		VAR __PadR     = 30
+		VAR __Ticks    = 5
+		VAR __DotR     = 5
+		VAR __LineW    = 3
+		VAR __Inset    = 5   // benchmark line extends a bit beyond bar edges
+		VAR __Font     = IF(NOT ISBLANK(_AxisFont),     _AxisFont,     "{{font.family}}")
+		VAR __FS       = IF(NOT ISBLANK(_AxisFontSize), _AxisFontSize, 15)
+		VAR __UpCol    = IF(NOT ISBLANK(_ColorUp),      _ColorUp,      "{{colors.good}}")
+		VAR __DownCol  = IF(NOT ISBLANK(_ColorDown),    _ColorDown,    "{{colors.bad}}")
+		VAR __NeuCol   = IF(NOT ISBLANK(_ColorNeutral), _ColorNeutral, "{{colors.text}}")
+		
+		/* 1) Base via helper (single grouped table) */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		      _CurrentExpr, _PastExpr, _DateNumber, _DateVal
+		    )
+		VAR __Empty  = COUNTROWS(_Base) = 0
+		VAR MinValue = 0
+		VAR MaxValue = MAXX(_Base, MAX([PY], [CY]))
+		
+		/* 2) Geometry via helper (adds Xc, Y_Past, Y_Curr, Y0 per row) */
+		VAR _Geo =
+		    Park.SVG.Tab.Geo_Vertical_ByNumText(
+		      _CurrentExpr, _PastExpr,
+		      _DateNumber, _DateVal,
+		      __SvgW, __SvgH-10, __PadL, __PadR
+		    )
+		
+		/* 3) Slot & bar width */
+		VAR _AvailW = __SvgW - __PadL - __PadR
+		VAR _N      = MAX(COUNTROWS(_Base), 1)
+		VAR _SlotW  = DIVIDE(_AvailW, _N, 0)
+		VAR _BarW   = MAX(_SlotW * 0.5, 1)
+		
+		/* 4) Per-row: bar (Current) + benchmark line (Past) + optional dot */
+		VAR _PerRow =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        ADDCOLUMNS(
+		          _Geo,
+		          "Col", IF([CY] >= [PY], __UpCol, __DownCol)
+		        ),
+		        VAR xl  = [Xc] - (_BarW/2)
+		        VAR xr  = [Xc] + (_BarW/2)
+		        VAR yC  = [Y_Curr]
+		        VAR yT  = [Y_Past]
+		        RETURN
+		            // Current bar
+		            "<rect x='" & xl &
+		            "' y='" & yC &
+		            "' width='" & _BarW &
+		            "' height='" & ([Y0] - yC) &
+		            "' fill='" & [Col] & "' opacity='1' />" &
+		            " " &
+		            // Past/Target benchmark line (slightly wider than bar)
+		            "<line x1='" & (xl - __Inset) &
+		            "' x2='" & (xr + __Inset) &
+		            "' y1='" & yT & "' y2='" & yT &
+		            "' stroke='" & __NeuCol & "' stroke-width='" & __LineW & "' />" &
+		            " " &
+		            // Optional dot at bottom, only for 'up' bars
+		            IF(
+		              [Col] = __UpCol,
+		              "<circle cx='" & [Xc] & "' cy='" & (__SvgH -30) &
+		              "' r='" & __DotR & "' fill='" & __UpCol & "' />",
+		              ""
+		            ),
+		        " ",
+		        _DateNumber, ASC
+		      )
+		    )
+		
+		/* 5) X-axis via helper */
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNumber, _DateVal,
+		        __SvgW, __SvgH+5, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		/* 6) Y-axis: inline ticks so we can nudge labels DOWN by +10px */
+		VAR _Step   = Park.SVG.Aux.NiceStep(MinValue, MaxValue, __Ticks)
+		VAR _YTicks =
+		    ADDCOLUMNS(
+		        GENERATESERIES(MinValue, MaxValue, _Step),
+		        "YPos", Park.SVG.Aux.ScaleY([Value], MinValue, MaxValue, __SvgH-10, __PadR),
+		        "Lbl",  Park.SVG.Fmt.AbbrevKMB([Value])
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        _YTicks,
+		        "<text x='" & (__PadL - 20) &
+		        "' y='" & ([YPos]) &    // nudged down to clear bottom dots
+		        "' font-size='" & __FS &
+		        "' text-anchor='end' font-family='" & __Font &
+		        "' fill='{{colors.textMuted}}'>" & [Lbl] & "</text>",
+		        " "
+		      )
+		    )
+		
+		/* 7) Assemble FULL SVG */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    _PerRow &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)

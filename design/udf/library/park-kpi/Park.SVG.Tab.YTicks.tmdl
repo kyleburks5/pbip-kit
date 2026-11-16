@@ -1,0 +1,17 @@
+function 'Park.SVG.Tab.YTicks' =
+		
+		(
+		  _MinV     : NUMERIC VAL,
+		  _MaxV     : NUMERIC VAL,
+		  _Desired  : NUMERIC VAL,
+		  _InnerH   : NUMERIC VAL,
+		  _PadR     : NUMERIC VAL
+		)
+		=>
+		VAR _Step = Park.SVG.Aux.NiceStep(_MinV, _MaxV, _Desired)
+		RETURN
+		  ADDCOLUMNS(
+		    GENERATESERIES(_MinV, _MaxV, _Step),
+		    "YPos", Park.SVG.Aux.ScaleY([Value], _MinV, _MaxV, _InnerH, _PadR),
+		    "Lbl",  Park.SVG.Fmt.AbbrevKMB([Value])
+		  )

@@ -268,6 +268,31 @@ def check_catalog(fd, rep, pages, layout, catalog_path):
             fd.warn("catalog", line)
 
 
+def check_udf_cards(fd, rep, lay, project=None):
+    """UDF cards (layout.json `udfCard`, UDF study 7.4-7.5): the function is in the kit's library and turned on, the
+    arguments fit it, and the target Desktop is new enough for DAX functions unless the card is inlined."""
+    cards = [v for v in (lay or {}).get("visuals", []) if "udfCard" in v]
+    if not cards:
+        return
+    from . import udf as U
+    root = rep.path.parent
+    by = U.load(root)
+    try:
+        tokens = U.load_tokens(root)
+    except (OSError, ValueError):
+        tokens = {}
+    tv = versions.target_for(root, project)[0].desktop
+    for v in cards:
+        try:
+            p = U.card_plan(v["id"], v["udfCard"], by, tokens)
+        except U.UdfError as e:
+            fd.err(v["id"], str(e))
+            continue
+        if p["mode"] != "inline" and tv != "latest" and U.vt(tv) < U.vt(U.FIRST_UDF_DESKTOP):
+            fd.err(v["id"], f"uses the DAX function {p['function']}, but the target Desktop {tv} is older than the "
+                            f"first release with DAX functions ({U.FIRST_UDF_DESKTOP}): use inline mode")
+
+
 def check_deneb(fd, rep, denebs, lay, project=None):
     if denebs and (versions.target_for(rep.path.parent, project)[1] or {}).get("customVisuals") is False:
         fd.warn("project.json", f"customVisuals is false but {len(denebs)} Deneb visual(s) are built: rerun pbik build "
@@ -708,6 +733,7 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
 
     # ---- Deneb visuals: a valid Vega-Lite spec over the dataset, registered in report.json, a fallback in layout.json
     check_deneb(fd, rep, denebs, load(layout) if layout else None, project)
+    check_udf_cards(fd, rep, load(layout) if layout else None, project)
 
     # ---- Microsoft's schema, property by property (warnings; errors with --strict), and the filter pane
     check_schema_props(fd, rep, pages, layout, strict_schema)

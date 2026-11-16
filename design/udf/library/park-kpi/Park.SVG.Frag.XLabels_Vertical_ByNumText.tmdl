@@ -1,0 +1,42 @@
+function 'Park.SVG.Frag.XLabels_Vertical_ByNumText' =
+		
+		(
+		  _CurrentExpr : NUMERIC EXPR,
+		  _PastExpr    : NUMERIC EXPR,
+		  _DateNum     : ANYREF  EXPR,
+		  _DateText    : ANYREF  EXPR,
+		  _InnerW      : NUMERIC VAL,
+		  _InnerH      : NUMERIC VAL,
+		  _PadL        : NUMERIC VAL,
+		  _PadR        : NUMERIC VAL,
+		  _Color       : STRING  VAL,
+		  _Font        : STRING  VAL,
+		  _FontSize    : NUMERIC VAL
+		)
+		=>
+		VAR __Col   = IF(NOT ISBLANK(_Color),    _Color,    "{{colors.textMuted}}")
+		VAR __Font  = IF(NOT ISBLANK(_Font),     _Font,     "{{font.family}}")
+		VAR __FS    = IF(NOT ISBLANK(_FontSize), _FontSize, 15)
+		VAR _Geo    = Park.SVG.Tab.Geo_Vertical_ByNumText(
+		                _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		                _InnerW, _InnerH, _PadL, _PadR
+		              )
+		VAR _N      = COUNTROWS(_Geo)
+		VAR __SlotW = DIVIDE(_InnerW - _PadL - _PadR, MAX(_N, 1))     // per-category width
+		VAR __CharW = __FS * 0.60                                      // rough px-per-char
+		VAR __MaxL  = MAX(1, INT(DIVIDE(__SlotW, __CharW)))            // safe letters
+		RETURN
+		IF(
+		  _N = 0, "",
+		  CONCATENATEX(
+		    _Geo,
+		    "<text x='" & [Xc] & "' y='" & (_InnerH - 5) &
+		    "' font-size='" & __FS &
+		    "' text-anchor='middle' font-family='" & __Font &
+		    "' fill='" & __Col & "'>" &
+		      IF(LEN([Txt]) > __MaxL, LEFT([Txt], __MaxL), [Txt]) &
+		    "</text>",
+		    " ",
+		    _DateNum, ASC
+		  )
+		)

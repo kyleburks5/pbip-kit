@@ -322,3 +322,22 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 9 | Done, confirmed in Desktop (second pass) | Average, Max, Count, Count of Category, Median, Standard deviation, Variance and Percentile.Inc render with unique native reference names (2026-11-11) |
 | 10 | Done, confirmed in Desktop (second pass) | the running total and the sparkline column render (2026-11-11) |
 | 30 | Written, UNVERIFIED in Desktop | rail + panel study M-3 (2026-11-15): `selection` on a new slicer writes general.filter with typed values; save a picker in Desktop and run `pbik roundtrip` |
+| 31 | Written, UNVERIFIED in Desktop | UDF toolbelt (Study 2 import, 2026-11-15): `pbik udf` (list, show, check, render, install, inline, desktop), the bind-check rule for UDF calls, `udfCard` in layout.json; the six Desktop checks below |
+
+## UDF toolbelt: Desktop checks (Study 2, UDF KPI card library, 2026-11-15)
+
+From the study's §6 "Desktop checks". None has been looked at in Desktop yet: each stays **verify in Desktop** until
+someone opens a test page, saves it and records the result here (then a lesson, docs/lessons/README.md).
+
+| # | Check | Status | What pbik relies on |
+| --- | --- | --- | --- |
+| U-1 | A visual calculation calling a UDF renders on 2.159, and `image.imageUrl` = `SelectRef` to it is kept on save | verify in Desktop | `udfCard` mode `calc` |
+| U-2 | A report extension measure can call a model UDF | verify in Desktop | `udfCard` mode `measure`; variant B on a live model with the function |
+| U-3 | The nested microchart SVG (a whole `data:` SVG inside the card's `<g>`, study F-02) renders at the kit's sizes | verify in Desktop | SVGKPICard and SVGKPICardGradient |
+| U-4 | 2.155 and 2.159: is the UDF preview switch still there, or are UDFs on by default? | verify in Desktop | `pbik udf desktop` says "verify in Desktop" for both; `FIRST_UDF_DESKTOP` 2.147 is from the study, not the kit's sources |
+| U-5 | Both harvested templates (`cardVisual.svg-kpi-card`, `advancedSlicerVisual.svg-kpi-card-buttons`) after a Desktop save | verify in Desktop | every `udfCard` build |
+| U-6 | A model at compatibility level 1702 publishes to the service | verify in Desktop | `pbik udf install` raises the level to 1702 |
+
+Also not yet seen in Desktop (checked on disk only): an inlined card (`pbik udf inline`, `udfCard` mode `inline`)
+returning the same image as the function call; `hidden: true` projections written by pbik for calc mode; the button
+form with a real category. The wireframe draws a `udfCard` as a plain card.

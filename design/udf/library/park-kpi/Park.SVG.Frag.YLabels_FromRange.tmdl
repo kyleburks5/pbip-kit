@@ -1,0 +1,32 @@
+function 'Park.SVG.Frag.YLabels_FromRange' =
+		
+		(
+		  _MinV     : NUMERIC VAL,
+		  _MaxV     : NUMERIC VAL,
+		  _Desired  : NUMERIC VAL,
+		  _InnerH   : NUMERIC VAL,
+		  _PadL     : NUMERIC VAL,
+		  _PadR     : NUMERIC VAL,
+		  _Color    : STRING  VAL,
+		  _Font     : STRING  VAL,
+		  _FontSize : NUMERIC VAL
+		)
+		=>
+		VAR __Col  = IF(NOT ISBLANK(_Color),    _Color,    "{{colors.textMuted}}")
+		VAR __Font = IF(NOT ISBLANK(_Font),     _Font,     "{{font.family}}")
+		VAR __FS   = IF(NOT ISBLANK(_FontSize), _FontSize, 15)
+		VAR _Ticks = Park.SVG.Tab.YTicks(_MinV, _MaxV, _Desired, _InnerH, _PadR)
+		RETURN
+		IF(
+		  COUNTROWS(_Ticks) = 0, "",
+		  CONCATENATEX(
+		    _Ticks,
+		    "<text x='" & (_PadL - 20) & "' y='" & [YPos] &
+		    "' font-size='" & __FS &
+		    "' text-anchor='end' font-family='" & __Font &
+		    "' fill='" & __Col & "'>" &
+		      [Lbl] &
+		    "</text>",
+		    " "
+		  )
+		)

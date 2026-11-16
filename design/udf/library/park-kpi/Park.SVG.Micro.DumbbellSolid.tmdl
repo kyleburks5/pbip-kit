@@ -1,0 +1,112 @@
+function 'Park.SVG.Micro.DumbbellSolid' = ```
+		
+		/*
+		  KPI 13 — Vertical Dumbbell (Solid Rounded)
+		  Full SVG (Image URL ready). 
+		  Uses shared Base, Geometry, and Axis helpers.
+		  Each point renders as one thick rounded stroke (no endpoint dots).
+		
+		  Parameters (exactly 8):
+		    _CurrentExpr, _PastExpr, _DateNumber, _DateVal,
+		    _AccentUp, _AccentDown,
+		    _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr   : NUMERIC EXPR,
+		  _PastExpr      : NUMERIC EXPR,
+		  _DateNumber    : ANYREF  EXPR,   // numeric order
+		  _DateVal       : ANYREF  EXPR,   // label text
+		  _AccentUp      : STRING  VAL,
+		  _AccentDown    : STRING  VAL,
+		  _AxisFont      : STRING  VAL,
+		  _AxisFontSize  : NUMERIC VAL
+		)
+		=>
+		/* ── Configuration ───────────────────────────────────────────────────────── */
+		VAR __SvgW     = 400
+		VAR __SvgH     = 170
+		VAR __PadL     = 55
+		VAR __PadR     = 30
+		VAR __Ticks    = 5
+		VAR __StemW    = 11
+		VAR __CircleR  = 8
+		VAR __StrokeW  = MAX(__StemW, 2 * __CircleR)
+		
+		VAR __UpCol    = IF( NOT ISBLANK(_AccentUp),   _AccentUp,   "{{colors.good}}" )
+		VAR __DownCol  = IF( NOT ISBLANK(_AccentDown), _AccentDown, "{{colors.secondLight}}" )
+		VAR __Font     = IF( NOT ISBLANK(_AxisFont),   _AxisFont,   "{{font.family}}" )
+		VAR __FS       = IF( NOT ISBLANK(_AxisFontSize), _AxisFontSize, 15 )
+		
+		/* 1) Base via helper */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		      _CurrentExpr, _PastExpr, _DateNumber, _DateVal
+		    )
+		
+		VAR __Empty  = COUNTROWS(_Base) = 0
+		VAR MinValue = 0
+		VAR MaxValue = MAXX(_Base, MAX([PY],[CY]))
+		
+		/* 2) Geometry table */
+		VAR _Geo =
+		    Park.SVG.Tab.Geo_Vertical_ByNumText(
+		      _CurrentExpr, _PastExpr,
+		      _DateNumber, _DateVal,
+		      __SvgW, __SvgH, __PadL, __PadR
+		    )
+		
+		/* 3) Thick rounded stroke per point (no circles) */
+		VAR _PerPoint =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        ADDCOLUMNS(
+		          _Geo,
+		          "Col", IF([CY] >= [PY], __UpCol, __DownCol)
+		        ),
+		        "<line x1='" & [Xc] &
+		        "' x2='" & [Xc] &
+		        "' y1='" & [Y_Curr] &
+		        "' y2='" & [Y_Past] &
+		        "' stroke='" & [Col] &
+		        "' stroke-width='" & __StrokeW &
+		        "'  vector-effect='non-scaling-stroke' />",
+		        " ",
+		        _DateNumber, ASC
+		      )
+		    )
+		
+		/* 4) Axes via helpers */
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNumber, _DateVal,
+		        __SvgW, __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.YLabels_FromRange(
+		        MinValue, MaxValue, __Ticks,
+		        __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		/* 5) Assemble */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    _PerPoint &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)
+		```

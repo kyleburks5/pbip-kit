@@ -1,15 +1,28 @@
 # DAX functions: DAX Lib packages
 
 SVG measures and other reusable DAX come from DAX Lib packages (daxlib.org), not from function files kept in the kit.
-`packages.json` lists the packages a rep may install, with their licences. The kit keeps no function files of its
-own; `vendor/` holds unmodified copies of the listed packages with their licences (`vendor/NOTICE.md`), only for a
-laptop where npm is blocked.
+`packages.json` lists the packages a rep may install, with their licences. `vendor/` holds unmodified copies of the
+listed packages with their licences (`vendor/NOTICE.md`), only for a laptop where npm is blocked.
+
+The one exception to "no function files of its own": **kit UDF libraries** in `library/<name>/`, used with their
+author's recorded permission (UDF KPI card study, 2026-11-15). Each has `index.json` (description, parameters,
+output, example, Use when / Avoid when, model tables needed, a fingerprint per function, enabled or disabled),
+`CHANGES.md` (the kit's changes; the author's originals stay in the study project, never in the master kit), and a
+provenance note. Today: `library/park-kpi` (33 KPI card functions; design/udf/udf-kpi-library-provenance.md;
+pattern docs/patterns/svg-kpi-card.md). They are an optional toolbelt: used only when the plan or the person picks
+one. `pbik udf` lists, checks (fingerprints, enabled, model tables), renders (design tokens), installs (the
+synthetic model always; a person's own model only when they ask) and inlines them (tools/pbik/README.md);
+`library/index_udf.py` rebuilds an index after a reviewed change (the maintainer).
 
 ## Order of preference
 
 1. A DAX Lib package listed in `packages.json` (licence checked), installed with the daxlib-mcp server (.mcp.json,
    pinned to `@daxlib/mcp@0.1.0`). DaxLib.SVG covers most SVG measures.
-2. New SVG code in the rep's model, written to .claude/rules/svg.md, when no listed package draws it.
+2. A kit UDF library function the plan or the person picks (`pbik udf list`), checked with `pbik udf check`, and
+   either inlined into a report-level measure (`udfCard` mode `inline`: no function needed in the model) or installed
+   (`pbik udf install` into the synthetic model; into a model open in Desktop through the modeling MCP
+   `function_operations` with `pbik udf render` text, compatibility level 1702, only when the person asks).
+3. New SVG code in the rep's model, written to .claude/rules/svg.md, when nothing listed draws it.
 
 Packages are installed into the model, not copied here: `/plan` puts a package a rep needs on the model approval
 list, and `/model approved` installs it with daxlib-mcp `install_package`, saves it to the TMDL and records the version

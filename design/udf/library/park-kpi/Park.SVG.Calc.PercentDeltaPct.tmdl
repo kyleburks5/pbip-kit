@@ -1,0 +1,6 @@
+function 'Park.SVG.Calc.PercentDeltaPct' =
+		(
+		        _CurVal  : NUMERIC VAL,
+		        _PastVal : NUMERIC VAL
+		    ) =>
+		    DIVIDE( _CurVal - _PastVal, _PastVal, 0 ) * 100

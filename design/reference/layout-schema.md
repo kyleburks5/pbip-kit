@@ -97,6 +97,32 @@ build.py (pbik 0.6): what layout.json can't express is a pbik gap (design/known-
   builds it instead, in the same folder.
 - The wireframe draws the spec (gen_wireframe_hf.py). Review it with the `reports:deneb-reviewer` agent first.
 
+### UDF KPI cards (`udfCard`, step 2)
+
+```json
+{"id": "P1-V03", "name": "kpi-revenue", "page": "P1", "type": "cardVisual", "x": 32, "y": 172, "w": 448, "h": 240,
+ "pattern": "svg-kpi-card", "container": {"altText": "Revenue this year, up or down against last year"},
+ "udfCard": {"function": "Park.SVG.Card2", "mode": "inline",
+             "args": {"_CurrentExpr": "[Revenue]", "_PastExpr": "[Revenue PY]", "_LabelExpr": "Revenue",
+                      "_AccentExpr": "token:brand"}}}
+```
+
+- Optional (the toolbelt, docs/patterns/svg-kpi-card.md): `pbik udf list --role card` gives the functions and their
+  **Use when** lines. The two icon functions are turned off; leave `_IconExpr` out (Card1 draws its own small
+  diamond, Card2 an empty tinted tile, SVGKPICard nothing). `icon:` values are refused.
+- `mode`: `inline` (default: the function's DAX goes into a report-level measure, so the card works on any live
+  model), `measure` (a report-level measure calling the function in the model), `calc` (a visual calculation calling
+  it, the measures it uses added as hidden fields; not for functions that take columns). `calc` and `measure` need
+  the function in the model (`pbik udf install`).
+- `form`: `card` (default, `cardVisual.svg-kpi-card`) or `buttons` (`advancedSlicerVisual.svg-kpi-card-buttons`: one
+  card per member of the field in `bindings`; not with `calc`).
+- `args`: `"[Measure]"` or `"Table[Column]"` as written; `"token:<colour>"` the token's hex; `"=<DAX>"` any DAX;
+  other text becomes a text value; style arguments left out take the report's tokens. A chart style name is checked
+  against the function's list. `name` (optional) names the report measure (default `img <ID>`).
+- Size the box from the grid in the function's shape (Card2 280:150, Card1 250:140, SVGKPICard 240:180); pbik build
+  stops on a box more than 15% off. Alt text is required (A-01). pbik build writes `build` step 2 and `udf`
+  (function, mode, fingerprint) itself.
+
 ### `pattern`
 
 The pattern a visual draws, from docs/patterns/ (`range-band`, `dumbbell`, `small-multiples-expected`,

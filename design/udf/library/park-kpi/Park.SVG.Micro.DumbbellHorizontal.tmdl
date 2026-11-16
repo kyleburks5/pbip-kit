@@ -1,0 +1,144 @@
+function 'Park.SVG.Micro.DumbbellHorizontal' =
+		
+		/*
+		  Horizontal dumbbell microchart — FULL SVG (Image URL ready)
+		  Connector uses _AccentUp when Current ≥ Past, else _AccentDown.
+		  Past dot = lightgrey, Current dot = black.
+		
+		  Parameters (exactly 8):
+		    _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		    _AccentUp, _AccentDown,
+		    _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr   : NUMERIC EXPR,
+		  _PastExpr      : NUMERIC EXPR,
+		  _DateNum       : ANYREF  EXPR,   // category order (e.g., Month Number)
+		  _DateText      : ANYREF  EXPR,   // category label (e.g., Month)
+		  _AccentUp      : STRING  VAL,    // connector color when Current ≥ Past
+		  _AccentDown    : STRING  VAL,    // connector color when Current <  Past
+		  _AxisFont      : STRING  VAL,
+		  _AxisFontSize  : NUMERIC VAL
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __SvgW      = 400
+		VAR __SvgH      = 170
+		VAR __PadL      = 20
+		VAR __PadR      = 30
+		VAR __PadT      = 20
+		VAR __PadB      = 20
+		VAR __Ticks     = 5
+		VAR __StemW     = 5
+		VAR __DotR      = 5
+		
+		VAR __UpCol     = IF( NOT ISBLANK(_AccentUp),   _AccentUp,   "{{colors.good}}" )
+		VAR __DownCol   = IF( NOT ISBLANK(_AccentDown), _AccentDown, "{{colors.secondLight}}" )
+		VAR __PastDot   = "{{colors.secondLight}}"
+		VAR __CurrDot   = "{{colors.text}}"
+		VAR __Font      = IF( NOT ISBLANK(_AxisFont),     _AxisFont,     "{{font.family}}" )
+		VAR __FS        = IF( NOT ISBLANK(_AxisFontSize), _AxisFontSize, 15 )
+		
+		/* 1) Base via helper (single grouped table) */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText
+		    )
+		VAR __Empty  = COUNTROWS(_Base) = 0
+		
+		/* 2) Value range for horizontal axis */
+		VAR MinXVal  = 0
+		VAR MaxXVal  = MAXX(_Base, MAX([PY],[CY]))
+		VAR Step     = Park.SVG.Aux.NiceStep(MinXVal, MaxXVal, __Ticks)
+		
+		/* 3) Vertical (categorical) layout */
+		VAR _N       = MAX(COUNTROWS(_Base), 1)
+		VAR _MinKey  = MINX(_Base, _DateNum)
+		VAR YScale   = DIVIDE(__SvgH - __PadT - __PadB, MAX(_N - 1, 1))
+		
+		/* 4) Geometry table (one pass, reused) */
+		VAR _Geo =
+		    ADDCOLUMNS(
+		        _Base,
+		        "Y",      __PadT + (_DateNum - _MinKey) * YScale,
+		        "XPast",  Park.SVG.Aux.ScaleX([PY], MinXVal, MaxXVal, __SvgW, __PadR),
+		        "XCurr",  Park.SVG.Aux.ScaleX([CY], MinXVal, MaxXVal, __SvgW, __PadR),
+		        "Lbl1",   LEFT(_DateText, 1),
+		        "Stroke", IF([CY] - [PY] >= 0, __UpCol, __DownCol)
+		    )
+		
+		/* 5) Dumbbell per point: connector + both dots */
+		VAR _PerPoint =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        _Geo,
+		        VAR y   = [Y]
+		        VAR xP  = [XPast]
+		        VAR xC  = [XCurr]
+		        VAR col = [Stroke]
+		        RETURN
+		            "<line y1='" & y & "' y2='" & y &
+		            "' x1='" & xP & "' x2='" & xC &
+		            "' stroke='" & col & "' stroke-width='" & __StemW & "' />" &
+		            " " &
+		            "<circle cx='" & xP & "' cy='" & y &
+		            "' r='" & __DotR & "' fill='" & __PastDot & "' />" &
+		            " " &
+		            "<circle cx='" & xC & "' cy='" & y &
+		            "' r='" & __DotR & "' fill='" & __CurrDot & "' />",
+		        " ",
+		        _DateNum, ASC
+		      )
+		    )
+		
+		/* 6) X-axis ticks (values, K/M/bn/T) */
+		VAR _XTicks =
+		    ADDCOLUMNS(
+		        GENERATESERIES(MinXVal, MaxXVal, Step),
+		        "XPos", Park.SVG.Aux.ScaleX([Value], MinXVal, MaxXVal, __SvgW, __PadR),
+		        "Lbl",  Park.SVG.Fmt.AbbrevKMB([Value])
+		    )
+		
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        _XTicks,
+		        "<text x='" & [XPos] &
+		        "' y='" & (__SvgH ) &
+		        "' font-size='" & __FS &
+		        "' text-anchor='middle' font-family='" & __Font &
+		        "' fill='{{colors.textMuted}}'>" & [Lbl] & "</text>",
+		        " "
+		      )
+		    )
+		
+		/* 7) Y-axis labels (categories; first letter) */
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        _Geo,
+		        "<text x='" & (__PadL - 10) &
+		        "' y='" & [Y] &
+		        "' font-size='" & 10 &
+		        "' text-anchor='end' font-family='" & __Font &
+		        "' fill='{{colors.textMuted}}'>" & [Lbl1] & "</text>",
+		        " ",
+		        _DateNum, ASC
+		      )
+		    )
+		
+		/* 8) Assemble FULL SVG */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    _PerPoint &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)

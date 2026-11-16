@@ -1,0 +1,41 @@
+function 'Park.Icons.GradientIcon' =
+		(
+		    iconName : STRING EXPR,  // e.g. "Arrows.arrow-down-box-fill"
+		    color1   : STRING EXPR,  // first color
+		    color2   : STRING EXPR   // second color
+		)
+		=>
+		VAR rawSvg =
+		    LOOKUPVALUE ( icons[Content], icons[Name], iconName )
+		VAR svg =
+		    Park.icons.cleansvg( rawSvg )
+		
+		// Detect "line" icons (stroke-based) vs "fill" icons
+		VAR hasStroke =
+		    OR(
+		        CONTAINSSTRING( svg, "stroke=" ),
+		        CONTAINSSTRING( rawSvg, " fill=""none""" ) || CONTAINSSTRING( rawSvg, " fill='none'" )
+		    )
+		
+		VAR defs =
+		    "<defs>" &
+		    "<linearGradient id='MyGradient' x1='0%' y1='0%' x2='100%' y2='100%'>" &
+		        "<stop offset='0%' style='stop-color:" & color1 & "'/>" &
+		        "<stop offset='75%' style='stop-color:" & color2 & "'/>" &
+		    "</linearGradient>" &
+		    "</defs>"
+		
+		VAR styleFillIcon =
+		    // For solid "fill" icons
+		    "<style type='text/css'>path{fill:url(#MyGradient);} </style>"
+		
+		VAR styleStrokeIcon =
+		    // For outline "line" icons
+		    "<style type='text/css'>path{fill:none;stroke:url(#MyGradient);} </style>"
+		
+		VAR styleBlock =
+		    IF( hasStroke, styleStrokeIcon, styleFillIcon )
+		
+		RETURN
+		    "data:image/svg+xml;utf8," &
+		    SUBSTITUTE( svg, "<path", styleBlock & defs & "<path", 1 )

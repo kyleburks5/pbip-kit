@@ -1,0 +1,129 @@
+function 'Park.SVG.Micro.BarwithTarget' =
+		
+		/*
+		  Bars with target line — FULL SVG (Image URL ready)
+		  Past/Target drawn as a horizontal line; Current drawn as a bar with conditional color.
+		  Helpers used:
+		    • Park.SVG.Tab.Base_ByNumText
+		    • Park.SVG.Tab.Geo_Vertical_ByNumText
+		    • Park.SVG.Frag.XLabels_Vertical_ByNumText
+		    • Park.SVG.Frag.YLabels_FromRange
+		
+		  Parameters (9 total — keep the additional color parameter):
+		    _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		    _UpColor, _DownColor, _LineColor,
+		    _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr  : NUMERIC EXPR,   // [Actual]
+		  _PastExpr     : NUMERIC EXPR,   // [Past/Target]
+		  _DateNum      : ANYREF  EXPR,   // numeric order key (e.g., Month Number)
+		  _DateText     : ANYREF  EXPR,   // label text (e.g., Month)
+		  _UpColor      : STRING  VAL,    // bar color when Current ≥ Past (default "{{colors.good}}")
+		  _DownColor    : STRING  VAL,    // bar color when Current < Past (default "{{colors.bad}}")
+		  _LineColor    : STRING  VAL,    // target line color (default "{{colors.text}}")
+		  _AxisFont     : STRING  VAL,    // e.g., "{{font.family}}"
+		  _AxisFontSize : NUMERIC VAL     // e.g., 15
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __SvgW    = 400
+		VAR __SvgH    = 170
+		VAR __PadL    = 55
+		VAR __PadR    = 30
+		VAR __Ticks   = 5
+		VAR __TargetW = 3  // stroke width for target line
+		VAR __Inset   = 2  // small horizontal inset beyond bar edges
+		
+		VAR __UpClr   = IF( NOT ISBLANK(_UpColor),   _UpColor,   "{{colors.good}}" )
+		VAR __DownClr = IF( NOT ISBLANK(_DownColor), _DownColor, "{{colors.bad}}" )
+		VAR __LineClr = IF( NOT ISBLANK(_LineColor), _LineColor, "{{colors.text}}" )
+		VAR __Font    = IF( NOT ISBLANK(_AxisFont),  _AxisFont,  "{{font.family}}" )
+		VAR __FS      = IF( NOT ISBLANK(_AxisFontSize), _AxisFontSize, 15 )
+		
+		/* 1) Base via helper (single grouped table) */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText
+		    )
+		VAR __Empty  = COUNTROWS(_Base) = 0
+		VAR MinValue = 0
+		VAR MaxValue = MAXX(_Base, MAX([PY], [CY]))
+		
+		/* 2) Geometry via helper (adds Xc, Y_Past, Y_Curr, Y0 per point) */
+		VAR _Geo =
+		    Park.SVG.Tab.Geo_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr,
+		        _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR
+		    )
+		
+		/* 3) Bar width (template’s 12-slot rule, half-slot bars) */
+		VAR _AvailW = __SvgW - __PadL - __PadR
+		VAR _BarW   = DIVIDE(_AvailW, 12, 0) * 0.5
+		
+		/* 4) Shapes per row: Current bar + Target line */
+		VAR _Shapes =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        ADDCOLUMNS(
+		          _Geo,
+		          "FillCol", IF([CY] - [PY] >= 0, __UpClr, __DownClr)
+		        ),
+		        VAR x   = [Xc]
+		        VAR xl  = x - (_BarW / 2)
+		        VAR xr  = x + (_BarW / 2)
+		        VAR yC  = [Y_Curr]
+		        VAR yT  = [Y_Past]
+		        RETURN
+		            // Current bar
+		            "<rect x='" & xl &
+		            "' y='" & yC &
+		            "' width='" & _BarW &
+		            "' height='" & ([Y0] - yC) &
+		            "' fill='" & [FillCol] & "' opacity='1' />" &
+		            // Target line (slightly extended beyond bar edges)
+		            "<line x1='" & (xl - __Inset) &
+		            "' x2='" & (xr + __Inset) &
+		            "' y1='" & yT &
+		            "' y2='" & yT &
+		            "' stroke='" & __LineClr & "' stroke-width='" & __TargetW & "' />",
+		        " ",
+		        _DateNum, ASC
+		      )
+		    )
+		
+		/* 5) Axes via shared helpers */
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.YLabels_FromRange(
+		        MinValue, MaxValue, __Ticks,
+		        __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		/* 6) Assemble FULL SVG */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    _Shapes &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)

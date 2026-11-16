@@ -355,6 +355,12 @@ def generate(root, name, out_folder=None, notes=None):
             rels += [f"relationship {tag('rel', r['from'], r['to'])}", f"\tfromColumn: {q(ft)}.{q(fc)}",
                      f"\ttoColumn: {q(tt)}.{q(tc)}", ""]
     write_text(d / "relationships.tmdl", "\n".join(rels))
+    from . import udf as U                       # UDFs installed for the synthetic model (pbik udf install)
+    wanted = [n for n, v in U.state(root).get("installed", {}).items() if v.get("model") == "synthetic"]
+    if wanted:
+        names = U.write_functions(folder, U.load(root), wanted, U.load_tokens(root))
+        if notes is not None:
+            notes.append(f"{len(names)} DAX function(s) added for the UDF cards (compatibility level {U.MIN_LEVEL})")
     return folder
 
 

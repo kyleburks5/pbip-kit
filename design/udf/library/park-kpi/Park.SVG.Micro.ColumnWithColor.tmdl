@@ -1,0 +1,103 @@
+function 'Park.SVG.Micro.ColumnWithColor' =
+		/*
+		  SVG KPI 2 — single bar chart with conditional colors vs past
+		  Uses shared X/Y label helpers with configurable font + size.
+		*/
+		(
+		  _CurrentExpr   : NUMERIC EXPR,
+		  _PastExpr      : NUMERIC EXPR,
+		  _DateNum       : ANYREF  EXPR,
+		  _DateText      : ANYREF  EXPR,
+		  _ColorPos      : STRING  VAL,
+		  _ColorNeg      : STRING  VAL,
+		  _AxisFont      : STRING  VAL,   // NEW: font family for axis labels (e.g., "{{font.family}}")
+		  _AxisFontSize  : NUMERIC VAL    // NEW: font size for axis labels (e.g., 15)
+		)
+		=>
+		VAR __SvgW     = 380
+		VAR __SvgH     = 170
+		VAR __PadL     = 55
+		VAR __PadR     = 30
+		VAR __Ticks    = 5
+		VAR __PosClr   = IF( NOT ISBLANK(_ColorPos), _ColorPos, "{{colors.good}}" )
+		VAR __NegClr   = IF( NOT ISBLANK(_ColorNeg), _ColorNeg, "{{colors.bad}}" )
+		
+		/* 1) Base table */
+		VAR _Base = Park.SVG.Tab.Base_ByNumText(_CurrentExpr, _PastExpr, _DateNum, _DateText)
+		
+		/* Short-circuit if empty */
+		VAR _NPoints = COUNTROWS(_Base)
+		VAR __Empty  = _NPoints = 0
+		
+		/* 2) Range + step */
+		VAR MinValue = 0
+		VAR MaxValue = MAXX(_Base, MAX([CY],[PY]))
+		
+		/* 3) Geometry spans */
+		VAR _AvailW  = __SvgW - __PadL - __PadR
+		VAR _AvailH  = __SvgH - 2 * __PadR
+		VAR _MinX    = MINX(_Base, _DateNum)
+		VAR _XScale  = DIVIDE(_AvailW, MAX(_NPoints - 1, 1))
+		VAR _YScale  = DIVIDE(_AvailH, MAX(MaxValue - MinValue, 1))
+		VAR BarWidth = DIVIDE(_AvailW * 0.8, MAX(_NPoints, 1), 0)
+		
+		/* 4) Unified geometry table */
+		VAR _Data =
+		    ADDCOLUMNS(
+		        _Base,
+		        "BarX",     __PadL + (_DateNum - _MinX) * _XScale - BarWidth / 2,
+		        "BarH",     ([CY] - MinValue) * _YScale,
+		        "BarY",     __SvgH - __PadR - ([CY] - MinValue) * _YScale,
+		        "BarColor", IF([CY] >= [PY], __PosClr, __NegClr)
+		    )
+		
+		/* 5) Bars */
+		VAR _Bars =
+		    IF(
+		        __Empty, "",
+		        CONCATENATEX(
+		            _Data,
+		            "<rect x='" & [BarX] &
+		            "' y='" & [BarY] &
+		            "' width='" & BarWidth &
+		            "' height='" & [BarH] &
+		            "' fill='" & [BarColor] &
+		            "' opacity='1' />",
+		            " ",
+		            _DateNum, ASC
+		        )
+		    )
+		
+		/* 6) Axes via helpers (with font + size) */
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", _AxisFont, _AxisFontSize
+		      )
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.YLabels_FromRange(
+		        MinValue, MaxValue, __Ticks,
+		        __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", _AxisFont, _AxisFontSize
+		      )
+		    )
+		
+		/* 7) Assemble */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		      _Bars &
+		      _XAxis &
+		      _YAxis &
+		  "</svg>"
+		)

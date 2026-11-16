@@ -1,0 +1,132 @@
+function 'Park.SVG.Micro.Line2' =
+		
+		/*
+		  Two-series line chart (Past vs Current) — FULL SVG (Image URL ready)
+		  Helpers used:
+		    • Park.SVG.Tab.Base_ByNumText
+		    • Park.SVG.Tab.Geo_Vertical_ByNumText
+		    • Park.SVG.Frag.XLabels_Vertical_ByNumText
+		    • Park.SVG.Frag.YLabels_FromRange
+		  Parameters (exactly 8):
+		    _CurrentExpr, _PastExpr, _DateNum, _DateText, _CurrColor, _PastColor, _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr   : NUMERIC EXPR,
+		  _PastExpr      : NUMERIC EXPR,
+		  _DateNum       : ANYREF  EXPR,   // numeric (e.g. Month Number)
+		  _DateText      : ANYREF  EXPR,   // display text (e.g. Month name)
+		  _CurrColor     : STRING  VAL,
+		  _PastColor     : STRING  VAL,
+		  _AxisFont      : STRING  VAL,
+		  _AxisFontSize  : NUMERIC VAL
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __W      = 400
+		VAR __H      = 170
+		VAR __Pad    = 55
+		VAR __Ticks  = 4
+		VAR __Past   = IF( NOT ISBLANK(_PastColor), _PastColor, "{{colors.secondLight}}" )
+		VAR __Curr   = IF( NOT ISBLANK(_CurrColor), _CurrColor, "{{colors.text}}" )
+		VAR __Font   = IF( NOT ISBLANK(_AxisFont),  _AxisFont,  "{{font.family}}" )
+		VAR __FS     = IF( NOT ISBLANK(_AxisFontSize), _AxisFontSize, 15 )
+		
+		/* 1) Base via helper (single grouped table) */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText
+		    )
+		VAR __Empty = COUNTROWS(_Base) = 0
+		VAR MinV    = 0
+		VAR MaxV    = MAXX(_Base, MAX([PY], [CY]))
+		
+		/* 2) Geometry via helper (adds Xc, Y_Past, Y_Curr, Y0, etc.) */
+		VAR _Geo =
+		    Park.SVG.Tab.Geo_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr,
+		        _DateNum, _DateText,
+		        __W, __H, __Pad, __Pad
+		    )
+		
+		/* 3) Polylines (ordered) */
+		VAR _LinePast =
+		    IF(__Empty, "", CONCATENATEX(_Geo, [Xc] & "," & [Y_Past], " ", _DateNum, ASC))
+		VAR _LineCurr =
+		    IF(__Empty, "", CONCATENATEX(_Geo, [Xc] & "," & [Y_Curr], " ", _DateNum, ASC))
+		
+		/* 4) Peaks (distinct when flat) */
+		VAR _PastMax   = TOPN(1, _Geo, [PY], DESC, _DateNum, DESC)
+		VAR _PastMin   = TOPN(1, _Geo, [PY], ASC,  _DateNum, ASC )
+		VAR _PastPeaks = SUMMARIZE( UNION(_PastMax, _PastMin), [Xc], [Y_Past], [PY] )
+		
+		VAR _CurrMax   = TOPN(1, _Geo, [CY], DESC, _DateNum, DESC)
+		VAR _CurrMin   = TOPN(1, _Geo, [CY], ASC,  _DateNum, ASC )
+		VAR _CurrPeaks = SUMMARIZE( UNION(_CurrMax, _CurrMin), [Xc], [Y_Curr], [CY] )
+		
+		/* 5) Value labels at peaks (uses same font/size as axes) */
+		VAR _LblPast =
+		    IF(
+		        __Empty, "",
+		        CONCATENATEX(
+		            _PastPeaks,
+		            "<text x='" & [Xc] & "' y='" & ([Y_Past] - 10) &
+		            "' font-size='" & __FS &
+		            "' text-anchor='middle' font-family='" & __Font &
+		            "' fill='{{colors.text}}'>" &
+		              Park.SVG.Fmt.AbbrevKMB([PY]) &
+		            "</text>",
+		            " "
+		        )
+		    )
+		
+		VAR _LblCurr =
+		    IF(
+		        __Empty, "",
+		        CONCATENATEX(
+		            _CurrPeaks,
+		            "<text x='" & [Xc] & "' y='" & ([Y_Curr] - 10) &
+		            "' font-size='" & __FS &
+		            "' text-anchor='middle' font-family='" & __Font &
+		            "' fill='{{colors.text}}'>" &
+		              Park.SVG.Fmt.AbbrevKMB([CY]) &
+		            "</text>",
+		            " "
+		        )
+		    )
+		
+		/* 6) Axes via shared helpers */
+		VAR _XAxis =
+		    IF(
+		        __Empty, "",
+		        Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		            _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		            __W, __H, __Pad, __Pad,
+		            "{{colors.textMuted}}", __Font, __FS
+		        )
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		        __Empty, "",
+		        Park.SVG.Frag.YLabels_FromRange(
+		            MinV, MaxV, __Ticks,
+		            __H, __Pad, __Pad,
+		            "{{colors.textMuted}}", __Font, __FS
+		        )
+		    )
+		
+		/* 7) Assemble full SVG (Image URL ready) */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __W & "' height='" & __H & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    "<polyline points='" & _LinePast & "' fill='none' stroke='" & __Past & "' stroke-width='2' />" &
+		    _LblPast &
+		    "<polyline points='" & _LineCurr & "' fill='none' stroke='" & __Curr & "' stroke-width='2' />" &
+		    _LblCurr &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)

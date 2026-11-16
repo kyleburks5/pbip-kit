@@ -1,0 +1,30 @@
+function 'Park.SVG.Tab.Geo_Vertical_ByNumText' =
+		
+		(
+		  _CurrentExpr : NUMERIC EXPR,
+		  _PastExpr    : NUMERIC EXPR,
+		  _DateNum     : ANYREF  EXPR,
+		  _DateText    : ANYREF  EXPR,
+		  _InnerW      : NUMERIC VAL,
+		  _InnerH      : NUMERIC VAL,
+		  _PadL        : NUMERIC VAL,
+		  _PadR        : NUMERIC VAL
+		)
+		=>
+		VAR _Base   = Park.SVG.Tab.Base_ByNumText(_CurrentExpr, _PastExpr, _DateNum, _DateText)
+		VAR _N      = COUNTROWS(_Base)
+		VAR _MinKey = MINX(_Base, _DateNum)
+		VAR MinV    = 0
+		VAR MaxV    = MAXX(_Base, MAX([PY], [CY]))
+		VAR XScale  = DIVIDE(_InnerW - _PadL - _PadR, MAX(_N - 1, 1))
+		RETURN
+		  ADDCOLUMNS(
+		    _Base,
+		    "Xc",     _PadL + (_DateNum - _MinKey) * XScale,
+		    "Y_Past", Park.SVG.Aux.ScaleY([PY], MinV, MaxV, _InnerH, _PadR),
+		    "Y_Curr", Park.SVG.Aux.ScaleY([CY], MinV, MaxV, _InnerH, _PadR),
+		    "Txt",    _DateText,                            // generic text alias
+		    "MinV",   MinV,
+		    "MaxV",   MaxV,
+		    "Y0",     Park.SVG.Aux.ScaleY(MinV, MinV, MaxV, _InnerH, _PadR)
+		  )

@@ -1,0 +1,19 @@
+function 'Park.SVG.Aux.NiceStep' =
+		(
+		        _MinVal       : NUMERIC VAL,
+		        _MaxVal       : NUMERIC VAL,
+		        _DesiredTicks : NUMERIC VAL
+		    ) =>
+		    VAR _Range = MAX( _MaxVal - _MinVal, 0 )
+		    VAR _Des   = MAX( _DesiredTicks, 1 )
+		    VAR _Raw   = MAX( DIVIDE( _Range, _Des, 0 ), 0.0001 )
+		    VAR _Pow10 = 10 ^ ROUNDDOWN( LOG10( _Raw ), 0 )
+		    VAR _Norm  = DIVIDE( _Raw, _Pow10 )
+		    VAR _Snap  =
+		        SWITCH( TRUE(),
+		            _Norm <= 1, 1,
+		            _Norm <= 2, 2,
+		            _Norm <= 5, 5,
+		            10
+		        )
+		    RETURN _Snap * _Pow10

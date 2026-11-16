@@ -1,0 +1,147 @@
+function 'Park.SVG.Card2' =
+		(
+				_CurrentExpr   : NUMERIC EXPR,
+				_PastExpr      : NUMERIC EXPR,
+				_LabelExpr     : STRING  EXPR,
+				_IconExpr      : STRING  EXPR,
+				_AccentExpr    : STRING  EXPR,
+		        // K-02 style (BLANK() = the kit's design token)
+		        _Font           : STRING  VAL,
+		        _TextColor      : STRING  VAL,
+		        _MutedColor     : STRING  VAL,
+		        _SurfaceColor   : STRING  VAL,
+		        _BorderColor    : STRING  VAL,
+		        _GoodColor      : STRING  VAL,
+		        _BadColor       : STRING  VAL,
+		        _GoodTint       : STRING  VAL,
+		        _BadTint        : STRING  VAL
+			) =>
+		    /// K-02 style: each colour and font from the arguments, or the kit's design token
+		    VAR __Font     = IF( ISBLANK( _Font ), "{{font.family}}", _Font )
+		    VAR __Text     = IF( ISBLANK( _TextColor ), "{{colors.text}}", _TextColor )
+		    VAR __Muted    = IF( ISBLANK( _MutedColor ), "{{colors.textMuted}}", _MutedColor )
+		    VAR __Surface  = IF( ISBLANK( _SurfaceColor ), "{{colors.card}}", _SurfaceColor )
+		    VAR __Border   = IF( ISBLANK( _BorderColor ), "{{colors.border}}", _BorderColor )
+		    VAR __Good     = IF( ISBLANK( _GoodColor ), "{{colors.good}}", _GoodColor )
+		    VAR __Bad      = IF( ISBLANK( _BadColor ), "{{colors.bad}}", _BadColor )
+		    VAR __GoodTint = IF( ISBLANK( _GoodTint ), "{{colors.goodTint}}", _GoodTint )
+		    VAR __BadTint  = IF( ISBLANK( _BadTint ), "{{colors.badTint}}", _BadTint )
+			/// Inputs
+			VAR _cur          = _CurrentExpr
+			VAR _prv          = _PastExpr
+			VAR _label        = _LabelExpr
+			VAR _iconParam    = _IconExpr
+			VAR _accent       = _AccentExpr
+			VAR _refLabel     = "From Last Year"
+		
+			/// Trend
+			VAR _trendVal     = _cur - _prv
+			VAR _trendPct     = DIVIDE( _trendVal, _prv, 0 ) * 100
+			VAR _trendTxt     = IF( ISBLANK( _prv ), "–", IF( _trendPct >= 0, "+", "" ) & FORMAT( _trendPct, "0.0" ) & "%" )
+			VAR _isUp         = _trendPct >= 0
+			VAR _refClr       = IF( ISBLANK( _prv ), __Muted, IF( _isUp, __Good, __Bad ) )
+			VAR _refBg        = IF( ISBLANK( _prv ), __Border, IF( _isUp, __GoodTint, __BadTint ) )
+		
+			/// Main value text
+			VAR _valTxt       = FORMAT( _cur, "#,##0" )
+		
+			/// Layout
+			VAR _w            = 280
+			VAR _h            = 150
+			VAR _pad          = 20
+			VAR _radius       = 12
+		
+			/// Colors & fonts
+			VAR _bg           = __Surface
+			VAR _border       = __Border
+			VAR _clrLabel     = __Muted
+			VAR _clrValue     = __Text
+			VAR _iconTileFill = _accent & "20"
+			VAR _font         = __Font
+			VAR _fsLabel      = 14
+			VAR _fsValue      = 28
+			VAR _fsRef        = 13
+		
+			/// Icon tile (top-right)
+			VAR _iconBgX      = _w - 60
+			VAR _iconBgY      = 50
+		
+			/// Reference pill geometry (bottom-left)
+			VAR _refBgX       = _pad
+			VAR _refBgY       = _h - 45
+			VAR _refBgW       = 80
+			VAR _refBgH       = 25
+		
+			/// SVG prefix/suffix
+			VAR _svgPrefix =
+				"data:image/svg+xml;utf8,<svg width='" & _w & "' height='" & _h & "' xmlns='http://www.w3.org/2000/svg'>"
+			VAR _svgSuffix = "</svg>"
+		
+			/// Card background + left accent
+			VAR _cardRect =
+				"<rect x='0' y='0' width='" & _w & "' height='" & _h
+				& "' rx='" & _radius & "' fill='" & _bg
+				& "' stroke='" & _border & "' stroke-width='1'/>"
+			VAR _leftBar =
+				"<rect x='0' y='0' width='4' height='" & _h & "' fill='" & _accent & "'/>"
+		
+			/// Icon tile + icon (base64 PNG or inline SVG)
+			VAR _iconTile =
+				"<rect x='" & _iconBgX & "' y='" & _iconBgY & "' width='40' height='40' rx='8' fill='" & _iconTileFill & "'/>"
+			VAR _isB64    = LEFT( _iconParam, 14 ) = "data:image/png"
+			VAR _iconSvg  =
+				IF(
+					_isB64,
+					"<image x='" & ( _iconBgX + 5 ) & "' y='" & ( _iconBgY + 5 ) & "' width='30' height='30' href='" & _iconParam & "'/>",
+					IF( LEN( _iconParam ) > 10, _iconParam, "" )
+				)
+		
+			/// Headings
+			VAR _labelSvg =
+				"<text x='" & _pad & "' y='40' font-family='" & _font & "' font-size='" & _fsLabel
+				& "' fill='" & _clrLabel & "'>" & _label & "</text>"
+			VAR _valueSvg =
+				"<text x='" & _pad & "' y='75' font-family='" & _font & "' font-size='" & _fsValue
+				& "' font-weight='bold' fill='" & _clrValue & "'>" & _valTxt & "</text>"
+		
+			/// Reference pill (bg + arrow + value + trailing label)
+			VAR _refBgRect =
+				"<rect x='" & _refBgX & "' y='" & _refBgY & "' width='" & _refBgW & "' height='" & _refBgH
+				& "' rx='4' fill='" & _refBg & "'/>"
+			VAR _arX       = _refBgX + 10
+			VAR _arY       = _refBgY + 12
+			VAR _arrow =
+				IF(
+					_isUp,
+					"<path d='M" & _arX & " " & ( _arY + 3 ) & " L" & ( _arX + 5 ) & " " & ( _arY - 2 )
+						& " L" & ( _arX + 10 ) & " " & ( _arY + 3 ) & "' stroke='" & _refClr
+						& "' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/>",
+					"<path d='M" & _arX & " " & ( _arY - 3 ) & " L" & ( _arX + 5 ) & " " & ( _arY + 2 )
+						& " L" & ( _arX + 10 ) & " " & ( _arY - 3 ) & "' stroke='" & _refClr
+						& "' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/>"
+				)
+			VAR _refValTxt =
+				"<text x='" & ( _refBgX + 25 ) & "' y='" & ( _refBgY + 17 )
+				& "' font-family='" & _font & "' font-size='" & _fsRef
+				& "' font-weight='500' fill='" & _refClr & "'>" & _trendTxt & "</text>"
+			VAR _refLblTxt =
+				"<text x='" & ( _refBgX + _refBgW + 10 ) & "' y='" & ( _refBgY + 17 )
+				& "' font-family='" & _font & "' font-size='" & _fsRef
+				& "' fill='" & _clrLabel & "'>" & _refLabel & "</text>"
+		
+			/// Final SVG
+			VAR _svg =
+				_svgPrefix
+				& _cardRect
+				& _leftBar
+				& _iconTile
+				& _iconSvg
+				& _labelSvg
+				& _valueSvg
+				& _refBgRect
+				& _arrow
+				& _refValTxt
+				& _refLblTxt
+				& _svgSuffix
+		
+			RETURN IF( ISBLANK( _cur ), BLANK(), _svg )  // K-05

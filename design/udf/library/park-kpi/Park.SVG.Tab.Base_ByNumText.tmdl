@@ -1,0 +1,14 @@
+function 'Park.SVG.Tab.Base_ByNumText' =
+		
+		(
+		  _CurrentExpr : NUMERIC EXPR,
+		  _PastExpr    : NUMERIC EXPR,
+		  _DateNum     : ANYREF  EXPR,
+		  _DateText    : ANYREF  EXPR
+		)
+		=>
+		  SUMMARIZECOLUMNS(
+		    _DateNum, _DateText,
+		    "PY", COALESCE(_PastExpr,    0),
+		    "CY", COALESCE(_CurrentExpr, 0)
+		  )

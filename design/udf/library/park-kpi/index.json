@@ -1,0 +1,2516 @@
+{
+ "_note": "UDF KPI card library, kit copy (study 2026-11-15). Optional toolbelt: used only when the plan or the person picks a function. Permission and sources: design/udf/udf-kpi-library-provenance.md. Changes from the author's originals: CHANGES.md. Colours and fonts are {{token}} placeholders filled by `pbik udf render`; `pbik udf check` checks fingerprints and model tables first.",
+ "source": "udf-kpi-study",
+ "namespace": "Park",
+ "functions": [
+  {
+   "name": "Park.SVG.Card1",
+   "role": "card",
+   "description": "KPI card image with a progress bar of the change (capped at 100%), label, value in thousands with a $ prefix. Style: trailing font and colour parameters; pass BLANK() for the report's design tokens.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_LabelExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_IconExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_Font",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_TextColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MutedColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_SurfaceColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BorderColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_GoodColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BadColor",
+     "type": "STRING",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {
+    "_Font": "font.family",
+    "_TextColor": "colors.text",
+    "_MutedColor": "colors.textMuted",
+    "_SurfaceColor": "colors.card",
+    "_BorderColor": "colors.border",
+    "_GoodColor": "colors.good",
+    "_BadColor": "colors.bad"
+   },
+   "output": "svg",
+   "calls": [],
+   "calledBy": [],
+   "requires": [],
+   "example": "Park.SVG.Card1 ( [Sales], [Sales PY], \"Sales\", \"\", \"#038D96\", BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK() )",
+   "useWhen": "the change itself is the story (a bar from -100% to +100%)",
+   "avoidWhen": "the value isn't money (the $ and K are fixed inside)",
+   "tokens": [
+    "colors.bad",
+    "colors.border",
+    "colors.card",
+    "colors.good",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-02",
+    "K-05"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "3e0763131b17acdeed07e7a51064c6d5e811e242552414c43940b0b9eb116a84",
+   "originalSha256": "8961499a926c4d18b8e1a8cda2ba8a82e48f84c58879e0c42f78c9ad1758409a",
+   "file": "Park.SVG.Card1.tmdl",
+   "status": "enabled",
+   "size": [
+    250,
+    140
+   ]
+  },
+  {
+   "name": "Park.SVG.Card2",
+   "role": "card",
+   "description": "KPI card image: label, big value, change pill against the comparison, icon tile, accent bar on the left. Style: trailing font and colour parameters; pass BLANK() for the report's design tokens.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_LabelExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_IconExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_Font",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_TextColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MutedColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_SurfaceColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BorderColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_GoodColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BadColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_GoodTint",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BadTint",
+     "type": "STRING",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {
+    "_Font": "font.family",
+    "_TextColor": "colors.text",
+    "_MutedColor": "colors.textMuted",
+    "_SurfaceColor": "colors.card",
+    "_BorderColor": "colors.border",
+    "_GoodColor": "colors.good",
+    "_BadColor": "colors.bad",
+    "_GoodTint": "colors.goodTint",
+    "_BadTint": "colors.badTint"
+   },
+   "output": "svg",
+   "calls": [],
+   "calledBy": [],
+   "requires": [],
+   "example": "Park.SVG.Card2 ( [Sales], [Sales PY], \"Sales\", \"\", \"#038D96\", BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK() )",
+   "useWhen": "one headline number with its change, on a designed card; the card the source report uses",
+   "avoidWhen": "a native new card with a reference label shows the same thing (ladder step 1)",
+   "tokens": [
+    "colors.bad",
+    "colors.badTint",
+    "colors.border",
+    "colors.card",
+    "colors.good",
+    "colors.goodTint",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-01",
+    "K-02",
+    "K-05"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.6.0",
+   "sha256": "81340f1fdccd5e601331d1d7f8df8bcb7fde3eff602b01f3cc9098d609c234c0",
+   "originalSha256": "f7ffb82e57f6d50958771cb61967e51d4d62cadba3db6a54603999dc85f3a97b",
+   "file": "Park.SVG.Card2.tmdl",
+   "status": "enabled",
+   "size": [
+    280,
+    150
+   ]
+  },
+  {
+   "name": "Park.SVG.SVGKPICard",
+   "role": "card",
+   "description": "KPI card image with value, change, icon and a small chart over the months; picks one of 13 chart styles by name (Line1-3, Bar1-5, Dumbbell1-5). Style: trailing colour parameters (and its own font); BLANK() gives the report's design tokens.",
+   "params": [
+    {
+     "name": "_LabelExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNumber",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateVal",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_IconExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentUp",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentDown",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_NeutralAccent",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_Font",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_FontSize",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_MicrochartType",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_TextColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MutedColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_SurfaceColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BorderColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_GoodColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BadColor",
+     "type": "STRING",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {
+    "_Font": "font.family",
+    "_TextColor": "colors.text",
+    "_MutedColor": "colors.textMuted",
+    "_SurfaceColor": "colors.card",
+    "_BorderColor": "colors.border",
+    "_GoodColor": "colors.good",
+    "_BadColor": "colors.bad"
+   },
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Calc.PercentDeltaPct",
+    "Park.SVG.Fmt.AbbrevKMB",
+    "Park.SVG.Fmt.PercentWithSign",
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.BarPast_LineCurrent",
+    "Park.SVG.Micro.BarinBarColor",
+    "Park.SVG.Micro.BarwithTarget",
+    "Park.SVG.Micro.BasicLineChart",
+    "Park.SVG.Micro.ColumnWithColor",
+    "Park.SVG.Micro.DumbbellHorizontal",
+    "Park.SVG.Micro.DumbbellSolid",
+    "Park.SVG.Micro.DumbbellSolidRounded",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots2",
+    "Park.SVG.Micro.Line2",
+    "Park.SVG.Micro.LineAreaV_PastCurrent"
+   ],
+   "calledBy": [],
+   "requires": [],
+   "example": "Park.SVG.SVGKPICard ( \"Sales\", [Sales], [Sales PY], 'Date'[Month Number], 'Date'[Month], \"\", \"#026E75\", \"#A84545\", \"#5D6B8A\", BLANK(), BLANK(), \"Bar5\", BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK() )",
+   "useWhen": "a KPI needs its trend in the same tile",
+   "avoidWhen": "the date has no month order and label columns (an unknown style name now stops with an error)",
+   "tokens": [
+    "colors.bad",
+    "colors.border",
+    "colors.card",
+    "colors.good",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-02",
+    "K-05",
+    "K-06",
+    "K-07"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "989a5a570d939496cf7a514887578f615a83ee238d61007fd2dacd0a95ffa2a3",
+   "originalSha256": "9e28efe695c51b6ae0c78317d810cca868262883924a50d5cd67a82ec1c0757c",
+   "file": "Park.SVG.SVGKPICard.tmdl",
+   "status": "enabled",
+   "size": [
+    240,
+    180
+   ],
+   "styles": [
+    "Line1",
+    "Line2",
+    "Line3",
+    "Bar1",
+    "Bar2",
+    "Bar3",
+    "Bar4",
+    "Bar5",
+    "Dumbbell1",
+    "Dumbbell2",
+    "Dumbbell3",
+    "Dumbbell4",
+    "Dumbbell5"
+   ]
+  },
+  {
+   "name": "Park.SVG.SVGKPICardGradient",
+   "role": "card",
+   "description": "Like SVGKPICard with three accent colours and its own six chart styles (Dumbbell1, Dumbbell2, Dumbbell2c, Dumbbell3, Bar1, Area1). Fixed in the kit copy (K-04). Style: trailing font and colour parameters; pass BLANK() for the report's design tokens.",
+   "params": [
+    {
+     "name": "_LabelExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateVal",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_IconExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentExpr",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentExpr2",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentExpr3",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_MicrochartType",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_Font",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_TextColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MutedColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_SurfaceColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BorderColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_GoodColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BadColor",
+     "type": "STRING",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {
+    "_Font": "font.family",
+    "_TextColor": "colors.text",
+    "_MutedColor": "colors.textMuted",
+    "_SurfaceColor": "colors.card",
+    "_BorderColor": "colors.border",
+    "_GoodColor": "colors.good",
+    "_BadColor": "colors.bad"
+   },
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Calc.PercentDeltaPct",
+    "Park.SVG.Fmt.PercentWithSign",
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.DumbbellHorizontal",
+    "Park.SVG.Micro.DumbbellSolidRounded",
+    "Park.SVG.Micro.DumbbellSolidRoundedColor",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots",
+    "Park.SVG.Micro.LineAreaV_PastCurrent"
+   ],
+   "calledBy": [],
+   "requires": [
+    {
+     "table": "Date",
+     "columns": [],
+     "why": "SUMMARIZE('Date', <order>, <label>): the order and label columns passed in must be in 'Date'"
+    }
+   ],
+   "example": "Park.SVG.SVGKPICardGradient ( \"Sales\", [Sales], [Sales PY], 'Date'[Month Number], 'Date'[Month], \"\", \"#038D96\", \"#A84545\", \"#5D6B8A\", \"Bar1\", BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK(), BLANK() )",
+   "useWhen": "a microchart card needs three accent colours",
+   "avoidWhen": "SVGKPICard's 13 styles cover it; Dumbbell2c needs a table called 'Date'",
+   "tokens": [
+    "colors.bad",
+    "colors.border",
+    "colors.card",
+    "colors.good",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-02",
+    "K-04",
+    "K-05",
+    "K-07"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "c1bed1f99378a7b47d0ee186545523f8bead73618ca8fe52934a87893f4a81b2",
+   "originalSha256": "baead85e7798d696b1cf61b8a37da1b5fc95b71fe6810fad8f58eccd99daa448",
+   "file": "Park.SVG.SVGKPICardGradient.tmdl",
+   "status": "enabled",
+   "size": [
+    240,
+    180
+   ],
+   "styles": [
+    "Dumbbell1",
+    "Dumbbell2",
+    "Dumbbell2c",
+    "Dumbbell3",
+    "Bar1",
+    "Area1"
+   ]
+  },
+  {
+   "name": "Park.SVG.BasicLineChart",
+   "role": "chart",
+   "description": "Stand-alone line chart image over the months with max and min points marked.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_StrokeColor",
+     "type": "STRING",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Aux.NiceStep",
+    "Park.SVG.Fmt.AbbrevKMB"
+   ],
+   "calledBy": [],
+   "requires": [
+    {
+     "table": "Date",
+     "columns": [],
+     "why": "SUMMARIZE('Date', <order>, <label>): the order and label columns passed in must be in 'Date'"
+    }
+   ],
+   "example": "Park.SVG.BasicLineChart ( [Sales], 'Date'[Month Number], 'Date'[Month], \"#1F6FEB\" )",
+   "useWhen": "a trend image in a table row or card",
+   "avoidWhen": "a native line chart or sparkline can show it; the date table isn't called 'Date' (it is read by name)",
+   "tokens": [
+    "colors.text",
+    "colors.textMuted"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "352ac96856d08d0005359e0fd1441ee1d1ef4222b3202903606e32b5dfdb7402",
+   "originalSha256": "14405a65f03afc900f302b163eec79fa44d75527a156bc1e249f177d50fea1e3",
+   "file": "Park.SVG.BasicLineChart.tmdl",
+   "status": "enabled",
+   "size": [
+    400,
+    150
+   ]
+  },
+  {
+   "name": "Park.SVG.Micro.BarLineV_RB",
+   "role": "microchart",
+   "description": "Current columns with a comparison benchmark line and a red dot where it falls short (style Bar5; the source report's card).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNumber",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateVal",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_ColorUp",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_ColorDown",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_ColorNeutral",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Aux.NiceStep",
+    "Park.SVG.Aux.ScaleY",
+    "Park.SVG.Fmt.AbbrevKMB",
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.bad",
+    "colors.good",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-01",
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.5.2",
+   "sha256": "df63fd6d1ff015525460e4f433d1b22ca2b568c56a3be8c7e55dd64be819a88f",
+   "originalSha256": "f71b3c854a734003d84280bb389243981b11f99a15bef03ea02ae6ac187ac865",
+   "file": "Park.SVG.Micro.BarLineV_RB.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.BarPast_LineCurrent",
+   "role": "microchart",
+   "description": "Comparison as columns, current as a line (style Bar2).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_LineColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_BarColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.secondLight",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "87524c03e79a0f8fd7a932c297261a9767bad6e4f135e0bf45a38ae6a4ae2e41",
+   "originalSha256": "108c141a8f8751871f272fdbcb1e52478c6982f47f0f57ea50f691875f952371",
+   "file": "Park.SVG.Micro.BarPast_LineCurrent.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.BarinBarColor",
+   "role": "microchart",
+   "description": "Comparison columns with current columns inside, coloured up or down (style Bar3). The card passes its colours in a different order from the parameter list.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_UpColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PastBarColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_DownColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.bad",
+    "colors.good",
+    "colors.secondLight",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "974fdd4f0b7658970c1b132a7076f6833c9cc75eeaa07574eaa93e952e83444c",
+   "originalSha256": "bc80aa36f2f0e752bcddacb465332d0fd1570d22d3b2b70302ac9eb91419998e",
+   "file": "Park.SVG.Micro.BarinBarColor.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.BarwithTarget",
+   "role": "microchart",
+   "description": "Current columns with the comparison as a target tick per month (style Bar4).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_UpColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_DownColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_LineColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.bad",
+    "colors.good",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "f9c4dc5abadb75798d2c9b6edd8e9ae5f97e12dcdc035c2f560b8a86808c733f",
+   "originalSha256": "3bea93f660ff2677ca2fc5e2b134fc4f414127e9f5073f3c8ee99e651b1c532e",
+   "file": "Park.SVG.Micro.BarwithTarget.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.BasicLineChart",
+   "role": "microchart",
+   "description": "Line of the current measure with max and min points (style Line1).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_StrokeColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_UpColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_DownColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly (use the card)",
+   "tokens": [
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "46e42529f4535e3a593445a6ffa9d12bc9e01476962cf2caf9fecfd40c748487",
+   "originalSha256": "0ebcf70e6e046a288621159bec46f0e53af6c241faf0208586997dae09d66771",
+   "file": "Park.SVG.Micro.BasicLineChart.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.ColumnWithColor",
+   "role": "microchart",
+   "description": "Columns of the current measure, coloured up or down against the comparison (style Bar1).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_ColorPos",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_ColorNeg",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.bad",
+    "colors.good",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "abb319bf54b7d6c6c22d31a1c19603565269e8a364858e02e1dc40b8abc5cb33",
+   "originalSha256": "aa26590a8dce373bb722d23294abd4837e4f3d0ee6133c142e4f8484a5cf53ae",
+   "file": "Park.SVG.Micro.ColumnWithColor.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.DumbbellHorizontal",
+   "role": "microchart",
+   "description": "Horizontal dumbbell per month (style Dumbbell3).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentUp",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AccentDown",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Aux.NiceStep",
+    "Park.SVG.Aux.ScaleX",
+    "Park.SVG.Fmt.AbbrevKMB",
+    "Park.SVG.Tab.Base_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.good",
+    "colors.secondLight",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-01",
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.5.0",
+   "sha256": "44c1c8d6739cb4d5e7481fbd8edb3925e59b27e216f531d433ab1bf34e267b55",
+   "originalSha256": "7d8299641bcc8f970d27010ae8d57d8e3948f5ac689091c1e28e3673a8b3034d",
+   "file": "Park.SVG.Micro.DumbbellHorizontal.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.DumbbellSolid",
+   "role": "microchart",
+   "description": "Vertical dumbbell, solid rounded stroke with end caps (style Dumbbell5).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNumber",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateVal",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentUp",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AccentDown",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.good",
+    "colors.secondLight",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "96f0e034d595434d619a19ab6eaf649d8e35ed68ec495958bcb0c3aa282122a3",
+   "originalSha256": "58fe815acfc1d9466ea08330e2269ea79c5bfccf03b0e293d46b3ee06d903fd9",
+   "file": "Park.SVG.Micro.DumbbellSolid.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.DumbbellSolidRounded",
+   "role": "microchart",
+   "description": "Vertical dumbbell as one thick rounded stroke per month (style Dumbbell2).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PositiveColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_NegativeColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.good",
+    "colors.secondLight",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-01",
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.5.1",
+   "sha256": "bf764c5741302cd2f885d0a3a0e1c680d147733e1421c44674999ce7d80fd51a",
+   "originalSha256": "ab09a29eedbfc96b83196fd885adfc31c4d59ac009334deb7976ca26c98a894c",
+   "file": "Park.SVG.Micro.DumbbellSolidRounded.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.DumbbellSolidRoundedColor",
+   "role": "microchart",
+   "description": "Dumbbell with the older 12-argument signature (size, padding, ticks passed in); used by the gradient card's Dumbbell2c style; reads 'Date' by name.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateVal",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_InnerW",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_InnerH",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadL",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadR",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_DesiredTicks",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PositiveColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PositiveColor2",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_NegativeColor",
+     "type": "STRING",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg fragment",
+   "calls": [
+    "Park.SVG.Aux.NiceStep",
+    "Park.SVG.Aux.ScaleY",
+    "Park.SVG.Fmt.AbbrevKMB"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [
+    {
+     "table": "Date",
+     "columns": [],
+     "why": "SUMMARIZE('Date', <order>, <label>): the order and label columns passed in must be in 'Date'"
+    }
+   ],
+   "example": null,
+   "useWhen": "inside SVGKPICardGradient (Dumbbell2c)",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.good",
+    "colors.secondLight",
+    "colors.textMuted"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "26ce91a0087b5a9ac712ea0fd0a730cf4c42f47f154955acd9a608d24283bbf2",
+   "originalSha256": "09fc4d9454d3f68e85a78d586717673f0f41a460581ed2bde9a1725f91018e08",
+   "file": "Park.SVG.Micro.DumbbellSolidRoundedColor.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.DumbbellV_RB_FixedDots",
+   "role": "microchart",
+   "description": "Vertical dumbbell per month: current and comparison dots joined by a thin line coloured up or down (style Dumbbell1).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentUp",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AccentDown",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.good",
+    "colors.secondLight",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-01",
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.5.4",
+   "sha256": "9907d1d6e59fb235a019570d5d30faf39b77e735f994306ee5e53f1930d2dc65",
+   "originalSha256": "33ca302b9f40814d859b827d5f2a20c24b27423d2dfce37887872dc8a063fcd1",
+   "file": "Park.SVG.Micro.DumbbellV_RB_FixedDots.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.DumbbellV_RB_FixedDots2",
+   "role": "microchart",
+   "description": "Vertical dumbbell with a thick rounded connector and two dots (style Dumbbell4).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNumber",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateVal",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_AccentUp",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AccentDown",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.good",
+    "colors.secondLight",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "d2ce0049de353aae2f766447d136555e932ca425ec99204b1db566d58a3a23ee",
+   "originalSha256": "fdaf590de53604e7a294f8d4780e367240f66981e702a5e9a83cf750a45fd0d3",
+   "file": "Park.SVG.Micro.DumbbellV_RB_FixedDots2.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.Line2",
+   "role": "microchart",
+   "description": "Two lines: current and comparison, with axis labels (style Line2).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_CurrColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PastColor",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Fmt.AbbrevKMB",
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.secondLight",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "47bfed0eafab12216f9f6c93dfd99180bf17948da6f73873d5c911dcd6a0d227",
+   "originalSha256": "2a46e93cb1b9c557e8bf0e0010567718900de4bd0254353370b27a1f7569758e",
+   "file": "Park.SVG.Micro.Line2.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Micro.LineAreaV_PastCurrent",
+   "role": "microchart",
+   "description": "Comparison as a filled area, current as a line, latest value labelled (style Line3).",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNumber",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateVal",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_ColorUp",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_ColorDown",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFont",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_AxisFontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Frag.YLabels_FromRange",
+    "Park.SVG.Tab.Base_ByNumText",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside SVGKPICard",
+   "avoidWhen": "called directly",
+   "tokens": [
+    "colors.secondLight",
+    "colors.text",
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-01",
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.5.3",
+   "sha256": "3954d26baa184b3e1870f67c2652783cf9f4f0860a3fc62fc3f61a0c9ba48bb9",
+   "originalSha256": "2b3181ac5278c0d45f3e2775e004d4bca20bd15326d9d52ea143618cf3831d2a",
+   "file": "Park.SVG.Micro.LineAreaV_PastCurrent.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.Icons.GradientIcon",
+   "role": "icon",
+   "description": "An icon from the icons table filled with a two-colour gradient.",
+   "params": [
+    {
+     "name": "iconName",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "color1",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "color2",
+     "type": "STRING",
+     "mode": "EXPR"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.Icons.CleanSVG"
+   ],
+   "calledBy": [],
+   "requires": [
+    {
+     "table": "icons",
+     "columns": [
+      "Name",
+      "Content"
+     ],
+     "why": "looks up the icon by name (LOOKUPVALUE icons[Content], icons[Name])"
+    }
+   ],
+   "example": "Park.Icons.GradientIcon ( \"thumb-up-fill\", \"#1F6FEB\", \"#7F56D9\" )",
+   "useWhen": "a decorative icon with a gradient",
+   "avoidWhen": "the model has no icons table; two gradient icons in one image (the gradient id is fixed)",
+   "tokens": [],
+   "changes": [],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "c55b0b32aa8d400267f8403c6695f6da3dfcc1cea7e88dda777cc0836d5af6ff",
+   "originalSha256": "c55b0b32aa8d400267f8403c6695f6da3dfcc1cea7e88dda777cc0836d5af6ff",
+   "file": "Park.Icons.GradientIcon.tmdl",
+   "status": "disabled: the icon pack's licence isn't confirmed (its site wasn't named; the icon names look like Remix Icon, whose Remix Icon License v1.0 isn't MIT, Apache or CC0). Name the source and its licence in design/udf/udf-kpi-library-provenance.md to enable"
+  },
+  {
+   "name": "Park.Icons.SolidIcon",
+   "role": "icon",
+   "description": "An icon from the model's icons table, recoloured in one colour, as an SVG image.",
+   "params": [
+    {
+     "name": "iconName",
+     "type": "STRING",
+     "mode": "EXPR"
+    },
+    {
+     "name": "color",
+     "type": "STRING",
+     "mode": "EXPR"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg",
+   "calls": [
+    "Park.Icons.CleanSVG"
+   ],
+   "calledBy": [],
+   "requires": [
+    {
+     "table": "icons",
+     "columns": [
+      "Name",
+      "Content"
+     ],
+     "why": "looks up the icon by name (LOOKUPVALUE icons[Content], icons[Name])"
+    }
+   ],
+   "example": "Park.Icons.SolidIcon ( \"thumb-up-fill\", \"#1F6FEB\" )",
+   "useWhen": "a card or table needs a small icon in a token colour",
+   "avoidWhen": "the model has no icons table (Name, Content)",
+   "tokens": [],
+   "changes": [],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "6476ec6dc1a0954f9315aebce1233faca64812cf764f03c97c8674417ab3a176",
+   "originalSha256": "6476ec6dc1a0954f9315aebce1233faca64812cf764f03c97c8674417ab3a176",
+   "file": "Park.Icons.SolidIcon.tmdl",
+   "status": "disabled: the icon pack's licence isn't confirmed (its site wasn't named; the icon names look like Remix Icon, whose Remix Icon License v1.0 isn't MIT, Apache or CC0). Name the source and its licence in design/udf/udf-kpi-library-provenance.md to enable"
+  },
+  {
+   "name": "Park.SVG.Calc.PercentDeltaPct",
+   "role": "number",
+   "description": "Change from comparison to current as a percent number (0 when the comparison is 0 or blank).",
+   "params": [
+    {
+     "name": "_CurVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PastVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "number",
+   "calls": [],
+   "calledBy": [
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [],
+   "example": "Park.SVG.Calc.PercentDeltaPct ( [Sales], [Sales PY] )",
+   "useWhen": "a change percent inside SVG code",
+   "avoidWhen": "a model measure already gives it (use that, so the numbers audit sees one source)",
+   "tokens": [],
+   "changes": [
+    "K-01"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.4.1",
+   "sha256": "c871f22053d24869dc381f23ecf7c612b7b38860dc24ef8b56d376a5dfea1051",
+   "originalSha256": "2d58f71116e9ecc2989a7cd1bc679795f9a0e4ce904d8fa3e63c07dd424b0b52",
+   "file": "Park.SVG.Calc.PercentDeltaPct.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Fmt.AbbrevKMB",
+   "role": "format",
+   "description": "Number as short text: 950, 1.2K, 3.4M, 5.6bn, 7.8T.",
+   "params": [
+    {
+     "name": "_Val",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "text",
+   "calls": [],
+   "calledBy": [
+    "Park.SVG.BasicLineChart",
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.DumbbellHorizontal",
+    "Park.SVG.Micro.DumbbellSolidRoundedColor",
+    "Park.SVG.Micro.Line2",
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.Tab.YTicks"
+   ],
+   "requires": [],
+   "example": "Park.SVG.Fmt.AbbrevKMB ( 1234567 )",
+   "useWhen": "big numbers drawn in SVG",
+   "avoidWhen": "the number needs a currency or unit (none is added)",
+   "tokens": [],
+   "changes": [
+    "K-01"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.4.1",
+   "sha256": "a55f47059e42ca42f08b95133c662f5e51966fd8bed2263317227b51c0d56295",
+   "originalSha256": "0802d2c88583ddb700a5b44d3c10aad65223679c73a1c5b740f1a1d25c109a02",
+   "file": "Park.SVG.Fmt.AbbrevKMB.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Fmt.PercentWithSign",
+   "role": "format",
+   "description": "Percent text with + or - and 0-3 decimals.",
+   "params": [
+    {
+     "name": "_Pct",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_Decimals",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "text",
+   "calls": [],
+   "calledBy": [
+    "Park.SVG.SVGKPICard",
+    "Park.SVG.SVGKPICardGradient"
+   ],
+   "requires": [],
+   "example": "Park.SVG.Fmt.PercentWithSign ( 12.345, 1 )",
+   "useWhen": "change text drawn in SVG",
+   "avoidWhen": "a format string on a measure can do it",
+   "tokens": [],
+   "changes": [
+    "K-01"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.4.1",
+   "sha256": "c402057c0e70b1b40faeb8401a90e7340608fa93b6cde14b41868a64a233b961",
+   "originalSha256": "108f0c14bc1307d844499db27558ed698c6eb027ec32c2cc147d4fadcfa40a1d",
+   "file": "Park.SVG.Fmt.PercentWithSign.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.Icons.CleanSVG",
+   "role": "helper",
+   "description": "Removes currentColor and none fills from raw icon SVG so it can be recoloured.",
+   "params": [
+    {
+     "name": "svg",
+     "type": "STRING",
+     "mode": "EXPR"
+    }
+   ],
+   "styleParams": {},
+   "output": "text",
+   "calls": [],
+   "calledBy": [
+    "Park.Icons.GradientIcon",
+    "Park.Icons.SolidIcon"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "inside the icon functions",
+   "avoidWhen": "-",
+   "tokens": [],
+   "changes": [],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "5edec63cd125997c1dfaf7e29fd45913fabf888016986f38e1a01a7c9c754c75",
+   "originalSha256": "5edec63cd125997c1dfaf7e29fd45913fabf888016986f38e1a01a7c9c754c75",
+   "file": "Park.Icons.CleanSVG.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Aux.NiceStep",
+   "role": "helper",
+   "description": "A tidy tick step (1, 2 or 5 x 10^n) for a range and a wanted tick count.",
+   "params": [
+    {
+     "name": "_MinVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MaxVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_DesiredTicks",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "number",
+   "calls": [],
+   "calledBy": [
+    "Park.SVG.BasicLineChart",
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.DumbbellHorizontal",
+    "Park.SVG.Micro.DumbbellSolidRoundedColor",
+    "Park.SVG.Tab.YTicks"
+   ],
+   "requires": [],
+   "example": "Park.SVG.Aux.NiceStep ( 0, 950, 5 )",
+   "useWhen": "any axis drawn in SVG",
+   "avoidWhen": "-",
+   "tokens": [],
+   "changes": [
+    "K-01"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.4.1",
+   "sha256": "1ed849623062cc107030719549f743fa556342b1c600b18c4a439dd164c733db",
+   "originalSha256": "b269405cc14c9e7d14499fe903e8640306f16f51f94b62eb4e7f9d07c3da264a",
+   "file": "Park.SVG.Aux.NiceStep.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Aux.ScaleX",
+   "role": "helper",
+   "description": "Maps a value to an x pixel with left and right padding.",
+   "params": [
+    {
+     "name": "_Val",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MinVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MaxVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_InnerW",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadLR",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "number",
+   "calls": [],
+   "calledBy": [
+    "Park.SVG.Micro.DumbbellHorizontal"
+   ],
+   "requires": [],
+   "example": "Park.SVG.Aux.ScaleX ( 6, 1, 12, 400, 30 )",
+   "useWhen": "any SVG chart",
+   "avoidWhen": "-",
+   "tokens": [],
+   "changes": [
+    "K-01"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.5.0",
+   "sha256": "c835f951b3a572c74010d7191cd7ebcf4561846a7d35393b1f0e79eaf10f1d8b",
+   "originalSha256": "15fc8170022b19d69ec6ec20dde6c3652cfa9ff41b451fc6da7fed6caa7923f7",
+   "file": "Park.SVG.Aux.ScaleX.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Aux.ScaleY",
+   "role": "helper",
+   "description": "Maps a value to a y pixel (SVG y grows downwards).",
+   "params": [
+    {
+     "name": "_Val",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MinVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MaxVal",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_InnerH",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadTB",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "number",
+   "calls": [],
+   "calledBy": [
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.DumbbellSolidRoundedColor",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText",
+    "Park.SVG.Tab.YTicks"
+   ],
+   "requires": [],
+   "example": "Park.SVG.Aux.ScaleY ( 50, 0, 100, 170, 10 )",
+   "useWhen": "any SVG chart",
+   "avoidWhen": "-",
+   "tokens": [],
+   "changes": [
+    "K-01"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": "0.4.1",
+   "sha256": "2be7e5cadbc2a79fad2d89fefe708b425708112a7348ca839faee90c5c61c03a",
+   "originalSha256": "ff1c92236c8145042eecee1e331b9b61cb0ac8f238dad602e7769f274cc0aeca",
+   "file": "Park.SVG.Aux.ScaleY.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+   "role": "helper",
+   "description": "SVG text for the month labels along the x axis, shortened to fit.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_InnerW",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_InnerH",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadL",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadR",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_Color",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_Font",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_FontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg fragment",
+   "calls": [
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.Micro.BarinBarColor",
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.BarPast_LineCurrent",
+    "Park.SVG.Micro.BarwithTarget",
+    "Park.SVG.Micro.BasicLineChart",
+    "Park.SVG.Micro.ColumnWithColor",
+    "Park.SVG.Micro.DumbbellSolid",
+    "Park.SVG.Micro.DumbbellSolidRounded",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots2",
+    "Park.SVG.Micro.Line2",
+    "Park.SVG.Micro.LineAreaV_PastCurrent"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "building a new microchart",
+   "avoidWhen": "-",
+   "tokens": [
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "848c7aefafe85f272f2ef2bfc76e484d0cbb28225cdde0af1f7454eb99208ef9",
+   "originalSha256": "250b27301ba5aa441b050c9aa38172d2fca4010565e62faa168035320763c3e1",
+   "file": "Park.SVG.Frag.XLabels_Vertical_ByNumText.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Frag.YLabels_FromRange",
+   "role": "helper",
+   "description": "SVG text for the y-axis tick labels.",
+   "params": [
+    {
+     "name": "_MinV",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MaxV",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_Desired",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_InnerH",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadL",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadR",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_Color",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_Font",
+     "type": "STRING",
+     "mode": "VAL"
+    },
+    {
+     "name": "_FontSize",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "svg fragment",
+   "calls": [
+    "Park.SVG.Tab.YTicks"
+   ],
+   "calledBy": [
+    "Park.SVG.Micro.BarinBarColor",
+    "Park.SVG.Micro.BarPast_LineCurrent",
+    "Park.SVG.Micro.BarwithTarget",
+    "Park.SVG.Micro.ColumnWithColor",
+    "Park.SVG.Micro.DumbbellSolid",
+    "Park.SVG.Micro.DumbbellSolidRounded",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots2",
+    "Park.SVG.Micro.Line2",
+    "Park.SVG.Micro.LineAreaV_PastCurrent"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "building a new microchart",
+   "avoidWhen": "-",
+   "tokens": [
+    "colors.textMuted",
+    "font.family"
+   ],
+   "changes": [
+    "K-03"
+   ],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "b178153fd2bbf0ecd6f0972213dfcb72fa9bb818cfd816132e9ba81f6fdfc4c1",
+   "originalSha256": "a905a319b2a473b3bd82bd210e3d7dfce42377365784a477e231a119fc83b9c6",
+   "file": "Park.SVG.Frag.YLabels_FromRange.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Tab.Base_ByNumText",
+   "role": "helper",
+   "description": "Table of current and comparison values per date key and label (blank becomes 0). Every microchart starts here.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    }
+   ],
+   "styleParams": {},
+   "output": "table",
+   "calls": [],
+   "calledBy": [
+    "Park.SVG.Micro.BarinBarColor",
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.BarPast_LineCurrent",
+    "Park.SVG.Micro.BarwithTarget",
+    "Park.SVG.Micro.ColumnWithColor",
+    "Park.SVG.Micro.DumbbellHorizontal",
+    "Park.SVG.Micro.DumbbellSolid",
+    "Park.SVG.Micro.DumbbellSolidRounded",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots2",
+    "Park.SVG.Micro.Line2",
+    "Park.SVG.Micro.LineAreaV_PastCurrent",
+    "Park.SVG.Tab.Geo_Vertical_ByNumText"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "building a new microchart",
+   "avoidWhen": "-",
+   "tokens": [],
+   "changes": [],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "a94b08ffe535f4a3ad77d71eb33d8b05da1441aa58c764f4c274b32e0466d50a",
+   "originalSha256": "a94b08ffe535f4a3ad77d71eb33d8b05da1441aa58c764f4c274b32e0466d50a",
+   "file": "Park.SVG.Tab.Base_ByNumText.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Tab.Geo_Vertical_ByNumText",
+   "role": "helper",
+   "description": "Adds pixel positions (x, y for current and comparison, baseline) to the base table.",
+   "params": [
+    {
+     "name": "_CurrentExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_PastExpr",
+     "type": "NUMERIC",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateNum",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_DateText",
+     "type": "ANYREF",
+     "mode": "EXPR"
+    },
+    {
+     "name": "_InnerW",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_InnerH",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadL",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadR",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "table",
+   "calls": [
+    "Park.SVG.Aux.ScaleY",
+    "Park.SVG.Tab.Base_ByNumText"
+   ],
+   "calledBy": [
+    "Park.SVG.Frag.XLabels_Vertical_ByNumText",
+    "Park.SVG.Micro.BarinBarColor",
+    "Park.SVG.Micro.BarLineV_RB",
+    "Park.SVG.Micro.BarPast_LineCurrent",
+    "Park.SVG.Micro.BarwithTarget",
+    "Park.SVG.Micro.DumbbellSolid",
+    "Park.SVG.Micro.DumbbellSolidRounded",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots",
+    "Park.SVG.Micro.DumbbellV_RB_FixedDots2",
+    "Park.SVG.Micro.Line2",
+    "Park.SVG.Micro.LineAreaV_PastCurrent"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "building a new microchart",
+   "avoidWhen": "-",
+   "tokens": [],
+   "changes": [],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "3296cfb4bec9faab0e0897d5b38d49db15a08b3369a61c1e0d34ecffeb784b7f",
+   "originalSha256": "3296cfb4bec9faab0e0897d5b38d49db15a08b3369a61c1e0d34ecffeb784b7f",
+   "file": "Park.SVG.Tab.Geo_Vertical_ByNumText.tmdl",
+   "status": "enabled"
+  },
+  {
+   "name": "Park.SVG.Tab.YTicks",
+   "role": "helper",
+   "description": "Table of y-axis tick values, positions and short labels.",
+   "params": [
+    {
+     "name": "_MinV",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_MaxV",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_Desired",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_InnerH",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    },
+    {
+     "name": "_PadR",
+     "type": "NUMERIC",
+     "mode": "VAL"
+    }
+   ],
+   "styleParams": {},
+   "output": "table",
+   "calls": [
+    "Park.SVG.Aux.NiceStep",
+    "Park.SVG.Aux.ScaleY",
+    "Park.SVG.Fmt.AbbrevKMB"
+   ],
+   "calledBy": [
+    "Park.SVG.Frag.YLabels_FromRange"
+   ],
+   "requires": [],
+   "example": null,
+   "useWhen": "building a new microchart",
+   "avoidWhen": "-",
+   "tokens": [],
+   "changes": [],
+   "minCompatibilityLevel": 1702,
+   "sourceVersion": null,
+   "sha256": "4992697acccdb40455cf78d2a596332da46a6642ba026b39e1d9b56d3fbb78a5",
+   "originalSha256": "4992697acccdb40455cf78d2a596332da46a6642ba026b39e1d9b56d3fbb78a5",
+   "file": "Park.SVG.Tab.YTicks.tmdl",
+   "status": "enabled"
+  }
+ ]
+}

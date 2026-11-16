@@ -426,6 +426,41 @@ def _main(argv=None):
     gt = gas.add_parser("tasks", help="write .vscode/tasks.json (one task per gate)")
     gt.add_argument("--root", default=".")
 
+    ud = sub.add_parser("udf", help="the kit's UDF libraries: an optional toolbelt of DAX functions (KPI cards)")
+    uds = ud.add_subparsers(dest="sub", required=True)
+    ul = uds.add_parser("list", help="the functions in plain words, by role (turned-off ones are not offered)")
+    ul.add_argument("--role", choices=["card", "chart", "microchart", "icon", "number", "format", "helper"])
+    ul.add_argument("--all", action="store_true", help="also the turned-off functions")
+    ul.add_argument("--root", default=".")
+    ush = uds.add_parser("show", help="one function: arguments, what it brings along, the tables it needs")
+    ush.add_argument("name")
+    ush.add_argument("--root", default=".")
+    uc = uds.add_parser("check", help="fingerprints, turned on, and the model tables a function reads")
+    uc.add_argument("names", nargs="*")
+    uc.add_argument("--model", help="a TMDL folder (default: the project's contract)")
+    uc.add_argument("--root", default=".")
+    ur = uds.add_parser("render", help="install text with the report's design tokens (tmdl, or a query to test)")
+    ur.add_argument("names", nargs="*")
+    ur.add_argument("--format", choices=["tmdl", "query"], default="tmdl")
+    ur.add_argument("--rename", help="Old.=New. (a test beside a model that already has the functions)")
+    ur.add_argument("--out")
+    ur.add_argument("--root", default=".")
+    ui = uds.add_parser("install", help="add functions (and what they call) to the synthetic model; to your own "
+                                        "model only with --own-model")
+    ui.add_argument("names", nargs="+")
+    ui.add_argument("--model", default="synthetic", help="synthetic (default) or a TMDL folder")
+    ui.add_argument("--own-model", action="store_true", help="the person asked for their own model to get them")
+    ui.add_argument("--root", default=".")
+    uin = uds.add_parser("inline", help="a call expanded into plain DAX that needs no UDF (for a live model)")
+    uin.add_argument("expression", nargs="?", help="DAX with a call (default: the function's example)")
+    uin.add_argument("--function")
+    uin.add_argument("--out")
+    uin.add_argument("--root", default=".")
+    udk = uds.add_parser("desktop", help="the Desktop version check before using UDFs")
+    udk.add_argument("--version", help="a Desktop version instead of the installed one")
+    udk.add_argument("--model", help="a TMDL folder: its compatibility level")
+    udk.add_argument("--root", default=".")
+
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
     ds = dk.add_subparsers(dest="sub", required=True)
@@ -468,6 +503,8 @@ def _main(argv=None):
         D_.mark_built(".", args.report if pathlib.Path(args.report, "definition").is_dir() else report_folder(args.report))                   # the agent's own change, for desktop close (D1)
         from . import status as ST_
         ST_.mark(".", "theme", "build")                 # the theme is applied with every build (v1.7 live fix 6)
+    elif c == "udf":
+        return udf_cmd(args)
     elif c == "measure":
         from . import extensions as X
         if args.op == "add":
@@ -879,6 +916,76 @@ def _main(argv=None):
         else:
             D.screenshot(args.page, args.out, args.report, args.region, args.scale, args.bridge)
     return 0
+
+
+def udf_cmd(args):
+    from . import udf as U
+    try:
+        by = U.load(args.root)
+        if args.sub == "list":
+            for ln in U.lines_list(by, args.role, args.all):
+                print(ln)
+            return 0
+        if args.sub == "show":
+            for ln in U.lines_show(by, args.name):
+                print(ln)
+            return 0
+        if args.sub == "check":
+            names = U.closure(by, args.names) if args.names else list(by)
+            tables = U.model_tables(args.root, args.model)
+            probs = U.check(by, names, tables)
+            for p in probs:
+                print(f"error           {p}")
+            for d in U.drift(args.root):
+                print(f"warning         {d}")
+            print(f"{len(names)} function(s) checked" + ("" if tables is not None else
+                  " (no contract or model, so the tables they read weren't checked)") + ": "
+                  + ("OK" if not probs else f"{len(probs)} problem(s)"))
+            return 1 if probs else 0
+        if args.sub == "render":
+            text = U.render(by, args.names, U.load_tokens(args.root), args.format, args.rename)
+            if args.out:
+                pathlib.Path(args.out).write_text(text, encoding="utf-8")
+                print(f"rendered {len(U.closure(by, args.names) if args.names else by)} function(s)")
+            else:
+                sys.stdout.write(text)
+            return 0
+        if args.sub == "install":
+            folder, names = U.install(args.root, args.names, args.model, args.own_model)
+            where = "the synthetic model" if args.model == "synthetic" else "your model"
+            if folder is None:
+                print(f"{len(names)} function(s) recorded for the synthetic model; they go in when it is made")
+            else:
+                print(f"{len(names)} function(s) added to {where} (compatibility level {U.MIN_LEVEL}): "
+                      + ", ".join(names))
+            return 0
+        if args.sub == "inline":
+            expr = args.expression
+            if not expr:
+                k = U.find(by, args.function or "")
+                if not k or not by[k].get("example"):
+                    print("pbik: give a DAX expression with a call, or a function that has an example", file=sys.stderr)
+                    return 2
+                expr = by[k]["example"]
+            text = U.inline(expr, by, U.load_tokens(args.root))
+            probs = U.inline_problems(text, by)
+            for p in probs:
+                print(f"error           {p}")
+            if args.out:
+                pathlib.Path(args.out).write_text(text, encoding="utf-8")
+                print(f"inlined: {len(text)} characters of plain DAX, no function needed")
+            else:
+                print(text)
+            return 1 if probs else 0
+        facts, probs = U.desktop_check(args.root, args.version, args.model)
+        for f in facts:
+            print(f)
+        for p in probs:
+            print(f"error           {p}")
+        return 1 if probs else 0
+    except U.UdfError as e:
+        print(f"pbik: {e}", file=sys.stderr)
+        return 2
 
 
 def bind_cmd(args):

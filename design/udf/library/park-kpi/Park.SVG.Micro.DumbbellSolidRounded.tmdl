@@ -1,0 +1,104 @@
+function 'Park.SVG.Micro.DumbbellSolidRounded' =
+		
+		/*
+		  KPI 13 — Vertical dumbbell (solid rounded connector; no endpoint circles)
+		  FULL SVG (Image URL ready). Uses shared Base + Geo + Axis helpers.
+		
+		  Parameters (exactly 8):
+		    _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		    _PositiveColor, _NegativeColor,
+		    _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr    : NUMERIC EXPR,
+		  _PastExpr       : NUMERIC EXPR,
+		  _DateNum        : ANYREF  EXPR,  // numeric order key
+		  _DateText       : ANYREF  EXPR,  // display text
+		  _PositiveColor  : STRING  VAL,   // color when Current ≥ Past
+		  _NegativeColor  : STRING  VAL,   // color when Current < Past
+		  _AxisFont       : STRING  VAL,
+		  _AxisFontSize   : NUMERIC VAL
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __SvgW     = 400
+		VAR __SvgH     = 170
+		VAR __PadL     = 55
+		VAR __PadR     = 30
+		VAR __Ticks    = 5
+		VAR __StrokeW  = 11  // solid rounded connector thickness
+		
+		VAR __UpCol    = IF( NOT ISBLANK(_PositiveColor), _PositiveColor, "{{colors.good}}" )
+		VAR __DownCol  = IF( NOT ISBLANK(_NegativeColor), _NegativeColor, "{{colors.secondLight}}" )
+		VAR __Font     = IF( NOT ISBLANK(_AxisFont),      _AxisFont,      "{{font.family}}" )
+		VAR __FS       = IF( NOT ISBLANK(_AxisFontSize),  _AxisFontSize,  15 )
+		
+		/* 1) Base via helper (single grouped table) */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText
+		    )
+		VAR __Empty  = COUNTROWS(_Base) = 0
+		VAR MinValue = 0
+		VAR MaxValue = MAXX(_Base, MAX([PY],[CY]))
+		
+		/* 2) Geometry via helper (adds Xc, Y_Past, Y_Curr, Y0 per point) */
+		VAR _Geo =
+		    Park.SVG.Tab.Geo_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr,
+		        _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR
+		    )
+		
+		/* 3) One rounded stroke per row (no circles) */
+		VAR _PerPoint =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        ADDCOLUMNS(
+		          _Geo,
+		          "Col", IF([CY] >= [PY], __UpCol, __DownCol)
+		        ),
+		        "<line x1='" & [Xc] & "' x2='" & [Xc] &
+		        "' y1='" & [Y_Curr] & "' y2='" & [Y_Past] &
+		        "' stroke='" & [Col] &
+		        "' stroke-width='" & __StrokeW &
+		        "' stroke-linecap='round' vector-effect='non-scaling-stroke' />",
+		        " ",
+		        _DateNum, ASC
+		      )
+		    )
+		
+		/* 4) Axes via shared helpers (no custom shifts) */
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.YLabels_FromRange(
+		        MinValue, MaxValue, __Ticks,
+		        __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		/* 5) Assemble FULL SVG */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    _PerPoint &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)

@@ -1,0 +1,7 @@
+function 'Park.Icons.CleanSVG' =
+		( svg : STRING EXPR ) =>
+		VAR s1 = SUBSTITUTE(svg, " fill=""currentColor""", "", 1)
+		VAR s2 = SUBSTITUTE(s1, " fill='currentColor'", "", 1)
+		VAR s3 = SUBSTITUTE(s2, " fill=""none""", "", 1)
+		VAR s4 = SUBSTITUTE(s3, " fill='none'", "", 1)
+		RETURN s4

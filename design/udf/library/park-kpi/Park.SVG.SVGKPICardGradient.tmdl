@@ -1,0 +1,189 @@
+function 'Park.SVG.SVGKPICardGradient' = ```
+		(
+		        _LabelExpr       : STRING  EXPR,
+		        _CurrentExpr     : NUMERIC EXPR,
+		        _PastExpr        : NUMERIC EXPR,
+		        _DateVal         : ANYREF  EXPR,
+		        _DateNum         : ANYREF  EXPR,
+		        _IconExpr        : STRING  EXPR,
+		        _AccentExpr      : STRING  EXPR,
+		        _AccentExpr2      : STRING  EXPR,
+		        _AccentExpr3      : STRING  EXPR,
+		        _MicrochartType  : STRING  EXPR,
+		        // K-02 style (BLANK() = the kit's design token)
+		        _Font           : STRING  VAL,
+		        _TextColor      : STRING  VAL,
+		        _MutedColor     : STRING  VAL,
+		        _SurfaceColor   : STRING  VAL,
+		        _BorderColor    : STRING  VAL,
+		        _GoodColor      : STRING  VAL,
+		        _BadColor       : STRING  VAL
+		    ) =>
+		    /// K-02 style: each colour and font from the arguments, or the kit's design token
+		    VAR __Font     = IF( ISBLANK( _Font ), "{{font.family}}", _Font )
+		    VAR __Text     = IF( ISBLANK( _TextColor ), "{{colors.text}}", _TextColor )
+		    VAR __Muted    = IF( ISBLANK( _MutedColor ), "{{colors.textMuted}}", _MutedColor )
+		    VAR __Surface  = IF( ISBLANK( _SurfaceColor ), "{{colors.card}}", _SurfaceColor )
+		    VAR __Border   = IF( ISBLANK( _BorderColor ), "{{colors.border}}", _BorderColor )
+		    VAR __Good     = IF( ISBLANK( _GoodColor ), "{{colors.good}}", _GoodColor )
+		    VAR __Bad      = IF( ISBLANK( _BadColor ), "{{colors.bad}}", _BadColor )
+		    /// Inputs
+		    VAR _CurVal    = _CurrentExpr
+		    VAR _PrvVal    = _PastExpr
+		    VAR _Label     = _LabelExpr
+		    VAR _IconParam = _IconExpr
+		    VAR _Accent    = _AccentExpr
+		    VAR _Accent2    = _AccentExpr2
+		    VAR _Accent3    = _AccentExpr3
+		
+		    /// Card layout & typography
+		    VAR _SvgW          = 240
+		    VAR _SvgH          = 180
+		    VAR _Pad           = 20
+		    VAR _Radius        = 8
+		
+		    VAR _FontFamily       = __Font
+		    VAR _LabelFS          = 13
+		    VAR _ValueFS          = 28
+		    VAR _SubLabelFS       = 13
+		    VAR _TrendFS          = 14
+		
+		    VAR _CardBG        = __Surface
+		    VAR _CardBorder    = __Border
+		    VAR _LabelColor    = __Text
+		    VAR _ValueColor    = __Text
+		    VAR _SubLabelColor = __Muted
+		
+		    /// Value + trend
+		    VAR _TrendPct   = Park.SVG.Calc.PercentDeltaPct( _CurVal, _PrvVal )
+		    VAR _IsUp       = _TrendPct >= 0
+		    VAR _TrendTxt   = IF( ISBLANK( _PrvVal ), "–", Park.SVG.Fmt.PercentWithSign( _TrendPct, 0 ) )
+		    VAR _TrendColor = IF( ISBLANK( _PrvVal ), __Muted, IF( _IsUp, __Good, __Bad ) )
+		
+		    VAR _FormattedValue = FORMAT( DIVIDE( _CurVal, 1000 ), "#,##0.0" ) & "K"
+		
+		    /// Micro geometry (internal)
+		    VAR _MIC_W     = 400
+		    VAR _MIC_H     = 170
+		    VAR _MIC_PadL  = 45
+		    VAR _MIC_PadR  = 30
+		    VAR _MIC_Ticks = 5
+		
+		    /// Render microchart (choose by type)
+		    VAR _MicroInner =
+		        // K-04: the author's calls used an older 11-argument microchart signature; the microcharts take 8
+		        // (9 for Bar1). This card's 4th parameter (_DateVal) is the numeric order, the 5th (_DateNum) the label.
+		        SWITCH(
+		            _MicrochartType,
+		            "Dumbbell1",  Park.SVG.Micro.DumbbellV_RB_FixedDots( _CurrentExpr, _PastExpr, _DateVal, _DateNum, _Accent, _Accent2, __Font, BLANK() ),
+		            "Dumbbell2",  Park.SVG.Micro.DumbbellSolidRounded( _CurrentExpr, _PastExpr, _DateVal, _DateNum, _Accent, _Accent2, __Font, BLANK() ),
+		            "Dumbbell2c", Park.SVG.Micro.DumbbellSolidRoundedColor( _CurrentExpr, _PastExpr, _DateVal, _DateNum, _MIC_W, _MIC_H, _MIC_PadL, _MIC_PadR, _MIC_Ticks, _Accent, _Accent3, _Accent2 ),
+		            "Dumbbell3",  Park.SVG.Micro.DumbbellHorizontal( _CurrentExpr, _PastExpr, _DateVal, _DateNum, _Accent, _Accent2, __Font, BLANK() ),
+		            "Bar1",       Park.SVG.Micro.BarLineV_RB( _CurrentExpr, _PastExpr, _DateVal, _DateNum, _Accent, _Accent2, _Accent3, __Font, BLANK() ),
+		            "Area1",      Park.SVG.Micro.LineAreaV_PastCurrent( _CurrentExpr, _PastExpr, _DateVal, _DateNum, _Accent, _Accent2, __Font, BLANK() ),
+		            ERROR( "Park.SVG.SVGKPICardGradient: unknown chart style. Use Dumbbell1, Dumbbell2, Dumbbell2c, Dumbbell3, Bar1 or Area1." )  // K-07
+		        )
+
+		    /// Place microchart in card
+		    VAR _MicroX     = _Pad
+		    VAR _MicroY     = 78
+		    VAR _MicroScale = 0.5
+		    VAR _MicroGroup =
+		        "<g transform='translate(" & _MicroX & "," & _MicroY & ") scale(" & _MicroScale & ")'>"
+		        & _MicroInner & "</g>"
+		
+		    /// Chrome + icon
+		    VAR _SvgPrefix = "data:image/svg+xml;utf8,<svg width='" & _SvgW & "' height='" & _SvgH & "' xmlns='http://www.w3.org/2000/svg'>"
+		    VAR _SvgSuffix = "</svg>"
+		
+		    VAR _CardRect =
+		        "<rect x='0' y='0' width='" & _SvgW & "' height='" & _SvgH
+		        & "' rx='" & _Radius & "' fill='" & _CardBG
+		        & "' stroke='" & _CardBorder & "' stroke-width='1'/>"
+		
+		VAR _IsBase64 = LEFT ( _IconParam, 14 ) = "data:image/png"
+		
+		VAR _IconX = _SvgW - _Pad - 24
+		VAR _IconY = _Pad
+		
+		// Strip prefix + outer <svg> tags for inline SVG
+		VAR _SvgInner =
+		    SUBSTITUTE (
+		        SUBSTITUTE (
+		            SUBSTITUTE ( _IconParam, "data:image/svg+xml;utf8,", "" ),
+		            "<svg viewBox=""0 0 24 24"" xmlns=""http://www.w3.org/2000/svg"">",
+		            ""
+		        ),
+		        "</svg>",
+		        ""
+		    )
+		
+		VAR _Icon =
+		    IF (
+		        _IsBase64,
+		        // Case 1: PNG → draw at 24×24
+		        "<image x='" & _IconX & "' y='" & _IconY &
+		        "' width='24' height='24' href='" & _IconParam & "'/>",
+		        // Case 2: Inline SVG → use only the inner contents, positioned in a 24×24 slot
+		        "<g transform='translate(" & _IconX & "," & _IconY & ") scale(1)'>" &
+		            _SvgInner &
+		        "</g>"
+		    )
+		
+		
+		
+		
+		    /// Text + trend
+		    VAR _LabelText =
+		        "<text x='" & _Pad & "' y='" & ( _Pad + 5 )
+		        & "' font-family='" & _FontFamily & "' font-size='" & _LabelFS
+		        & "' fill='" & _LabelColor & "'>" & _Label & "</text>"
+		
+		    VAR _ValueText =
+		        "<text x='" & _Pad & "' y='50' font-family='" & _FontFamily
+		        & "' font-size='" & _ValueFS & "' font-weight='bold' fill='" & _ValueColor & "'>"
+		        & _FormattedValue & "</text>"
+		
+		    VAR _SubY    = 70
+		    VAR _SubText =
+		        "<text x='" & _Pad & "' y='" & _SubY & "' font-family='" & _FontFamily
+		        & "' font-size='" & _SubLabelFS & "' fill='" & _SubLabelColor & "'>From last year</text>"
+		
+		    VAR _TrendTextWidth = 35
+		    VAR _ArrowX = _SvgW - _Pad - _TrendTextWidth - 12
+			VAR _ArrowStyle =
+				" style='fill:none;stroke:" & _TrendColor &
+				";stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round'"
+		
+			VAR _ArrowPath =
+				IF(
+					NOT _IsUp,
+					"<path d='M" & _ArrowX & " " & ( _SubY - 6 ) &
+					" L" & ( _ArrowX + 4 ) & " " & ( _SubY - 2 ) &
+					" L" & ( _ArrowX + 8 ) & " " & ( _SubY - 6 ) & "'" & _ArrowStyle & "/>",
+					"<path d='M" & _ArrowX & " " & ( _SubY - 2 ) &
+					" L" & ( _ArrowX + 4 ) & " " & ( _SubY - 6 ) &
+					" L" & ( _ArrowX + 8 ) & " " & ( _SubY - 2 ) & "'" & _ArrowStyle & "/>"
+				)
+		
+		    VAR _TrendText =
+		        "<text x='" & ( _SvgW - _Pad ) & "' y='" & _SubY
+		        & "' font-family='" & _FontFamily & "' font-size='" & _TrendFS
+		        & "' font-weight='500' fill='" & _TrendColor & "' text-anchor='end'>"
+		        & _TrendTxt & "</text>"
+		
+		    /// Final assembly
+		    VAR _SVG =
+		          _SvgPrefix
+		        & _CardRect
+		        & _Icon
+		        & _LabelText
+		        & _ValueText
+		        & _SubText
+		        & _MicroGroup
+		        & _ArrowPath
+		        & _TrendText
+		        & _SvgSuffix
+		
+		    RETURN IF( ISBLANK( _CurVal ), BLANK(), _SVG )  // K-05
+		```

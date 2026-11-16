@@ -1,0 +1,15 @@
+function 'Park.SVG.Fmt.PercentWithSign' =
+		(
+		        _Pct      : NUMERIC VAL,
+		        _Decimals : NUMERIC VAL
+		    ) =>
+		    VAR _Abs = ABS( _Pct )
+		    VAR _Fmt =
+		        SWITCH(
+		            TRUE(),
+		            _Decimals <= 0, FORMAT( _Abs, "0" ),
+		            _Decimals = 1,  FORMAT( _Abs, "0.0" ),
+		            _Decimals = 2,  FORMAT( _Abs, "0.00" ),
+		                             FORMAT( _Abs, "0.000" )
+		        )
+		    RETURN IF( _Pct >= 0, "+", "-" ) & _Fmt & "%"

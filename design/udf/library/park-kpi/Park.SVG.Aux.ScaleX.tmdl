@@ -1,0 +1,11 @@
+function 'Park.SVG.Aux.ScaleX' =
+		(
+		        _Val    : NUMERIC VAL,
+		        _MinVal : NUMERIC VAL,
+		        _MaxVal : NUMERIC VAL,
+		        _InnerW : NUMERIC VAL,
+		        _PadLR  : NUMERIC VAL
+		    ) =>
+		    VAR _Range = MAX( _MaxVal - _MinVal, 1 )
+		    VAR _Scale = DIVIDE( _InnerW - 2 * _PadLR, _Range )
+		    RETURN _PadLR + ( _Val - _MinVal ) * _Scale

@@ -725,6 +725,49 @@ it says exactly why months will sort A to Z. Number measures without a format ge
 - `map approve --by`: person-only; reruns the check through the map, prints it, asks for the contract's model name
   typed. `bind live` refuses a map that isn't approved or changed since.
 
+- UDF calls (UDF KPI card study, `pbik udf`): a call to a kit UDF library function (report-level measures, visual
+  calculations, planned measures) that the contract's `functions` doesn't list is an error that offers inline mode;
+  so is one the live model has in another version (the kit's `PBIK_UDF` mark differs), a table a called function
+  reads (`'Date'`) that the contract lacks, and a table an inlined card reads by name. A function with that name the
+  kit didn't add is a note (its version can't be confirmed). `synth contract` records the model's `functions` (name
+  and the kit's mark) and its `compatibilityLevel` when it has functions.
+
+### `udf list | show | check | render | install | inline | desktop` (the UDF toolbelt)
+
+Optional: used only when the plan or the person picks a function (docs/patterns/svg-kpi-card.md). The library is
+design/udf/library/<name>/ (one `.tmdl` per function, `index.json`); today `park-kpi` (33 functions, provenance
+design/udf/udf-kpi-library-provenance.md).
+- `list [--role card] [--all]`: plain words per function with its Use when / Avoid when; turned-off functions (the
+  two icon functions) are only shown with `--all`, so the plan never picks them.
+- `show <name>`: arguments (type, mode), style arguments and their tokens, chart style names, size, what it brings
+  along, the tables it needs.
+- `check [names] [--model <TMDL>]`: each file against its fingerprint, turned on, and the model tables it reads
+  (the contract by default); a later library change to an installed function is a warning.
+- `render [names] [--format tmdl|query] [--rename Old.=New.]`: the text with design/tokens.json filled in, plus what
+  each function calls; `query` gives a `DEFINE FUNCTION` block for a query-scoped test.
+- `install <names> [--model synthetic|<TMDL folder> --own-model]`: the functions and what they call go into
+  functions.tmdl (pbik's own block, each with `annotation PBIK_UDF = <library>:<sha256>`; the model's own functions
+  are kept, a name clash refused), the compatibility level goes to 1702, and design/specs/udf.json records the
+  install. The synthetic model always (kept when `synth generate` runs again); a person's own TMDL folder only with
+  `--own-model`, when they asked. A function reading a table the model lacks (`'Date'`) is refused. Installing into a
+  model open in Desktop goes through the modeling MCP `function_operations` with `render` text instead.
+- `inline [<DAX>] [--function <name>]`: every library call expanded into plain DAX that needs no function: a `VAL`
+  argument becomes a `VAR`, an `EXPR` argument is placed where it is used (a measure is still evaluated per month;
+  columns without brackets), the function's own VARs get a unique suffix, nested calls first. Checked on disk
+  (brackets balance, no call or token left); the result running in Desktop is still to verify (roadmap).
+  SVGKPICard inlines to about 150,000 characters (all 13 chart styles); install it where the model allows.
+- `desktop [--version V] [--model <TMDL>]`: the installed Desktop against the first release with DAX functions
+  (2.147, from the study: not confirmed in the kit's sources), whether its UDF preview switch is confirmed (2.155 and
+  2.159: verify in Desktop), the project's target, the model's level. `pbik validate` errors when a UDF card that
+  isn't inlined targets an older Desktop.
+- `udfCard` in layout.json (design/reference/layout-schema.md): one UDF KPI card in one step. `pbik build` checks the
+  function and arguments against the index (names, a chart style name against the list, icons refused), writes the
+  call (visual calculation for `calc`, a report-level ImageUrl measure for `measure` and `inline`), the hidden
+  fields, the template (`cardVisual.svg-kpi-card`, or `advancedSlicerVisual.svg-kpi-card-buttons` with
+  `form: "buttons"`), the image settings, value and label off, no saved sort, and `build` step 2; it requires alt
+  text and a box the shape of the function's drawing (15% either way). `calc` and `measure` need the function in the
+  model (install it, or use `inline`).
+
 ### `model register <project> --to <packs>`, `project new [folder] --from-pack <pack>`, `model drift`, `model approve`
 
 Model packs reuse an approved contract (resolutions and the rules behind them), generate.json (settings and
@@ -784,6 +827,8 @@ design/specs/layout.json) it runs only the suites related to the files changed s
 See "pbik can't write it yet" in the kit's `design/known-gaps.md` for the full list with workarounds. In short:
 filter states in data bookmarks, drill-through and tooltip pages, mobile
 layout, shape maps with an uploaded map file, a page background or wallpaper image, new card small multiples (`pbik_helpers.small_multiples_grid`), and custom, Python, R or Deneb visuals.
+UDF cards: the wireframe draws a `udfCard` as a plain card (no renderer for the function yet); the six UDF Desktop
+checks are in design/reviews/pbik-roadmap.md.
 
 Checked in Desktop: the smoke page (card, button slicer, table, 2026-10-18), Rep 5 parity (filter pane, Clear, sync
 slicers, field parameters, bookmarks) and the 0.5 check page (theme colours, `general` and `spacing`, visual groups,

@@ -1,0 +1,130 @@
+function 'Park.SVG.Micro.DumbbellSolidRoundedColor' =
+		(
+		    _CurrentExpr   : NUMERIC EXPR,
+		    _PastExpr      : NUMERIC EXPR,
+		    _DateVal       : ANYREF  EXPR,
+		    _DateNum       : ANYREF  EXPR,
+		
+		    _InnerW        : NUMERIC VAL,
+		    _InnerH        : NUMERIC VAL,
+		    _PadL          : NUMERIC VAL,
+		    _PadR          : NUMERIC VAL,
+		
+		    _DesiredTicks  : NUMERIC VAL,
+		    _PositiveColor : STRING  VAL,
+		    _PositiveColor2 : STRING  VAL,
+		    _NegativeColor : STRING  VAL
+		) =>
+		VAR _CircleR    = 5
+		VAR _StemWidth  = 11
+		VAR _ShowX      = TRUE()
+		VAR _ShowY      = TRUE()
+		
+		// Color scheme
+		VAR _ColorUp    = IF( NOT ISBLANK( _PositiveColor ), _PositiveColor, "{{colors.good}}" )
+		VAR _ColorDown  = IF( NOT ISBLANK( _PositiveColor2 ), _PositiveColor2, "{{colors.secondLight}}" )
+		
+		// Series
+		VAR _TS =
+		    ADDCOLUMNS(
+		        SUMMARIZE( 'Date', _DateVal, _DateNum ),
+		        "Past",    COALESCE( _PastExpr, 0 ),
+		        "Current", COALESCE( _CurrentExpr, 0 )
+		    )
+		
+		// X geometry
+		VAR _NumPts = MAX( COUNTROWS( _TS ), 1 )
+		VAR _MinKey = MINX( _TS, _DateVal )
+		VAR _XScale = DIVIDE( _InnerW - _PadL - _PadR, MAX( _NumPts - 1, 1 ) )
+		
+		// Y geometry + ticks
+		VAR _MinY   = 0
+		VAR _MaxY   = MAXX( _TS, MAX( [Past], [Current] ) )
+		VAR _Step   = Park.SVG.Aux.NiceStep( _MinY, _MaxY, _DesiredTicks )
+		
+		// Precompute per-point
+		VAR _Rows =
+		    ADDCOLUMNS(
+		        _TS,
+		        "X",      _PadL + ( _DateVal - _MinKey ) * _XScale,
+		        "YCur",   Park.SVG.Aux.ScaleY( [Current], _MinY, _MaxY, _InnerH, _PadR ),
+		        "YPast",  Park.SVG.Aux.ScaleY( [Past],    _MinY, _MaxY, _InnerH, _PadR ),
+		        "Lbl1",   LEFT( _DateNum, 1 ),
+		        "IsUp",   [Current] >= [Past],
+		        "Col",    IF( [Current] - [Past] >= 0, _ColorUp, _NegativeColor )
+		    )
+		
+		
+		// Per-point SVG (connector uses gradient only when up; dots remain solid)
+		VAR _PerPoint =
+		    CONCATENATEX(
+		        _Rows,
+		        VAR __x   = [X]
+		        VAR __yc  = [YCur]
+		        VAR __yp  = [YPast]
+		        VAR __up  = [Current] >= [Past]
+		        VAR __gid = "grad_" & FORMAT( _DateVal, "yyyymmdd" )
+		        VAR __defs =
+		            IF(
+		                __up,
+		                "<defs><linearGradient id='" & __gid &
+		                "' gradientUnits='userSpaceOnUse' x1='" & __x & "' y1='" & __yp &
+		                "' x2='" & __x & "' y2='" & __yc & "'>" &
+		                    "<stop offset='0%' stop-color='" & _NegativeColor & "' stop-opacity='1'/>" &
+		                    "<stop offset='100%' stop-color='" & _ColorUp & "' stop-opacity='1'/>" &
+		                "</linearGradient></defs>",
+		                ""
+		            )
+		        VAR __stroke =
+		            IF( __up, "url(#" & __gid & ")", _ColorDown )
+		        RETURN
+		            __defs &
+		            "<line x1='" & __x & "' x2='" & __x &
+		            "' y1='" & __yc & "' y2='" & __yp &
+		            "' stroke='" & __stroke &
+		            "' stroke-width='" & _StemWidth &
+		            "' stroke-linecap='round' vector-effect='non-scaling-stroke' />",
+		        " ",
+		        _DateVal, ASC
+		    )
+		
+		
+		// Cached Y tick table
+		VAR _YTicks =
+		    ADDCOLUMNS(
+		        GENERATESERIES( _MinY, _MaxY, _Step ),
+		        "YPos", Park.SVG.Aux.ScaleY( [Value], _MinY, _MaxY, _InnerH, _PadR ),
+		        "Lbl",  Park.SVG.Fmt.AbbrevKMB( [Value] )
+		    )
+		
+		// X labels
+		VAR _X_Axis =
+		    IF(
+		        _ShowX,
+		        CONCATENATEX(
+		            _Rows,
+		            "<text x='" & [X] & "' y='" & ( _InnerH - 5 ) &
+		            "' font-size='15' text-anchor='middle' font-family='Arial' fill='{{colors.textMuted}}'>" &
+		            [Lbl1] & "</text>",
+		            " ",
+		            _DateVal, ASC
+		        ),
+		        ""
+		    )
+		
+		// Y labels
+		VAR _Y_Axis =
+		    IF(
+		        _ShowY,
+		        CONCATENATEX(
+		            _YTicks,
+		            "<text x='" & ( _PadL - 20 ) & "' y='" & [YPos] &
+		            "' font-size='15' text-anchor='end' font-family='Arial' fill='{{colors.textMuted}}'>" &
+		            [Lbl] & "</text>",
+		            " "
+		        ),
+		        ""
+		    )
+		
+		VAR _Inner =  _PerPoint & _X_Axis & _Y_Axis
+		RETURN "<g>" & _Inner & "</g>"

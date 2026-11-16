@@ -1,0 +1,113 @@
+function 'Park.SVG.Micro.BarPast_LineCurrent' =
+		
+		/*
+		  Past as bars + Current as line — FULL SVG (Image URL ready)
+		  Helpers used:
+		    • Park.SVG.Tab.Base_ByNumText
+		    • Park.SVG.Tab.Geo_Vertical_ByNumText
+		    • Park.SVG.Frag.XLabels_Vertical_ByNumText
+		    • Park.SVG.Frag.YLabels_FromRange
+		  Parameters (exactly 8):
+		    _CurrentExpr, _PastExpr, _DateNum, _DateText, _BarColor, _LineColor, _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr  : NUMERIC EXPR,
+		  _PastExpr     : NUMERIC EXPR,
+		  _DateNum      : ANYREF  EXPR,
+		  _DateText     : ANYREF  EXPR,
+		  _LineColor    : STRING  VAL,
+		  _BarColor     : STRING  VAL,
+		  _AxisFont     : STRING  VAL,
+		  _AxisFontSize : NUMERIC VAL
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __SvgW   = 380
+		VAR __SvgH   = 170
+		VAR __PadL   = 55
+		VAR __PadR   = 30
+		VAR __Ticks  = 5
+		VAR __BarClr  = IF( NOT ISBLANK(_BarColor),  _BarColor,  "{{colors.secondLight}}" )
+		VAR __LineClr = IF( NOT ISBLANK(_LineColor), _LineColor, "{{colors.text}}" )
+		VAR __Font    = IF( NOT ISBLANK(_AxisFont),  _AxisFont,  "{{font.family}}" )
+		VAR __FS      = IF( NOT ISBLANK(_AxisFontSize), _AxisFontSize, 15 )
+		
+		/* 1) Base via helper (single grouped table) */
+		VAR _Base =
+		    Park.SVG.Tab.Base_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText
+		    )
+		VAR __Empty  = COUNTROWS(_Base) = 0
+		VAR MinValue = 0
+		VAR MaxValue = MAXX(_Base, MAX([PY], [CY]))
+		
+		/* 2) Geometry via helper; yields Xc, Y_Past, Y_Curr, Y0 per point */
+		VAR _Geo =
+		    Park.SVG.Tab.Geo_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr,
+		        _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR
+		    )
+		
+		/* 3) Bar width based on available slots (reuse the 12-slot template idea) */
+		VAR _NPoints = COUNTROWS(_Base)
+		VAR _AvailW  = __SvgW - __PadL - __PadR
+		VAR _BarW    = DIVIDE(_AvailW, 12, 0) * 0.8
+		
+		/* 4) Bars: past as rectangles from Y_Past up to baseline Y0 */
+		VAR _Bars =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(
+		        _Geo,
+		        "<rect x='" & ([Xc] - _BarW/2) &
+		        "' y='" & [Y_Past] &
+		        "' width='" & _BarW &
+		        "' height='" & ( [Y0] - [Y_Past] ) &
+		        "' fill='" & __BarClr & "' opacity='0.8' />",
+		        " ",
+		        _DateNum, ASC
+		      )
+		    )
+		
+		/* 5) Current line (polyline) */
+		VAR _LinePts =
+		    IF(
+		      __Empty, "",
+		      CONCATENATEX(_Geo, [Xc] & "," & [Y_Curr], " ", _DateNum, ASC)
+		    )
+		
+		/* 6) Axes via shared helpers (consistent with other micros) */
+		VAR _XAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		        _CurrentExpr, _PastExpr, _DateNum, _DateText,
+		        __SvgW, __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		VAR _YAxis =
+		    IF(
+		      __Empty, "",
+		      Park.SVG.Frag.YLabels_FromRange(
+		        MinValue, MaxValue, __Ticks,
+		        __SvgH, __PadL, __PadR,
+		        "{{colors.textMuted}}", __Font, __FS
+		      )
+		    )
+		
+		/* 7) Assemble FULL SVG */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    _Bars &
+		    "<polyline points='" & _LinePts & "' fill='none' stroke='" & __LineClr & "' stroke-width='2' />" &
+		    _XAxis &
+		    _YAxis &
+		  "</svg>"
+		)

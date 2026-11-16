@@ -313,6 +313,18 @@
     "textbox.textbox-title": {
       "visualType": "textbox",
       "source": "P4-V02_textbox-title"
+    },
+    "cardVisual.svg-kpi-card": {
+      "visualType": "cardVisual",
+      "source": "udf-kpi-study",
+      "clean": true,
+      "pattern": "svg-kpi-card"
+    },
+    "advancedSlicerVisual.svg-kpi-card-buttons": {
+      "visualType": "advancedSlicerVisual",
+      "source": "udf-kpi-study",
+      "clean": true,
+      "pattern": "svg-kpi-card"
     }
   }
 }

@@ -1,0 +1,122 @@
+function 'Park.SVG.Micro.BasicLineChart' =
+		
+		/*
+		  SVG KPI 1 — single line with max/min markers and labels (no Y-axis)
+		  FULL SVG (Image URL ready). Uses shared X-axis helper for labels.
+		  Parameters (exactly 8):
+		    _CurrentExpr, _DateNum, _DateText, _StrokeColor, _UpColor, _DownColor, _AxisFont, _AxisFontSize
+		*/
+		(
+		  _CurrentExpr  : NUMERIC EXPR,  // e.g. [Actual]
+		  _DateNum      : ANYREF  EXPR,  // e.g. 'Date'[Month Number]
+		  _DateText     : ANYREF  EXPR,  // e.g. 'Date'[Month]
+		  _StrokeColor  : STRING  VAL,   // line stroke color
+		  _UpColor      : STRING  VAL,   // color for MAX point
+		  _DownColor    : STRING  VAL,   // color for MIN point
+		  _AxisFont     : STRING  VAL,   // font family for axis/labels (e.g., "{{font.family}}")
+		  _AxisFontSize : NUMERIC VAL    // font size for axis/labels (e.g., 15)
+		)
+		=>
+		/* ── micro-config ─────────────────────────────────────────────────────────── */
+		VAR __SvgW    = 400
+		VAR __SvgH    = 150
+		VAR __Pad     = 30
+		VAR __Stroke  = IF( NOT ISBLANK(_StrokeColor), _StrokeColor, "{{colors.text}}" )
+		VAR __UpCol   = IF( NOT ISBLANK(_UpColor),     _UpColor,     "{{colors.text}}" )
+		VAR __DownCol = IF( NOT ISBLANK(_DownColor),   _DownColor,   "{{colors.text}}" )
+		VAR __Font    = IF( NOT ISBLANK(_AxisFont),    _AxisFont,    "{{font.family}}" )
+		VAR __FS      = IF( NOT ISBLANK(_AxisFontSize),_AxisFontSize,15 )
+		VAR __R       = 5
+		
+		/* 1) Series in current context (group once) */
+		VAR _TS =
+		    ADDCOLUMNS(
+		        SUMMARIZECOLUMNS( _DateNum, _DateText ),
+		        "Value", COALESCE( _CurrentExpr, 0 )
+		    )
+		
+		/* Short-circuit: nothing to draw */
+		VAR _NPoints = COUNTROWS(_TS)
+		VAR __Empty  = _NPoints = 0
+		
+		/* 2) Range (no Y-axis ticks needed) */
+		VAR _MinValue = 0
+		VAR _MaxValue = MAXX(_TS, [Value])
+		VAR _DataMin  = MINX(_TS, [Value])
+		VAR _MinOrder = MINX(_TS, _DateNum)
+		
+		/* 3) Geometry (scales) */
+		VAR _XScale = DIVIDE(__SvgW - (2 * __Pad), MAX(_NPoints - 1, 1))
+		VAR _YScale = DIVIDE(__SvgH - (2 * __Pad), MAX(_MaxValue - _MinValue, 1))
+		
+		/* 4) Per-point geometry (group once, reuse) */
+		VAR _Geo =
+		    ADDCOLUMNS(
+		        _TS,
+		        "X", __Pad + (_DateNum - _MinOrder) * _XScale,
+		        "Y", __SvgH - __Pad - ( [Value] - _MinValue ) * _YScale
+		    )
+		
+		/* 5) Extrema (distinct when max == min) */
+		VAR _MaxRow  = TOPN(1, _Geo, [Value], DESC, _DateNum, DESC)
+		VAR _MinRow  = TOPN(1, _Geo, [Value], ASC,  _DateNum, ASC )
+		VAR _ExtremaDistinct = SUMMARIZE( UNION(_MaxRow, _MinRow), [X], [Y], [Value] )
+		
+		/* 6) SVG fragments — CONCATENATEX over prebuilt tables only */
+		VAR _LinePts =
+		    IF( __Empty, "", CONCATENATEX(_Geo, [X] & "," & [Y], " ", _DateNum, ASC) )
+		
+		/* Color max vs min points: if flat series (max=min), uses Up color */
+		VAR _Circles =
+		    IF(
+		        __Empty, "",
+		        CONCATENATEX(
+		            _ExtremaDistinct,
+		            "<circle cx='" & [X] & "' cy='" & [Y] & "' r='" & __R &
+		            "' fill='" & IF([Value] = _MaxValue, __UpCol, __DownCol) & "' />",
+		            " "
+		        )
+		    )
+		
+		VAR _Labels =
+		    IF(
+		        __Empty, "",
+		        CONCATENATEX(
+		            _ExtremaDistinct,
+		            VAR __isFlat = _MaxValue = _DataMin
+		            VAR __isMin  = [Value] = _DataMin
+		            VAR __y      = IF(__isMin && NOT __isFlat, [Y] + 20, [Y] - 10)
+		            RETURN
+		                "<text x='" & [X] & "' y='" & __y &
+		                "' font-size='" & __FS &
+		                "' text-anchor='middle' font-family='" & __Font &
+		                "' fill='" & __Stroke & "'>" &
+		                    FORMAT([Value], "#,0") & "</text>",
+		            " "
+		        )
+		    )
+		
+		/* 7) X-axis via shared helper (auto-truncates safely) */
+		VAR _XAxis =
+		    IF(
+		        __Empty, "",
+		        Park.SVG.Frag.XLabels_Vertical_ByNumText(
+		            _CurrentExpr, BLANK(), _DateNum, _DateText,   // PastExpr not needed
+		            __SvgW, __SvgH, __Pad, __Pad,                 // PadL, PadR
+		            "{{colors.textMuted}}", __Font, __FS
+		        )
+		    )
+		
+		/* 8) Assemble FULL SVG (Image URL ready) */
+		RETURN
+		IF(
+		  __Empty,
+		  BLANK(),
+		  "data:image/svg+xml;utf8," &
+		  "<svg width='" & __SvgW & "' height='" & __SvgH & "' xmlns='http://www.w3.org/2000/svg'>" &
+		    "<polyline points='" & _LinePts & "' fill='none' stroke='" & __Stroke & "' stroke-width='2' />" &
+		    _Circles &
+		    _Labels &
+		    _XAxis &
+		  "</svg>"
+		)
