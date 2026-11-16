@@ -16,6 +16,8 @@ docs/lessons/README.md.
 | D-07 | A new audit check must fail on the old definition | – |
 | D-08 | Extension measures reference model measures only | `pbik validate` errors on a chain (test 89) |
 | D-09 | Conditional counts return 0, not blank | – |
+| D-10 | Pass a measure to a UDF as an expression when it is worked out per month | – |
+| D-11 | Test a function with a metric and a period that have data | – |
 <!-- /lessons:index -->
 
 ## D-01 Test new DAX query-scoped first
@@ -74,3 +76,18 @@ docs/lessons/README.md.
 - **Why:** a blank turned the matching % blank and broke text measures built from it ("within SLA ()").
 - **Enforced by:** not enforced (read at /model)
 - **Source:** Rep 9
+
+## D-10 Pass a measure to a UDF as an expression when it is worked out per month
+- **Rule:** A UDF parameter that takes a measure it evaluates per month (a small chart) is `EXPR`, not `VAL`; bind a
+  value taken from a row context to a `VAR` before passing it in.
+- **Why:** as `VAL` the function gets one number and the chart is flat; a column of an outer table passed straight
+  in failed with "Column cannot be found".
+- **Enforced by:** not enforced (read when writing or changing a UDF; `pbik udf inline` keeps `EXPR` lazy)
+- **Source:** UDF KPI card study, Study 2 (2026-11-15), G-07
+
+## D-11 Test a function with a metric and a period that have data
+- **Rule:** Test a function or measure query-scoped with a real selection that has data, and test the empty case
+  on purpose as a separate state.
+- **Why:** with nothing picked every input was blank, and the run drew cards for empty values that looked like a pass.
+- **Enforced by:** not enforced (read at query-scoped tests; audit.json keeps the empty state separate)
+- **Source:** UDF KPI card study, Study 2 (2026-11-15), G-12

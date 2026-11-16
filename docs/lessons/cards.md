@@ -18,6 +18,7 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 | C-09 | Colour small multiples through the header, not the accent bar | – |
 | C-10 | The KPI card is its own container, or sits on a shared panel | `pbik validate` warns (pbikit/kpicards.py); design/scripts/card_space.py flags empty space |
 | C-11 | Background shapes keep their layer order | `pbik validate` warns (pbikit/kpicards.py `layer_order`) |
+| C-12 | An SVG image card can take a Text visual calculation | `pbik build` writes it for a `udfCard` in mode `calc` (tools/pbik/tests/test_udf.py) |
 <!-- /lessons:index -->
 
 ## C-01 Shapes need their fill set explicitly
@@ -98,3 +99,11 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 - **Why:** without it, clicking the shape in the report brings it to the front over the visuals it backs.
 - **Enforced by:** `pbik validate` warns (pbikit/kpicards.py `layer_order`)
 - **Source:** batch 3 item 12 (2026-11-13)
+
+## C-12 An SVG image card can take a Text visual calculation
+- **Rule:** For an SVG card from a model function, a new card can show a visual calculation that calls it, with
+  `DataType` Text, the measures it uses as hidden fields, and `image.imageUrl` pointing at the calculation
+  (`udfCard` mode `calc`). Not yet confirmed in Desktop (U-1).
+- **Why:** no report-level measure is needed for each card; the image comes straight from the visual.
+- **Enforced by:** `pbik build` writes it for a `udfCard` in mode `calc` (tools/pbik/tests/test_udf.py)
+- **Source:** UDF KPI card study, Study 2 (2026-11-15); Desktop check U-1 open

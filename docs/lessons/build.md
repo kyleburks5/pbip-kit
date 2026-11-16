@@ -19,6 +19,7 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 | B-11 | Filter on a measure only at visual level | pbik build stops with an error on a page measure filter |
 | B-12 | HTML Content visuals use legacy rendering and room to draw | pbik build sets `compatibility.legacyRendering` and warns under 43px; `pbik validate` warns too |
 | B-13 | Roundtrip after every hand polish, then update layout.json | – |
+| B-14 | Image cards get no saved sort | `pbik build` drops `sort` from a `udfCard` (tools/pbik/tests/test_udf.py) |
 <!-- /lessons:index -->
 
 ## B-01 Build through the kit, never by hand
@@ -106,3 +107,9 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 - **Why:** a polish that only lives in the report files is undone or fought over by the next build.
 - **Enforced by:** not enforced (read after every hand polish; `pbik build` prints "No changes" when done)
 - **Source:** batch 3 item 12 (2026-11-13)
+
+## B-14 Image cards get no saved sort
+- **Rule:** Write no saved sort on a card whose only output is an image (an SVG measure or calculation).
+- **Why:** the saved sort keeps the old expression text; after a rename the study's card still named the old function.
+- **Enforced by:** `pbik build` drops `sort` from a `udfCard` (tools/pbik/tests/test_udf.py)
+- **Source:** UDF KPI card study, Study 2 (2026-11-15), F-05

@@ -22,6 +22,7 @@ enforces everything below.
 | B-11 | Filter on a measure only at visual level | [build.md](build.md) | yes |
 | B-12 | HTML Content visuals use legacy rendering and room to draw | [build.md](build.md) | yes |
 | B-13 | Roundtrip after every hand polish, then update layout.json | [build.md](build.md) | – |
+| B-14 | Image cards get no saved sort | [build.md](build.md) | yes |
 | C-01 | Shapes need their fill set explicitly | [cards.md](cards.md) | – |
 | C-02 | A text card on a coloured background turns every layer off | [cards.md](cards.md) | – |
 | C-03 | Rounded new cards need tileShape rectangleRoundedByPixel | [cards.md](cards.md) | yes |
@@ -33,6 +34,7 @@ enforces everything below.
 | C-09 | Colour small multiples through the header, not the accent bar | [cards.md](cards.md) | – |
 | C-10 | The KPI card is its own container, or sits on a shared panel | [cards.md](cards.md) | yes |
 | C-11 | Background shapes keep their layer order | [cards.md](cards.md) | yes |
+| C-12 | An SVG image card can take a Text visual calculation | [cards.md](cards.md) | yes |
 | S-01 | Short button slicers need Custom padding | [slicers.md](slicers.md) | yes |
 | S-02 | Button slicers need a grid sized for their items | [slicers.md](slicers.md) | yes |
 | S-03 | Dropdown slicers with a header need 76px | [slicers.md](slicers.md) | yes |
@@ -55,6 +57,8 @@ enforces everything below.
 | D-07 | A new audit check must fail on the old definition | [dax.md](dax.md) | – |
 | D-08 | Extension measures reference model measures only | [dax.md](dax.md) | yes |
 | D-09 | Conditional counts return 0, not blank | [dax.md](dax.md) | – |
+| D-10 | Pass a measure to a UDF as an expression when it is worked out per month | [dax.md](dax.md) | – |
+| D-11 | Test a function with a metric and a period that have data | [dax.md](dax.md) | – |
 | A-01 | Every data visual and image has alt text | [accessibility.md](accessibility.md) | yes |
 | A-02 | Text meets WCAG 2.1 AA contrast in every state | [accessibility.md](accessibility.md) | yes |
 | A-03 | No text below 10pt | [accessibility.md](accessibility.md) | yes |
