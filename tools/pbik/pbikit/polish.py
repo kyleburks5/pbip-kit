@@ -184,6 +184,10 @@ def _detect_lower(layout, planned, measures=None):
         # measures only, never a column such as Return Reason
         rl = v.get("referenceLabels") if isinstance(v.get("referenceLabels"), dict) else {}
         names += [name_of(lab.get("value", "")) for lab in rl.get("labels", []) or []]
+        uc = v.get("udfCard") if isinstance(v.get("udfCard"), dict) else None
+        if uc and "lowerIsBetter" not in uc:           # a UDF card's current value: its colours swap (pbik udf)
+            names += [name_of(a) for k, a in (uc.get("args") or {}).items()
+                      if re.search("Current", k) and isinstance(a, str) and a.strip().startswith("[")]
         for n in names:
             m = _base(n, planned) or (re.split(r"\s+(?:vs|change|growth|variance|diff|delta|yoy)", n, 1,
                                                flags=re.I)[0] if is_comparison(n) else n)

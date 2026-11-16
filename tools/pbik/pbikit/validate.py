@@ -127,6 +127,10 @@ def svg_issues(name, expr):
         return [f"{name}: passes a %23 colour to DaxLib.SVG, which draws nothing in Desktop; pass \"#RRGGBB\""]
     if not any("svg" in s_.lower() for s_ in strings):
         return []
+    if re.search(r"\w__i\d+\b", expr or "") or re.search(r"\bPark\.SVG\.", expr or ""):
+        # a kit UDF card (inlined: pbik's __i<n> names, or a call): the library keeps a raw % on purpose, so
+        # Power BI doesn't decode the URI and its raw # colours render (.claude/rules/svg.md, UDF gallery 2026-11-16)
+        return []
     out = []
     for s_ in strings:
         for pos in raw_percent(s_):
@@ -285,12 +289,18 @@ def check_udf_cards(fd, rep, lay, project=None):
     for v in cards:
         try:
             said = []
-            p = U.card_plan(v["id"], v["udfCard"], by, tokens, warnings=said)
+            p = U.card_plan(v["id"], v["udfCard"], by, tokens, warnings=said, lower=U.card_lower(lay, v["udfCard"]),
+                            date_default=U.date_table(root))
         except U.UdfError as e:
             fd.err(v["id"], str(e))
             continue
         for w_ in said:
             fd.warn(v["id"], w_.split(": ", 1)[-1])
+        small = U.size_problem(v["id"], by[p["function"]], (v["udfCard"].get("args") or {}),
+                               v.get("w") or (v.get("desktopPosition") or {}).get("width"),
+                               v.get("h") or (v.get("desktopPosition") or {}).get("height"))
+        if small:
+            fd.warn(v["id"], small.split(": ", 1)[-1])
         if p["mode"] != "inline" and tv != "latest" and U.vt(tv) < U.vt(U.FIRST_UDF_DESKTOP):
             fd.err(v["id"], f"uses the DAX function {p['function']}, but the target Desktop {tv} is older than the "
                             f"first release with DAX functions ({U.FIRST_UDF_DESKTOP}): use inline mode")

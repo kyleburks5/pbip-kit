@@ -17,7 +17,9 @@ function 'Park.SVG.SVGKPICardGradient' = ```
 		        _SurfaceColor   : STRING  VAL,
 		        _BorderColor    : STRING  VAL,
 		        _GoodColor      : STRING  VAL,
-		        _BadColor       : STRING  VAL
+		        _BadColor       : STRING  VAL,
+		        // K-11 change arrow: "triangle" (default: solid ▲ / ▼ as the kit's native KPI cards) or "chevron"
+		        _ArrowShape     : STRING  VAL
 		    ) =>
 		    /// K-02 style: each colour and font from the arguments, or the kit's design token
 		    VAR __Font     = IF( ISBLANK( _Font ), "{{font.family}}", _Font )
@@ -155,7 +157,13 @@ function 'Park.SVG.SVGKPICardGradient' = ```
 				" style='fill:none;stroke:" & _TrendColor &
 				";stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round'"
 		
+		    VAR __Shape = IF( ISBLANK( _ArrowShape ), "triangle", LOWER( TRIM( _ArrowShape ) ) )  // K-11
 			VAR _ArrowPath =
+				IF(
+					ISBLANK( _PrvVal ),
+					"",                                         // K-11: no comparison, no arrow (the dash says it)
+				IF(
+					__Shape = "chevron",
 				IF(
 					NOT _IsUp,
 					"<path d='M" & _ArrowX & " " & ( _SubY - 6 ) &
@@ -164,6 +172,15 @@ function 'Park.SVG.SVGKPICardGradient' = ```
 					"<path d='M" & _ArrowX & " " & ( _SubY - 2 ) &
 					" L" & ( _ArrowX + 4 ) & " " & ( _SubY - 6 ) &
 					" L" & ( _ArrowX + 8 ) & " " & ( _SubY - 2 ) & "'" & _ArrowStyle & "/>"
+				),
+				IF(
+					NOT _IsUp,
+					"<path d='M" & _ArrowX & " " & ( _SubY - 8 ) & " L" & ( _ArrowX + 9 ) & " " & ( _SubY - 8 ) &
+					" L" & ( _ArrowX + 4.5 ) & " " & ( _SubY - 1 ) & " Z' fill='" & _TrendColor & "'/>",
+					"<path d='M" & _ArrowX & " " & ( _SubY - 1 ) & " L" & ( _ArrowX + 9 ) & " " & ( _SubY - 1 ) &
+					" L" & ( _ArrowX + 4.5 ) & " " & ( _SubY - 8 ) & " Z' fill='" & _TrendColor & "'/>"
+				)
+				)
 				)
 		
 		    VAR _TrendText =
@@ -185,5 +202,11 @@ function 'Park.SVG.SVGKPICardGradient' = ```
 		        & _TrendText
 		        & _SvgSuffix
 		
-		    RETURN IF( ISBLANK( _CurVal ), BLANK(), _SVG )  // K-05
+		    /// K-09 a blank current value: the card with its label and a muted "No data", so the layout keeps its shape
+		    VAR _NoData =
+		        _SvgPrefix & _CardRect & _LabelText
+		        & "<text x='" & _Pad & "' y='50' font-family='" & _FontFamily & "' font-size='16' fill='" & __Muted & "'>No data</text>"
+		        & _SvgSuffix
+		
+		    RETURN IF( ISBLANK( _CurVal ), _NoData, _SVG )  // K-05, K-09
 		```

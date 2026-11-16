@@ -10,7 +10,8 @@ rest from the kit file and the author's original:
   --originals <folder> it is recomputed from them, otherwise the recorded value is kept;
 - requires: model tables and columns the function reads by name, its own and through what it calls;
 - changes: the K-ids (CHANGES.md) found in the file; status: from STATUS below, else "enabled";
-- hand-written fields kept as they are: size (a card's drawn width and height), styles (a card's chart style names).
+- hand-written fields kept as they are: size (a card's drawn width and height), styles (a card's chart style names),
+  minSize (the smallest box a card reads at: `default` and per chart style; `pbik validate` warns below it).
 """
 import hashlib, json, pathlib, re, sys
 
@@ -83,7 +84,7 @@ def main(lib, originals=None):
             "sha256": sha(t), "originalSha256": sha(orig) if orig is not None else k.get("originalSha256"),
             "file": f"{n}.tmdl",
             "status": STATUS.get(n, "enabled"),
-            **{x: k[x] for x in ("size", "styles") if x in k},
+            **{x: k[x] for x in ("size", "styles", "minSize") if x in k},
         })
     order = ["card", "chart", "microchart", "icon", "number", "format", "helper"]
     funcs.sort(key=lambda x: (order.index(x["role"]), x["name"]))

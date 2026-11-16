@@ -67,6 +67,11 @@
      "name": "_BadColor",
      "type": "STRING",
      "mode": "VAL"
+    },
+    {
+     "name": "_ArrowShape",
+     "type": "STRING",
+     "mode": "VAL"
     }
    ],
    "styleParams": {
@@ -96,23 +101,32 @@
    ],
    "changes": [
     "K-02",
-    "K-05"
+    "K-05",
+    "K-09",
+    "K-10",
+    "K-11"
    ],
    "minCompatibilityLevel": 1702,
    "sourceVersion": null,
-   "sha256": "3e0763131b17acdeed07e7a51064c6d5e811e242552414c43940b0b9eb116a84",
+   "sha256": "0184040d7005fea8c71f28a5d648598f67390fdb5ef95e9cd4af8cdec90b226b",
    "originalSha256": "8961499a926c4d18b8e1a8cda2ba8a82e48f84c58879e0c42f78c9ad1758409a",
    "file": "Park.SVG.Card1.tmdl",
    "status": "enabled",
    "size": [
     250,
     140
-   ]
+   ],
+   "minSize": {
+    "default": [
+     250,
+     140
+    ]
+   }
   },
   {
    "name": "Park.SVG.Card2",
    "role": "card",
-   "description": "KPI card image: label, big value, change pill against the comparison, icon tile, accent bar on the left. Style: trailing font and colour parameters; pass BLANK() for the report's design tokens.",
+   "description": "KPI card image: label, big value, change pill against the comparison, accent bar on the left, and an icon tile only when an icon is given (a kit glyph by name: trend-up, trend-down, currency, cart, people). Style: trailing font and colour parameters; pass BLANK() for the report's design tokens.",
    "params": [
     {
      "name": "_CurrentExpr",
@@ -183,6 +197,11 @@
      "name": "_BadTint",
      "type": "STRING",
      "mode": "VAL"
+    },
+    {
+     "name": "_ArrowShape",
+     "type": "STRING",
+     "mode": "VAL"
     }
    ],
    "styleParams": {
@@ -217,18 +236,27 @@
    "changes": [
     "K-01",
     "K-02",
-    "K-05"
+    "K-05",
+    "K-08",
+    "K-09",
+    "K-11"
    ],
    "minCompatibilityLevel": 1702,
    "sourceVersion": "0.6.0",
-   "sha256": "81340f1fdccd5e601331d1d7f8df8bcb7fde3eff602b01f3cc9098d609c234c0",
+   "sha256": "5b8668aa31c2aa3ffc0f75f1de72cf7e34dd5815c3783b30a6710023fc9e028f",
    "originalSha256": "f7ffb82e57f6d50958771cb61967e51d4d62cadba3db6a54603999dc85f3a97b",
    "file": "Park.SVG.Card2.tmdl",
    "status": "enabled",
    "size": [
     280,
     150
-   ]
+   ],
+   "minSize": {
+    "default": [
+     280,
+     150
+    ]
+   }
   },
   {
    "name": "Park.SVG.SVGKPICard",
@@ -324,6 +352,11 @@
      "name": "_BadColor",
      "type": "STRING",
      "mode": "VAL"
+    },
+    {
+     "name": "_ArrowShape",
+     "type": "STRING",
+     "mode": "VAL"
     }
    ],
    "styleParams": {
@@ -372,11 +405,13 @@
     "K-02",
     "K-05",
     "K-06",
-    "K-07"
+    "K-07",
+    "K-09",
+    "K-11"
    ],
    "minCompatibilityLevel": 1702,
    "sourceVersion": null,
-   "sha256": "989a5a570d939496cf7a514887578f615a83ee238d61007fd2dacd0a95ffa2a3",
+   "sha256": "c2106e8184ef7b1ad9858055cb1d80fb804ac53ffaf236bf76af36398c5dab48",
    "originalSha256": "9e28efe695c51b6ae0c78317d810cca868262883924a50d5cd67a82ec1c0757c",
    "file": "Park.SVG.SVGKPICard.tmdl",
    "status": "enabled",
@@ -398,7 +433,17 @@
     "Dumbbell3",
     "Dumbbell4",
     "Dumbbell5"
-   ]
+   ],
+   "minSize": {
+    "default": [
+     240,
+     180
+    ],
+    "Dumbbell3": [
+     480,
+     360
+    ]
+   }
   },
   {
    "name": "Park.SVG.SVGKPICardGradient",
@@ -489,6 +534,11 @@
      "name": "_BadColor",
      "type": "STRING",
      "mode": "VAL"
+    },
+    {
+     "name": "_ArrowShape",
+     "type": "STRING",
+     "mode": "VAL"
     }
    ],
    "styleParams": {
@@ -535,11 +585,13 @@
     "K-02",
     "K-04",
     "K-05",
-    "K-07"
+    "K-07",
+    "K-09",
+    "K-11"
    ],
    "minCompatibilityLevel": 1702,
    "sourceVersion": null,
-   "sha256": "c1bed1f99378a7b47d0ee186545523f8bead73618ca8fe52934a87893f4a81b2",
+   "sha256": "f08873565b245c75584cdaeda3f8c04c6c603872ae7199443c783b8083730aa1",
    "originalSha256": "baead85e7798d696b1cf61b8a37da1b5fc95b71fe6810fad8f58eccd99daa448",
    "file": "Park.SVG.SVGKPICardGradient.tmdl",
    "status": "enabled",
@@ -554,7 +606,17 @@
     "Dumbbell3",
     "Bar1",
     "Area1"
-   ]
+   ],
+   "minSize": {
+    "default": [
+     240,
+     180
+    ],
+    "Dumbbell3": [
+     480,
+     360
+    ]
+   }
   },
   {
    "name": "Park.SVG.BasicLineChart",

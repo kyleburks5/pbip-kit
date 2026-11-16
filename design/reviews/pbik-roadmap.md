@@ -322,22 +322,25 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 9 | Done, confirmed in Desktop (second pass) | Average, Max, Count, Count of Category, Median, Standard deviation, Variance and Percentile.Inc render with unique native reference names (2026-11-11) |
 | 10 | Done, confirmed in Desktop (second pass) | the running total and the sparkline column render (2026-11-11) |
 | 30 | Written, UNVERIFIED in Desktop | rail + panel study M-3 (2026-11-15): `selection` on a new slicer writes general.filter with typed values; save a picker in Desktop and run `pbik roundtrip` |
-| 31 | Written, UNVERIFIED in Desktop | UDF toolbelt (Study 2 import, 2026-11-15): `pbik udf` (list, show, check, render, install, inline, desktop), the bind-check rule for UDF calls, `udfCard` in layout.json; the six Desktop checks below |
+| 31 | Partial after the Desktop check | UDF toolbelt (Study 2 import, 2026-11-15): `pbik udf` (list, show, check, render, install, inline, desktop), the bind-check rule for UDF calls, `udfCard` in layout.json. UDF card gallery (2026-11-16, Desktop 2.159.1231.0, made-up Orders model): U-1 to U-4 confirmed, U-5 confirmed for the card form, U-6 open; fixes in row 32 |
+| 32 | Done, confirmed in Desktop | UDF card gallery fixes (pbik 0.21.0, 2026-11-16): card image settings as Desktop saved a working SVG card (image Left, area 100, fit, one tile, no padding; the template's size 450 / Bottom / 3 tiles zoomed and cropped every card); `lowerIsBetter` swaps a UDF card's good and bad colours (polish detects returns and costs on a card's current value); `'Date'` mapped to the model's own date table in install, inline and render; validate leaves the library's raw `%` alone; library K-08 to K-11 (Card2 no empty tile and five kit glyphs, "No data" card, Card1's sign, triangles with `_ArrowShape`); index `minSize` per chart style with a validate warning (Dumbbell3 480 x 360) |
+| 33 | Open | `pbik desktop open` reports a failure ("The task was cancelled", application.state.get) while Desktop is still starting, though the report opens; seen three times on 2026-11-16. It should keep waiting |
 
 ## UDF toolbelt: Desktop checks (Study 2, UDF KPI card library, 2026-11-15)
 
-From the study's §6 "Desktop checks". None has been looked at in Desktop yet: each stays **verify in Desktop** until
-someone opens a test page, saves it and records the result here (then a lesson, docs/lessons/README.md).
+From the study's §6 "Desktop checks". Checked on the UDF card gallery (2026-11-16): Desktop 2.159.1231.0, the made-up
+Orders model (public), 15 cards on one page, saved once in Desktop and compared with `pbik roundtrip`.
 
 | # | Check | Status | What pbik relies on |
 | --- | --- | --- | --- |
-| U-1 | A visual calculation calling a UDF renders on 2.159, and `image.imageUrl` = `SelectRef` to it is kept on save | verify in Desktop | `udfCard` mode `calc` |
-| U-2 | A report extension measure can call a model UDF | verify in Desktop | `udfCard` mode `measure`; variant B on a live model with the function |
-| U-3 | The nested microchart SVG (a whole `data:` SVG inside the card's `<g>`, study F-02) renders at the kit's sizes | verify in Desktop | SVGKPICard and SVGKPICardGradient |
-| U-4 | 2.155 and 2.159: is the UDF preview switch still there, or are UDFs on by default? | verify in Desktop | `pbik udf desktop` says "verify in Desktop" for both; `FIRST_UDF_DESKTOP` 2.147 is from the study, not the kit's sources |
-| U-5 | Both harvested templates (`cardVisual.svg-kpi-card`, `advancedSlicerVisual.svg-kpi-card-buttons`) after a Desktop save | verify in Desktop | every `udfCard` build |
-| U-6 | A model at compatibility level 1702 publishes to the service | verify in Desktop | `pbik udf install` raises the level to 1702 |
+| U-1 | A visual calculation calling a UDF renders on 2.159, and `image.imageUrl` = `SelectRef` to it is kept on save | **confirmed** 2026-11-16 (2.159.1231.0): renders; the save kept `SelectRef` "img P1-V20" and both hidden fields (lesson C-12) | `udfCard` mode `calc` |
+| U-2 | A report extension measure can call a model UDF | **confirmed** 2026-11-16: renders and was kept on save; its image equals the inlined card's (764 characters, exact) | `udfCard` mode `measure`; variant B on a live model with the function |
+| U-3 | The nested microchart SVG (a whole `data:` SVG inside the card's `<g>`, study F-02) renders at the kit's sizes | **confirmed** 2026-11-16: all six styles tried (SVGKPICard Line1, Bar1, Line3, Dumbbell3; gradient Dumbbell2c, Area1) render at 288 x 216. Dumbbell3's month labels squash below 2x: index `minSize` 480 x 360 and a validate warning. Micro axis labels are 5px at native size (font 10 at scale 0.5): a library limit | SVGKPICard and SVGKPICardGradient |
+| U-4 | 2.155 and 2.159: is the UDF preview switch still there, or are UDFs on by default? | **2.159 confirmed** 2026-11-16: no preview switch, UDFs on by default (2.159.1231.0, checked by the maintainer); 2.155 still verify in Desktop | `pbik udf desktop` says "on by default" for 2.159; `FIRST_UDF_DESKTOP` 2.147 is from the study, not the kit's sources |
+| U-5 | Both harvested templates (`cardVisual.svg-kpi-card`, `advancedSlicerVisual.svg-kpi-card-buttons`) after a Desktop save | **card form confirmed** 2026-11-16: the save changed nothing but final newlines (with the image settings of row 32); the button form not yet built | every `udfCard` build |
+| U-6 | A model at compatibility level 1702 publishes to the service | verify in Desktop (open: not published, by choice). Desktop kept level 1702 and the functions on save | `pbik udf install` raises the level to 1702 |
+| U-7 | The plan picture and the wireframe draw a UDF card as it will look | open: both draw a plain placeholder card, so the person approves a placeholder; needs a UDF card renderer (wireframe overhaul) | `udfCard` in the plan picture |
 
-Also not yet seen in Desktop (checked on disk only): an inlined card (`pbik udf inline`, `udfCard` mode `inline`)
-returning the same image as the function call; `hidden: true` projections written by pbik for calc mode; the button
-form with a real category. The wireframe draws a `udfCard` as a plain card.
+Also seen in Desktop on 2026-11-16: an inlined card returns the same image as the function call (Card2: 840, then
+764 characters after K-11, exact); `hidden: true` projections for calc mode are kept on save. Not yet seen: the button
+form with a real category. The wireframe draws a `udfCard` as a plain card (U-7).

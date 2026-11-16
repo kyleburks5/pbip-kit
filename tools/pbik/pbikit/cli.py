@@ -933,7 +933,11 @@ def udf_cmd(args):
         if args.sub == "check":
             names = U.closure(by, args.names) if args.names else list(by)
             tables = U.model_tables(args.root, args.model)
-            probs = U.check(by, names, tables)
+            dt = U.date_table(args.root, args.model)
+            probs = U.check(by, names, tables, dt)
+            if dt and dt != U.LIB_DATE and any(r["table"] == U.LIB_DATE for n in names
+                                                for r in by[n].get("requires", [])):
+                print(f"note            'Date' is mapped to the model's own date table, {dt}")
             for p in probs:
                 print(f"error           {p}")
             for d in U.drift(args.root):
@@ -943,7 +947,8 @@ def udf_cmd(args):
                   + ("OK" if not probs else f"{len(probs)} problem(s)"))
             return 1 if probs else 0
         if args.sub == "render":
-            text = U.render(by, args.names, U.load_tokens(args.root), args.format, args.rename)
+            text = U.render(by, args.names, U.load_tokens(args.root), args.format, args.rename,
+                            date_table=U.date_table(args.root))
             if args.out:
                 pathlib.Path(args.out).write_text(text, encoding="utf-8")
                 print(f"rendered {len(U.closure(by, args.names) if args.names else by)} function(s)")
@@ -967,7 +972,7 @@ def udf_cmd(args):
                     print("pbik: give a DAX expression with a call, or a function that has an example", file=sys.stderr)
                     return 2
                 expr = by[k]["example"]
-            text = U.inline(expr, by, U.load_tokens(args.root))
+            text = U.inline(expr, by, U.load_tokens(args.root), date_table=U.date_table(args.root))
             probs = U.inline_problems(text, by)
             for p in probs:
                 print(f"error           {p}")

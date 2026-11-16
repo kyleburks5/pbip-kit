@@ -230,6 +230,121 @@ class CardPlanTests(unittest.TestCase):
         self.assertIn("img P1-V03", measures)
 
 
+class GalleryFixTests(unittest.TestCase):
+    """UDF card gallery (2026-11-16): K-08 / K-09, lower is better, the model's own date table, card image settings."""
+
+    def setUp(self):
+        self.by = U.load(KIT)
+
+    def card2(self, **args):
+        a = {"_CurrentExpr": "[Orders]", "_PastExpr": "[Orders PY]", "_LabelExpr": "Orders",
+             "_AccentExpr": "token:brand"}
+        a.update(args)
+        return a
+
+    def test_card2_draws_no_empty_tile_and_offers_kit_glyphs(self):
+        text = U.text_of(self.by["Park.SVG.Card2"])
+        self.assertIn("_iconTileOut = IF( LEN( _iconSvg ) > 0, _iconTile, \"\" )", text)
+        for g in ("trend-up", "trend-down", "currency", "cart", "people"):
+            self.assertIn(f'"{g}"', text)
+        p = U.card_plan("P1-V04", {"function": "Park.SVG.Card2", "args": self.card2(_IconExpr="cart")}, self.by,
+                        tokens())
+        self.assertIn('"cart"', p["call"])
+        self.assertEqual(U.inline_problems(p["expression"], self.by), [])
+
+    def test_blank_current_value_draws_no_data_on_every_card(self):
+        for n in CARDS:
+            text = U.text_of(self.by[n])
+            self.assertIn("No data", text, n)
+            self.assertIn("K-09", text, n)
+            self.assertNotIn("BLANK(), _svg )", text.replace("_SVG", "_svg"), n)
+
+    def test_lower_is_better_swaps_good_and_bad(self):
+        t = tokens()["colors"]
+        p = U.card_plan("P1-V06", {"function": "Park.SVG.Card2", "lowerIsBetter": True, "args": self.card2()},
+                        self.by, tokens())
+        call = p["call"]
+        # the trailing style arguments: ..., good, bad, goodTint, badTint (then the arrow shape)
+        self.assertIn(f'"{t["bad"]}", "{t["good"]}", "{t["badTint"]}", "{t["goodTint"]}", BLANK() )', call)
+        lay = {"lowerIsBetter": ["Returns"], "visuals": [
+            {"id": "P1-V06", "page": "P1", "x": 0, "y": 0, "w": 280, "h": 150, "container": {"altText": "Returns"},
+             "udfCard": {"function": "Park.SVG.SVGKPICard", "args": {
+                 "_LabelExpr": "Returns", "_CurrentExpr": "[Returns]", "_PastExpr": "[Returns PY]",
+                 "_DateNumber": "Calendar[Month No]", "_DateVal": "Calendar[Month]", "_AccentUp": "token:good",
+                 "_AccentDown": "token:bad", "_NeutralAccent": "token:second", "_MicrochartType": "Bar1"}}}]}
+        lay["visuals"][0].update(w=240, h=180)
+        vis, measures, errs = U.expand_layout(lay, self.by, tokens())
+        self.assertEqual(errs, [])
+        self.assertTrue(vis[0]["udf"].get("lowerIsBetter"))
+        self.assertTrue(U.card_lower(lay, lay["visuals"][0]["udfCard"]))
+        self.assertFalse(U.card_lower({"visuals": []}, lay["visuals"][0]["udfCard"]))
+
+    def test_polish_adds_a_udf_cards_returns_measure(self):
+        from pbikit import polish as PL
+        lay = {"visuals": [{"id": "P1-V06", "page": "P1", "type": "cardVisual",
+                            "udfCard": {"function": "Park.SVG.Card2", "args": self.card2(_CurrentExpr="[Returns]")}}]}
+        self.assertEqual(PL._detect_lower(lay, {}), ["Returns"])
+
+    def test_date_is_mapped_to_the_models_own_date_table(self):
+        self.assertEqual(U.map_date("SUMMARIZE ( 'Date', a, b ) // 'Date'\n\"'Date'\"", "Calendar"),
+                         "SUMMARIZE ( 'Calendar', a, b ) // 'Date'\n\"'Date'\"")
+        args = {"_LabelExpr": "Orders", "_CurrentExpr": "[Orders]", "_PastExpr": "[Orders PY]",
+                "_DateVal": "Calendar[Month No]", "_DateNum": "Calendar[Month]", "_AccentExpr": "token:brand",
+                "_AccentExpr2": "token:bad", "_AccentExpr3": "token:second", "_MicrochartType": "Dumbbell2c"}
+        p = U.card_plan("P1-V14", {"function": "Park.SVG.SVGKPICardGradient", "args": args}, self.by, tokens())
+        self.assertEqual(p["dateTable"], "Calendar")
+        self.assertIn("'Calendar'", p["expression"])
+        self.assertNotIn("'Date'", [t for k, t in U.segments(p["expression"]) if k == "quoted"])
+        tables = {"calendar": {"date", "month", "month no"}, "orders": {"amount"}}
+        self.assertTrue(U.check(self.by, ["Park.SVG.SVGKPICardGradient"], tables))
+        self.assertEqual(U.check(self.by, ["Park.SVG.SVGKPICardGradient"], tables, "Calendar"), [])
+
+    def test_card_image_settings_are_desktops(self):
+        lay = {"visuals": [{"id": "P1-V04", "page": "P1", "x": 0, "y": 0, "w": 280, "h": 150,
+                            "container": {"altText": "Orders"},
+                            "udfCard": {"function": "Park.SVG.Card2", "args": self.card2()}}]}
+        vis, _, errs = U.expand_layout(lay, self.by, tokens())
+        self.assertEqual(errs, [])
+        pr = vis[0]["props"]
+        self.assertEqual(pr["image.position@default"], "Left")
+        self.assertEqual(pr["image.imageAreaSize@default"], {"int": 100})
+        self.assertEqual(pr["layout.maxTiles"], {"int": 1})
+
+    def test_card1_change_keeps_its_sign(self):
+        text = U.text_of(self.by["Park.SVG.Card1"])
+        self.assertIn('FORMAT( _trendPct, "+0;-0;0" )', text)
+        self.assertNotIn("FORMAT( ABS( _trendPct )", text)
+
+    def test_arrows_are_triangles_by_default_chevron_on_request(self):
+        for n in CARDS:
+            f = self.by[n]
+            self.assertEqual(f["params"][-1]["name"], "_ArrowShape", n)
+            text = U.text_of(f)
+            self.assertIn('"triangle", LOWER( TRIM( _ArrowShape ) )', text, n)
+            self.assertIn("Z' fill='", text, n)                          # a filled triangle
+        args = self.card2(_ArrowShape="chevron")
+        p = U.card_plan("P1-V04", {"function": "Park.SVG.Card2", "args": args}, self.by, tokens())
+        self.assertIn('"chevron"', p["call"])
+        with self.assertRaises(U.UdfError):
+            U.card_plan("P1-V04", {"function": "Park.SVG.Card2", "args": self.card2(_ArrowShape="arrow")},
+                        self.by, tokens())
+
+    def test_minimum_size_per_chart_style(self):
+        f = self.by["Park.SVG.SVGKPICard"]
+        self.assertEqual(U.min_size(f, {"_MicrochartType": "Dumbbell3"}), (480, 360, "Dumbbell3"))
+        self.assertEqual(U.min_size(f, {"_MicrochartType": "Bar1"}), (240, 180, None))
+        self.assertIn("Dumbbell3 needs at least 480 x 360",
+                      U.size_problem("P1-V13", f, {"_MicrochartType": "Dumbbell3"}, 288, 216))
+        self.assertIsNone(U.size_problem("P1-V11", f, {"_MicrochartType": "Bar1"}, 288, 216))
+        self.assertIsNotNone(U.size_problem("P1-V04", self.by["Park.SVG.Card2"], {}, 200, 107))
+
+    def test_validate_leaves_the_librarys_raw_percent_alone(self):
+        from pbikit import validate as V
+        p = U.card_plan("P1-V04", {"function": "Park.SVG.Card2", "args": self.card2()}, self.by, tokens())
+        self.assertEqual(V.svg_issues("img", p["expression"]), [])
+        self.assertTrue(V.svg_issues("mine", '"data:image/svg+xml;utf8,<svg><text>24%</text></svg>"'))
+
+
 class InstallAndBuildTests(unittest.TestCase):
     """3: install mode, the udfCard build (calc and inline), and the Desktop check."""
 
@@ -317,7 +432,7 @@ class InstallAndBuildTests(unittest.TestCase):
         self.assertTrue(probs)
         facts, probs = U.desktop_check(self.tmp, version="2.159.1231.0")
         self.assertEqual(probs, [])
-        self.assertIn("verify in Desktop", " ".join(facts))
+        self.assertIn("on by default", " ".join(facts))             # U-4, checked 2026-11-16
         facts, _ = U.desktop_check(self.tmp, version="2.155.756.0")
         self.assertIn("verify in Desktop", " ".join(facts))
 

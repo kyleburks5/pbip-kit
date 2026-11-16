@@ -17,7 +17,11 @@ design/reviews/pbik-roadmap.md)
 - Colours and font come from the report's design tokens (the function's style parameters, BLANK() = token):
   `text`, `textMuted`, `card`, `border`, `good`, `bad`, `goodTint`, `badTint`, `font.family`. The accent colour is an
   argument (a token hex).
-- A blank value draws no card; a blank comparison shows a dash in `textMuted`, never +0%.
+- A blank value draws the card with its label and a muted "No data" (K-09), so the layout keeps its shape; a blank
+  comparison shows a dash in `textMuted`, never +0%.
+- Lower is better (layout `lowerIsBetter`, filled by `pbik layout polish`): the card's good and bad colours swap.
+- Card2 draws no icon tile without an icon; it can take one of the kit's own glyphs by name (`trend-up`,
+  `trend-down`, `currency`, `cart`, `people`).
 - Keep the function's aspect ratio when sizing the box from the grid: Card2 280:150, Card1 250:140, SVGKPICard
   240:180.
 
@@ -33,7 +37,10 @@ design/reviews/pbik-roadmap.md)
   Mode `inline` (default) needs no function in the model; `measure` and `calc` need it (`pbik udf install`).
 - Before use: `pbik udf check` (fingerprints, turned on, model tables such as `'Date'`); `pbik udf render
   --format query` to test a call query-scoped.
-- Icons are turned off (provenance note): leave the icon argument out; never pick an icon function.
+- Icons are turned off (provenance note): leave the icon argument out, or give Card2 a kit glyph name; never pick an
+  icon function.
+- A function that reads `'Date'` by name reads the model's own date table instead (the month columns' table, or the
+  table marked as a date table): `pbik udf install` and inline mode map it.
 - Both templates are a clean harvest: **confirm in Desktop** (U-5).
 
 ## Accessibility and numbers
@@ -41,5 +48,6 @@ design/reviews/pbik-roadmap.md)
 - The numbers drawn are `svg` entries in the numbers audit.
 
 ## Not yet
-- A wireframe renderer for the function (the wireframe draws a plain card); Desktop checks U-1 to U-6
+- A renderer for UDF cards in the plan picture and the wireframe (both draw a plain card today, so the person
+  approves a placeholder): part of the wireframe overhaul (roadmap U-7); Desktop checks U-1 to U-6
   (design/reviews/pbik-roadmap.md), all "verify in Desktop".

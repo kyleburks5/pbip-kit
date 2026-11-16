@@ -103,7 +103,8 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 ## C-12 An SVG image card can take a Text visual calculation
 - **Rule:** For an SVG card from a model function, a new card can show a visual calculation that calls it, with
   `DataType` Text, the measures it uses as hidden fields, and `image.imageUrl` pointing at the calculation
-  (`udfCard` mode `calc`). Not yet confirmed in Desktop (U-1).
+  (`udfCard` mode `calc`). Confirmed in Desktop 2.159.1231.0 (U-1, 2026-11-16): it renders, and a save keeps the
+  `SelectRef` image link and the hidden fields.
 - **Why:** no report-level measure is needed for each card; the image comes straight from the visual.
 - **Enforced by:** `pbik build` writes it for a `udfCard` in mode `calc` (tools/pbik/tests/test_udf.py)
-- **Source:** UDF KPI card study, Study 2 (2026-11-15); Desktop check U-1 open
+- **Source:** UDF KPI card study, Study 2 (2026-11-15); confirmed on the UDF card gallery (2026-11-16, U-1)

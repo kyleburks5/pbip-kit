@@ -36,8 +36,12 @@ reason, and a fallback register row before building one.
 - Colours and fonts are `{{token}}` placeholders and BLANK()-means-token style arguments: `pbik udf render` fills them
   from tokens.json, and a card's colour arguments are `token:<name>` in `udfCard`, never a typed hex.
 - The icon functions (`Park.Icons.SolidIcon`, `Park.Icons.GradientIcon`) are turned off until the icon pack's source
-  and licence are recorded; the kit ships no icons and no icons table. Leave a card's icon argument out: Card1 draws
-  its own small diamond, Card2 an empty tinted tile, SVGKPICard nothing.
+  and licence are recorded; the kit ships no icon pack and no icons table. Leave a card's icon argument out: Card1
+  draws its own small diamond, Card2 no icon and no tile, SVGKPICard nothing. Card2 also takes one of the kit's own
+  glyphs by name (`trend-up`, `trend-down`, `currency`, `cart`, `people`; K-08).
+- Lower is better swaps a UDF card's good and bad colours automatically (layout `lowerIsBetter`); a function reading
+  `'Date'` reads the model's own date table (install and inline map it). Card image settings are the ones Desktop
+  saved on a working SVG card (image Left, area 100, fit, one tile, no padding): `pbik build` writes them.
 - Three ways to use one (`udfCard.mode`): `inline` (default; the function's DAX expanded into a report-level measure,
   so it works on any live model), `measure` (a report-level measure calling the model's function), `calc` (a visual
   calculation with `DataType` Text and the measures it uses as hidden fields; not for functions that take columns).

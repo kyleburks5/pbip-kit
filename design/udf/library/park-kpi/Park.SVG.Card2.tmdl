@@ -14,7 +14,9 @@ function 'Park.SVG.Card2' =
 		        _GoodColor      : STRING  VAL,
 		        _BadColor       : STRING  VAL,
 		        _GoodTint       : STRING  VAL,
-		        _BadTint        : STRING  VAL
+		        _BadTint        : STRING  VAL,
+		        // K-11 change arrow: "triangle" (default: solid ▲ / ▼ as the kit's native KPI cards) or "chevron"
+		        _ArrowShape     : STRING  VAL
 			) =>
 		    /// K-02 style: each colour and font from the arguments, or the kit's design token
 		    VAR __Font     = IF( ISBLANK( _Font ), "{{font.family}}", _Font )
@@ -88,13 +90,33 @@ function 'Park.SVG.Card2' =
 			/// Icon tile + icon (base64 PNG or inline SVG)
 			VAR _iconTile =
 				"<rect x='" & _iconBgX & "' y='" & _iconBgY & "' width='40' height='40' rx='8' fill='" & _iconTileFill & "'/>"
+
+			/// K-08 icon: one of the kit's own glyphs by name (trend-up, trend-down, currency, cart, people; drawn
+			/// from scratch for the kit), a base64 PNG, inline SVG, or nothing. No icon: no tile at all.
+			VAR _glyphKey = LOWER( TRIM( _iconParam ) )
+			VAR _gOpen    = "<g transform='translate(" & ( _iconBgX + 8 ) & "," & ( _iconBgY + 8 ) & ")' fill='none' stroke='" & _accent & "' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>"
+			VAR _glyph =
+				SWITCH(
+					_glyphKey,
+					"trend-up",   _gOpen & "<path d='M3 17 L9 11 L13 15 L21 7'/><path d='M15 7 L21 7 L21 13'/></g>",
+					"trend-down", _gOpen & "<path d='M3 7 L9 13 L13 9 L21 17'/><path d='M15 17 L21 17 L21 11'/></g>",
+					"currency",   _gOpen & "<circle cx='12' cy='12' r='9.5'/><path d='M15 9 C15 7.8 13.8 7 12 7 C10.2 7 9 7.9 9 9.3 C9 12.4 15 11.6 15 14.7 C15 16.1 13.8 17 12 17 C10.2 17 9 16.2 9 15 M12 5.2 L12 7 M12 17 L12 18.8'/></g>",
+					"cart",       _gOpen & "<path d='M3 4 L6 4 L8.5 15 L18 15 L20.5 8 L7 8'/><circle cx='10' cy='19' r='1.5'/><circle cx='17' cy='19' r='1.5'/></g>",
+					"people",     _gOpen & "<circle cx='9' cy='8' r='3'/><path d='M3.5 19 C3.5 15.5 6 13.5 9 13.5 C12 13.5 14.5 15.5 14.5 19'/><circle cx='16.5' cy='9' r='2.5'/><path d='M16.5 13.6 C18.8 13.6 20.5 15.5 20.5 19'/></g>",
+					BLANK()
+				)
 			VAR _isB64    = LEFT( _iconParam, 14 ) = "data:image/png"
 			VAR _iconSvg  =
+				IF(
+					NOT ISBLANK( _glyph ),
+					_glyph,
 				IF(
 					_isB64,
 					"<image x='" & ( _iconBgX + 5 ) & "' y='" & ( _iconBgY + 5 ) & "' width='30' height='30' href='" & _iconParam & "'/>",
 					IF( LEN( _iconParam ) > 10, _iconParam, "" )
 				)
+				)
+			VAR _iconTileOut = IF( LEN( _iconSvg ) > 0, _iconTile, "" )  // K-08: no icon, no empty tile
 		
 			/// Headings
 			VAR _labelSvg =
@@ -110,7 +132,13 @@ function 'Park.SVG.Card2' =
 				& "' rx='4' fill='" & _refBg & "'/>"
 			VAR _arX       = _refBgX + 10
 			VAR _arY       = _refBgY + 12
+			VAR __Shape = IF( ISBLANK( _ArrowShape ), "triangle", LOWER( TRIM( _ArrowShape ) ) )  // K-11
 			VAR _arrow =
+				IF(
+					ISBLANK( _prv ),
+					"",                                         // K-11: no comparison, no arrow (the dash says it)
+				IF(
+					__Shape = "chevron",
 				IF(
 					_isUp,
 					"<path d='M" & _arX & " " & ( _arY + 3 ) & " L" & ( _arX + 5 ) & " " & ( _arY - 2 )
@@ -119,6 +147,15 @@ function 'Park.SVG.Card2' =
 					"<path d='M" & _arX & " " & ( _arY - 3 ) & " L" & ( _arX + 5 ) & " " & ( _arY + 2 )
 						& " L" & ( _arX + 10 ) & " " & ( _arY - 3 ) & "' stroke='" & _refClr
 						& "' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/>"
+				),
+				IF(
+					_isUp,
+					"<path d='M" & _arX & " " & ( _arY + 4 ) & " L" & ( _arX + 10 ) & " " & ( _arY + 4 )
+						& " L" & ( _arX + 5 ) & " " & ( _arY - 4 ) & " Z' fill='" & _refClr & "'/>",
+					"<path d='M" & _arX & " " & ( _arY - 4 ) & " L" & ( _arX + 10 ) & " " & ( _arY - 4 )
+						& " L" & ( _arX + 5 ) & " " & ( _arY + 4 ) & " Z' fill='" & _refClr & "'/>"
+				)
+				)
 				)
 			VAR _refValTxt =
 				"<text x='" & ( _refBgX + 25 ) & "' y='" & ( _refBgY + 17 )
@@ -134,7 +171,7 @@ function 'Park.SVG.Card2' =
 				_svgPrefix
 				& _cardRect
 				& _leftBar
-				& _iconTile
+				& _iconTileOut
 				& _iconSvg
 				& _labelSvg
 				& _valueSvg
@@ -144,4 +181,10 @@ function 'Park.SVG.Card2' =
 				& _refLblTxt
 				& _svgSuffix
 		
-			RETURN IF( ISBLANK( _cur ), BLANK(), _svg )  // K-05
+			/// K-09 a blank current value: the card with its label and a muted "No data", so the layout keeps its shape
+			VAR _noData =
+				_svgPrefix & _cardRect & _leftBar & _labelSvg
+				& "<text x='" & _pad & "' y='75' font-family='" & _font & "' font-size='16' fill='" & _clrLabel & "'>No data</text>"
+				& _svgSuffix
+		
+			RETURN IF( ISBLANK( _cur ), _noData, _svg )  // K-05, K-09

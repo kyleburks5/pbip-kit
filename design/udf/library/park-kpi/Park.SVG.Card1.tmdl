@@ -12,7 +12,9 @@ function 'Park.SVG.Card1' = ```
 		        _SurfaceColor   : STRING  VAL,
 		        _BorderColor    : STRING  VAL,
 		        _GoodColor      : STRING  VAL,
-		        _BadColor       : STRING  VAL
+		        _BadColor       : STRING  VAL,
+		        // K-11 change arrow: "triangle" (default: solid ▲ / ▼ as the kit's native KPI cards) or "chevron"
+		        _ArrowShape     : STRING  VAL
 		    ) =>
 		    /// K-02 style: each colour and font from the arguments, or the kit's design token
 		    VAR __Font     = IF( ISBLANK( _Font ), "{{font.family}}", _Font )
@@ -34,7 +36,7 @@ function 'Park.SVG.Card1' = ```
 		    /// Trend
 		    VAR _trendVal = _cur - _prv
 		    VAR _trendPct = DIVIDE( _trendVal, _prv, 0 ) * 100
-		    VAR _trendTxt = IF( ISBLANK( _prv ), "–", IF( _trendPct >= 0, "+", "" ) & FORMAT( ABS( _trendPct ), "0" ) & "%" )
+		    VAR _trendTxt = IF( ISBLANK( _prv ), "–", FORMAT( _trendPct, "+0;-0;0" ) & "%" )  // K-10: signed, as the bar reads
 		    VAR _isUp     = _trendPct >= 0
 		    VAR _trendClr = IF( ISBLANK( _prv ), __Muted, IF( _isUp, __Good, __Bad ) )
 		
@@ -100,6 +102,29 @@ function 'Park.SVG.Card1' = ```
 		    VAR _trendSvg =
 		        "<text x='" & ( _w - _pad ) & "' y='85' font-family='" & _font & "' font-size='" & _fsTrend & "' font-weight='500' fill='" & _trendClr & "' text-anchor='end'>" & _trendTxt & "</text>"
 		
+		    VAR __Shape = IF( ISBLANK( _ArrowShape ), "triangle", LOWER( TRIM( _ArrowShape ) ) )  // K-11
+		    /// K-11 the change arrow, left of the change text (right-aligned at the card's edge)
+		    VAR _arX = _w - _pad - LEN( _trendTxt ) * 8 - 14
+		    VAR _arY = 80
+		    VAR _arrowSvg =
+		        IF(
+		            ISBLANK( _prv ),
+		            "",
+		        IF(
+		            __Shape = "chevron",
+		            IF(
+		                _isUp,
+		                "<path d='M" & _arX & " " & ( _arY + 3 ) & " L" & ( _arX + 4 ) & " " & ( _arY - 1 ) & " L" & ( _arX + 8 ) & " " & ( _arY + 3 ) & "' stroke='" & _trendClr & "' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/>",
+		                "<path d='M" & _arX & " " & ( _arY - 1 ) & " L" & ( _arX + 4 ) & " " & ( _arY + 3 ) & " L" & ( _arX + 8 ) & " " & ( _arY - 1 ) & "' stroke='" & _trendClr & "' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/>"
+		            ),
+		            IF(
+		                _isUp,
+		                "<path d='M" & _arX & " " & ( _arY + 4 ) & " L" & ( _arX + 9 ) & " " & ( _arY + 4 ) & " L" & ( _arX + 4.5 ) & " " & ( _arY - 3 ) & " Z' fill='" & _trendClr & "'/>",
+		                "<path d='M" & _arX & " " & ( _arY - 3 ) & " L" & ( _arX + 9 ) & " " & ( _arY - 3 ) & " L" & ( _arX + 4.5 ) & " " & ( _arY + 4 ) & " Z' fill='" & _trendClr & "'/>"
+		            )
+		        )
+		        )
+
 		    VAR _barBg =
 		        "<rect x='" & _pad & "' y='" & _barY & "' width='" & _barW & "' height='" & _barH & "' rx='" & ( _barH / 2 ) & "' fill='" & __Border & "'/>"
 		
@@ -125,9 +150,16 @@ function 'Park.SVG.Card1' = ```
 		        & _valueSvg
 		        & _subSvg
 		        & _trendSvg
+		        & _arrowSvg
 		        & _barBg
 		        & _barFill
 		        & _svgSuffix
 		
-		    RETURN IF( ISBLANK( _cur ), BLANK(), _svg )  // K-05
+		    /// K-09 a blank current value: the card with its label and a muted "No data", so the layout keeps its shape
+		    VAR _noData =
+		        _svgPrefix & _cardRect & _iconSvg & _labelSvg
+		        & "<text x='" & _pad & "' y='65' font-family='" & _font & "' font-size='16' fill='" & __Muted & "'>No data</text>"
+		        & _svgSuffix
+		
+		    RETURN IF( ISBLANK( _cur ), _noData, _svg )  // K-05, K-09
 		```

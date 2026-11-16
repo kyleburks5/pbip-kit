@@ -358,7 +358,7 @@ def generate(root, name, out_folder=None, notes=None):
     from . import udf as U                       # UDFs installed for the synthetic model (pbik udf install)
     wanted = [n for n, v in U.state(root).get("installed", {}).items() if v.get("model") == "synthetic"]
     if wanted:
-        names = U.write_functions(folder, U.load(root), wanted, U.load_tokens(root))
+        names = U.write_functions(folder, U.load(root), wanted, U.load_tokens(root), U.state(root).get("dateTable"))
         if notes is not None:
             notes.append(f"{len(names)} DAX function(s) added for the UDF cards (compatibility level {U.MIN_LEVEL})")
     return folder

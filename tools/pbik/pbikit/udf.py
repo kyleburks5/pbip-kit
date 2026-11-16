@@ -29,7 +29,9 @@ RAW_TYPES = {"ANYREF", "TABLE", "ANYVAL"}        # an EXPR argument of these typ
 # the first Desktop release with UDFs (preview, September 2025: from the study, not confirmed in the kit's sources)
 FIRST_UDF_DESKTOP = "2.147"
 # Desktop releases whose UDF switch is still to be checked by a person (Desktop check 4)
-PREVIEW_UNKNOWN = {"2.155": "verify in Desktop", "2.159": "verify in Desktop"}
+PREVIEW_UNKNOWN = {"2.155": "verify in Desktop"}
+# Desktop releases checked by a person (Desktop check U-4): no preview switch, DAX functions on by default
+UDF_ON_BY_DEFAULT = {"2.159": "2.159.1231.0, UDF card gallery 2026-11-16"}
 
 
 class UdfError(Exception):
@@ -131,6 +133,11 @@ def lines_show(by, name):
         out.append("chart styles: " + ", ".join(f["styles"]))
     if f.get("size"):
         out.append(f"draws {f['size'][0]} x {f['size'][1]}: keep that shape when sizing the box")
+    if f.get("minSize"):
+        out.append("smallest box it reads at: " + "; ".join(
+            f"{'any style' if k == 'default' else k} {v[0]} x {v[1]}" for k, v in f["minSize"].items()))
+    if any(p["name"] == "_ArrowShape" for p in f.get("params", [])):
+        out.append('change arrow (_ArrowShape): "triangle" (default, solid ▲ / ▼) or "chevron"')
     out.append("brings along: " + (", ".join(pulls) if pulls else "nothing (it works on its own)"))
     req = tables_needed(by, [k])
     out.append("needs in the model: " + ("; ".join(f"a table '{r['table']}' ({r['why']})" for r in req)
@@ -167,8 +174,10 @@ def model_tables(root=".", model=None):
     return {t.lower(): {x.lower() for x in v.get("columns", {})} for t, v in c.get("tables", {}).items()}
 
 
-def check(by, names=None, tables=None):
-    """Problems (plain lines) for the named functions and everything they call (default: every function)."""
+def check(by, names=None, tables=None, date_table=None):
+    """Problems (plain lines) for the named functions and everything they call (default: every function). A function
+    that reads 'Date' by name is fine when the model has its own date table (`date_table`, e.g. Calendar): install
+    and inline map 'Date' to it (map_date)."""
     names = closure(by, names) if names else list(by)
     errors = []
     for n in names:
@@ -181,6 +190,8 @@ def check(by, names=None, tables=None):
         if tables is None:
             continue
         for r in f.get("requires", []):
+            if r["table"] == LIB_DATE and date_table and date_table.lower() in tables:
+                continue                                # mapped to the model's own date table
             cols = tables.get(r["table"].lower())
             if cols is None:
                 errors.append(f"{n}: needs a table '{r['table']}' in the model ({r['why']})")
@@ -189,6 +200,61 @@ def check(by, names=None, tables=None):
                 if c.lower() not in cols:
                     errors.append(f"{n}: needs '{r['table']}'[{c}] in the model ({r['why']})")
     return errors
+
+
+# ---------------------------------------------------------------- the model's own date table
+LIB_DATE = "Date"            # the table the library's functions read by name: SUMMARIZE ( 'Date', <order>, <label> )
+DATE_NAMES = ("date", "calendar", "dates", "dim date", "dimdate", "dim_date", "date table", "calendar table")
+
+
+def quote_table(name):
+    return "'" + name.replace("'", "''") + "'"
+
+
+def map_date(text, table):
+    """'Date' read by name in DAX code -> the model's own date table (quoted table names in code only; strings and
+    comments are kept). No table, or a model whose date table is called Date: unchanged."""
+    if not table or table == LIB_DATE:
+        return text
+    q = quote_table(table)
+    return "".join(q if kind == "quoted" and t == "'Date'" else t for kind, t in segments(text))
+
+
+def date_table(root=".", model=None):
+    """The model's own date table, for functions that read 'Date' by name: in a TMDL folder the table marked as a
+    date table (dataCategory: Time), else the first table named like one (Date, Calendar, Dates, Dim Date ...), else
+    the table most relationships point at on a date column (the contract). None when there is none."""
+    names, rels = [], []
+    if model:
+        folder = pathlib.Path(model)
+        d = folder / "definition" if (folder / "definition").is_dir() else folder
+        for f in sorted((d / "tables").glob("*.tmdl")):
+            text = f.read_text(encoding="utf-8-sig")
+            m = re.match(r"\s*table\s+('(?:[^']|'')+'|[^\s]+)", text)
+            if not m:
+                continue
+            name = m.group(1).strip("'").replace("''", "'")
+            names.append(name)
+            if re.search(r"^\s*dataCategory:\s*Time\s*$", text, re.M):
+                return name
+    else:
+        f = pathlib.Path(root) / "design" / "specs" / "contract.json"
+        if not f.exists():
+            return None
+        c = json.loads(f.read_text(encoding="utf-8"))
+        names = list(c.get("tables", {}))
+        for r in c.get("relationships", []):
+            tt, _, tc = (r.get("to") or "").partition("[")
+            col = c["tables"].get(tt.strip("'"), {}).get("columns", {}).get(tc.rstrip("]"), {})
+            if col.get("type") == "dateTime":
+                rels.append(tt.strip("'"))
+    low = {n.lower(): n for n in names}
+    for k in DATE_NAMES:
+        if k in low:
+            return low[k]
+    if rels:
+        return max(sorted(set(rels)), key=rels.count)
+    return None
 
 
 # ---------------------------------------------------------------- render
@@ -247,7 +313,7 @@ def to_query(text):
     return f"FUNCTION {name} =\n{head}=>{body}\n"
 
 
-def render(by, names, tokens, fmt="tmdl", rename=None, allow_disabled=False, annotate=False):
+def render(by, names, tokens, fmt="tmdl", rename=None, allow_disabled=False, annotate=False, date_table=None):
     names = closure(by, names) if names else list(by)
     off = [n for n in names if disabled_reason(by[n])]
     if off and not allow_disabled:
@@ -255,6 +321,8 @@ def render(by, names, tokens, fmt="tmdl", rename=None, allow_disabled=False, ann
     blocks = []
     for n in names:
         text = fill(text_of(by[n]), tokens)
+        mapped = map_date(text, date_table)
+        text, mapped = mapped, mapped != text
         if rename:
             old, new = rename.split("=", 1)
             text = text.replace(old, new)
@@ -263,6 +331,8 @@ def render(by, names, tokens, fmt="tmdl", rename=None, allow_disabled=False, ann
         else:
             if annotate:
                 text = text.rstrip() + f"\n\n\tannotation {ANNOTATION} = {by[n]['library']}:{by[n]['sha256']}\n"
+                if mapped:
+                    text += f"\tannotation {ANNOTATION}_DateTable = {date_table}\n"
             blocks.append(text.rstrip() + "\n")
     return ("DEFINE\n" + "\n".join(blocks)) if fmt == "query" else "\n".join(blocks)
 
@@ -322,13 +392,13 @@ def synthetic_folder(root="."):
     return None
 
 
-def write_functions(folder, by, names, tokens):
+def write_functions(folder, by, names, tokens, date_table=None):
     """Write the functions into <folder>/definition/functions.tmdl (pbik's own block, replaced as a whole) and raise
     the compatibility level to 1702. Returns the names written."""
     folder = pathlib.Path(folder)
     d = folder / "definition" if (folder / "definition").is_dir() else folder
     names = closure(by, names)
-    text = render(by, names, tokens, annotate=True)
+    text = render(by, names, tokens, annotate=True, date_table=date_table)
     f = d / "functions.tmdl"
     keep = ""
     if f.exists():
@@ -386,15 +456,19 @@ def install(root, names, model="synthetic", own_model=False, tokens=None):
             raise UdfError("that is your own model: I add functions to it only when you ask (say so, and I'll run "
                            "it again with your OK)")
     tables = model_tables(root, folder) if folder else model_tables(root)
+    dt = date_table(root, folder) if folder else date_table(root)
+    reads_date = any(r["table"] == LIB_DATE for n in names for r in by[n].get("requires", []))
     if tables is not None:
-        need = [p for p in check(by, names, tables) if "needs" in p]
+        need = [p for p in check(by, names, tables, dt) if "needs" in p]
         if need:
             raise UdfError("; ".join(need) + ". Pick a card that takes the month columns as arguments (Card1, "
                                              "Card2, SVGKPICard) instead")
     tokens = tokens if tokens is not None else load_tokens(root)
     st = state(root)
+    if reads_date and dt and dt != LIB_DATE:
+        st["dateTable"] = dt                            # synth generate writes them again with the same map
     if folder is not None:
-        write_functions(folder, by, names, tokens)
+        write_functions(folder, by, names, tokens, st.get("dateTable"))
     when = datetime.date.today().isoformat()
     for n in names:
         st.setdefault("installed", {})[n] = {"library": by[n]["library"], "sha256": by[n]["sha256"],
@@ -513,7 +587,7 @@ class _Counter:
         return self.n
 
 
-def inline(expr, by, tokens, counter=None, stack=()):
+def inline(expr, by, tokens, counter=None, stack=(), date_table=None):
     """Every library function call in `expr` replaced by its body (nested calls too): plain DAX that needs no UDF.
     VAL parameters become VARs bound to their argument; EXPR parameters are replaced by their argument text where
     they are used (so a measure is still evaluated per month); the function's own VARs get a unique suffix."""
@@ -532,20 +606,20 @@ def inline(expr, by, tokens, counter=None, stack=()):
             raise UdfError(f"{name} calls itself: {' -> '.join(stack + (name,))}")
         args, end = call_args(expr, m.end() - 1)
         out.append(expr[pos:m.start()])
-        out.append(expand(name, args, by, tokens, counter, stack))
+        out.append(expand(name, args, by, tokens, counter, stack, date_table))
         pos = end
     out.append(expr[pos:])
     return "".join(out)
 
 
-def expand(name, args, by, tokens, counter, stack=()):
+def expand(name, args, by, tokens, counter, stack=(), date_table=None):
     f = by[name]
     params = f["params"]
     if len(args) > len(params):
         raise UdfError(f"{name} takes {len(params)} arguments; the call gives {len(args)}")
     args = list(args) + ["BLANK()"] * (len(params) - len(args))
     k = counter.next()
-    _, _, body = split_tmdl(fill(text_of(f), tokens))
+    _, _, body = split_tmdl(map_date(fill(text_of(f), tokens), date_table))
     body = compact(body)
     for p, a in zip(params, args):                     # a fixed style name: keep only its SWITCH branch
         lit = string_literal(a)
@@ -556,7 +630,7 @@ def expand(name, args, by, tokens, counter, stack=()):
     rename = {v: f"{v}__i{k}" for v in names - pnames}
     binds, subst = [], {}
     for p, a in zip(params, args):
-        a = inline(a, by, tokens, counter, stack + (name,))        # nested calls in the arguments first
+        a = inline(a, by, tokens, counter, stack + (name,), date_table)   # nested calls in the arguments first
         if p["mode"] == "VAL":
             var = f"__i{k}{p['name']}"
             binds.append(f"VAR {var} = {a}")
@@ -570,7 +644,7 @@ def expand(name, args, by, tokens, counter, stack=()):
         pat = re.compile(r"(?<![\w.@])(" + "|".join(re.escape(x) for x in sorted(allnames, key=len, reverse=True))
                          + r")(?!\w)")
         body = sub_code(body, pat, lambda m: allnames[m.group(1)])
-    body = inline(body, by, tokens, counter, stack + (name,))
+    body = inline(body, by, tokens, counter, stack + (name,), date_table)
     if binds:
         return "(\n" + "\n".join(binds) + "\nRETURN\n" + body + "\n)"
     return "(\n" + body + "\n)"
@@ -704,7 +778,70 @@ def measures_in(dax):
     return out
 
 
-def card_plan(vid, spec, by, tokens, installed=None, warnings=None):
+ARROW_SHAPES = ("triangle", "chevron")         # K-11: the change arrow; left out = triangle
+
+
+def chart_style(f, args):
+    """The card's fixed chart style name from its arguments (SVGKPICard "Bar1"), else None."""
+    for p in f.get("params", []):
+        n = p["name"]
+        if re.search(r"Microchart|Chart|Style|Type", n) and n not in f.get("styleParams", {}) and n in args:
+            return string_literal(arg_text(args[n], {}, n)) if isinstance(args[n], str) else None
+    return None
+
+
+def min_size(f, args):
+    """(width, height, style or None): the smallest box the card reads at (index `minSize`: per chart style, else
+    `default`), or None when the library gives none."""
+    ms = f.get("minSize") or {}
+    style = chart_style(f, args)
+    if style and style in ms:
+        return ms[style][0], ms[style][1], style
+    if "default" in ms:
+        return ms["default"][0], ms["default"][1], None
+    return None
+
+
+def size_problem(vid, f, args, w, h):
+    """A plain warning when the box is smaller than the card's minimum size, else None."""
+    m = min_size(f, args)
+    if not m or not w or not h:
+        return None
+    mw, mh, style = m
+    if w + 0.5 >= mw and h + 0.5 >= mh:
+        return None
+    what = f"{f['name']} {style}" if style else f["name"]
+    return (f"{vid}: the card is {round(w)} x {round(h)}; {what} needs at least {mw} x {mh}, or its "
+            + ("chart labels squash" if style else "text drops below a readable size")
+            + " (library minSize)")
+
+
+# good/bad argument pairs a card takes: swapped when a fall is good (lower is better)
+POLARITY_PAIRS = (("_GoodColor", "_BadColor"), ("_GoodTint", "_BadTint"), ("_AccentUp", "_AccentDown"))
+
+
+def swap_polarity(args, params, style):
+    """Lower is better: each good/bad argument pair the function has takes the other's value (an argument left out
+    takes its design token first), so a fall draws in the good colour."""
+    out = dict(args)
+    for g, b in POLARITY_PAIRS:
+        if g not in params or b not in params:
+            continue
+        gv = out.get(g, f"token:{style[g]}" if g in style else None)
+        bv = out.get(b, f"token:{style[b]}" if b in style else None)
+        if gv is None or bv is None:
+            continue
+        out[g], out[b] = bv, gv
+    return out
+
+
+def column_table(value):
+    """The table of a "Table[Column]" argument, else None."""
+    m = re.match(r"^\s*('(?:[^']|'')+'|[A-Za-z_][\w ]*)\s*\[", str(value or ""))
+    return m.group(1).strip().strip("'").replace("''", "'") if m else None
+
+
+def card_plan(vid, spec, by, tokens, installed=None, warnings=None, lower=None, date_default=None):
     """A layout.json `udfCard` -> {"call", "expression", "mode", "form", "type", "template", "measures", "size",
     "name"}: what pbik build writes. Errors are plain sentences."""
     if not isinstance(spec, dict) or not spec.get("function"):
@@ -740,6 +877,15 @@ def card_plan(vid, spec, by, tokens, installed=None, warnings=None):
                    and params[p]["type"] == "STRING"), None)
         if sp and str(args.get(sp, "")) not in f["styles"]:
             raise UdfError(f"{vid}: {name} chart style {args.get(sp)!r} isn't one of {', '.join(f['styles'])}")
+    if lower is None:
+        lower = spec.get("lowerIsBetter")
+    if lower:
+        args = swap_polarity(args, params, style)
+    dt = spec.get("dateTable") or next((column_table(args[p]) for p in params if p in args
+                                         and params[p]["type"] in RAW_TYPES and column_table(args[p])), None) \
+        or date_default
+    if "_ArrowShape" in args and str(args["_ArrowShape"]).lower() not in ARROW_SHAPES:
+        raise UdfError(f"{vid}: _ArrowShape is {' or '.join(ARROW_SHAPES)} (K-11), not {args['_ArrowShape']!r}")
     if mode == "calc" and any(params[p]["type"] in RAW_TYPES for p in params):
         raise UdfError(f"{vid}: {name} takes columns, which a visual calculation can't pass: use mode inline or "
                        "measure")
@@ -755,7 +901,7 @@ def card_plan(vid, spec, by, tokens, installed=None, warnings=None):
     full = f"{name} ( " + ", ".join(texts) + " )"
     expression = full
     if mode == "inline":
-        expression = inline(full, by, tokens)
+        expression = inline(full, by, tokens, date_table=dt)
         probs = inline_problems(expression, by)
         if probs:
             raise UdfError(f"{vid}: inlining {name} failed: {'; '.join(probs)}")
@@ -766,10 +912,40 @@ def card_plan(vid, spec, by, tokens, installed=None, warnings=None):
     return {"function": name, "call": full, "expression": expression, "mode": mode, "form": form, "type": vtype,
             "template": spec.get("template", template), "measures": measures_in(full),
             "size": f.get("size"), "name": spec.get("name") or f"img {vid}",
-            "hash": f["sha256"], "chars": len(expression)}
+            "hash": f["sha256"], "chars": len(expression), "lower": bool(lower), "dateTable": dt}
 
 
-def expand_layout(layout, by, tokens, warnings=None):
+def current_measure(spec):
+    """The measure a udfCard's current-value argument names ("[Returns]" -> "Returns"), else None."""
+    for k, v in ((spec or {}).get("args") or {}).items():
+        if re.search("Current", k) and isinstance(v, str) and v.strip().startswith("["):
+            return v.strip()[1:-1]
+    return None
+
+
+def card_lower(layout, spec):
+    """Lower is better for this card: the card's own `lowerIsBetter`, else layout.json `lowerIsBetter` for the
+    measure on its current-value argument (the list `pbik layout polish` fills, as for native KPI cards)."""
+    if isinstance(spec, dict) and "lowerIsBetter" in spec:
+        return bool(spec["lowerIsBetter"])
+    from . import polish
+    m = current_measure(spec)
+    return bool(m) and polish.lower_is_better(layout, m)
+
+
+# the card image settings Desktop saved on an SVG card that rendered (Rep 10 spark card; UDF card gallery,
+# 2026-11-16): the harvested template's fixed image size 450, Bottom and 3 tiles zoomed and cropped the image
+CARD_IMAGE_PROPS = {
+    "image.show@default": True, "image.imageType@default": "imageUrl", "image.position@default": "Left",
+    "image.imageAreaSize@default": {"int": 100}, "image.fit@default": "Fit", "image.padding@default": {"int": 0},
+    "layout.calloutSize": 0, "layout.maxTiles": {"int": 1}, "layout.columnCount": {"int": 1},
+    "layout.cellPadding": {"int": 0}, "padding.paddingSelection@default": "Custom",
+    "padding.topMargin@default": {"int": 0}, "padding.bottomMargin@default": {"int": 0},
+    "padding.leftMargin@default": {"int": 0}, "padding.rightMargin@default": {"int": 0},
+}
+
+
+def expand_layout(layout, by, tokens, warnings=None, date_default=None):
     """Every visual with `udfCard` -> the plain layout keys pbik build already knows, plus the report-level measures
     to write ({name: expression}). Returns (visuals, measures, errors)."""
     out, measures, errors = [], {}, []
@@ -778,7 +954,8 @@ def expand_layout(layout, by, tokens, warnings=None):
             out.append(v)
             continue
         try:
-            p = card_plan(v["id"], v["udfCard"], by, tokens, warnings=warnings)
+            p = card_plan(v["id"], v["udfCard"], by, tokens, warnings=warnings,
+                          lower=card_lower(layout, v["udfCard"]), date_default=date_default)
         except UdfError as e:
             errors.append(str(e))
             out.append(v)
@@ -794,10 +971,8 @@ def expand_layout(layout, by, tokens, warnings=None):
         props.setdefault("value.show@default", False)
         props.setdefault("label.show@default", False)
         if p["form"] == "card":
-            props.setdefault("image.show@default", True)
-            props.setdefault("image.imageType@default", "imageUrl")
-            props.setdefault("image.position@default", "Bottom")
-            props.setdefault("image.padding@default", {"int": 0})
+            for k, val in CARD_IMAGE_PROPS.items():
+                props.setdefault(k, val)
         if p["mode"] == "calc":
             calc = {"calc": p["name"], "expression": p["call"], "dataType": "Text"}
             hidden = [{"field": f"[{m}]", "hidden": True} for m in p["measures"]]
@@ -821,6 +996,11 @@ def expand_layout(layout, by, tokens, warnings=None):
         b.setdefault("reason", f"UDF card {p['function']}: a native card can't draw it")
         w["build"] = b
         w["udf"] = {"function": p["function"], "mode": p["mode"], "hash": p["hash"]}
+        if p["lower"]:
+            w["udf"]["lowerIsBetter"] = True
+        if p["dateTable"] and p["dateTable"] != LIB_DATE and any(
+                r["table"] == LIB_DATE for n in closure(by, [p["function"]]) for r in by[n].get("requires", [])):
+            w["udf"]["dateTable"] = p["dateTable"]
         if p.get("size") and "h" in w and "w" in w:
             want = p["size"][1] / p["size"][0]
             have = w["h"] / w["w"] if w["w"] else want
@@ -855,7 +1035,10 @@ def desktop_check(root=".", version=None, model=None, uses=True):
         else:
             key = ".".join(str(x) for x in vt(version))
             note = PREVIEW_UNKNOWN.get(key)
-            if note:
+            if key in UDF_ON_BY_DEFAULT:
+                facts.append(f"Power BI Desktop {version}: DAX functions are on by default, no preview switch "
+                             f"(checked on {UDF_ON_BY_DEFAULT[key]})")
+            elif note:
                 facts.append(f"Power BI Desktop {version}: whether DAX functions still need the preview switch "
                              f"(File > Options > Preview features) is not confirmed: {note}")
             else:
