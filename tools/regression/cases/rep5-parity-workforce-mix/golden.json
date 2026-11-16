@@ -699,6 +699,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Shape: band'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -773,6 +786,19 @@
         "expr": {
          "Literal": {
           "Value": "false"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'textbox: Title'"
          }
         }
        }
@@ -1110,6 +1136,19 @@
         "expr": {
          "Literal": {
           "Value": "false"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Filter badge'"
          }
         }
        }
@@ -1563,6 +1602,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Year'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -1606,6 +1658,19 @@
         "expr": {
          "Literal": {
           "Value": "'043f6c60eda5bb497e92'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Show filters-open'"
          }
         }
        }
@@ -2134,6 +2199,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Page navigator: nav'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -2432,6 +2510,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Headline Mix'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -2475,6 +2566,19 @@
         "expr": {
          "Literal": {
           "Value": "'6e0a701576574aa02cd6'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Show filters-closed'"
          }
         }
        }
@@ -2853,6 +2957,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Shape: pane'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   },
@@ -2865,7 +2982,7 @@
    "x": 32,
    "y": 136,
    "z": 1010,
-   "height": 340,
+   "height": 344,
    "width": 446,
    "tabOrder": 1000
   },
@@ -3396,6 +3513,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Donut chart of Employees by EmploymentType'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -3407,7 +3537,7 @@
    "x": 502,
    "y": 136,
    "z": 1011,
-   "height": 340,
+   "height": 344,
    "width": 446,
    "tabOrder": 1100
   },
@@ -3979,6 +4109,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Donut chart of Employees by Gender'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -3990,7 +4133,7 @@
    "x": 972,
    "y": 136,
    "z": 1012,
-   "height": 340,
+   "height": 344,
    "width": 916,
    "tabOrder": 1200
   },
@@ -4691,6 +4834,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Matrix of Employees by Education level, Age group'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -4747,6 +4903,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'textbox: pane title'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   },
@@ -4791,6 +4960,19 @@
         "expr": {
          "Literal": {
           "Value": "'6e0a701576574aa02cd6'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Show filters-closed'"
          }
         }
        }
@@ -5275,6 +5457,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Filter count text'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   },
@@ -5327,6 +5522,19 @@
         "expr": {
          "Literal": {
           "Value": "false"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'textbox: pane note'"
          }
         }
        }
@@ -5820,6 +6028,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Quarter'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   },
@@ -6004,6 +6225,19 @@
         "expr": {
          "Literal": {
           "Value": "false"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Month'"
          }
         }
        }
@@ -6502,6 +6736,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Department'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   },
@@ -6512,9 +6759,9 @@
   "name": "P2-V20_sentiment",
   "position": {
    "x": 32,
-   "y": 500,
+   "y": 504,
    "z": 1020,
-   "height": 548,
+   "height": 544,
    "width": 1073,
    "tabOrder": 2000
   },
@@ -7108,6 +7355,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Table of   by  '"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -7117,9 +7377,9 @@
   "name": "P2-V21_pay",
   "position": {
    "x": 1129,
-   "y": 500,
+   "y": 504,
    "z": 1021,
-   "height": 548,
+   "height": 544,
    "width": 759,
    "tabOrder": 2100
   },
@@ -7829,6 +8089,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Table of Staff, Average, Salary Range, $40K–$200K by Job Role'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -8316,6 +8589,19 @@
         "expr": {
          "Literal": {
           "Value": "'left'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by EmploymentType'"
          }
         }
        }
@@ -8814,6 +9100,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Gender'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   },
@@ -8858,6 +9157,19 @@
         "expr": {
          "Literal": {
           "Value": "'25dc2d76469df0bb3996'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Show filters-cleared'"
          }
         }
        }
@@ -9087,6 +9399,19 @@
         "expr": {
          "Literal": {
           "Value": "'6e0a701576574aa02cd6'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Show filters-closed'"
          }
         }
        }
@@ -9712,6 +10037,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V02": [
@@ -9738,6 +10069,12 @@
      "border",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V03": [
@@ -9884,6 +10221,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V04": [
@@ -10096,6 +10439,12 @@
      "title",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V05": [
@@ -10212,6 +10561,12 @@
      "shape",
      "{\"id\": \"default\"}",
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V06": [
@@ -10388,6 +10743,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V07": [
@@ -10516,6 +10877,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V08": [
@@ -10632,6 +10999,12 @@
      "shape",
      "{\"id\": \"default\"}",
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V09": [
@@ -10736,6 +11109,12 @@
      "dropShadow",
      null,
      "transparency"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V10": [
@@ -10996,6 +11375,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V11": [
@@ -11262,6 +11647,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V12": [
@@ -11612,6 +12003,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V13": [
@@ -11626,6 +12023,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V14": [
@@ -11742,6 +12145,12 @@
      "shape",
      "{\"id\": \"default\"}",
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V15": [
@@ -11870,6 +12279,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V16": [
@@ -11884,6 +12299,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V17": [
@@ -12126,6 +12547,12 @@
      "title",
      null,
      "alignment"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V18": [
@@ -12218,6 +12645,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V19": [
@@ -12460,6 +12893,12 @@
      "title",
      null,
      "alignment"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V20": [
@@ -12798,6 +13237,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V21": [
@@ -13184,6 +13629,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V22": [
@@ -13426,6 +13877,12 @@
      "title",
      null,
      "alignment"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V23": [
@@ -13668,6 +14125,12 @@
      "title",
      null,
      "alignment"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V24": [
@@ -13784,6 +14247,12 @@
      "shape",
      "{\"id\": \"default\"}",
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P2-V25": [
@@ -13900,6 +14369,12 @@
      "shape",
      "{\"id\": \"default\"}",
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "page:P2": [

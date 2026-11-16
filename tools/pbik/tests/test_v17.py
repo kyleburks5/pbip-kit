@@ -706,6 +706,182 @@ class ScoreTests(Tmp):
         self.assertEqual(rec["score"], ST.read(work)["score"])
 
 
+class PolishV110Tests(Tmp):
+    """v1.10: build writes alt text and snaps to the grid; the score lists what is out of line and marks N/A."""
+
+    def build(self, mutate):
+        report, lf = built_starter(self.tmp / "rep")
+        lay = json.loads(lf.read_text(encoding="utf-8"))
+        mutate(lay)
+        lf.write_text(json.dumps(lay), encoding="utf-8")
+        r = pbik("build", report, lf, cwd=self.tmp / "rep")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        return report, lf, r
+
+    @staticmethod
+    def alt(report, vid):
+        vf = next(pathlib.Path(report).glob(f"definition/pages/*/visuals/{vid}_*/visual.json"))
+        d = json.loads(vf.read_text(encoding="utf-8"))
+        for e in d["visual"].get("visualContainerObjects", {}).get("general", []):
+            a = (e.get("properties") or {}).get("altText")
+            if a:
+                return a["expr"]["Literal"]["Value"].strip("'")
+        return None
+
+    @staticmethod
+    def nothing_to_click(lay):
+        from pbikit import score as SC
+        lay["visuals"] = [v for v in lay["visuals"]
+                          if v.get("type") not in ("slicer", "advancedSlicerVisual", "actionButton", "pageNavigator",
+                                                   "listSlicer")
+                          and not (v.get("bindings") and any(r not in SC.VALUE_ROLES for r in v["bindings"]))]
+
+    def test_alt_text_written_from_text_or_title_and_never_over_a_persons(self):
+        def mutate(lay):
+            vs = lay["visuals"]
+            page = vs[0]["page"]
+            vs.append({"id": "P1-V90", "name": "note", "page": page, "type": "textbox", "x": 32, "y": 1000,
+                       "w": 600, "h": 32, "text": [{"runs": [{"text": "Sales by"}, {"text": "region"}]}]})
+            vs.append({"id": "P1-V91", "name": "next-page", "page": page, "type": "actionButton",
+                       "x": 656, "y": 1000, "w": 288, "h": 40, "text": "Next page"})
+            vs.append({"id": "P1-V92", "name": "trim", "page": page, "type": "shape", "x": 968, "y": 1000,
+                       "w": 288, "h": 40, "decorative": True})
+            vs.append({"id": "P1-V93", "name": "chart", "page": page, "type": "lineChart", "x": 1285,
+                       "y": 1000, "w": 603, "h": 40, "container": {"altText": "Written by a person"},
+                       "bindings": {"Category": ["Date[Date]"], "Y": ["[Revenue]"]}})
+        report, lf, r = self.build(mutate)
+        self.assertEqual(self.alt(report, "P1-V90"), "Sales by region", "a text box: its own text")
+        self.assertEqual(self.alt(report, "P1-V91"), "Next page", "a button: its label")
+        self.assertIsNone(self.alt(report, "P1-V92"), "decorative: none (screen readers skip it)")
+        self.assertEqual(self.alt(report, "P1-V93"), "Written by a person", "layout.json alt text is kept")
+        # a person types alt text in Desktop (pbik didn't write it): the next build keeps it
+        vf = next(pathlib.Path(report).glob("definition/pages/*/visuals/P1-V90_*/visual.json"))
+        d = json.loads(vf.read_text(encoding="utf-8"))
+        d["visual"]["visualContainerObjects"]["general"][0]["properties"]["altText"] = {
+            "expr": {"Literal": {"Value": "'Typed in Desktop'"}}}
+        vf.write_text(json.dumps(d), encoding="utf-8")
+        vmap = self.tmp / "rep" / "design" / "specs" / "visual-map.json"
+        m = json.loads(vmap.read_text(encoding="utf-8"))
+        m["owned"]["P1-V90"] = [x for x in m["owned"]["P1-V90"] if x[-1] != "altText"]
+        vmap.write_text(json.dumps(m), encoding="utf-8")
+        r = pbik("build", report, lf, cwd=self.tmp / "rep")
+        self.assertEqual(self.alt(report, "P1-V90"), "Typed in Desktop", r.stdout)
+        r = pbik("validate", report, "--layout", lf, cwd=self.tmp / "rep")
+        self.assertNotIn("no alt text", r.stdout, "every visual has alt text after a build")
+
+    def test_validate_warns_on_a_visual_still_without_alt_text(self):
+        report, lf, _ = self.build(lambda lay: None)
+        vf = next(pathlib.Path(report).glob("definition/pages/*/visuals/P1-V01_*/visual.json"))
+        d = json.loads(vf.read_text(encoding="utf-8"))
+        d["visual"].get("visualContainerObjects", {}).pop("general", None)
+        vf.write_text(json.dumps(d), encoding="utf-8")
+        r = pbik("validate", report, "--layout", lf, cwd=self.tmp / "rep")
+        self.assertIn("P1-V01", "".join(x for x in r.stdout.splitlines() if "no alt text" in x), r.stdout)
+
+    def test_build_snaps_to_the_grid_with_equal_gaps(self):
+        from pbikit import gridsnap as GS, score as SC
+        ids = []
+
+        def mutate(lay):
+            page = lay["visuals"][0]["page"]
+            card = {"type": "cardVisual", "page": page, "y": 960, "w": 289, "h": 64,
+                    "bindings": {"Data": ["[Revenue]"]}}
+            boxes = [(35, 960), (345, 965), (699, 960), (974, 960)]  # a slip, off the 8 px line, a choice, by hand
+            for k, (x, y) in enumerate(boxes):
+                lay["visuals"].append({**card, "id": f"P1-V8{k}", "name": f"probe-{k}", "x": x, "y": y})
+            lay["visuals"][-1]["desktopPosition"] = {"x": 974}
+            ids.extend(f"P1-V8{k}" for k in range(4))
+        report, lf, r = self.build(mutate)
+        lay = json.loads(lf.read_text(encoding="utf-8"))
+        by = {v["id"]: v for v in lay["visuals"]}
+        a, b, c, d = ids
+        self.assertIn(f"grid: {a}: left", r.stdout)
+        self.assertEqual(by[b]["y"] % 8, 0)
+        self.assertIn(f"{c} left edge", r.stdout)
+        self.assertIn("too far to snap safely", r.stdout)
+        self.assertIn("placed by hand (desktopPosition), not moved", r.stdout)
+        self.assertEqual({i["id"] for i in GS.issues(lay)}, {c, d},
+                         "only the choice and the hand-placed visual are still out of line")
+        res = SC.compute(report, lay)
+        self.assertFalse(res[2][0])
+        self.assertRegex(res[2][1], rf"{c} left edge \S+ is \S+ px right of the column edge \d+")
+        self.assertRegex(res[2][1], rf"{d} left edge \S+ is 2 px right of the column edge \d+")
+        _, lefts, rights = GS.grid_of(lay)                          # equal gaps: snapped edges a gutter apart
+        self.assertEqual({round(lefts[k + 1]) - round(rights[k]) for k in range(11)}, {24})
+        again = pbik("build", report, lf, cwd=self.tmp / "rep")
+        self.assertNotIn("(snapped; layout.json updated)", again.stdout, "a second build moves nothing")
+
+    def test_snap_keeps_a_24_px_gap_between_rows(self):
+        from pbikit import gridsnap as GS
+        lay = {"visuals": [{"id": "P1-V01", "type": "cardVisual", "page": "P1", "x": 32, "y": 236, "w": 446, "h": 136},
+                           {"id": "P1-V02", "type": "lineChart", "page": "P1", "x": 32, "y": 396, "w": 446, "h": 312}]}
+        moved, _ = GS.snap(lay)
+        a, b = lay["visuals"]
+        self.assertEqual((a["y"] % 8, (a["y"] + a["h"]) % 8, b["y"] % 8), (0, 0, 0))
+        self.assertEqual(b["y"] - (a["y"] + a["h"]), 24, moved)
+        self.assertEqual(GS.snap(lay), ([], []))
+
+    def test_snap_keeps_a_row_one_height_when_a_row_mate_sits_on_a_panel(self):
+        from pbikit import gridsnap as GS
+        lay = {"visuals": [{"id": "P1-V01", "type": "cardVisual", "page": "P1", "x": 32, "y": 136, "w": 289, "h": 148},
+                           {"id": "P1-V02", "type": "shape", "page": "P1", "x": 1285, "y": 124, "w": 603, "h": 532},
+                           {"id": "P1-V03", "type": "cardVisual", "page": "P1", "x": 1285, "y": 136, "w": 289,
+                            "h": 148}]}
+        GS.snap(lay)
+        self.assertEqual(lay["visuals"][0]["h"], lay["visuals"][2]["h"], "rep8's KPI row stays one height")
+
+    def test_na_for_checks_that_cant_apply(self):
+        from pbikit import score as SC
+        report, lf, _ = self.build(self.nothing_to_click)
+        lay = json.loads(lf.read_text(encoding="utf-8"))
+        res = SC.compute(report, lay, {1: True, 3: True})
+        self.assertEqual(res[7][0], SC.NA, res[7])
+        self.assertIn("no slicers", res[7][1])
+        self.assertEqual(res[13][0], SC.NA)
+        lines = SC.say(res)
+        na = sum(1 for r_ in res.values() if r_[0] == SC.NA)
+        self.assertIn(f"of 15 checks applied, {na} N/A;", lines[0])
+        self.assertTrue(any(x.startswith("Not applicable: interactions working (no slicers") for x in lines), lines)
+        self.assertEqual(SC.total(res), round(SC.passed(res) * 10 / len(SC.applicable(res))))
+        SC.write_review(self.tmp, res)
+        md = (self.tmp / "design" / "reviews" / "polish.md").read_text(encoding="utf-8")
+        self.assertRegex(md, r"\| 7 \| interactions working \| N/A \| no slicers")
+
+    def test_score_card_says_how_many_checks_applied_and_when_the_score_is_limited(self):
+        from pbikit import score as SC
+        res = {n: (True, "") for n in range(1, 16)}
+        for n in (7, 11, 12, 13, 14):
+            res[n] = (SC.NA, "can't apply")
+        lines = SC.say(res)
+        self.assertEqual(lines[0], "Polish 10/10 (10 of 15 checks applied, 5 N/A; 10 passed; target 7 before showing "
+                                   "colleagues).")
+        self.assertFalse(any(x.startswith("Limited score") for x in lines), "a third N/A is not 'more than a third'")
+        res[3] = (SC.NA, "no KPI cards")
+        lines = SC.say(res)
+        self.assertIn("9 of 15 checks applied, 6 N/A", lines[0])
+        self.assertIn("Limited score: many checks didn't apply (6 of 15 N/A).", lines)
+        SC.write_review(self.tmp, res)
+        self.assertIn("Limited score", (self.tmp / "design" / "reviews" / "polish.md").read_text(encoding="utf-8"))
+        res = {n: (True, "") for n in range(1, 16)}
+        self.assertIn("(15 of 15 checks applied; 15 passed;", SC.say(res)[0])
+
+    def test_na_never_hides_a_real_failure(self):
+        from pbikit import score as SC
+        report, lf, _ = self.build(self.nothing_to_click)
+        lay = json.loads(lf.read_text(encoding="utf-8"))
+        res = SC.compute(report, lay, {1: True, 3: True, 7: False})
+        self.assertIs(res[7][0], False, "the agent's 'no' stays a 'no' on a page with nothing to click")
+        self.assertIn("interactions working", SC.say(res)[1])
+        for n in range(1, 16):                                      # any failure, computed or the agent's
+            r_ = {k: (True, "") for k in range(1, 16)}
+            r_[n] = (False, "seeded")
+            self.assertFalse(SC.mark_na(r_, n, "can't apply"), n)
+            self.assertIs(r_[n][0], False, n)
+        na = SC.compute(report, lay, {1: True, 3: True})
+        self.assertEqual(len(SC.applicable(res)), len(SC.applicable(na)) + 1, "the failure is counted")
+        self.assertLessEqual(SC.total(res), SC.total(na))
+
+
 class DesktopCloseTests(Tmp):
     """D1: Desktop is closed without saving only when its only unsaved changes are its own reload marks."""
 

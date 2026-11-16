@@ -1,4 +1,4 @@
-# pbik 0.21.0
+# pbik 0.22.0
 
 pbip-kit's own command line tool for PBIR reports and TMDL models. Python standard library only; `jsonschema` is
 optional (schema checks).
@@ -75,6 +75,13 @@ pbik build "Sales.Report" design\specs\layout.json --no-custom-visuals   rem eac
 Options: `--map`, `--tokens` (default `design/tokens.json`), `--templates` (default `design/templates`), `--strict`
 (a property, setting or value outside Microsoft's cached schema stops the build: nothing is written; without it, a
 warning).
+
+Before writing, build snaps layout.json to the grid (v1.10, `pbikit/gridsnap.py`): column edges, tops and bottoms on
+the 8 px line (rounded alike, so a 24 px gap stays 24), a row's bottoms level; it prints one `grid:` line per visual
+moved and updates layout.json. It never moves a visual placed by hand (`desktopPosition`, or `snap: false` on the
+visual; `"snap": false` at the top turns it off), one inside a shape (a panel, the header band), or an edge more than
+12 px off: those are listed. Every visual without alt text gets one from its text, button label or title, else what it
+shows; alt text in layout.json or typed in Desktop is kept, and decorative visuals get none.
 
 Every `props` key, `container:` prop, page `filterPane` / `filterCards` property and `report` key is checked against
 the cached Microsoft schema (`pbikit/schemaprops.py`, standard library). Microsoft's schema lists container, page and
@@ -576,7 +583,10 @@ of the type average below 7 or below the guided ones. `score` gives the polish s
 from the files (grid, built types and fields against layout.json, no colours or fonts written into the layout, no
 overlaps or crowded pages, accessibility warnings, validate errors), 1, 3 and 7 from the agent's own checks
 (`--item 1=pass`: matches the approved picture, labelled as the agent's judgment; KPI cards filled; interactions
-working), unchecked items counted 0. It writes design/reviews/polish.md; `--final` records the build in the history;
+working), unchecked items counted 0. A check that can't apply (no slicers or cross-filtering visuals for
+interactions, no charts, no native cards ...) is N/A with its reason and left out: the line says "10 of 15 checks
+applied, 5 N/A", and more than a third N/A adds "Limited score". A "no" is never N/A. Alignment lists each visual out
+of line, the edge and the pixels. It writes design/reviews/polish.md; `--final` records the build in the history;
 `--hand-minutes` (wrap-up) adds the person's hand-polish minutes.
 
 ### `gate prepare <gate> ...`, `gate open | wait | run <gate>`, `gate tasks`

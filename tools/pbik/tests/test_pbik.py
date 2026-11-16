@@ -74,6 +74,15 @@ def add_ext(report):
          "--format-string", "$#,0")
 
 
+def drop_alt(report, vid):
+    """Take the alt text off a built visual (v1.10: build writes one for every visual), to test a visual without it."""
+    f = next(pathlib.Path(report).glob(f"definition/pages/*/visuals/{vid}_*/visual.json"))
+    d = json.loads(f.read_text(encoding="utf-8"))
+    for e in d["visual"].get("visualContainerObjects", {}).get("general", []):
+        (e.get("properties") or {}).pop("altText", None)
+    f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+
+
 def visual(report, vid):
     return json.loads(next(report.glob(f"definition/pages/*/visuals/{vid}_*/visual.json")).read_text(encoding="utf-8"))
 
@@ -480,6 +489,7 @@ class PbikTests(unittest.TestCase):
         from pbikit import deneb as DN
         rep, lay, L = self.work("deneb")
         L["visuals"].append(self.deneb_visual())
+        L["snap"] = False                       # the viewport as written (the grid snap is tested in test_v17)
         lay.write_text(json.dumps(L), encoding="utf-8")
         pbik("build", rep, lay)
         d = visual(rep, "P2-V10")["visual"]
@@ -907,7 +917,8 @@ class PbikTests(unittest.TestCase):
         self._save(lay, d)
         pbik("build", rep, lay)
         gen = visual(rep, "P1-V08")["visual"]["visualContainerObjects"]["general"][0]["properties"]
-        self.assertNotIn("altText", gen)
+        self.assertNotEqual(gen["altText"], {"expr": {"Literal": {"Value": "'Year buttons'"}}},
+                            "the layout's alt text is released; v1.10 build writes its own in its place")
         v["container"]["spacing"] = {"between": 4}
         self._save(lay, d)
         self.assertIn("container.spacing keys ['between']", pbik("build", rep, lay, ok=(1,)).stdout)
@@ -927,13 +938,14 @@ class PbikTests(unittest.TestCase):
         g = visual(rep, "P1-V20")
         self.assertNotIn("visual", g)
         self.assertEqual(g["visualGroup"], {"displayName": "KPIs", "groupMode": "ScaleMode"})
-        # KPIs spans P1-V03 (32,172 438x160) and P1-V08 (1418,172 470x44); All adds P1-V09 (1418,240 470x220)
+        # KPIs spans P1-V03 (32,176 438x160) and P1-V08 (1418,176 470x44); All adds P1-V09 (1418,240 470x220)
+        # (the fixture's build snapped its tops from 172 to 176 at setUp: v1.10 grid snap)
         self.assertEqual({k: g["position"][k] for k in ("x", "y", "width", "height")},
                          {"x": 0, "y": 0, "width": 1856, "height": 160})          # relative to All (32,172)
         self.assertEqual(g["parentGroupName"], "P1-V21_all")
         outer = visual(rep, "P1-V21")
         self.assertEqual({k: outer["position"][k] for k in ("x", "y", "width", "height")},
-                         {"x": 32, "y": 172, "width": 1856, "height": 288})
+                         {"x": 32, "y": 176, "width": 1856, "height": 288})
         card = visual(rep, "P1-V03")
         self.assertEqual((card["position"]["x"], card["position"]["y"], card["parentGroupName"]), (0, 0, "P1-V20_kpis"))
         sl = visual(rep, "P1-V08")
@@ -956,14 +968,14 @@ class PbikTests(unittest.TestCase):
                            capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         html_ = (work / "design" / "wireframes" / "wireframe.html").read_text(encoding="utf-8")
-        self.assertIn('data-id="P1-V21" style="left:32px;top:172px;width:1856px;height:288px', html_)
+        self.assertIn('data-id="P1-V21" style="left:32px;top:176px;width:1856px;height:288px', html_)
         # leaving a group drops parentGroupName and the member keeps its page position
         d["visuals"][-2]["members"] = ["P1-V03"]
         self._save(lay, d)
         pbik("build", rep, lay)
         sl = visual(rep, "P1-V08")
         self.assertNotIn("parentGroupName", sl)
-        self.assertEqual((sl["position"]["x"], sl["position"]["y"]), (1418, 172))
+        self.assertEqual((sl["position"]["x"], sl["position"]["y"]), (1418, 176))
         # layout errors
         d["visuals"][-2]["members"] = ["P1-V03", "P2-V01"]
         self._save(lay, d)
@@ -1026,6 +1038,7 @@ class PbikTests(unittest.TestCase):
         v = next(x for x in d["visuals"] if x["id"] == "P2-V03")
         v.pop("referenceLines")
         v["x"] = 40
+        v["snap"] = False                       # v1.10: a hand-placed position stays (the grid snap would move it)
         lay.write_text(json.dumps(d, indent=2), encoding="utf-8")
         pbik("build", rep, lay)
         vis = visual(rep, "P2-V03")
@@ -1694,6 +1707,7 @@ class PbikTests(unittest.TestCase):
                  "w": 300, "h": 150, "bindings": {"Category": ["Date[Year]"], "Y": ["[Revenue]"]}}]
         work, rep, lf = self._item5("a11y44", edit)
         pbik("build", rep, lf)
+        drop_alt(rep, "P1-V52")                 # v1.10: build wrote one; a visual without it is still warned on
         out = pbik("validate", rep, "--layout", lf, "--no-catalog").stdout
         lines = [x for x in out.splitlines() if "a11y" in x]
         self.assertTrue(any("P1-V52" in x and "no alt text" in x for x in lines), out)
@@ -1739,6 +1753,7 @@ class PbikTests(unittest.TestCase):
                                    "y": 700, "w": 600, "h": 300,
                                    "bindings": {"Values": ["Date[Year]", "[Revenue]"]},
                                    "columnWidths": {"Date[Year]": 200, "[Revenue]": "fit"}})
+            lay["snap"] = False                 # widths as written (the grid snap is tested in test_v17)
         work, rep, lf = self._item5("fit47", edit)
         pbik("build", rep, lf)
         ws = {e["selector"]["metadata"]: e["properties"]["value"]["expr"]["Literal"]["Value"]
@@ -2276,6 +2291,9 @@ class PbikTests(unittest.TestCase):
         """Gap 21: a shape without alt text must be marked decorative; decorative visuals leave the tab-order check."""
         work, rep, lf = self._batch1("b119")
         pbik("build", rep, lf)
+        self.assertTrue(visual(rep, "P1-V01")["visual"]["visualContainerObjects"]["general"][0]["properties"]
+                        ["altText"], "v1.10: build gives a shape that isn't decorative its own alt text")
+        drop_alt(rep, "P1-V01")
         v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
         self.assertRegex(v, r"a11y: \d+ shape\(s\) with no alt text and not marked `decorative: true`.*P1-V01_band")
         self._relayout(lf, lambda lay: next(x for x in lay["visuals"] if x["id"] == "P1-V01").update(decorative=True))
@@ -2301,6 +2319,9 @@ class PbikTests(unittest.TestCase):
         d = json.loads(f.read_text(encoding="utf-8"))
         d["visual"]["query"].pop("sortDefinition", None)
         f.write_text(json.dumps(d, indent=2), encoding="utf-8")
+        v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
+        self.assertNotIn("P1-V02_title: a11y: text box text", v, "v1.10: build's alt text is the text box's text")
+        drop_alt(rep, "P1-V02")
         v = pbik("validate", rep, "--layout", lf, "--no-catalog", ok=(0, 1)).stdout
         self.assertIn("alt text is 260 characters; Power BI keeps 250", v)
         self.assertIn("P1-V02_title: a11y: text box text isn't in its alt text", v)

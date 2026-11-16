@@ -791,7 +791,7 @@ class PolishTests(unittest.TestCase):
         res = {n: (n not in (7, 11, 12, 13, 14, 15), "") for n in range(1, 16)}
         res[7] = (None, "not checked")
         self.assertEqual(SC.total(res), 6)
-        self.assertIn("Polish 6/10 (9 of 15 checks", SC.say(res)[0])
+        self.assertIn("Polish 6/10 (15 of 15 checks applied; 9 passed", SC.say(res)[0])
 
     def test_theme_lines_straight_and_text_sized_for_the_canvas(self):
         theme = json.loads((KIT / "design" / "themes" / "pbip-polish.json").read_text(encoding="utf-8"))

@@ -769,6 +769,70 @@ def button_text(v):
     return " ".join(x for x in out if x)
 
 
+ALT_MAX = 250                   # Power BI keeps 250 characters of alt text (Microsoft Learn)
+AUTO_ALT_LABEL = {"actionButton": "Button", "image": "Image", "shape": "Shape", "basicShape": "Shape",
+                  "slicer": "Filter", "advancedSlicerVisual": "Filter", "listSlicer": "Filter", "textSlicer": "Filter",
+                  "pageNavigator": "Page navigator", "bookmarkNavigator": "Bookmark navigator"}
+
+
+def _plain_text(t):
+    """A layout `text` (string, runs or paragraphs) as one line, runs joined as validate reads a text box."""
+    parts = t if isinstance(t, list) else [t]
+    runs = []
+    for p in parts:
+        rs = p if isinstance(p, list) else (p.get("runs", []) if isinstance(p, dict) else [p])
+        runs += [r if isinstance(r, str) else r.get("text", "") for r in rs]
+    return re.sub(r"\s+", " ", " ".join(runs)).strip()
+
+
+def auto_alt_text(v, d):
+    """Alt text for a visual that has none (v1.10): a text box's or button's own text, else its title, else what it
+    shows (namenew.alt_for), else its kind and name ("Shape: header band"). Cut to Power BI's 250 characters."""
+    from . import namenew as NN
+    t = v.get("type")
+    text = ""
+    if t in ("textbox", "actionButton") and v.get("text"):
+        text = _plain_text(v["text"])
+    c = v.get("container") if isinstance(v.get("container"), dict) else {}
+    title = c.get("title")
+    title = title.get("text") if isinstance(title, dict) else title
+    if not text and isinstance(title, str) and title.strip():
+        text = title.strip()
+    if not text and t == "actionButton" and isinstance(v.get("action"), dict):
+        a = v["action"]
+        target = a.get("page") or a.get("bookmark") or a.get("url") or ""
+        text = {"PageNavigation": f"Go to {target}", "Back": "Back", "Bookmark": f"Show {target}",
+                "WebUrl": f"Open {target}"}.get(a.get("type"), "") .strip()
+    if not text:
+        text = NN.alt_for(d) or ""
+    if not text and v.get("bindings"):
+        names = [str(x.get("field") if isinstance(x, dict) else x).split("[", 1)[-1].rstrip("]")
+                 for xs in v["bindings"].values() for x in (xs if isinstance(xs, list) else [xs])]
+        text = f"{AUTO_ALT_LABEL.get(t, t)} by {', '.join(dict.fromkeys(names))}" if names else ""
+    if not text:
+        words = re.sub(r"[-_]+", " ", v.get("name") or "").strip()
+        text = f"{AUTO_ALT_LABEL.get(t, t)}: {words}" if words else AUTO_ALT_LABEL.get(t, t)
+    if len(text) > ALT_MAX:
+        text = text[:ALT_MAX - 1].rsplit(" ", 1)[0] + "…"
+    return text
+
+
+def apply_auto_alt(ctx, vid, v, d, old_owned):
+    """v1.10: every visual without alt text gets one (auto_alt_text). Never over alt text a person wrote: layout.json
+    `container.altText`, or alt text on the visual that pbik didn't write (typed in Desktop). Decorative visuals are
+    skipped by screen readers, so they get none."""
+    if v.get("decorative") or v.get("type") == "group":
+        return
+    c = v.get("container")
+    if isinstance(c, dict) and c.get("altText"):
+        return
+    mine = ["visualContainerObjects", "general", None, "altText"]
+    for e in (d.get("visual", {}).get("visualContainerObjects", {}).get("general") or []):
+        if (e.get("properties") or {}).get("altText") and "selector" not in e                 and json.dumps(mine) not in {json.dumps(x) for x in old_owned.get(vid, [])}:
+            return                          # a person's alt text (Desktop): kept
+    set_prop(ctx, vid, d, "visualContainerObjects", "general", None, "altText", s(auto_alt_text(v, d)))
+
+
 def apply_text(ctx, vid, v, d):
     if "text" not in v:
         return
@@ -1702,6 +1766,15 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             print("project.json customVisuals false: building each Deneb visual's fallback (as --no-custom-visuals)")
     layout = load(layout_path)
     design = layout_path.parent.parent
+    from . import gridsnap as GS                # v1.10: every visual on the grid with equal gaps, before the score
+    snapped, off_grid = GS.snap(layout)
+    if snapped:
+        layout_path.write_text(json.dumps(layout, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if not quiet:
+        for line in snapped:
+            print(f"grid: {line} (snapped; layout.json updated)")
+        for line in off_grid:
+            print(f"grid: {line}")
     udf_measures = {}
     if any("udfCard" in v for v in layout.get("visuals", [])):        # UDF study 7.4: a whole UDF card in one step
         from . import udf as U
@@ -2076,6 +2149,7 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             apply_shape_map(ctx, vid, v, d)
             apply_members(ctx, vid, v, d)
             apply_props(ctx, vid, v, d)
+            apply_auto_alt(ctx, vid, v, d, old_owned)
             check_props_schema(ctx, vid, v, d["$schema"])
             retiring = DEP.visual_issue(v["type"], in_build=True) or DEP.link_issue(
                 d["visual"].get("visualContainerObjects", {}).get("visualLink"))

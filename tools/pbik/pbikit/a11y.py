@@ -1,7 +1,8 @@
 """Accessibility checks for pbik validate (warnings; CLAUDE.md "Accessibility").
 
-- alt text: every data visual (a visual with field bindings, except slicers) and every image has
-  visualContainerObjects.general.altText (text or a measure);
+- alt text: every visual that isn't decorative or hidden has visualContainerObjects.general.altText (text or a
+  measure): data visuals and images one by one, shapes in one line per page, and since v1.10 text boxes, buttons,
+  slicers and navigators too (`pbik build` writes one from the visual's text or title where none was written);
 - contrast (WCAG 2.1 AA): literal text colours against what is behind the text: the visual's own container background
   when shown and mostly opaque, else the topmost opaque shape or visual background under it (lower z, covering its
   centre), else the page background. 4.5:1, or 3:1 for large text (18pt and up, or 14pt and up in a bold or semibold
@@ -252,6 +253,8 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
                             ("; or mark it `decorative: true` in layout.json if it only decorates" if vt == "image" else ""))
             elif vt in DECOR and no_alt and not hidden:
                 undeclared.append(f.parent.name)
+            elif no_alt and not hidden:         # v1.10: every visual has alt text (pbik build writes one)
+                fd.warn(where, "a11y: no alt text (container.altText); `pbik build` writes one from its text or title")
             # font size
             for prop, pt in sizes(d):
                 if pt < min_pt:

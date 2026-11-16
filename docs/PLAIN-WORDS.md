@@ -50,8 +50,9 @@ build, the checks, the polish, the result, switching to the live model, the wrap
 
 ## Polish score
 
-"Polish 6/10 (9 of 15 checks; target 7 before showing colleagues). Not yet: KPI cards read well, text sized for the
-canvas." Check 1 is always called "matches the approved picture (my own judgment)". After the build, the real Desktop
+"Polish 6/10 (15 of 15 checks applied; 9 passed; target 7 before showing colleagues). Not yet: KPI cards read well,
+text sized for the canvas." A check that can't apply is "N/A" with its reason and left out ("10 of 15 checks applied,
+5 N/A"); more than a third N/A adds "Limited score: many checks didn't apply". Check 1 is always called "matches the approved picture (my own judgment)". After the build, the real Desktop
 screenshot is put beside the approved picture: "The built page matches the approved picture" or "2 differences from
 the approved picture: ...". The picture's numbers are examples; never compare them with the report's.
 

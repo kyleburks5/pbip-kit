@@ -10,12 +10,10 @@ enforces everything below.
 | ID | Lesson | File | Enforced |
 | --- | --- | --- | --- |
 | B-01 | Build through the kit, never by hand | [build.md](build.md) | – |
-| B-02 | Every build gives the same result twice | [build.md](build.md) | yes |
 | B-03 | Build the first repeated unit first | [build.md](build.md) | – |
 | B-04 | Copy a setting Desktop saved instead of guessing | [build.md](build.md) | yes |
 | B-05 | A template's reference lines are dropped, so give the visual its own | [build.md](build.md) | yes |
 | B-06 | Measure-driven text is an expression, not a literal | [build.md](build.md) | – |
-| B-07 | Rename fields per visual with displayName | [build.md](build.md) | yes |
 | B-08 | Field parameters bind every underlying field | [build.md](build.md) | yes |
 | B-09 | Every Deneb visual names a fallback | [build.md](build.md) | yes |
 | B-10 | Record the build method of every visual | [build.md](build.md) | yes |
@@ -23,6 +21,7 @@ enforces everything below.
 | B-12 | HTML Content visuals use legacy rendering and room to draw | [build.md](build.md) | yes |
 | B-13 | Roundtrip after every hand polish, then update layout.json | [build.md](build.md) | – |
 | B-14 | Image cards get no saved sort | [build.md](build.md) | yes |
+| B-15 | Build snaps to the grid and writes missing alt text; N/A never covers a "no" | [build.md](build.md) | yes |
 | C-01 | Shapes need their fill set explicitly | [cards.md](cards.md) | – |
 | C-02 | A text card on a coloured background turns every layer off | [cards.md](cards.md) | – |
 | C-03 | Rounded new cards need tileShape rectangleRoundedByPixel | [cards.md](cards.md) | yes |
@@ -59,7 +58,7 @@ enforces everything below.
 | D-09 | Conditional counts return 0, not blank | [dax.md](dax.md) | – |
 | D-10 | Pass a measure to a UDF as an expression when it is worked out per month | [dax.md](dax.md) | – |
 | D-11 | Test a function with a metric and a period that have data | [dax.md](dax.md) | – |
-| A-01 | Every data visual and image has alt text | [accessibility.md](accessibility.md) | yes |
+| A-01 | Every visual has alt text | [accessibility.md](accessibility.md) | yes |
 | A-02 | Text meets WCAG 2.1 AA contrast in every state | [accessibility.md](accessibility.md) | yes |
 | A-03 | No text below 10pt | [accessibility.md](accessibility.md) | yes |
 | A-04 | Tab order follows reading order | [accessibility.md](accessibility.md) | yes |

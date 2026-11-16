@@ -7,19 +7,20 @@ layout.json, or note why it is accepted in the spec by visual ID.
 <!-- lessons:index -->
 | ID | Lesson | Enforced by |
 | --- | --- | --- |
-| A-01 | Every data visual and image has alt text | `pbik validate` warns (pbikit/a11y.py); gen_wireframe_hf.py lists the missing ones |
+| A-01 | Every visual has alt text | `pbik validate` warns on any visual without it (pbikit/a11y.py); `pbik build` fills the rest |
 | A-02 | Text meets WCAG 2.1 AA contrast in every state | `pbik validate` warns (pbikit/a11y.py); design/scripts/check_contrast.py on the wireframe |
 | A-03 | No text below 10pt | `pbik validate` warns (pbikit/a11y.py) |
 | A-04 | Tab order follows reading order | `pbik validate` warns (pbikit/a11y.py); pbik writes tab order as the visual number x 100 |
 | A-05 | Colours come from /theme and are used in their role | gen_tokens.py `--layout --fix-layout` renames colours out of role; check_contrast.py |
 <!-- /lessons:index -->
 
-## A-01 Every data visual and image has alt text
+## A-01 Every visual has alt text
 - **Rule:** Write `container.altText` for every data visual and image: what it shows, for which period or filter, in
-  one sentence.
+  one sentence. `pbik build` writes one for any other visual without it (its text, label or title); decorative visuals
+  get none.
 - **Why:** screen readers announce a visual by its alt text.
-- **Enforced by:** `pbik validate` warns (pbikit/a11y.py); gen_wireframe_hf.py lists the missing ones
-- **Source:** kit v0.3
+- **Enforced by:** `pbik validate` warns on any visual without it (pbikit/a11y.py); `pbik build` fills the rest
+- **Source:** kit v0.3; every visual since v1.10 (2026-11-16)
 
 ## A-02 Text meets WCAG 2.1 AA contrast in every state
 - **Rule:** 4.5:1 against what is behind the text, 3:1 for large text (18pt and up, or 14pt bold or semibold),

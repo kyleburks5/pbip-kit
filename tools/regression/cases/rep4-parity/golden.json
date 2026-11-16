@@ -343,6 +343,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Shape: band'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -382,6 +395,21 @@
          ]
         }
        ]
+      }
+     }
+    ]
+   },
+   "visualContainerObjects": {
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'textbox: title'"
+         }
+        }
+       }
       }
      }
     ]
@@ -793,6 +821,21 @@
       }
      }
     ]
+   },
+   "visualContainerObjects": {
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Year'"
+         }
+        }
+       }
+      }
+     }
+    ]
    }
   }
  },
@@ -835,6 +878,19 @@
         "expr": {
          "Literal": {
           "Value": "'e4634ba4d8fba6fc599b'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Go to Sales performance'"
          }
         }
        }
@@ -1060,6 +1116,19 @@
         "expr": {
          "Literal": {
           "Value": "'bdd1c1ef09b000b9'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Go to bdd1c1ef09b000b9'"
          }
         }
        }
@@ -1496,6 +1565,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Headline Sales'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -1507,7 +1589,7 @@
    "x": 32,
    "y": 136,
    "z": 1007,
-   "height": 76,
+   "height": 80,
    "width": 289,
    "tabOrder": 700
   },
@@ -1950,6 +2032,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Metric'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -1961,7 +2056,7 @@
    "x": 345,
    "y": 136,
    "z": 1008,
-   "height": 76,
+   "height": 80,
    "width": 289,
    "tabOrder": 800
   },
@@ -2133,6 +2228,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Quarter'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -2144,7 +2252,7 @@
    "x": 659,
    "y": 136,
    "z": 1009,
-   "height": 76,
+   "height": 80,
    "width": 133,
    "tabOrder": 900
   },
@@ -2316,6 +2424,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Month'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -2327,7 +2448,7 @@
    "x": 815,
    "y": 136,
    "z": 1010,
-   "height": 76,
+   "height": 80,
    "width": 289,
    "tabOrder": 1000
   },
@@ -2499,6 +2620,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Location Type'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -2510,7 +2644,7 @@
    "x": 1129,
    "y": 136,
    "z": 1011,
-   "height": 76,
+   "height": 80,
    "width": 289,
    "tabOrder": 1100
   },
@@ -2682,6 +2816,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by City'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -2693,7 +2840,7 @@
    "x": 1442,
    "y": 136,
    "z": 1012,
-   "height": 76,
+   "height": 80,
    "width": 289,
    "tabOrder": 1200
   },
@@ -2865,6 +3012,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Filter by Product_Category'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -2874,7 +3034,7 @@
   "name": "P1-V13_reset",
   "position": {
    "x": 1755,
-   "y": 172,
+   "y": 176,
    "z": 1013,
    "height": 40,
    "width": 133,
@@ -2901,6 +3061,19 @@
         "expr": {
          "Literal": {
           "Value": "'ClearAllSlicers'"
+         }
+        }
+       }
+      }
+     }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Button: reset'"
          }
         }
        }
@@ -3060,7 +3233,7 @@
   "name": "P1-V14_kpi-revenue",
   "position": {
    "x": 32,
-   "y": 236,
+   "y": 240,
    "z": 1014,
    "height": 136,
    "width": 446,
@@ -3655,6 +3828,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Revenue'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -3664,7 +3850,7 @@
   "name": "P1-V15_kpi-profit",
   "position": {
    "x": 502,
-   "y": 236,
+   "y": 240,
    "z": 1015,
    "height": 136,
    "width": 446,
@@ -4259,6 +4445,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Profit'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -4268,7 +4467,7 @@
   "name": "P1-V16_kpi-margin",
   "position": {
    "x": 972,
-   "y": 236,
+   "y": 240,
    "z": 1016,
    "height": 136,
    "width": 446,
@@ -4849,6 +5048,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Margin'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -4858,7 +5070,7 @@
   "name": "P1-V17_kpi-units",
   "position": {
    "x": 1442,
-   "y": 236,
+   "y": 240,
    "z": 1017,
    "height": 136,
    "width": 446,
@@ -5439,6 +5651,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Card of Units sold'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -5448,7 +5673,7 @@
   "name": "P1-V18_trend",
   "position": {
    "x": 32,
-   "y": 396,
+   "y": 400,
    "z": 1018,
    "height": 312,
    "width": 1229,
@@ -6108,6 +6333,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Line chart of Selected Metric vs PY %, This year, Last year by Month'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -6117,7 +6355,7 @@
   "name": "P1-V19_category-bars",
   "position": {
    "x": 1285,
-   "y": 396,
+   "y": 400,
    "z": 1019,
    "height": 312,
    "width": 603,
@@ -6656,6 +6894,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Bar chart of Margin %, Selected Metric vs PY %, Selected Metric by Product_Category'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -6665,9 +6916,9 @@
   "name": "P1-V20_location-bars",
   "position": {
    "x": 32,
-   "y": 732,
+   "y": 736,
    "z": 1020,
-   "height": 316,
+   "height": 312,
    "width": 603,
    "tabOrder": 2000
   },
@@ -7204,6 +7455,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Bar chart of Store Count, Selected Metric per Store, Selected Metric by Location Type'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -7213,9 +7477,9 @@
   "name": "P1-V21_top-stores",
   "position": {
    "x": 659,
-   "y": 732,
+   "y": 736,
    "z": 1021,
-   "height": 316,
+   "height": 312,
    "width": 603,
    "tabOrder": 2100
   },
@@ -7874,6 +8138,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Table of Value, vs PY by Store, City'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -7883,9 +8160,9 @@
   "name": "P1-V22_bottom-stores",
   "position": {
    "x": 1285,
-   "y": 732,
+   "y": 736,
    "z": 1022,
-   "height": 316,
+   "height": 312,
    "width": 603,
    "tabOrder": 2200
   },
@@ -8544,6 +8821,19 @@
        }
       }
      }
+    ],
+    "general": [
+     {
+      "properties": {
+       "altText": {
+        "expr": {
+         "Literal": {
+          "Value": "'Table of Value, vs PY by Store, City'"
+         }
+        }
+       }
+      }
+     }
     ]
    }
   }
@@ -8939,6 +9229,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V02": [
@@ -8947,6 +9243,12 @@
      "general",
      null,
      "paragraphs"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V03": [
@@ -9135,6 +9437,12 @@
      "general",
      null,
      "filter"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V04": [
@@ -9251,6 +9559,12 @@
      "shape",
      null,
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V05": [
@@ -9367,6 +9681,12 @@
      "shape",
      null,
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V06": [
@@ -9465,6 +9785,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V07": [
@@ -9677,6 +10003,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V08": [
@@ -9763,6 +10095,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V09": [
@@ -9849,6 +10187,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V10": [
@@ -9935,6 +10279,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V11": [
@@ -10021,6 +10371,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V12": [
@@ -10107,6 +10463,12 @@
      "background",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V13": [
@@ -10199,6 +10561,12 @@
      "shape",
      null,
      "rectangleRoundedCurve"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V14": [
@@ -10489,6 +10857,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V15": [
@@ -10779,6 +11153,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V16": [
@@ -11057,6 +11437,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V17": [
@@ -11335,6 +11721,12 @@
      "dropShadow",
      null,
      "show"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V18": [
@@ -11691,6 +12083,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V19": [
@@ -11975,6 +12373,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V20": [
@@ -12259,6 +12663,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V21": [
@@ -12597,6 +13007,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "P1-V22": [
@@ -12935,6 +13351,12 @@
      "subTitle",
      null,
      "text"
+    ],
+    [
+     "visualContainerObjects",
+     "general",
+     null,
+     "altText"
     ]
    ],
    "page:P1": [

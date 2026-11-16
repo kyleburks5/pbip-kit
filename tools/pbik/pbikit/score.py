@@ -9,6 +9,10 @@ fill their space with the change line readable and coloured by direction; number
 separators, number headers over their numbers, "vs" columns coloured); charts that read well (months in month order,
 straight lines); text sized for the 1920 canvas; and a finished look (a header band with the filter in it). The
 walkthrough page of 2026-11-14 scores 6/10 by them (9 of 15), where the ten checks alone gave 8.
+N/A (v1.10): a check that can't apply (interactions on a report with no slicers, buttons, bookmarks or cross-filtering
+visuals; KPI cards with no cards; charts with no charts ...) is "N/A" with its reason and left out of the score, so the
+score is passed / applicable x 10. A "no" is never N/A: mark_na() leaves a failure, computed or the agent's, as it is.
+Alignment and spacing (v1.10) lists each visual out of line, which edge and by how many pixels (gridsnap.py).
 """
 import json, pathlib, re, subprocess, sys
 
@@ -24,25 +28,12 @@ HEX = re.compile(r"#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b")
 DECOR = {"shape", "basicShape", "textbox", "image"}
 
 
-def _grid_edges():
-    col = (1920 - 64 - 11 * 24) / 12
-    lefts = [32 + i * (col + 24) for i in range(12)]
-    return lefts, [x + col for x in lefts]
-
-
 def check_grid(layout):
-    """Visual IDs off the 12-column grid. A full-width band may span 0..1920; a rail (pattern rail-panel, study
-    2026-11-15) may touch one page edge, with its inner edge on the grid; everything else sits on the grid."""
-    lefts, rights = _grid_edges()
-    bad = []
-    for v in layout.get("visuals", []):
-        x, w, y = v.get("x", 0), v.get("w", 0), v.get("y", 0)
-        at_l, at_r = x == 0, x + w >= 1920
-        on_left = at_l or min(abs(x - e) for e in lefts) <= 1
-        on_right = at_r or min(abs(x + w - e) for e in rights) <= 1
-        if not (on_left and on_right) or (v.get("type") not in DECOR and y % 8):
-            bad.append(v["id"])
-    return bad
+    """Visual IDs out of line (gridsnap.issues: column edges, the 8 px baseline, row bottoms). A full-width band may
+    span 0..1920; a rail (pattern rail-panel, study 2026-11-15) may touch one page edge, with its inner edge on the
+    grid; everything else sits on the grid."""
+    from . import gridsnap as GS
+    return list(dict.fromkeys(i["id"] for i in GS.issues(layout)))
 
 
 def overlaps(layout):
@@ -156,8 +147,9 @@ def compute(report, layout, agent=None, validate_fn=None, approved=None):
     lost = lost_since_approval(report, layout, approved)
     if lost:
         res[1] = (False, "lost since the approved plan: " + "; ".join(lost[:5]))
-    bad = check_grid(layout)
-    res[2] = (not bad, f"off the grid: {', '.join(bad[:5])}" if bad else "")
+    from . import gridsnap as GS
+    off = GS.issues(layout)                     # v1.10: exactly which visuals, which edge and by how many pixels
+    res[2] = (not off, "out of line: " + "; ".join(i["text"] for i in off) if off else "")
     built = built_visuals(report)
     want = {v["id"]: v for v in layout.get("visuals", [])}
     missing = sorted(set(want) - set(built))
@@ -187,7 +179,68 @@ def compute(report, layout, agent=None, validate_fn=None, approved=None):
     res[9] = (not a11y, f"{len(a11y)} accessibility warning(s)" if a11y else "")
     res[10] = (not full.errors, f"{len(full.errors)} error(s)" if full.errors else "")
     res.update(polish_checks(report, layout))
+    for n, reason in not_applicable(layout).items():
+        mark_na(res, n, reason)
     return res
+
+
+# ---------------------------------------------------------------- N/A: a check that can't apply (v1.10)
+NA = "n/a"
+CARDS = {"cardVisual", "card", "multiRowCard", "kpi"}
+SLICER_TYPES = {"slicer", "advancedSlicerVisual", "listSlicer", "textSlicer"}
+NAV_TYPES = {"pageNavigator", "bookmarkNavigator"}
+VALUE_ROLES = {"Data", "Values", "Y", "Y2", "Tooltips", "Indicator", "Goal", "TargetValue", "Value", "Size",
+               "MinValue", "MaxValue", "Target"}
+
+
+def _image_card(v):
+    return "udfCard" in v or any(c.get("type") == "image" for c in v.get("cf", []) or [])
+
+
+def _cross_filters(v):
+    """A data visual a person can click to filter the others: it has a category-like field (axis, rows, legend)."""
+    return any(role not in VALUE_ROLES and xs for role, xs in (v.get("bindings") or {}).items())
+
+
+def not_applicable(layout):
+    """{item: reason} for the checks that can't apply to this layout. mark_na() never turns a failure into N/A."""
+    vis = [v for v in layout.get("visuals", []) if not v.get("decorative")]
+    out = {}
+    if not any(v.get("type") in CARDS for v in vis):
+        out[3] = "no KPI cards in the report"
+    if not any(v.get("type") == "cardVisual" and not _image_card(v) for v in vis) and             not any(v.get("type") in CARDS - {"cardVisual"} for v in vis):
+        out[11] = ("no native KPI cards: image cards draw their own change line" if
+                   any(v.get("type") in CARDS for v in vis) else "no KPI cards in the report")
+    interactive = []
+    for page in {v.get("page") for v in vis}:
+        pv = [v for v in vis if v.get("page") == page]
+        data = [v for v in pv if v.get("bindings") or "udfCard" in v]
+        if any(v.get("type") in SLICER_TYPES | NAV_TYPES for v in pv) or                 any(v.get("type") == "actionButton" and v.get("action") for v in pv) or                 (len(data) > 1 and any(_cross_filters(v) for v in data)) or                 ((layout.get("pages") or {}).get(page) or {}).get("bookmarks") or                 ((layout.get("pages") or {}).get(page) or {}).get("drillthrough"):
+            interactive.append(page)
+    if not interactive:
+        out[7] = "no slicers, buttons, bookmarks or cross-filtering visuals on any page"
+    if not any(v.get("bindings") and not _image_card(v) for v in vis):
+        out[12] = "no visual shows numbers as values: image cards draw their own, and the numbers audit checks them"
+    if not any(v.get("type") in CHARTS for v in vis):
+        out[13] = "no charts in the report"
+    titled = any(isinstance(v.get("container"), dict) and v["container"].get("title") for v in vis)
+    if not titled and not any(v.get("type") in CHARTS for v in vis):
+        out[14] = "no visual titles, axes or legends to size"
+    return out
+
+
+def mark_na(res, n, reason):
+    """N/A only where nothing failed: a "no" (computed, or the agent's own) always stays a "no", and a check the
+    agent passed with how it tested it stays a pass."""
+    ok, why = res.get(n, (None, ""))
+    if ok is False:
+        return False
+    if n == 7 and ok is True:
+        return False
+    if n in (1, 3) and ok is True:
+        return False
+    res[n] = (NA, reason)
+    return True
 
 
 # ---------------------------------------------------------------- checks 11-15: the polish a person notices
@@ -414,24 +467,39 @@ def year_chosen(layout, page):
 
 
 def passed(res):
-    return sum(1 for ok, _ in res.values() if ok)
+    return sum(1 for ok, _ in res.values() if ok is True)
+
+
+def applicable(res):
+    return {n: r for n, r in res.items() if r[0] != NA}
 
 
 def total(res):
-    """The score out of 10: the share of checks passed (15 checks)."""
-    return round(passed(res) * 10 / max(len(res), 1))
+    """The score out of 10: the share of the checks that apply that passed (N/A left out, v1.10)."""
+    return round(passed(res) * 10 / max(len(applicable(res)), 1))
+
+
+def result_word(ok):
+    return "pass" if ok is True else "N/A" if ok == NA else "not checked" if ok is None else "no"
 
 
 def say(res):
     """The plain lines for the final screen and the wrap-up."""
     t = total(res)
-    lines = [f"Polish {t}/10 ({passed(res)} of {len(res)} checks; target {TARGET} before showing colleagues)."]
+    na = [n for n in sorted(res) if res[n][0] == NA]
+    lines = [f"Polish {t}/10 ({len(applicable(res))} of {len(res)} checks applied"
+             + (f", {len(na)} N/A" if na else "") + f"; {passed(res)} passed; target {TARGET} before showing "
+             "colleagues)."]
+    if len(na) * 3 > len(res):                  # more than a third didn't apply: the score says less than it seems
+        lines.append(f"Limited score: many checks didn't apply ({len(na)} of {len(res)} N/A).")
     no = [ITEMS[n] for n in sorted(res) if res[n][0] is False]
     unchecked = [ITEMS[n] for n in sorted(res) if res[n][0] is None]
     if no:
         lines.append("Not yet: " + "; ".join(no) + ".")
     if unchecked:
         lines.append("Not checked: " + "; ".join(unchecked) + ".")
+    if na:
+        lines.append("Not applicable: " + "; ".join(f"{ITEMS[n]} ({res[n][1]})" for n in na) + ".")
     if t < TARGET:
         lines.append("Below the target: I'd fix these before you show it to colleagues.")
     return lines
@@ -441,8 +509,7 @@ def write_review(root, res, mode=None):
     f = pathlib.Path(root) / "design" / "reviews" / "polish.md"
     f.parent.mkdir(parents=True, exist_ok=True)
     rows = ["# Polish score", "", *say(res), "", "| # | Item | Result | Why |", "| --- | --- | --- | --- |"]
-    rows += [f"| {n} | {ITEMS[n]} | {'pass' if ok else 'not checked' if ok is None else 'no'} | {why} |"
-             for n, (ok, why) in sorted(res.items())]
+    rows += [f"| {n} | {ITEMS[n]} | {result_word(ok)} | {why} |" for n, (ok, why) in sorted(res.items())]
     if mode:
         rows += ["", f"Build option: {mode}."]
     f.write_text("\n".join(rows) + "\n", encoding="utf-8")

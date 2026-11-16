@@ -924,6 +924,7 @@ class FidelityTests(unittest.TestCase):
                                capture_output=True, text=True)
             self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
             layout, tok, _, theme = case("rep8")
+            layout = json.loads(lay.read_text(encoding="utf-8"))     # as build left it (v1.10: snapped to the grid)
             wf = F.wireframe_visuals(G.build_html(layout, tok, theme, None))
             rp = F.report_visuals(proj / "HR Overview.Report")
             for key, p in layout["pages"].items():

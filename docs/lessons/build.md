@@ -7,12 +7,10 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 | ID | Lesson | Enforced by |
 | --- | --- | --- |
 | B-01 | Build through the kit, never by hand | – |
-| B-02 | Every build gives the same result twice | pbik build (idempotent writes); /build reruns it; the regression suite |
 | B-03 | Build the first repeated unit first | – |
 | B-04 | Copy a setting Desktop saved instead of guessing | `pbik validate` warns on settings outside the catalog (`pbik catalog show`) |
 | B-05 | A template's reference lines are dropped, so give the visual its own | pbik build drops a field-bound template line (since 0.6.1) |
 | B-06 | Measure-driven text is an expression, not a literal | – |
-| B-07 | Rename fields per visual with displayName | pbik build writes it per projection |
 | B-08 | Field parameters bind every underlying field | pbik build writes every field in parameter order plus `fieldParameters` (since 0.3) |
 | B-09 | Every Deneb visual names a fallback | `pbik validate` errors on a Deneb visual without one |
 | B-10 | Record the build method of every visual | design/scripts/audit_ids.py flags a visual without one |
@@ -20,6 +18,7 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 | B-12 | HTML Content visuals use legacy rendering and room to draw | pbik build sets `compatibility.legacyRendering` and warns under 43px; `pbik validate` warns too |
 | B-13 | Roundtrip after every hand polish, then update layout.json | – |
 | B-14 | Image cards get no saved sort | `pbik build` drops `sort` from a `udfCard` (tools/pbik/tests/test_udf.py) |
+| B-15 | Build snaps to the grid and writes missing alt text; N/A never covers a "no" | `pbik build` (gridsnap.py, auto alt text); `pbik score` (mark_na); tests/test_v17.py PolishV110Tests |
 <!-- /lessons:index -->
 
 ## B-01 Build through the kit, never by hand
@@ -29,12 +28,6 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 - **Why:** per-rep build.py scripts and patches drifted from layout.json and couldn't be rerun safely.
 - **Enforced by:** not enforced (read at /build, which forbids build code)
 - **Source:** pbik 0.6 (kit v0.3)
-
-## B-02 Every build gives the same result twice
-- **Rule:** Run `pbik build` twice; the second run must print "No changes".
-- **Why:** the old field-parameter patch stacked its fields again on every run.
-- **Enforced by:** pbik build (idempotent writes); /build reruns it; the regression suite
-- **Source:** pre-pbik builds (kit v0.3)
 
 ## B-03 Build the first repeated unit first
 - **Rule:** Build the first card (or any repeated unit), screenshot it, and only then repeat it.
@@ -63,12 +56,6 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
   the objects without a selector.
 - **Why:** a literal set after the measure replaces it.
 - **Enforced by:** not enforced (read at /build)
-- **Source:** CLAUDE.md before v0.5 (rep not recorded)
-
-## B-07 Rename fields per visual with displayName
-- **Rule:** Rename a field on one visual with `displayName` on that binding in layout.json.
-- **Why:** only that visual's projection changes; the model keeps its name.
-- **Enforced by:** pbik build writes it per projection
 - **Source:** CLAUDE.md before v0.5 (rep not recorded)
 
 ## B-08 Field parameters bind every underlying field
@@ -113,3 +100,10 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 - **Why:** the saved sort keeps the old expression text; after a rename the study's card still named the old function.
 - **Enforced by:** `pbik build` drops `sort` from a `udfCard` (tools/pbik/tests/test_udf.py)
 - **Source:** UDF KPI card study, Study 2 (2026-11-15), F-05
+
+## B-15 Build snaps to the grid and writes missing alt text; N/A never covers a "no"
+- **Rule:** Let `pbik build` snap layout.json (column edges, tops and bottoms on the 8 px line, a row's bottoms level)
+  and write alt text where none was written; mark a hand-placed visual with `desktopPosition` or `snap: false`.
+- **Why:** the UDF card gallery lost alignment and accessibility to 1-8 px slips and text boxes without alt text.
+- **Enforced by:** `pbik build` (gridsnap.py, auto alt text); `pbik score` (mark_na); tests/test_v17.py PolishV110Tests
+- **Source:** kit v1.10 (2026-11-16)
