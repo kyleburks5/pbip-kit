@@ -971,11 +971,12 @@ def udf_cmd(args):
             probs = U.inline_problems(text, by)
             for p in probs:
                 print(f"error           {p}")
+            note, over = U.size_note(text)
             if args.out:
                 pathlib.Path(args.out).write_text(text, encoding="utf-8")
-                print(f"inlined: {len(text)} characters of plain DAX, no function needed")
             else:
                 print(text)
+            print(f"warning         {note}" if over else f"{note}; no function needed in the model")
             return 1 if probs else 0
         facts, probs = U.desktop_check(args.root, args.version, args.model)
         for f in facts:

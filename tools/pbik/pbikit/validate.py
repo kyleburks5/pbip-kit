@@ -284,10 +284,13 @@ def check_udf_cards(fd, rep, lay, project=None):
     tv = versions.target_for(root, project)[0].desktop
     for v in cards:
         try:
-            p = U.card_plan(v["id"], v["udfCard"], by, tokens)
+            said = []
+            p = U.card_plan(v["id"], v["udfCard"], by, tokens, warnings=said)
         except U.UdfError as e:
             fd.err(v["id"], str(e))
             continue
+        for w_ in said:
+            fd.warn(v["id"], w_.split(": ", 1)[-1])
         if p["mode"] != "inline" and tv != "latest" and U.vt(tv) < U.vt(U.FIRST_UDF_DESKTOP):
             fd.err(v["id"], f"uses the DAX function {p['function']}, but the target Desktop {tv} is older than the "
                             f"first release with DAX functions ({U.FIRST_UDF_DESKTOP}): use inline mode")

@@ -115,6 +115,41 @@ class InlineTests(unittest.TestCase):
         self.assertNotIn("( 'Date'[Month Number] )", out)
         self.assertEqual(U.calls_in(out, self.by), [])
 
+    def test_a_fixed_chart_style_inlines_only_its_chart(self):
+        ex = self.by["Park.SVG.SVGKPICard"]["example"]
+        for style in self.by["Park.SVG.SVGKPICard"]["styles"]:
+            out = U.inline(ex.replace('"Bar5"', f'"{style}"'), self.by, tokens())
+            self.assertEqual(U.inline_problems(out, self.by), [], style)
+            self.assertLessEqual(len(out), U.INLINE_WARN, style)
+            self.assertNotIn("unknown chart style", out, style)
+        g = self.by["Park.SVG.SVGKPICardGradient"]["example"]
+        for style in self.by["Park.SVG.SVGKPICardGradient"]["styles"]:
+            self.assertLessEqual(len(U.inline(g.replace('"Bar1"', f'"{style}"'), self.by, tokens())), U.INLINE_WARN)
+        lower = U.inline(ex.replace('"Bar5"', '"bar5"'), self.by, tokens())     # DAX compares text ignoring case
+        self.assertLessEqual(len(lower), U.INLINE_WARN)
+        dynamic = U.inline(ex.replace('"Bar5"', "[Chart Style]"), self.by, tokens())
+        self.assertIn("unknown chart style", dynamic)                         # every style kept, ERROR included
+        self.assertTrue(U.size_note(dynamic)[1])
+        unknown = U.inline(ex.replace('"Bar5"', '"Nope"'), self.by, tokens())
+        self.assertIn("unknown chart style", unknown)                         # the function's own error stays
+
+    def test_size_warning_in_the_card_plan(self):
+        args = {"_LabelExpr": "Sales", "_CurrentExpr": "[Sales]", "_PastExpr": "[Sales PY]",
+                "_DateNumber": "'Date'[Month Number]", "_DateVal": "'Date'[Month]", "_AccentUp": "token:good",
+                "_AccentDown": "token:bad", "_NeutralAccent": "token:textMuted", "_MicrochartType": "Line2"}
+        said = []
+        p = U.card_plan("P1-V03", {"function": "Park.SVG.SVGKPICard", "args": args}, self.by, tokens(), warnings=said)
+        self.assertEqual(said, [])
+        self.assertEqual(p["chars"], len(p["expression"]))
+        old = U.INLINE_WARN
+        try:
+            U.INLINE_WARN = 1000
+            U.card_plan("P1-V03", {"function": "Park.SVG.SVGKPICard", "args": args}, self.by, tokens(),
+                        warnings=said)
+        finally:
+            U.INLINE_WARN = old
+        self.assertTrue(said and "characters" in said[0], said)
+
     def test_toy_function_semantics(self):
         tmp = pathlib.Path(tempfile.mkdtemp(prefix="pbik_udf_"))
         try:
@@ -134,7 +169,7 @@ class InlineTests(unittest.TestCase):
             self.assertIn("VAR _x__i1 = __i1_a + 1", out)
             self.assertIn("_x__i1 * ( [Units] )", out)
             self.assertIn("VAR _x__i2 = __i2_a + 1", out)
-            self.assertIn("// _a in a comment stays", out)
+            self.assertNotIn("comment stays", out)                  # generated DAX: comments dropped
             self.assertTrue(out.startswith("[M] + ("))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)

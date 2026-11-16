@@ -1707,8 +1707,11 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         from . import udf as U
         try:
             tokens_for_udf = U.load_tokens(design.parent)
+            udf_warnings = []
             layout["visuals"], udf_measures, udf_errors = U.expand_layout(layout, U.load(design.parent),
-                                                                          tokens_for_udf)
+                                                                          tokens_for_udf, udf_warnings)
+            for w_ in udf_warnings:
+                print(f"warning: UDF card {w_}")
         except U.UdfError as e:
             udf_errors = [str(e)]
         if udf_errors:

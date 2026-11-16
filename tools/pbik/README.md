@@ -753,9 +753,12 @@ design/udf/udf-kpi-library-provenance.md).
   model open in Desktop goes through the modeling MCP `function_operations` with `render` text instead.
 - `inline [<DAX>] [--function <name>]`: every library call expanded into plain DAX that needs no function: a `VAL`
   argument becomes a `VAR`, an `EXPR` argument is placed where it is used (a measure is still evaluated per month;
-  columns without brackets), the function's own VARs get a unique suffix, nested calls first. Checked on disk
-  (brackets balance, no call or token left); the result running in Desktop is still to verify (roadmap).
-  SVGKPICard inlines to about 150,000 characters (all 13 chart styles); install it where the model allows.
+  columns without brackets), the function's own VARs get a unique suffix, nested calls first. A fixed chart style
+  name keeps only that style's `SWITCH` branch (and what it calls); comments and indentation are dropped. Checked on
+  disk (brackets balance, no call or token left); the result running in Desktop is still to verify (roadmap).
+  The size is reported, with a warning above 20,000 characters (`INLINE_WARN`; also in `pbik build` and
+  `pbik validate` for a `udfCard`). Measured 2026-11-15: Card1 and Card2 about 5,000; SVGKPICard 10,150-15,650 per
+  style; SVGKPICardGradient 9,871-14,202; a style chosen by a measure keeps all 13 (about 115,600: warned).
 - `desktop [--version V] [--model <TMDL>]`: the installed Desktop against the first release with DAX functions
   (2.147, from the study: not confirmed in the kit's sources), whether its UDF preview switch is confirmed (2.155 and
   2.159: verify in Desktop), the project's target, the model's level. `pbik validate` errors when a UDF card that

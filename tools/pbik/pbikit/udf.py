@@ -546,7 +546,11 @@ def expand(name, args, by, tokens, counter, stack=()):
     args = list(args) + ["BLANK()"] * (len(params) - len(args))
     k = counter.next()
     _, _, body = split_tmdl(fill(text_of(f), tokens))
-    body = body.strip()
+    body = compact(body)
+    for p, a in zip(params, args):                     # a fixed style name: keep only its SWITCH branch
+        lit = string_literal(a)
+        if lit is not None:
+            body = prune_switch(body, p["name"], lit)
     names = set(re.findall(r"(?i)\bVAR\s+([A-Za-z_]\w*)", code_only(body)))
     pnames = {p["name"] for p in params}
     rename = {v: f"{v}__i{k}" for v in names - pnames}
@@ -570,6 +574,69 @@ def expand(name, args, by, tokens, counter, stack=()):
     if binds:
         return "(\n" + "\n".join(binds) + "\nRETURN\n" + body + "\n)"
     return "(\n" + body + "\n)"
+
+
+def compact(text):
+    """Generated DAX without comments, indentation or runs of spaces (text in strings untouched)."""
+    out = []
+    for kind, t in segments(text):
+        if kind == "comment":
+            continue
+        if kind == "code":
+            t = re.sub(r"[ \t]+", " ", t)
+            t = re.sub(r" ?\n[ \n]*", "\n", t)
+        out.append(t)
+    return "".join(out).strip()
+
+
+def string_literal(text):
+    """The value of a DAX text literal ("Bar5", or ( "Bar5" )), else None."""
+    m = re.fullmatch(r'\s*\(?\s*"((?:[^"]|"")*)"\s*\)?\s*', text or "")
+    return m.group(1).replace('""', '"') if m else None
+
+
+def prune_switch(body, param, value):
+    """Every SWITCH ( <param>, "a", x, "b", y, ..., else ) whose first argument is exactly the parameter: replaced
+    by the branch for `value` (DAX compares text case-insensitively). No matching branch: left as it is, so the
+    function's own ERROR still speaks. Only the chosen chart style (and what it calls) is then inlined."""
+    out, pos = [], 0
+    mask = code_only(body)
+    for m in re.finditer(r"(?i)\bSWITCH\s*\(", mask):
+        if m.start() < pos:
+            continue
+        args, end = call_args(body, m.end() - 1)
+        if len(args) < 3 or args[0].strip() != param:
+            continue
+        pairs = args[1:-1] if len(args) % 2 == 0 else args[1:]
+        branch = None
+        for k in range(0, len(pairs) - 1, 2):
+            lit = string_literal(U_strip_comments(pairs[k]))
+            if lit is not None and lit.casefold() == value.casefold():
+                branch = pairs[k + 1]
+                break
+        if branch is None:
+            continue
+        out.append(body[pos:m.start()])
+        out.append("(\n" + branch + "\n)")
+        pos = end
+    out.append(body[pos:])
+    return "".join(out)
+
+
+def U_strip_comments(text):
+    return "".join(t for kind, t in segments(text or "") if kind != "comment")
+
+
+INLINE_WARN = 20000          # characters: above this an inlined measure is slow to edit and to send to Desktop
+
+
+def size_note(text):
+    """Plain words on an inlined measure's size, and whether it is over the limit."""
+    n = len(text)
+    if n > INLINE_WARN:
+        return (f"the inlined DAX is {n:,} characters, over the {INLINE_WARN:,} the kit keeps to: give the card a "
+                "fixed chart style, or add the function to the model (measure mode)"), True
+    return f"the inlined DAX is {n:,} characters", False
 
 
 def inline_problems(text, by):
@@ -637,11 +704,12 @@ def measures_in(dax):
     return out
 
 
-def card_plan(vid, spec, by, tokens, installed=None):
+def card_plan(vid, spec, by, tokens, installed=None, warnings=None):
     """A layout.json `udfCard` -> {"call", "expression", "mode", "form", "type", "template", "measures", "size",
     "name"}: what pbik build writes. Errors are plain sentences."""
     if not isinstance(spec, dict) or not spec.get("function"):
         raise UdfError(f"{vid}: udfCard needs a function (pbik udf list --role card)")
+    warnings = warnings if warnings is not None else []
     name = find(by, spec["function"])
     if not name:
         raise UdfError(f"{vid}: there is no UDF called {spec['function']} in the kit's libraries")
@@ -691,14 +759,17 @@ def card_plan(vid, spec, by, tokens, installed=None):
         probs = inline_problems(expression, by)
         if probs:
             raise UdfError(f"{vid}: inlining {name} failed: {'; '.join(probs)}")
+        note, over = size_note(expression)
+        if over:
+            warnings.append(f"{vid}: {note}")
     vtype, template = FORMS[form]
     return {"function": name, "call": full, "expression": expression, "mode": mode, "form": form, "type": vtype,
             "template": spec.get("template", template), "measures": measures_in(full),
             "size": f.get("size"), "name": spec.get("name") or f"img {vid}",
-            "hash": f["sha256"]}
+            "hash": f["sha256"], "chars": len(expression)}
 
 
-def expand_layout(layout, by, tokens):
+def expand_layout(layout, by, tokens, warnings=None):
     """Every visual with `udfCard` -> the plain layout keys pbik build already knows, plus the report-level measures
     to write ({name: expression}). Returns (visuals, measures, errors)."""
     out, measures, errors = [], {}, []
@@ -707,7 +778,7 @@ def expand_layout(layout, by, tokens):
             out.append(v)
             continue
         try:
-            p = card_plan(v["id"], v["udfCard"], by, tokens)
+            p = card_plan(v["id"], v["udfCard"], by, tokens, warnings=warnings)
         except UdfError as e:
             errors.append(str(e))
             out.append(v)
