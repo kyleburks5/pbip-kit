@@ -56,6 +56,8 @@ visual has to fetch more. Deneb scenarios have `kind: "deneb"`, `spec` and `dene
 | `{"perf": ms, "mode": "orbit"}` | frames a second while the visual moves in real time (`mode`: what the visual's `kitPerf` drives, such as `orbit` or `fly`; scenario `realtime: true`): report.json `perf` with `fps`, `slow` (share of frames over 50 ms, the ones that look frozen) and `worst` (ms) |
 | `{"measure": {"click3d": "Site 05"}, "ms": 1200}` | the same numbers while a click (`click3d`, `clickText`, or `clickSelector` with `index`) plays out in real time: works on any build, so before / after compare |
 | `{"profile": {"clickText": "Tree"}, "ms": 1500}` | Chrome's sampling profiler while the click plays out: report.json `profile`, the top functions by own time in ms (`(program)` is the browser drawing) |
+| `{"transition": {"clickText": "North"}, "name": "open", "ms": 700, "every": 25}` | a screen change frame by frame on the frozen clock: the ink (area of every drawn shape and text times its effective opacity) at each step; check with `noBlank` |
+| `{"markMoves": "name"}` | remember how many morphs and entrances the visual has run (its `kitMoves`); check with `movesSince` |
 | `{"probe": "js expression"}` | evaluate in the page and record the value in report.json `probes` (debugging) |
 | `{"expect": {...}}` | checks: `selectCalls`, `minSelectCalls`, `lastMulti`, `lastSelectCount`, `clears`, `contextMenus`, `tooltips`, `fetchMore`, `marks`, `text`, `noRenderFailures`, `renderEvents` |
 
@@ -64,7 +66,8 @@ not), `ariaLabels`, `pill` (which pill is on), `selectorText` ({css: text}: exac
 text, such as the panel row lit for the floor under the pointer), `tooltipFields` (the last tooltip's field names, in
 order), `state` (values from the visual's `kitState()` debug hook) and `noOverlap` (the headline, each item of the
 Back / pills row, panels and visible labels never overlap; labels clipped under the header don't count) and `minTextPx` (every visible text, at the size it is drawn after
-zoom, is at least that many pixels) and `smooth` ({longest, frozen}: the last `perf` / `measure` had no frame over
+zoom, is at least that many pixels), `noBlank` (a named `transition` never fell below `minInk`, default 0.6, of
+the screens it joins), `movesSince` ({mark, max}: no more morphs since a `markMoves`) and `smooth` ({longest, frozen}: the last `perf` / `measure` had no frame over
 `longest` ms and under `frozen` % frozen frames).
 
 Scenario switches: `emptyFirst` (default true: an empty update first, as Desktop sends while loading), `roundTrip` (ms Desktop takes to send the rows again after the visual's filter or save; default

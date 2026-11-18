@@ -214,6 +214,11 @@ button.kit-crumb {
 }
 /* a small chip that clears the visual's own click filter */
 .kit-clear {
+    // top-right corner, out of the layout: picking something never shifts the visual
+    position: absolute;
+    top: var(--kit-pad);
+    right: var(--kit-pad);
+    z-index: 4;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -228,4 +233,22 @@ button.kit-crumb {
 }
 .kit-clear:focus-visible {
     outline: 2px solid var(--kit-selected);
+}
+
+/* screen changes and in-place morphs (kit/morph.ts): ghosts of shared elements fly above both screens */
+.kit-morph-fly {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+.kit-morph-ghost {
+    position: absolute;
+    will-change: left, top, width, height;
+}
+.kit-morph-out {
+    pointer-events: none;
+}
+.kit-root.has-clear .kit-headline {
+    right: calc(var(--kit-pad) + 96px);
 }

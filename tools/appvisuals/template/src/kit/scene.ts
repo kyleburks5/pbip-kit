@@ -48,7 +48,7 @@ export function chromeBottom(root: HTMLElement, gap = 8): number {
         return 0;                                      // not laid out yet (a page not in front): use the formula
     }
     let b = 0;
-    root.querySelectorAll<HTMLElement>(".kit-headline, .kit-top > *").forEach(el => {
+    root.querySelectorAll<HTMLElement>(".kit-headline, .kit-top > *:not(.kit-clear)").forEach(el => {
         const q = el.getBoundingClientRect();
         if (q.height > 0 && (el.textContent.trim() || el.querySelector("input, button, svg"))) {   // a search box has no text
             b = Math.max(b, q.bottom - r.top);
@@ -63,6 +63,8 @@ export function chromeBottom(root: HTMLElement, gap = 8): number {
  */
 export function clearChip(parent: Div, n: number, label: string, onClear: () => void): void {
     parent.selectAll(".kit-clear").remove();
+    const root = (parent.node() as HTMLElement)?.closest(".kit-root");
+    root?.classList.toggle("has-clear", n > 0);
     if (!n) {
         return;
     }

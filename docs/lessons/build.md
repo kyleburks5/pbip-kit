@@ -112,7 +112,8 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 ## B-16 Kit visuals send their click filter after the move lands
 - **Rule:** A kit visual shows a click at once and sends its filter (and its saved view) after the move lands; an
   update that brings the same rows draws nothing again; new rows morph by key; the empty update Desktop sends while
-  loading never removes a layer; kit visuals never filter the page's slicers (NoFilter, written by pbik build).
+  loading never removes a layer; kit visuals never filter the page's slicers (NoFilter, written by pbik build);
+  screens change through `Morpher` (shared parts morph by key, no blank frame, no entrance replay).
 - **Why:** Desktop redraws the rest of the page on the thread the visual animates on when a filter or a save
   arrives: 30-46% frozen frames on clicks, a blank org chart after the empty update, pills shrinking to the click.
 - **Enforced by:** the kit template (scene.ts `Later`, updates.ts `UpdateGate`); the harness simulates the round

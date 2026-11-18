@@ -28,6 +28,14 @@ Code: `src/kit/patterns/drill.ts` (`Drill` on top of `scene.ts` `Screens`; `flyT
 column hierarchy), read a matrix data view with `data.ts` `hierarchy()`, which gives each node a selection id, and use
 `selectionManager.toggleExpandCollapse` to load the next level.
 
+## Screens in HTML (cards, panels, lists)
+
+A drill drawn in HTML (a card that opens a detail screen, like the region panel) goes through `Morpher.run(layer,
+render, {screen: true})`: tag the shared parts with `data-share` (the card and the detail chart; each stage's mini
+column and its detail bar) and they morph by key while the rest cross-fades. `Morpher.run(layer, render)` without
+`screen` is the in-place form for new data. Never empty a screen and replay a staggered entrance: that was a 0.3 s
+blank and a 1 s fade on every click (Desktop review 2026-11-18).
+
 ## Checks
 
 Harness: `clickText` on a group label, a `frames` step (the re-pack), `text` "North:" in the headline, then

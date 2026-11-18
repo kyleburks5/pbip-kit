@@ -61,6 +61,13 @@ these patterns and routes.
   self-test plays the visual's own moves once its page is in front (make the page the opening page). Target: no frame
   over 100 ms after a click and under 5% frozen frames in any move. The harness simulates the round trip (`roundTrip`,
   400 ms) and checks it (`measure`, `smooth`).
+- Screens change without a blank frame (Desktop review 2026-11-18): draw through `Morpher` (kit/morph.ts). Tag what
+  is the same thing on two screens with one `data-share` key (a card's stage columns and the detail's stage bars, the
+  card and the detail it opens): on a screen change those fly from their old box and colour to the new one while the
+  old screen fades out over the new one (about 0.4 s; reduce motion swaps at once); Back plays the reverse. Entrance
+  animations play only when a screen opens; new data and clicks inside a screen move the real elements in place
+  (they stay clickable). The harness checks every screen change frame by frame (`transition`, `noBlank`) and that a
+  filter round trip replays nothing (`markMoves`, `movesSince`).
 - Match by key, never by position: a list, a panel row or a label finds its item by the item's key (a sorted or
   reversed list lights the wrong row otherwise). The harness checks it (`selectorText`).
 - The header is a band: the drawing starts below the header as measured (`chromeBottom`) and is clipped there

@@ -53,6 +53,7 @@ if (data.rowsFile) data.rows = JSON.parse(fs.readFileSync(abs(data.rowsFile), "u
 const theme = sc.theme ? (typeof sc.theme === "string" ? JSON.parse(fs.readFileSync(abs(sc.theme), "utf8")) : sc.theme) : {};
 
 // ---------------------------------------------------------------- run
+const marks = {};
 const report = { scenario: path.basename(scenarioPath), shots: [], frames: [], checks: [], consoleErrors: [], pageErrors: [], network: [] };
 const viewport = sc.viewport || { width: 900, height: 560 };
 const pad = 16;
@@ -190,6 +191,39 @@ async function runOnce(record) {
         }
         report.profile = (report.profile || []).concat({ what: JSON.stringify(inner), top: [...by].sort((x, y) => y[1] - x[1]).slice(0, 14).map(([k, v]) => [k, Math.round(v)]) });
         await cdp.detach();
+      }
+      else if (s.transition) {
+        // a screen change frame by frame (frozen clock): how much the visual paints at each step ("ink": the area of
+        // every drawn shape and text, times its effective opacity). A blank frame is ink falling far below both the
+        // screen before and the screen after ({"transition": {"clickText": "North"}, "name": "open", "ms": 700, "every": 25})
+        const ink = () => page.evaluate(() => {
+          const root = document.querySelector("#harness-visual .kit-root");
+          if (!root) return 0;
+          const R = root.getBoundingClientRect();
+          let sum = 0;
+          const op = el => { let o = 1; for (let e = el; e && e !== root.parentElement; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.visibility === "hidden" || cs.display === "none") return 0; o *= Number(cs.opacity || 1); } return o; };
+          root.querySelectorAll("*").forEach(el => {
+            const cs = getComputedStyle(el);
+            let paints = false;
+            if (el instanceof SVGGraphicsElement && !(el instanceof SVGGElement) && !(el instanceof SVGSVGElement)) paints = cs.fill !== "none" || cs.stroke !== "none";
+            else if (!(el instanceof SVGElement)) paints = (cs.backgroundColor && cs.backgroundColor !== "rgba(0, 0, 0, 0)") || [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
+            if (!paints) return;
+            const r = el.getBoundingClientRect();
+            const w = Math.max(0, Math.min(r.right, R.right) - Math.max(r.left, R.left)), h = Math.max(0, Math.min(r.bottom, R.bottom) - Math.max(r.top, R.top));
+            sum += w * h * op(el);
+          });
+          return Math.round(sum);
+        });
+        const t = s.transition, start = await ink(), b = await visualBox(), samples = [];
+        if (t.click3d) { const xy = await page.evaluate(n => document.querySelector("#harness-visual .kit-root").kitProject(n), t.click3d); await page.mouse.click(b.x + xy[0], b.y + xy[1]); }
+        else if (t.clickText) await page.locator("#harness-visual").getByText(t.clickText, { exact: true }).first().click();
+        else if (t.clickSelector) await page.locator(`#harness-visual ${t.clickSelector}`).nth(t.index || 0).click({ force: true });
+        for (let ms = 0; ms < (s.ms || 700); ms += (s.every || 25)) { await tick(s.every || 25); samples.push(await ink()); }
+        const end = samples.at(-1) ?? start, low = Math.min(...samples);
+        report.transitions = (report.transitions || []).concat({ name: s.name || JSON.stringify(t), start, end, low, ratio: Math.round(low / Math.max(1, Math.min(start, end)) * 100) / 100, samples });
+      }
+      else if (s.markMoves) {
+        marks[s.markMoves] = await page.evaluate(() => { const r = document.querySelector("#harness-visual .kit-root"); return r && r.kitMoves ? r.kitMoves() : 0; });
       }
       else if (s.measure) {
         // any visual: frames drawn and frame gaps while a click plays out in real time ({"measure": {"click3d": "Site 05"}
@@ -352,6 +386,18 @@ async function runOnce(record) {
           const m = (report.perf || []).at(-1) || {};
           const lim = e.smooth;
           res.push([`smooth: longest <= ${lim.longest} ms, frozen < ${lim.frozen}%`, m.worst <= lim.longest && (m.slow || 0) * 100 < lim.frozen, m]);
+        }
+        if (e.noBlank) {
+          // the named transition never painted less than `minInk` (default 0.6) of the smaller of the screens it joins
+          const tr = (report.transitions || []).find(x => x.name === e.noBlank) || {};
+          const min = e.minInk ?? 0.6;
+          res.push([`no blank frame in ${e.noBlank} (lowest ink at least ${min} of the screens it joins)`, tr.ratio >= min, tr]);
+        }
+        if (e.movesSince) {
+          // no morph or entrance since the mark (a filter round trip must not replay the screen)
+          const now = await page.evaluate(() => { const r = document.querySelector("#harness-visual .kit-root"); return r && r.kitMoves ? r.kitMoves() : 0; });
+          const was = marks[e.movesSince.mark] ?? 0, max = e.movesSince.max ?? 0;
+          res.push([`at most ${max} moves since ${e.movesSince.mark}`, now - was <= max, { was, now }]);
         }
         if (e.filterRemoved) { const f = (log.filters || []).at(-1) || {}; res.push(["filter removed", f.action === 1, f]); }
         if (e.camera) { const cam = await page.evaluate(() => { const r = document.querySelector("#harness-visual .kit-marks"); return r ? r.getAttribute("transform") : ""; }); res.push([`camera ${e.camera}`, e.camera === "zoomed" ? !/scale\(1\)$/.test(cam || "") : /scale\(1\)$/.test(cam || ""), cam]); }
