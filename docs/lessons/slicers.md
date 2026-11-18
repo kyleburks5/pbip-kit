@@ -10,6 +10,7 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md.
 | S-02 | Button slicers need a grid sized for their items | `pbik validate` warns (pbikit/slicerfit.py) |
 | S-03 | Dropdown slicers with a header need 76px | `pbik validate` warns (pbikit/validate.py `lesson_checks`) |
 | S-04 | Page navigator states come from the `navigator` key | pbik build writes the states from `navigator` |
+| S-05 | Button slicers carry only resolved values, never a template's sync group | `pbik validate` errors on a token name in a visual; pbik build resolves or rejects token names and drops a template's `syncGroup`; validate warns on slicers sharing a sync group across fields |
 <!-- /lessons:index -->
 
 ## S-01 Short button slicers need Custom padding
@@ -36,3 +37,12 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md.
 - **Why:** a navigator's states are not the button slicer's `selection:selected`.
 - **Enforced by:** pbik build writes the states from `navigator`
 - **Source:** Rep 8
+
+## S-05 Button slicers carry only resolved values, never a template's sync group
+- **Rule:** A button slicer's formatting holds real values (a number where Desktop saves a number), and a template
+  brings no `syncGroup`: start from the clean Desktop-made template and style it with layout props whose tokens resolve.
+- **Why:** a slicer with `'control.tileRadius'` (a token name written as text) in a number property took no clicks,
+  and a leftover sync group tied slicers on different fields together; the pills looked fine and did nothing.
+- **Enforced by:** `pbik validate` errors on a token name in a visual; pbik build resolves or rejects token names and
+  drops a template's `syncGroup`; validate warns on slicers sharing a sync group across fields
+- **Source:** v1.11 Desktop reviews, 2026-11-17

@@ -1,0 +1,449 @@
+{
+  "dataRoles": [
+    {
+      "name": "Item",
+      "kind": "Grouping",
+      "displayName": "Item (one dot per row)"
+    },
+    {
+      "name": "Group",
+      "kind": "Grouping",
+      "displayName": "Group"
+    },
+    {
+      "name": "Stage",
+      "kind": "Grouping",
+      "displayName": "Stage"
+    },
+    {
+      "name": "X",
+      "kind": "Measure",
+      "displayName": "X"
+    },
+    {
+      "name": "Y",
+      "kind": "Measure",
+      "displayName": "Y"
+    },
+    {
+      "name": "Size",
+      "kind": "Measure",
+      "displayName": "Size"
+    },
+    {
+      "name": "Tooltips",
+      "kind": "Measure",
+      "displayName": "Tooltips"
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "conditions": [
+        {
+          "Item": {
+            "max": 1
+          },
+          "Group": {
+            "max": 1
+          },
+          "Stage": {
+            "max": 1
+          },
+          "X": {
+            "max": 1
+          },
+          "Y": {
+            "max": 1
+          },
+          "Size": {
+            "max": 1
+          }
+        }
+      ],
+      "categorical": {
+        "categories": {
+          "select": [
+            {
+              "for": {
+                "in": "Item"
+              }
+            },
+            {
+              "for": {
+                "in": "Group"
+              }
+            },
+            {
+              "for": {
+                "in": "Stage"
+              }
+            }
+          ],
+          "dataReductionAlgorithm": {
+            "window": {
+              "count": 30000
+            }
+          }
+        },
+        "values": {
+          "select": [
+            {
+              "for": {
+                "in": "X"
+              }
+            },
+            {
+              "for": {
+                "in": "Y"
+              }
+            },
+            {
+              "for": {
+                "in": "Size"
+              }
+            },
+            {
+              "for": {
+                "in": "Tooltips"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "objects": {
+    "colors": {
+      "properties": {
+        "accent": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "background": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "text": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "byGroup": {
+          "type": {
+            "bool": true
+          }
+        },
+        "dimOpacity": {
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "fonts": {
+      "properties": {
+        "family": {
+          "type": {
+            "formatting": {
+              "fontFamily": true
+            }
+          }
+        },
+        "size": {
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        },
+        "headlineSize": {
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "properties": {
+        "padding": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "gap": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "radius": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "shadow": {
+          "type": {
+            "bool": true
+          }
+        },
+        "markSize": {
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "motion": {
+      "properties": {
+        "animate": {
+          "type": {
+            "bool": true
+          }
+        },
+        "speed": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "easing": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "cubicInOut",
+                "displayName": "cubicInOut"
+              },
+              {
+                "value": "cubicOut",
+                "displayName": "cubicOut"
+              },
+              {
+                "value": "quadInOut",
+                "displayName": "quadInOut"
+              },
+              {
+                "value": "expInOut",
+                "displayName": "expInOut"
+              },
+              {
+                "value": "backOut",
+                "displayName": "backOut"
+              },
+              {
+                "value": "linear",
+                "displayName": "linear"
+              }
+            ]
+          }
+        },
+        "stagger": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "reduceMotion": {
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "view": {
+      "properties": {
+        "initial": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "grid",
+                "displayName": "grid"
+              },
+              {
+                "value": "columns",
+                "displayName": "columns"
+              },
+              {
+                "value": "scatter",
+                "displayName": "scatter"
+              },
+              {
+                "value": "clusters",
+                "displayName": "clusters"
+              }
+            ]
+          }
+        },
+        "pills": {
+          "type": {
+            "bool": true
+          }
+        },
+        "headline": {
+          "type": {
+            "bool": true
+          }
+        },
+        "labels": {
+          "type": {
+            "bool": true
+          }
+        },
+        "maxItems": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "order": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "data",
+                "displayName": "data"
+              },
+              {
+                "value": "az",
+                "displayName": "az"
+              },
+              {
+                "value": "count",
+                "displayName": "count"
+              }
+            ]
+          }
+        },
+        "customOrder": {
+          "type": {
+            "text": true
+          }
+        }
+      }
+    },
+    "interaction": {
+      "properties": {
+        "tooltips": {
+          "type": {
+            "bool": true
+          }
+        },
+        "brush": {
+          "type": {
+            "bool": true
+          }
+        },
+        "zoom": {
+          "type": {
+            "bool": true
+          }
+        },
+        "clickMode": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "crossFilter",
+                "displayName": "crossFilter"
+              },
+              {
+                "value": "filter",
+                "displayName": "filter"
+              }
+            ]
+          }
+        },
+        "filterField": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "Item",
+                "displayName": "Item"
+              },
+              {
+                "value": "Group",
+                "displayName": "Group"
+              },
+              {
+                "value": "Stage",
+                "displayName": "Stage"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "general": {
+      "properties": {
+        "filter": {
+          "type": {
+            "filter": true
+          }
+        }
+      }
+    },
+    "state": {
+      "properties": {
+        "view": {
+          "type": {
+            "text": true
+          },
+          "filterState": true
+        },
+        "drill": {
+          "type": {
+            "text": true
+          },
+          "filterState": true
+        },
+        "camera": {
+          "type": {
+            "text": true
+          },
+          "filterState": true
+        }
+      }
+    },
+    "debug": {
+      "displayName": "Debug",
+      "properties": {
+        "meter": {
+          "type": {
+            "bool": true
+          }
+        },
+        "selfTest": {
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    }
+  },
+  "tooltips": {
+    "supportedTypes": {
+      "default": true,
+      "canvas": true
+    },
+    "roles": [
+      "Tooltips"
+    ]
+  },
+  "supportsHighlight": true,
+  "supportsKeyboardFocus": true,
+  "supportsMultiVisualSelection": true,
+  "supportsLandingPage": true,
+  "supportsEmptyDataView": true,
+  "suppressDefaultTitle": false,
+  "privileges": [],
+  "supportsSynchronizingFilterState": true
+}

@@ -20,18 +20,20 @@ SUITES = [("pbik", "tools/pbik/tests/test_pbik.py"), ("synth", "tools/pbik/tests
           ("layout", "tools/pbik/tests/test_layout_rules.py"),
           ("harvest", "tools/pbik/tests/test_harvestclean.py"),
           ("phase1", "tools/pbik/tests/test_phase1.py"), ("v17", "tools/pbik/tests/test_v17.py"),
+          ("v111", "tools/pbik/tests/test_v111.py"),
           ("walkthrough", "tools/pbik/tests/test_walkthrough.py"), ("udf", "tools/pbik/tests/test_udf.py"),
           ("patterns", "tools/patterns/test_patterns.py"),
           ("wireframe", "design/scripts/test_wireframe.py"), ("design", "design/scripts/test_design.py"),
           ("kit", "tools/tests/test_kit.py")]
 ALL = [n for n, _ in SUITES]
-PBIK_CORE = ["pbik", "synth", "bind", "live", "layout", "phase1", "v17", "walkthrough", "udf"]
+PBIK_CORE = ["pbik", "synth", "bind", "live", "layout", "phase1", "v17", "v111", "walkthrough", "udf"]
 # a changed path (glob; the first match wins) -> the suites that test it
 RELATED = [("tools/run_tests.py", ALL),
            ("tools/pbik/tests/test_pbik.py", ["pbik"]), ("tools/pbik/tests/test_synth.py", ["synth"]),
            ("tools/pbik/tests/test_bind.py", ["bind"]), ("tools/pbik/tests/bind_sample.py", ["bind", "layout"]),
            ("tools/pbik/tests/test_layout_rules.py", ["layout"]), ("tools/pbik/tests/test_phase1.py", ["phase1"]),
-           ("tools/pbik/tests/big_model.py", ["phase1", "v17"]), ("tools/pbik/tests/test_v17.py", ["v17"]),
+           ("tools/pbik/tests/big_model.py", ["phase1", "v17"]), ("tools/pbik/tests/test_v17.py", ["v17"]), ("tools/pbik/tests/test_v111.py", ["v111"]),
+           ("tools/pbik/pbikit/appvisual.py", ["v111", "pbik"]), ("tools/pbik/pbikit/apptools.py", ["v111"]),
            ("tools/pbik/tests/test_walkthrough.py", ["walkthrough"]),
            ("tools/pbik/tests/test_udf.py", ["udf"]), ("tools/pbik/pbikit/udf.py", ["udf", "bind", "pbik"]),
            ("design/udf/*", ["udf"]),

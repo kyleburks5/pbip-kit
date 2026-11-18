@@ -27,13 +27,13 @@
     },
     "advancedSlicerVisual": {
       "visualType": "advancedSlicerVisual",
-      "source": "P4-V22_button-slicer",
+      "source": "Desktop-made button slicer, clean harvest (2026-11-17)",
       "default": true,
       "sameAs": "advancedSlicerVisual.button-slicer"
     },
     "advancedSlicerVisual.button-slicer": {
       "visualType": "advancedSlicerVisual",
-      "source": "P4-V22_button-slicer"
+      "source": "Desktop-made button slicer, clean harvest (2026-11-17)"
     },
     "advancedSlicerVisual.button-slicer-single": {
       "visualType": "advancedSlicerVisual",

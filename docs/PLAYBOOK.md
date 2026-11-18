@@ -170,6 +170,8 @@ work stays in place but unused until the native option is confirmed everywhere.
 
 Where custom visuals are blocked, set `"customVisuals": false` in `design/specs/project.json`: `pbik build` then builds
 each Deneb visual's fallback.
+One route at a time: `routes` (`html`, `deneb`, `customVisual`) in the same file; a page that is exported or
+subscribed takes `exported: true` in layout.json and gets native or Deneb visuals only (docs/design/app-visuals.md).
 
 ## pbik
 

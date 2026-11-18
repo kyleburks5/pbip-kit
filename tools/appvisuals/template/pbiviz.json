@@ -1,0 +1,24 @@
+{
+  "visual": {
+    "name": "__NAME__",
+    "displayName": "__DISPLAY__",
+    "guid": "__GUID__",
+    "visualClassName": "Visual",
+    "version": "1.0.0.0",
+    "description": "Made with pbip-kit's app-visual template (docs/design/app-visuals.md).",
+    "supportUrl": "https://example.invalid/pbip-kit/support",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "5.11.0",
+  "author": {
+    "name": "pbip-kit",
+    "email": "pbip-kit@example.invalid"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": [],
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "stringResources": []
+}

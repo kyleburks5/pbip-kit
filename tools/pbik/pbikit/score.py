@@ -28,6 +28,10 @@ HEX = re.compile(r"#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b")
 DECOR = {"shape", "basicShape", "textbox", "image"}
 
 
+# patterns whose card shows a sentence from a text measure (docs/patterns/app-visuals): left-aligned, no number format
+TEXT_PATTERNS = {"live-headline", "context-strip"}
+
+
 def check_grid(layout):
     """Visual IDs out of line (gridsnap.issues: column edges, the 8 px baseline, row bottoms). A full-width band may
     span 0..1920; a rail (pattern rail-panel, study 2026-11-15) may touch one page edge, with its inner edge on the
@@ -49,7 +53,7 @@ def overlaps(layout):
                 bad.append(f"{a['id']}/{b['id']}")
     per_page = {}
     for v in vs:
-        if v.get("bindings"):
+        if v.get("bindings") and not _image_card(v):    # a card and its image card read as one tile (v1.11)
             per_page[v["page"]] = per_page.get(v["page"], 0) + 1
     crowded = [p for p, n in per_page.items() if n > BUDGET]
     return bad, crowded
@@ -153,7 +157,8 @@ def compute(report, layout, agent=None, validate_fn=None, approved=None):
     built = built_visuals(report)
     want = {v["id"]: v for v in layout.get("visuals", [])}
     missing = sorted(set(want) - set(built))
-    types = [i for i in want if i in built and built[i][0] != want[i].get("type") and want[i].get("type") != "deneb"]
+    types = [i for i in want if i in built and built[i][0] != want[i].get("type")
+             and want[i].get("type") not in ("deneb", "custom")]     # both resolve to a visual id at build (v1.11)
     res[4] = (not types and not missing, (f"not built: {', '.join(missing[:5])}" if missing else "")
               + (f" type differs: {', '.join(types[:5])}" if types else ""))
     fields = [i for i in want if i in built and want[i].get("bindings")
@@ -327,7 +332,7 @@ def polish_checks(report, layout):
     # 11 KPI cards read well
     bad = []
     for v in vis:
-        if v.get("type") != "cardVisual" or any(c.get("type") == "image" for c in v.get("cf", [])):
+        if v.get("type") != "cardVisual" or any(c.get("type") == "image" for c in v.get("cf", []))                 or v.get("pattern") in TEXT_PATTERNS:   # a sentence, not a number (v1.11 app-visual patterns)
             continue
         data = (v.get("bindings") or {}).get("Data") or []
         align = _prop(v, "value.horizontalAlignment") or _style(theme, "cardVisual", "value", "horizontalAlignment",
@@ -353,6 +358,8 @@ def polish_checks(report, layout):
     bad = []
     built = built_visuals(report)
     for v in vis:
+        if v.get("pattern") in TEXT_PATTERNS:
+            continue
         for role, xs in (v.get("bindings") or {}).items():
             for x in xs if isinstance(xs, list) else [xs]:
                 name = _name(x)
@@ -419,7 +426,9 @@ def polish_checks(report, layout):
 
     # 15 finished look: a header band behind the top row, the filter part of it
     bad = []
-    for page in layout.get("pages", {}):
+    for page, sp in (layout.get("pages") or {}).items():
+        if isinstance(sp, dict) and (sp.get("tooltip") or sp.get("drillthrough") and sp.get("hidden")):
+            continue                                   # a tooltip (or hidden drill-through) page has no header
         pv = [v for v in vis if v.get("page") == page]
         band = next((v for v in pv if v.get("type") in ("shape", "basicShape") and v.get("y", 99) <= 0
                      and v.get("w", 0) >= 1800), None)

@@ -44,6 +44,7 @@ Common WARN fallbacks:
 | npm registry blocked | DAX Lib from the vendored copy (`design\udf\vendor\`, below) |
 | No Desktop Bridge | Reload and screenshot by hand (the build gives you the steps) |
 | Custom visuals blocked | Set `"customVisuals": false` in `design\specs\project.json`: every Deneb visual is built as its fallback |
+| One kind of visual blocked | `routes` in `design\specs\project.json`: `html`, `deneb` or `customVisual` (the kit's own animated visuals) set to false builds those visuals' fallbacks; at work all three stay on (private visuals and Node are allowed there) |
 | Git user not set | `git config --global user.name "<name>"` and `git config --global user.email "<work email>"` |
 
 ## 3. Set up VS Code

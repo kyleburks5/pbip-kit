@@ -1,0 +1,10 @@
+{
+  "name": "__NAME__",
+  "private": true,
+  "version": "1.0.0",
+  "description": "pbip-kit app visual. Packages come from the kit tools folder (pbik visual build links them).",
+  "license": "MIT",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -84,6 +84,8 @@ def _main(argv=None):
     b.add_argument("layout")
     b.add_argument("--prune", action="store_true", help="remove ID'd visuals that are no longer in layout.json")
     b.add_argument("--reset", action="store_true", help="rebuild every visual from its template")
+    b.add_argument("--reset-ids", help="comma list of visual IDs to rebuild from their template (the rest keep what "
+                                      "Desktop saved)")
     b.add_argument("--map", help="ID map file (default: visual-map.json next to layout.json)")
     b.add_argument("--tokens", help="tokens.json (default: design/tokens.json)")
     b.add_argument("--templates", help="templates folder (default: design/templates)")
@@ -461,6 +463,49 @@ def _main(argv=None):
     udk.add_argument("--model", help="a TMDL folder: its compatibility level")
     udk.add_argument("--root", default=".")
 
+    vi = sub.add_parser("visual", help="kit custom visuals and Deneb charts (docs/design/app-visuals.md)")
+    vis = vi.add_subparsers(dest="sub", required=True)
+    vn = vis.add_parser("new", help="a custom visual from the app-visual template, or --deneb a Deneb chart")
+    vn.add_argument("name")
+    vn.add_argument("--deneb", action="store_true")
+    vn.add_argument("--display")
+    vb = vis.add_parser("build", help="lint, package and check (custom); check the spec (Deneb)")
+    vb.add_argument("name")
+    vt = vis.add_parser("test", help="the offline harness: screenshots, frames and checks")
+    vt.add_argument("name")
+    vt.add_argument("--scenario")
+    vt.add_argument("--out")
+    vt.add_argument("--record", action="store_true", help="also record a video of the run")
+    vt.add_argument("--update-golden", action="store_true", help="accept the screenshots as the new golden look")
+    vt.add_argument("--all", action="store_true", help="every scenario in the visual's test folder")
+    vh = vis.add_parser("handoff", help="the IT review pack: checks, licences, screenshots, the package")
+    vh.add_argument("name")
+    va = vis.add_parser("add", help="register in the report and (with --layout) add the layout entry")
+    va.add_argument("name")
+    va.add_argument("--report", required=True)
+    va.add_argument("--layout")
+    va.add_argument("--id")
+    va.add_argument("--page")
+    va.add_argument("--box", help="x,y,w,h")
+    va.add_argument("--bind", action="append", default=[], help="Role=Table[Field] (repeat)")
+    va.add_argument("--title")
+    vf = vis.add_parser("refresh", help="the visual's kit runtime (src/kit) from the template")
+    vf.add_argument("name")
+    vl = vis.add_parser("list", help="the project's app visuals and where they are used")
+    vl.add_argument("--report")
+    vr = vis.add_parser("remove", help="unregister a custom visual no page uses")
+    vr.add_argument("name")
+    vr.add_argument("--report", required=True)
+    tl = sub.add_parser("tools", help="the app-visual toolchain outside the repo (docs/design/app-visuals.md)")
+    tls = tl.add_subparsers(dest="sub", required=True)
+    tlc = tls.add_parser("check", help="each item: installed / missing / wrong version, and the fix")
+    tlc.add_argument("--json", action="store_true")
+    tli = tls.add_parser("install", help="install the pinned items (no admin rights)")
+    tli.add_argument("--only", help="comma list: node,npm,sources,deneb,playwright")
+    tli.add_argument("--record", action="store_true", help="(the maintainer) record new checksums and the lockfile")
+    tlr = tls.add_parser("run", help="run a kit tool (node, npm, pbiviz, eslint, tsc, playwright) with the kit's Node")
+    tlr.add_argument("tool")
+    tlr.add_argument("args", nargs=argparse.REMAINDER)
     dk = sub.add_parser("desktop", help="Power BI Desktop through .claude/scripts/pbi-bridge.ps1")
     dk.add_argument("--bridge", help="path to pbi-bridge.ps1 (default: found above the current folder)")
     ds = dk.add_subparsers(dest="sub", required=True)
@@ -496,6 +541,7 @@ def _main(argv=None):
     elif c == "build":
         from .build import build
         build(args.report, args.layout, prune=args.prune, reset=args.reset, map_path=args.map,
+              reset_ids={x.strip() for x in (args.reset_ids or '').split(',') if x.strip()},
               tokens_path=args.tokens, templates=args.templates, no_custom_visuals=args.no_custom_visuals,
               project=args.project, strict=args.strict)
         from . import desktop as D_
@@ -505,6 +551,38 @@ def _main(argv=None):
         ST_.mark(".", "theme", "build")                 # the theme is applied with every build (v1.7 live fix 6)
     elif c == "udf":
         return udf_cmd(args)
+    elif c == "visual":
+        from . import appvisual as AV
+        try:
+            if args.sub == "new":
+                AV.new(args.name, args.deneb, args.display)
+            elif args.sub == "build":
+                AV.build(args.name)
+            elif args.sub == "test":
+                if args.all:
+                    return 1 if AV.test_all(args.name, update_golden=args.update_golden) else 0
+                return AV.test(args.name, args.scenario, args.out, args.record, update_golden=args.update_golden)
+            elif args.sub == "handoff":
+                AV.handoff(args.name)
+            elif args.sub == "add":
+                return AV.add(args.name, args.report, args.layout, args.id, args.page, args.box, args.bind, args.title)
+            elif args.sub == "list":
+                return AV.listing(args.report)
+            elif args.sub == "refresh":
+                AV.refresh(args.name)
+            else:
+                return AV.remove(args.name, args.report)
+        except AV.VisualError as e:
+            print(f"pbik: {e}")
+            return 1
+    elif c == "tools":
+        from . import apptools as AT
+        if args.sub == "check":
+            return AT.check(args.json)
+        if args.sub == "install":
+            return AT.install([x.strip() for x in args.only.split(",")] if args.only else None, args.record)
+        code, out = AT.run(args.tool, *args.args, cwd=".", capture=False)
+        return code
     elif c == "measure":
         from . import extensions as X
         if args.op == "add":

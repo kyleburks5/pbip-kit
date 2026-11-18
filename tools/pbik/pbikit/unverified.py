@@ -67,7 +67,7 @@ def scan(rep):
 
 
 def check(fd, rep):
-    for key, wheres in sorted(scan(rep).items(), key=lambda kv: FEATURES[kv[0]][0]):
+    for key, wheres in sorted(scan(rep).items(), key=lambda kv: (str(FEATURES[kv[0]][0]).zfill(8), kv[0])):   # gaps are numbers or 'v1.11'
         fd.warn("unverified", f"{message(key)}; in {len(wheres)} file(s): {', '.join(wheres[:5])}"
                               f"{' ...' if len(wheres) > 5 else ''}")
 
@@ -199,6 +199,18 @@ def _new_filters(kind, doc):
 feature("filters", 4, "range filters (`type: Range`, written as Advanced with two comparisons)", _new_filters)
 feature("annotations", 13, "annotations on report.json, pages and visuals (layout `annotate`, `annotations`)",
         _pbik_annotations)
+
+
+def _deneb_interactivity(kind, doc):
+    if kind != "visual" or doc.get("visual", {}).get("visualType") != "deneb7E15AEF80B9E4D4F8E12924291ECE89A":
+        return False
+    props = ((doc["visual"].get("objects") or {}).get("vega") or [{}])[0].get("properties", {})
+    return any(k in props for k in ("enableSelection", "selectionMode", "selectionMaxDataPoints", "enableTooltips",
+                                    "enableContextMenu", "enableHighlight"))
+
+
+feature("deneb-interactivity", "v1.11", "Deneb cross-filter, tooltip, context-menu and highlight switches (layout "
+        "`deneb.interactivity`), from Deneb 2.0.1.0's capabilities and deneb.guide", _deneb_interactivity)
 
 
 # ---------------------------------------------------------------- confirmed in Desktop, no longer listed

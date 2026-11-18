@@ -70,7 +70,8 @@ SLICER_MODES = {"list": "list", "basic": "list", "dropdown": "dropdown", "betwee
                 "after": "between"}
 HTML_CONTENT_RE = re.compile(r"htmlContent[0-9A-Fa-f]{32}")       # the HTML Content visual, any version GUID
 METHOD_TAG = {"svg-measure": "SVG in {}", "svg": "SVG in {}", "html-measure": "HTML Content in {}",
-              "html": "HTML Content in {}", "custom-visual": "Custom visual", "deneb": "Deneb"}
+              "html": "HTML Content in {}", "custom-visual": "Custom visual", "deneb": "Deneb",
+              "kit-visual": "{}"}
 
 
 def load(f):
@@ -479,6 +480,9 @@ def spec_for(R, v, layout, member_of):
                                     R.theme_style("slicer", "data").get("mode") or "list").lower(), "list")
         base = {"list": "Slicer (list)", "dropdown": "Slicer (dropdown)", "between": "Slicer (between)"}[mode]
         s["mode"] = mode
+    if v.get("type") == "custom":               # a kit custom visual (v1.11): animated / app-like, IT approval at work
+        base = "Kit visual"
+        method = "kit-visual"
     s["tag"] = base if s.get("render") == "htmlContent" else (METHOD_TAG[method].format(base) if method in METHOD_TAG
                                                              else base)
     s["method"] = "html" if s.get("render") == "htmlContent" else method

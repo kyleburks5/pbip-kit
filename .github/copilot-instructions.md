@@ -185,8 +185,24 @@ pbik rules (tools/pbik/README.md has every command) and the Desktop and PBIR fac
   no `howCreated` and no condition (name, field, type), not `howCreated: Auto` (smoke save, 2026-11-10).
 - Deneb (Patterns page save, 2026-10-24): `visualType` deneb7E15AEF80B9E4D4F8E12924291ECE89A, fields on the
   `dataset` role, the spec as one string in `vega.jsonSpec`, `stateManagement` beside it, and report.json
-  `publicCustomVisuals` listing the visual. The saved file has no Deneb version, provider or config: the version shows
-  only in Desktop (the visual's About). pbik writes Vega-Lite specs only.
+  `publicCustomVisuals` listing the visual. Deneb 2.0.1.0 (scratch save, 2026-11-16) also saves `developer.version`
+  ('2.0.1.0') and `vega.version` (the Vega-Lite version, '6.4.3'); still no provider or config. pbik writes Vega-Lite
+  specs only. Cross-filtering is off until `vega.enableSelection` is true (Deneb's editor: Project setup >
+  Cross-filtering, not the Format pane), with `selectionMode` simple and `selectionMaxDataPoints` (default 50, max
+  250); in simple mode Deneb handles the clicks and the spec styles rows by the `__selected__` field (on/off/neutral).
+- A private .pbiviz (scratch save, 2026-11-16): the package unzipped into `<Report>/CustomVisuals/<guid>/`
+  (`package.json` and `resources/<guid>.pbiviz.json`, same content, re-indented with CRLF) and a report.json
+  `resourcePackages` entry `{name: <guid>, type: CustomVisual, items: [{name/path: <guid>.pbiviz.json, type:
+  CustomVisualMetadata}]}`; the visual.json `visualType` is the guid and its roles are the visual's own.
+- Kit custom visuals in Desktop (v1.11 reviews, 2026-11-17): a visual's own filter (`applyJsonFilter`) doesn't
+  filter the visual itself but makes Desktop re-query and redraw the rest of the page on the thread the visual
+  animates on, and it also filters the page's slicers (pbik build writes NoFilter from kit visuals to slicers);
+  Desktop sends an empty update (no data view) while it loads, before the rows; selections alone left cards and
+  tables unchanged, real filters work. The new card scales an image to the tile's width, not to fit inside it.
+- Button slicers (2026-11-17): a slicer whose formatting held text where Desktop saves a number (an unresolved token
+  name, `'control.tileRadius'`) took no clicks, and a template's leftover `syncGroup` tied slicers on different
+  fields together; the button-slicer template is now a clean harvest of one made in Desktop (no formatting), pbik
+  build resolves or rejects token names, and validate flags both.
 
 ---
 

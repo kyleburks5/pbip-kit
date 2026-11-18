@@ -54,6 +54,7 @@ class Relationship:
     def __init__(self, name, file, line):
         self.name, self.file, self.line = name, file, line
         self.from_column = self.to_column = None    # (table, column)
+        self.both_ways, self.active = False, True    # crossFilteringBehavior bothDirections, isActive
 
 
 class Model:
@@ -235,6 +236,56 @@ def _parse(model, f):
                 obj.from_column = split_ref(val)
             elif key == "toColumn":
                 obj.to_column = split_ref(val)
+            elif key == "crossFilteringBehavior":
+                obj.both_ways = val.strip() == "bothDirections"
+            elif key == "isActive":
+                obj.active = val.strip().lower() != "false"
+
+
+def filter_reach(model, table):
+    """Tables a filter on `table` reaches through active relationships: from the one side (toColumn) to the many
+    side (fromColumn), and back too when the relationship filters both ways."""
+    seen, todo = {table.casefold()}, [table.casefold()]
+    while todo:
+        t = todo.pop()
+        for r in model.relationships:
+            if not r.active or not r.from_column or not r.to_column:
+                continue
+            f, o = r.from_column[0].casefold(), r.to_column[0].casefold()
+            for a, b, ok in ((o, f, True), (f, o, r.both_ways)):
+                if ok and a == t and b not in seen:
+                    seen.add(b); todo.append(b)
+    return seen
+
+
+def measure_tables(model, table, name, _seen=None):
+    """Model tables a measure reads (its columns' tables and, through the measures it calls, theirs)."""
+    _seen = _seen if _seen is not None else set()
+    if (table, name) in _seen:
+        return set()
+    _seen.add((table, name))
+    t = model.tables.get(table)
+    m = t.measures.get(name) if t else None
+    if m is None:
+        return set()
+    out = set()
+    refs, _, _ = references(m.expression)
+    for tb, nm in refs:
+        if tb and tb in model.tables:
+            if nm in model.tables[tb].columns:
+                out.add(model.tables[tb].name.casefold())
+            elif nm in model.tables[tb].measures:
+                out |= measure_tables(model, model.tables[tb].name, nm, _seen)
+        elif tb is None:
+            for home in model.measure_home(nm):
+                out |= measure_tables(model, home, nm, _seen)
+        elif tb:
+            out.add(tb.casefold())     # a table used as a whole (COUNTROWS ( Deals ))
+    for w in re.findall(r"(?:COUNTROWS|FILTER|ALL|VALUES|RELATEDTABLE|SUMX|AVERAGEX|COUNTX|MAXX|MINX)\s*\(\s*'?([\w ]+?)'?\s*[,)]",
+                        strip_dax(m.expression or "")[0], flags=re.I):
+        if w in model.tables:
+            out.add(model.tables[w].name.casefold())
+    return out
 
 
 # ---------------------------------------------------------------- DAX references

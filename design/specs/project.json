@@ -1,4 +1,9 @@
 {
   "targetDesktop": "latest",
-  "catalog": "home"
+  "catalog": "home",
+  "routes": {
+    "html": true,
+    "deneb": true,
+    "customVisual": true
+  }
 }

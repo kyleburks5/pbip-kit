@@ -48,6 +48,18 @@ JSON (docs/design/phase1-usability.md).
 start (what the report is for, and what you have), the model, the page purpose, the plan picture, the colours, the
 build, the checks, the polish, the result, switching to the live model, the wrap-up.
 
+## App-like visuals (v1.11)
+
+| Thing | Say |
+| --- | --- |
+| kit custom visual | "an animated visual the kit builds for this report (it needs your IT team's OK at work)" |
+| route | "how a visual is made": built-in, built-in with formatting, a picture made from a measure, Deneb, or an animated kit visual |
+| route switched off | "Your organisation blocks animated visuals, so I built the plain version of that one" |
+| exported page | "a page that goes out as PDF or PowerPoint or by subscription: I keep it to built-in and Deneb visuals, which export" |
+| click filter | "Clicking in the visual filters the whole page; the Clear button in its corner undoes it" |
+| frame meter | "a hidden speed check I can turn on to measure smoothness; it's off in what you share" |
+| harness | "my offline test of the visual, before it reaches Power BI" |
+
 ## Polish score
 
 "Polish 6/10 (15 of 15 checks applied; 9 passed; target 7 before showing colleagues). Not yet: KPI cards read well,

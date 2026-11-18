@@ -63,7 +63,9 @@ def issues(layout):
     """[{id, what, at, want, off, text}] for every visual out of line. `want` is where the snap would put it."""
     width, lefts, rights = grid_of(layout)
     out = []
-    vis = [v for v in (layout or {}).get("visuals", []) if v.get("type") != "group"
+    small = {k for k, sp in ((layout or {}).get("pages") or {}).items()     # tooltip pages and other small pages
+             if isinstance(sp, dict) and (sp.get("tooltip") or (sp.get("width") or width) < width)}   # have no grid
+    vis = [v for v in (layout or {}).get("visuals", []) if v.get("type") != "group" and v.get("page") not in small
            and all(isinstance(v.get(k), (int, float)) and not isinstance(v.get(k), bool) for k in ("x", "y", "w", "h"))]
     shapes = [v for v in vis if v.get("type") in ("shape", "basicShape") and v.get("pattern") != "rail-panel"
               and (v["x"] == 0 or min(abs(v["x"] - e) for e in lefts) <= 1)

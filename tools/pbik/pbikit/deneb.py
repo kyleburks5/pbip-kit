@@ -46,6 +46,27 @@ class DenebError(Exception):
     pass
 
 
+# layout `deneb.interactivity` -> Deneb's own `vega` properties (Deneb 2.0.1.0 capabilities.json; deneb.guide,
+# "interactivity-selection"). Cross-filter in simple mode: Deneb handles the clicks and gives each row `__selected__`.
+INTERACTIVITY = {"crossFilter": "enableSelection", "tooltips": "enableTooltips", "contextMenu": "enableContextMenu",
+                 "highlight": "enableHighlight", "maxSelections": "selectionMaxDataPoints",
+                 "selectionMode": "selectionMode"}
+
+
+def interactivity_props(deneb):
+    """[(vega property, value)] from layout `deneb.interactivity` (crossFilter adds selectionMode 'simple')."""
+    ia = (deneb or {}).get("interactivity") if isinstance(deneb, dict) else None
+    if not isinstance(ia, dict):
+        return []
+    out = [(INTERACTIVITY[k], v) for k, v in ia.items() if k in INTERACTIVITY]
+    if ia.get("crossFilter") and "selectionMode" not in ia:
+        out.append(("selectionMode", "simple"))
+    m = ia.get("maxSelections")
+    if m is not None and not (isinstance(m, int) and 1 <= m <= 250):
+        raise DenebError("deneb.interactivity.maxSelections must be a whole number from 1 to 250 (Deneb's limit)")
+    return out
+
+
 def is_deneb(v):
     return v.get("type") in ("deneb", TYPE)
 
@@ -150,6 +171,11 @@ def resolve(visuals, no_custom, root):
             errors.append(f"{v['id']}: {e}")
             continue
         errors.extend(f"{v['id']}: Deneb spec: {e}" for e in spec_issues(spec)[0])
+        try:
+            interactivity_props(v.get("deneb"))
+        except DenebError as e:
+            errors.append(f"{v['id']}: {e}")
+            continue
         own = title_issue(v)
         if own:
             errors.append(f"{v['id']}: {own}")

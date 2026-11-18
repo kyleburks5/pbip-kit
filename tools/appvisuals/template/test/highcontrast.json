@@ -1,0 +1,104 @@
+{
+ "_note": "High contrast: the host's foreground/background only, strokes for selection.",
+ "viewport": {
+  "width": 900,
+  "height": 560
+ },
+ "highContrast": true,
+ "data": {
+  "generate": {
+   "n": 240,
+   "seed": 7,
+   "fields": {
+    "Deal": {
+     "id": "D-"
+    },
+    "Region": {
+     "pick": [
+      "North",
+      "South",
+      "East",
+      "West"
+     ],
+     "weights": [
+      4,
+      3,
+      2,
+      2
+     ]
+    },
+    "Stage": {
+     "pick": [
+      "Lead",
+      "Qualified",
+      "Proposal",
+      "Negotiation",
+      "Won"
+     ],
+     "weights": [
+      5,
+      4,
+      3,
+      2,
+      2
+     ]
+    },
+    "Value": {
+     "normal": [
+      42,
+      14
+     ]
+    },
+    "Days": {
+     "uniform": [
+      2,
+      120
+     ]
+    }
+   }
+  },
+  "roles": {
+   "Item": "Deal",
+   "Group": "Region",
+   "Stage": "Stage",
+   "X": "Days",
+   "Y": "Value"
+  },
+  "measures": [
+   "X",
+   "Y"
+  ],
+  "formats": {
+   "Value": "#,0.0",
+   "Days": "0"
+  }
+ },
+ "steps": [
+  {
+   "shot": "hc-grid"
+  },
+  {
+   "clickMark": 5
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "hc-selected"
+  },
+  {
+   "pill": "Scatter"
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "hc-scatter"
+  },
+  {
+   "expect": {
+    "noRenderFailures": true
+   }
+  }
+ ]
+}

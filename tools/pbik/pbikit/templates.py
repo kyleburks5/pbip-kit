@@ -21,6 +21,7 @@ def strip(d):
     for k in DROP_TOP:
         t.pop(k, None)
     vis = t.get("visual", {})
+    vis.pop("syncGroup", None)                  # a sync group belongs to its report, not to every slicer made from it
     q = vis.pop("query", None)
     if q == {"queryState": {}}:                 # no fields: keep Desktop's empty query (pbik build follows it)
         vis["query"] = q

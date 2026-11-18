@@ -22,6 +22,7 @@ enforces everything below.
 | B-13 | Roundtrip after every hand polish, then update layout.json | [build.md](build.md) | – |
 | B-14 | Image cards get no saved sort | [build.md](build.md) | yes |
 | B-15 | Build snaps to the grid and writes missing alt text; N/A never covers a "no" | [build.md](build.md) | yes |
+| B-16 | Kit visuals send their click filter after the move lands | [build.md](build.md) | yes |
 | C-01 | Shapes need their fill set explicitly | [cards.md](cards.md) | – |
 | C-02 | A text card on a coloured background turns every layer off | [cards.md](cards.md) | – |
 | C-03 | Rounded new cards need tileShape rectangleRoundedByPixel | [cards.md](cards.md) | yes |
@@ -34,10 +35,12 @@ enforces everything below.
 | C-10 | The KPI card is its own container, or sits on a shared panel | [cards.md](cards.md) | yes |
 | C-11 | Background shapes keep their layer order | [cards.md](cards.md) | yes |
 | C-12 | An SVG image card can take a Text visual calculation | [cards.md](cards.md) | yes |
+| C-13 | Size an SVG card image to its tile | [cards.md](cards.md) | yes |
 | S-01 | Short button slicers need Custom padding | [slicers.md](slicers.md) | yes |
 | S-02 | Button slicers need a grid sized for their items | [slicers.md](slicers.md) | yes |
 | S-03 | Dropdown slicers with a header need 76px | [slicers.md](slicers.md) | yes |
 | S-04 | Page navigator states come from the `navigator` key | [slicers.md](slicers.md) | yes |
+| S-05 | Button slicers carry only resolved values, never a template's sync group | [slicers.md](slicers.md) | yes |
 | CH-01 | Category labels above bars use a zero spacer series | [charts.md](charts.md) | – |
 | CH-02 | Colour each series by its metadata selector | [charts.md](charts.md) | yes |
 | CH-03 | An empty-chart icon means too little room | [charts.md](charts.md) | – |
@@ -58,6 +61,7 @@ enforces everything below.
 | D-09 | Conditional counts return 0, not blank | [dax.md](dax.md) | – |
 | D-10 | Pass a measure to a UDF as an expression when it is worked out per month | [dax.md](dax.md) | – |
 | D-11 | Test a function with a metric and a period that have data | [dax.md](dax.md) | – |
+| D-12 | Headline measures work in the current filters and are never blank | [dax.md](dax.md) | yes |
 | A-01 | Every visual has alt text | [accessibility.md](accessibility.md) | yes |
 | A-02 | Text meets WCAG 2.1 AA contrast in every state | [accessibility.md](accessibility.md) | yes |
 | A-03 | No text below 10pt | [accessibility.md](accessibility.md) | yes |

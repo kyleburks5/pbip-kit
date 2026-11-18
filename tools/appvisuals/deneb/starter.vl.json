@@ -1,0 +1,66 @@
+{
+  "data": {
+    "name": "dataset"
+  },
+  "encoding": {
+    "y": {
+      "field": "Category",
+      "type": "nominal",
+      "sort": {
+        "field": "Value",
+        "op": "sum",
+        "order": "descending"
+      },
+      "title": null
+    },
+    "x": {
+      "field": "Value",
+      "type": "quantitative",
+      "title": null,
+      "axis": {
+        "grid": false,
+        "labels": false,
+        "ticks": false,
+        "domain": false
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 4,
+        "tooltip": true,
+        "color": {
+          "expr": "pbiColor(0)"
+        }
+      },
+      "encoding": {
+        "opacity": {
+          "condition": {
+            "test": "datum.__selected__ == 'off'",
+            "value": 0.3
+          },
+          "value": 1
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 4,
+        "color": {
+          "expr": "pbiColor(0, -0.5)"
+        }
+      },
+      "encoding": {
+        "text": {
+          "field": "Value",
+          "type": "quantitative",
+          "format": ",.0f"
+        }
+      }
+    }
+  ]
+}

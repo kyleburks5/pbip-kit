@@ -117,15 +117,27 @@ def projects(kit):
     return sorted(out, key=lambda x: x[2].get("updated", ""), reverse=True)
 
 
+def _tools_line():
+    """The app-visual tools (pbik tools), only when something is missing: a fast look, no tool is run (v1.11)."""
+    try:
+        from . import apptools
+        return apptools.summary_line()
+    except Exception:                                    # status must never fail on the optional toolchain
+        return None
+
+
 def show(root, out=print):
     """In a project: its line. In the master kit: how to start a project (copy the folder). In a fresh copy of the kit:
     that it becomes the project now (one folder = one project). Older kits with a projects folder: each one's line."""
     from . import projectsetup as PS
     root = pathlib.Path(root).resolve()
     k = PS.kind(root)
+    tools = _tools_line()
     if k == "master":
         out("This is the master kit. For a report, copy this whole folder to a new folder (or clone it), open that "
             "folder, and ask me there: that folder becomes the project.")
+        if tools:
+            out(tools)
         return
     if k == "fresh copy":
         out(f"This folder is a fresh copy of the kit: I'll make it your project {root.name} now, with a Model folder "
@@ -134,6 +146,8 @@ def show(root, out=print):
         return
     if status_file(root).exists() or not (root / "projects").is_dir():
         out(line(root))
+        if tools:
+            out(tools)
         return
     ps = projects(root)
     if not ps:

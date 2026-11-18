@@ -24,6 +24,13 @@ number), then picks patterns from here and names them on each visual in layout.j
 | [Shared panel](panel.md) (`panel`) | Which numbers and charts belong together? | One shape; the visuals on it have no background of their own | 1 native (`shape.panel`: clean harvest, confirm in Desktop) |
 | [Rail + panel layout](rail-panel.md) (`rail-panel`, a layout style) | Which member am I looking at, and what is its whole story? | Rail shape at the page edge with pickers; one panel; tabs | 1 native (preset `rail-panel`, optional) |
 
+## App-visual patterns (v1.11)
+
+Moves that make a page feel like an app (morph between layouts, unit charts, drill zoom, view pills, range select,
+live headline, focus and dim) and the page polish around them (KPI cards with mini bars, forecast bullets, context
+strip, pills and badges) are in [app-visuals/](app-visuals/README.md), with the route pbik picks for each and the
+[how to describe a visual](app-visuals/describe-a-visual.md) guide.
+
 ## Styles: choosing the layout and preset
 
 /plan picks one style per page by its **Use when** / **Avoid when** lines in design/themes/presets/README.md

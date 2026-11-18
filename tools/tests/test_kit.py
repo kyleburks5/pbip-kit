@@ -109,7 +109,7 @@ class FastTestModeTests(unittest.TestCase):
         self.assertEqual(RT.related(["tools/pbik/pbikit/bind.py"]), ["bind", "live"])
         self.assertEqual(RT.related(["docs/lessons/cards.md"]), ["kit"])
         self.assertEqual(RT.related(["tools/pbik/pbikit/build.py"]),
-                         ["pbik", "synth", "bind", "live", "layout", "phase1", "v17", "walkthrough", "udf", "patterns", "wireframe", "design"])
+                         ["pbik", "synth", "bind", "live", "layout", "phase1", "v17", "v111", "walkthrough", "udf", "patterns", "wireframe", "design"])
         self.assertEqual(RT.related(["design/scripts/gen_wireframe_hf.py", "tools/patterns/build_patterns.py"]),
                          ["layout", "patterns", "wireframe", "design"])
         self.assertEqual(RT.related(["tools/run_tests.py"]), RT.ALL)
@@ -492,7 +492,7 @@ class VersionsTests(unittest.TestCase):
             self.skipTest("a project copy: project setup writes the data class into project.json")
         from pbikit import versions as V
         d = json.loads((KIT / "design" / "specs" / "project.json").read_text(encoding="utf-8"))
-        self.assertEqual(set(d) - {"targetDesktop", "catalog", "desktop", "customVisuals"}, set())
+        self.assertEqual(set(d) - {"targetDesktop", "catalog", "desktop", "customVisuals", "routes"}, set())
         V.Target(d["targetDesktop"])            # resolves (raises on a bad target)
         from pbikit import catalog as CAT
         self.assertEqual(d.get("catalog"), "home")

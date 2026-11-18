@@ -5,7 +5,8 @@
 
 Looks for personal paths (C:\\Users\\<name>, /Users/<name>, /home/<name>), user names, email addresses, secrets
 (keys, tokens, passwords, connection secrets), report project files (projects/, each its own repository), real
-data files (csv, xlsx, xls, pbix, abf, parquet, cache) and smoke,
+data files (csv, xlsx, xls, pbix, abf, parquet, cache), tool files (node_modules, .pbiviz builds, downloads,
+certificates, caches: v1.11) and smoke,
 scratch or sample folders. A path or folder that belongs in the kit (a made-up test sample, an address meant to be
 public) is listed in tools/export_allow.txt with its reason. Prints a pass/fail table; exit 1 on any finding.
 """
@@ -27,7 +28,11 @@ SECRETS = [("AWS key", r"AKIA[0-9A-Z]{16}"), ("GitHub token", r"gh[pousr]_[A-Za-
            ("password", r"(?i)\b(password|passwd|pwd)\s*[=:]\s*['\"][^'\"\s]{4,}['\"]"),
            ("connection secret", r"(?i)(AccountKey|SharedAccessKey|client_secret|SharedAccessSignature)\s*=\s*[^;\s\"']{8,}")]
 CHECKS = ["personal paths", "user names", "emails", "secrets", "data files", "smoke/sample/scratch folders",
-          "report projects"]
+          "report projects", "tool files"]
+# v1.11 app visuals: installed tools, npm packages, downloads, visual builds and caches live in the kit tools folder
+# outside the repo (pbik tools); only the pins in tools/appvisuals/ (package.json, package-lock.json, lock.json) ship.
+TOOL_FILES = re.compile(r"(^|/)(node_modules|\.pbik-tools|ms-playwright|\.tmp|dist|webpack\.statistics[^/]*|"
+                        r"\.npm|\.cache|downloads)(/|$)|\.(pbiviz|tgz|pfx|cer)$|(^|/)node-v[0-9.]+-win-x64", re.I)
 PROJECTS = re.compile(r"^(projects|Model|Reference)/", re.I)   # project files and drop folders: never in the kit
 
 
@@ -88,6 +93,8 @@ def scan_path(path, allow, found):
     folder = p.rsplit("/", 1)[0] + "/" if "/" in p else ""     # folder names only, not file names (smoke.md)
     if FOLDERS.search(folder) and not allowed(allow, "smoke/sample/scratch folders", p):
         found["smoke/sample/scratch folders"].append(p)
+    if TOOL_FILES.search(p) and not allowed(allow, "tool files", p):
+        found["tool files"].append(p)
     if PROJECTS.search(p):                              # no allow-list entry can let a project file through
         found["report projects"].append(p)
 

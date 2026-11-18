@@ -1,0 +1,50 @@
+{
+  "_note": "The app-visual toolchain, pinned (docs/design/app-visuals.md). `pbik tools install` downloads each item into the kit tools folder (%USERPROFILE%\\.pbik-tools, or PBIK_TOOLS; not AppData: Store apps see a redirected copy of it), checks its sha256 against this file and refuses a mismatch. npm packages are pinned by package.json and package-lock.json beside this file. Nothing here is ever copied into the repo. To update an item: change it here, run `pbik tools install`, then /smoke.",
+  "node": {
+    "version": "26.13.1",
+    "lts": "Lithium",
+    "url": "https://nodejs.org/dist/v26.13.1/node-v26.13.1-win-x64.zip",
+    "sha256": "e2edda75bfb089654705cf65a13b58933bfd5f57148e8ebda916f58a2474f1f7",
+    "sha256From": "https://nodejs.org/dist/v26.13.1/SHASUMS256.txt",
+    "licence": "MIT (LICENSE in the zip)"
+  },
+  "deneb": {
+    "version": "2.0.1.0",
+    "url": "https://github.com/deneb-viz/deneb/releases/download/2.0.1.0/deneb.2.0.1.0.pbiviz",
+    "sha256": "1376e21ae9864247216ff9e67c67cf70015fcfdfe69da37dfb796b0e0749e500",
+    "licence": "MIT (LICENSE in deneb-viz/deneb, Copyright (c) Daniel Marsh-Patrick)",
+    "use": "offline reference copy only: reports use the certified AppSource Deneb (publicCustomVisuals)"
+  },
+  "sources": {
+    "dotplot": {
+      "repo": "microsoft/powerbi-visuals-dotplot",
+      "commit": "e56f0992c0b91ed4cade55bf96d33c890349a983",
+      "sha256": "b3203385cb5691d141e6c4582681d385674411669c9d6a81c94dfebc568805c6",
+      "licence": "MIT (LICENSE: Power BI Visualizations, Copyright (c) Microsoft Corporation)",
+      "use": "starter for unit/dot charts and the app-visual base (pbiviz 7, API 5.11, eslint 9)"
+    },
+    "forcegraph": {
+      "repo": "microsoft/PowerBI-visuals-ForceGraph",
+      "commit": "22ab9141acac836cd2363783be7aa445ce2e6945",
+      "sha256": "252c419a6de65c1edee546a6f4a6419205c9549de1329de35e4af0648d60d44e",
+      "licence": "MIT (LICENSE: Power BI Visualizations, Copyright (c) Microsoft Corporation)",
+      "use": "reference for d3-force physics and drag (later round: network/org visual)"
+    }
+  },
+  "playwright": {
+    "version": "1.63.0",
+    "chromium": "1243",
+    "browsersPath": "%LOCALAPPDATA%\\ms-playwright when it already has this Chromium, else <tools>\\ms-playwright",
+    "licence": "Apache-2.0",
+    "use": "reuses the Chromium build already in the browsers folder when it is the one this version needs"
+  },
+  "recordOnly": {},
+  "licenceNotes": {
+    "flubber": "MIT (0.4.2, unmaintained since 2018); deps earcut ISC, svgpath MIT, svg-path-properties ISC",
+    "d3-flextree": "WTFPL (permissive; some legal teams don't accept it)",
+    "elkjs": "not installed (removed 2026-11-17): flow and layered layouts are a possible later add; EPL-2.0 OR GPL-3.0-or-later (weak copyleft) needs IT or legal approval first. 0.12.1 was measured: 1.6 MB, no eval or new Function",
+    "three": "MIT",
+    "deck.gl": "not installed: three covers the 3D patterns; deck.gl adds its own WebGL engine (luma.gl) for geospatial layers",
+    "powerbi-models": "MIT (Microsoft): BasicFilter for filter mode"
+  }
+}

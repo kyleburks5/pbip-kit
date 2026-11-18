@@ -1,0 +1,107 @@
+{
+ "_note": "12,000 rows in 5,000-row segments: fetch more, then WebGL for the dots.",
+ "viewport": {
+  "width": 900,
+  "height": 560
+ },
+ "data": {
+  "generate": {
+   "n": 12000,
+   "seed": 7,
+   "fields": {
+    "Deal": {
+     "id": "D-"
+    },
+    "Region": {
+     "pick": [
+      "North",
+      "South",
+      "East",
+      "West"
+     ],
+     "weights": [
+      4,
+      3,
+      2,
+      2
+     ]
+    },
+    "Stage": {
+     "pick": [
+      "Lead",
+      "Qualified",
+      "Proposal",
+      "Negotiation",
+      "Won"
+     ],
+     "weights": [
+      5,
+      4,
+      3,
+      2,
+      2
+     ]
+    },
+    "Value": {
+     "normal": [
+      42,
+      14
+     ]
+    },
+    "Days": {
+     "uniform": [
+      2,
+      120
+     ]
+    }
+   }
+  },
+  "roles": {
+   "Item": "Deal",
+   "Group": "Region",
+   "Stage": "Stage",
+   "X": "Days",
+   "Y": "Value"
+  },
+  "measures": [
+   "X",
+   "Y"
+  ],
+  "formats": {
+   "Value": "#,0.0",
+   "Days": "0"
+  },
+  "window": 5000
+ },
+ "steps": [
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "fetchMore": 1,
+    "marks": 12000,
+    "text": "12,000 items"
+   }
+  },
+  {
+   "shot": "many-grid"
+  },
+  {
+   "pill": "Scatter"
+  },
+  {
+   "frames": {
+    "name": "many-morph",
+    "every": 150,
+    "count": 4
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "many-scatter"
+  }
+ ]
+}

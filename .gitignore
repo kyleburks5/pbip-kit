@@ -19,3 +19,8 @@ projects/
 # a project's drop folders (made on first run): a copy of the model export, and the wireframe / screenshots / report
 Model/
 Reference/
+# v1.11 app visuals: the toolchain lives outside the repo (pbik tools); never commit installs, builds or packages
+node_modules/
+*.pbiviz
+.tmp/
+webpack.statistics*.html

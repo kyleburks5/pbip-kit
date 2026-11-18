@@ -1,0 +1,76 @@
+{
+ "_note": "Made-up categories for the Deneb starter (pbik visual test). Field names are the display names Deneb gives the dataset.",
+ "kind": "deneb",
+ "spec": "starter.vl.json",
+ "viewport": {
+  "width": 640,
+  "height": 360
+ },
+ "deneb": {
+  "crossFilter": true,
+  "tooltips": true
+ },
+ "data": {
+  "rows": [
+   {
+    "Category": "North",
+    "Value": 420
+   },
+   {
+    "Category": "South",
+    "Value": 310
+   },
+   {
+    "Category": "East",
+    "Value": 265
+   },
+   {
+    "Category": "West",
+    "Value": 198
+   },
+   {
+    "Category": "Central",
+    "Value": 140
+   }
+  ]
+ },
+ "steps": [
+  {
+   "shot": "deneb-start"
+  },
+  {
+   "label": "click a bar",
+   "clickSelector": "path[aria-roledescription='bar']",
+   "index": 1
+  },
+  {
+   "wait": 300
+  },
+  {
+   "expect": {
+    "selectCalls": 1
+   }
+  },
+  {
+   "shot": "deneb-selected"
+  },
+  {
+   "label": "ctrl-click a second bar",
+   "clickSelector": "path[aria-roledescription='bar']",
+   "index": 3,
+   "ctrl": true
+  },
+  {
+   "wait": 300
+  },
+  {
+   "expect": {
+    "selectCalls": 2,
+    "lastMulti": true
+   }
+  },
+  {
+   "shot": "deneb-two-selected"
+  }
+ ]
+}

@@ -87,6 +87,18 @@ def visual(report, vid):
     return json.loads(next(report.glob(f"definition/pages/*/visuals/{vid}_*/visual.json")).read_text(encoding="utf-8"))
 
 
+def styled_templates(case):
+    """The kit templates, with a styled button slicer (selected-state fill and text) in place of the kit's clean one
+    (since 2026-11-17 the kit's carries no formatting): the template-colour tests need a template that brings states."""
+    import tempfile as _t
+    d = pathlib.Path(_t.mkdtemp(prefix="pbik_tpl_"))
+    case.addCleanup(shutil.rmtree, d, True)
+    for f in (KIT / "design" / "templates").glob("*.json"):
+        shutil.copy2(f, d / f.name)
+    shutil.copy2(HERE / "sample" / "templates" / "advancedSlicerVisual.json", d / "advancedSlicerVisual.json")
+    return d
+
+
 class PbikTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -1173,9 +1185,7 @@ class PbikTests(unittest.TestCase):
         """Every selected state a template brings takes tokens colors.selected: the button slicer's teal (white text,
         4.0:1) and the navigator's white tile alike. The navigator's dark selected text fails on the new colour: a
         build warning. Layout props still win."""
-        kit_tpl = KIT / "design" / "templates"
-        if not (kit_tpl / "advancedSlicerVisual.json").exists():
-            self.fail("kit templates missing from design/templates (pbik templates harvest)")
+        kit_tpl = styled_templates(self)
         tokens = json.loads((SAMPLE_TOKENS).read_text(encoding="utf-8"))
         sel = tokens["colors"]["selected"].upper()
 
@@ -1245,9 +1255,7 @@ class PbikTests(unittest.TestCase):
         """The selected state's text: colors.onSelected if set, else white or the dark primary, whichever contrasts
         more; with a light and a dark colors.selected, and layout props on the text winning."""
         from pbikit import a11y
-        kit_tpl = KIT / "design" / "templates"
-        if not (kit_tpl / "advancedSlicerVisual.json").exists():
-            self.fail("kit templates missing from design/templates (pbik templates harvest)")
+        kit_tpl = styled_templates(self)
         dark, light, primary = "#037C84", "#E7F3F5", "#12343B"
         self.assertEqual(a11y.selected_text(dark, None, primary), "#FFFFFF")
         self.assertEqual(a11y.selected_text(light, None, primary), primary)

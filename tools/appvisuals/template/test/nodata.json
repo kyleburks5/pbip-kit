@@ -1,0 +1,22 @@
+{
+ "_note": "No fields yet: the landing state.",
+ "viewport": {
+  "width": 900,
+  "height": 560
+ },
+ "data": {
+  "rows": [],
+  "roles": {}
+ },
+ "steps": [
+  {
+   "shot": "no-data"
+  },
+  {
+   "expect": {
+    "text": "No data yet",
+    "noRenderFailures": true
+   }
+  }
+ ]
+}

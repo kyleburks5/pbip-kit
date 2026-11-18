@@ -216,6 +216,9 @@ def set_entries(ctx, vid, d, where, key, entries):
 
 
 # ---------------------------------------------------------------- value helpers
+TOKEN_PATH = re.compile(r"[a-z][A-Za-z]*\.[A-Za-z][A-Za-z0-9]*")
+
+
 def prop_value(ctx, prop, v):
     """Raw layout value -> PBIR property value."""
     if isinstance(v, dict):
@@ -242,6 +245,19 @@ def prop_value(ctx, prop, v):
         except BuildError:
             if v.startswith(("#", "theme:")):
                 raise
+    if isinstance(v, str) and TOKEN_PATH.fullmatch(v) and v.split(".")[0] in ctx.tokens:
+        # a token path ("control.radius"): its value, or stop. Writing the name as text put 'control.tileRadius' in a
+        # number property, and Desktop's button slicers then took no clicks (Desktop review 2026-11-17)
+        grp, name = v.split(".", 1)
+        val = ctx.tokens[grp].get(name) if isinstance(ctx.tokens[grp], dict) else None
+        if isinstance(val, bool) or val is None or isinstance(val, (dict, list)):
+            raise BuildError(f"{prop}: token {v!r} doesn't exist in tokens.json ({grp}: "
+                             f"{', '.join(k for k in ctx.tokens[grp] if not k.startswith('_'))})")
+        if isinstance(val, (int, float)):
+            return n(val)
+        if isinstance(val, str) and val.startswith("#"):
+            return solid(ctx.colour(val))
+        return s(val)
     if isinstance(v, str) and SIZE_PROPS.search(prop):        # a token name ("kpi") is a size, never text
         return n(ctx.number(v, "fontPt"))
     if isinstance(v, str) and LENGTH_PROPS.search(prop):
@@ -1727,6 +1743,9 @@ def apply_deneb(ctx, vid, v, d):
                       ("consolidateFieldParameters", b(False)), ("viewportHeight", n(round(v["h"]))),
                       ("viewportWidth", n(round(v["w"])))):
         set_prop(ctx, vid, d, "objects", "stateManagement", None, prop, val)
+    for prop, val in DN.interactivity_props(v.get("deneb")):
+        set_prop(ctx, vid, d, "objects", "vega", None, prop, b(val) if isinstance(val, bool) else
+                 (s(val) if isinstance(val, str) else n(val)))
 
 
 def register_custom_visual(rep, name):
@@ -1753,7 +1772,7 @@ def default_theme(design):
     return THEME_FILE if f.exists() else None
 
 
-def build(report_path, layout_path, prune=False, reset=False, map_path=None, tokens_path=None, templates=None,
+def build(report_path, layout_path, prune=False, reset=False, map_path=None, reset_ids=None, tokens_path=None, templates=None,
           quiet=False, no_custom_visuals=False, project=None, strict=False):
     layout_path = pathlib.Path(layout_path).resolve()
     from . import newreport as NR               # a new project: a clean, empty report folder (walkthrough fix 1)
@@ -1764,6 +1783,14 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
         no_custom_visuals = True                # custom visuals blocked on this laptop: build every fallback
         if not quiet:
             print("project.json customVisuals false: building each Deneb visual's fallback (as --no-custom-visuals)")
+    # v1.11 route switches (docs/design/app-visuals.md section 2): a tenant that blocks a route turns it off and pbik
+    # builds each visual's recorded fallback instead; customVisuals false still turns off Deneb and kit visuals both
+    routes = (load(pathlib.Path(project)).get("routes") or {}) if project and pathlib.Path(project).exists() else {}
+    no_deneb = no_custom_visuals or routes.get("deneb") is False
+    no_kit = no_custom_visuals or routes.get("customVisual") is False
+    if not quiet and not no_custom_visuals and (no_deneb or no_kit):
+        print("project.json routes: " + ", ".join(n for n, off in (("Deneb", no_deneb), ("kit visuals", no_kit)) if off)
+              + " off: building their fallbacks")
     layout = load(layout_path)
     design = layout_path.parent.parent
     from . import gridsnap as GS                # v1.10: every visual on the grid with equal gaps, before the score
@@ -1857,7 +1884,15 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
 
     pages_spec = layout.get("pages", {})
     visuals = [v for v in layout.get("visuals", []) if (v.get("build") or {}).get("method") != "page-background"]
-    visuals, dn_errors = DN.resolve(visuals, no_custom_visuals, design.parent)
+    visuals, dn_errors = DN.resolve(visuals, no_deneb, design.parent)
+    from . import appvisual as AV                  # v1.11 kit custom visuals: layout `type: "custom"`
+    exported = {k for k, sp in (pages_spec or {}).items() if isinstance(sp, dict) and sp.get("exported")}
+    visuals, cv_errors, cv_names = AV.resolve(visuals, no_kit, design.parent, exported, log)
+    if routes.get("html") is False:             # HTML Content has no fallback slot: the plan picks another route
+        cv_errors += [f"{v['id']}: project.json routes.html is false (HTML Content blocked here); give it a native, SVG "
+                      "or Deneb visual" for v in visuals if HC.is_html_content(v.get("type")) or
+                      (v.get("build") or {}).get("method") in ("html", "html-measure")]
+    dn_errors = dn_errors + cv_errors
     if dn_errors:
         for e in dn_errors:
             print(f"error: {e}")
@@ -2059,25 +2094,27 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
             except BuildError as e:
                 errors.append(f"{vid}: {e}")
             continue
+        # --reset-ids: only these visuals start again from their template (a template fixed after they were built)
+        reset_v = reset or bool(reset_ids and vid in reset_ids)
         swap = False                    # a Deneb visual and its fallback replace each other in the same folder
-        if src.exists() and not reset and v.get("_swapFrom"):
+        if src.exists() and not reset_v and v.get("_swapFrom"):
             swap = load(src).get("visual", {}).get("visualType") == v["_swapFrom"]
             if swap:
                 log.append(f"{vid}: {v['_swapFrom']} -> {v['type']} (Deneb visual / fallback)")
-        if not src.exists() or reset or swap:
+        if not src.exists() or reset_v or swap:
             tname = v.get("template") or v["type"]
             tf = templates / f"{tname}.json"
             tpl = load(tf) if tf.exists() else None
             if v.get("template") and tpl is None:
                 errors.append(f"{vid}: template {tf} not found")
                 continue
-            if tpl is None and templates.is_dir() and v["type"] != "group":      # roadmap gap 26
+            if tpl is None and templates.is_dir() and v["type"] != "group" and not v.get("_custom"):   # gap 26
                 ctx.res.warnings.append(
                     f"{vid}: no template for {v['type']} in {templates.name}/: built bare (Desktop's defaults, no kit "
                     f"formatting). Add it to the Patterns page, save in Desktop and run `pbik templates harvest` "
                     f"(docs/UPDATE-ROUTINE.md step 4); still missing: {NEW_VISUALS}")
         try:
-            if src.exists() and not reset and not swap:
+            if src.exists() and not reset_v and not swap:
                 d = load(src)
                 if d.get("visual", {}).get("visualType") != v["type"]:
                     on_disk = d.get("visual", {}).get("visualType") or ("group" if "visualGroup" in d else "?")
@@ -2096,6 +2133,8 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                         if f_.get("name", "").startswith("pbik_"):     # not to this visual's layout `filters`
                             f_["name"] = "tpl_" + f_["name"][5:]
                 if tpl:                         # a template carries formatting only: its content (text, titles,
+                    if d["visual"].pop("syncGroup", None):      # its report's sync group ties every slicer made
+                        log.append(f"{vid}: template sync group dropped (layout `sync` sets one)")  # from it together
                     gone = FR.formatting_only(d, rep.model(), rep.extensions())     # field-bound settings) goes
                     if ctx.tokens.get("theme", {}).get("recolourTemplates"):     # a gen_tokens.py palette: the
                         from . import recolour                                    # template's colours follow it
@@ -2118,11 +2157,11 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
                     if gone:
                         ctx.res.warnings.append(f"{vid}: template {v.get('template') or v['type']} filters on fields "
                                                 f"this model doesn't have; dropped {', '.join(gone)}")
-                if src.exists() and (reset or swap):
+                if src.exists() and (reset_v or swap):
                     old = load(src)
                     d["position"] = old.get("position", {})
                     keep_desktop_filters(old, d)
-            apply_empty_query(v, d, tpl, existing=src.exists() and not reset)
+            apply_empty_query(v, d, tpl, existing=src.exists() and not reset_v)
             d["name"] = vnames[vid]
             set_position(d, vid, v, box(vid), parent, box, vnames, ctx)
             apply_query(ctx, v, d)
@@ -2174,9 +2213,19 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     # interactions (page-level, by visual name), in place; pairs pbik wrote before but no longer listed are removed
     old_inter = old_map.get("interactions", {})
     new_inter = {}
+    SLICERS = ("slicer", "advancedSlicerVisual", "listSlicer", "textSlicer")
     for key, spec in pages_spec.items():
         d, _ = page_docs[key]
         pairs = []
+        listed = {(it.get("source"), t) for it in spec.get("interactions", [])
+                  for t in (it.get("targets", it.get("target")) if isinstance(it.get("targets", it.get("target")), list)
+                            else [it.get("targets", it.get("target"))])}
+        # a kit visual's click filter never filters the slicers on its page (Desktop review 2026-11-17: the pills
+        # shrank to the clicked region and stayed that way); layout `interactions` can still say otherwise
+        for kv in [v for v in visuals if v.get("_custom") and v.get("page") == key]:
+            for sv in [v for v in visuals if v.get("type") in SLICERS and v.get("page") == key]:
+                if (kv["id"], sv["id"]) not in listed and kv["id"] in vnames and sv["id"] in vnames:
+                    pairs.append([vnames[kv["id"]], vnames[sv["id"]], "NoFilter"])
         for it in spec.get("interactions", []):
             targets = it.get("targets", it.get("target"))
             targets = [x for x in vnames if x != it["source"] and pages_of(layout, x) == key] if targets == "*" else \
@@ -2241,6 +2290,9 @@ def build(report_path, layout_path, prune=False, reset=False, map_path=None, tok
     report_json_changed = report_doc is not None and rep.write(rep.defn / "report.json", report_doc)
     if any(v.get("_deneb") is not None for v in visuals):
         register_custom_visual(rep, DN.TYPE)
+    for cv in dict.fromkeys(cv_names):
+        _, cv_changed = AV.register(rep.path, cv, design.parent)   # the package as Desktop stores an imported .pbiviz
+        rep.changed.extend(str(c) for c in cv_changed if str(c) not in rep.changed)   # a rebuilt visual is a change
     for hc in sorted({v["type"] for v in visuals if HC.is_html_content(v["type"])}):
         register_custom_visual(rep, hc)
     for key, sp in pages_spec.items():          # roadmap gap 5: the state data bookmarks save, resolved here

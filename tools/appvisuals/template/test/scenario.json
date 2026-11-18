@@ -1,0 +1,413 @@
+{
+ "_note": "Made-up deals for the app-visual starter (pbik visual test). Every step is listed in tools/appvisuals/harness/README.md.",
+ "viewport": {
+  "width": 900,
+  "height": 560
+ },
+ "data": {
+  "generate": {
+   "n": 240,
+   "seed": 7,
+   "fields": {
+    "Deal": {
+     "id": "D-"
+    },
+    "Region": {
+     "pick": [
+      "North",
+      "South",
+      "East",
+      "West"
+     ],
+     "weights": [
+      4,
+      3,
+      2,
+      2
+     ]
+    },
+    "Stage": {
+     "pick": [
+      "Lead",
+      "Qualified",
+      "Proposal",
+      "Negotiation",
+      "Won"
+     ],
+     "weights": [
+      5,
+      4,
+      3,
+      2,
+      2
+     ]
+    },
+    "Value": {
+     "normal": [
+      42,
+      14
+     ]
+    },
+    "Days": {
+     "uniform": [
+      2,
+      120
+     ]
+    }
+   }
+  },
+  "roles": {
+   "Item": "Deal",
+   "Group": "Region",
+   "Stage": "Stage",
+   "X": "Days",
+   "Y": "Value"
+  },
+  "measures": [
+   "X",
+   "Y"
+  ],
+  "formats": {
+   "Value": "#,0.0",
+   "Days": "0"
+  }
+ },
+ "steps": [
+  {
+   "label": "start",
+   "expect": {
+    "renderEvents": true,
+    "noRenderFailures": true,
+    "marks": 240,
+    "text": "240 items by Region"
+   }
+  },
+  {
+   "shot": "01-grid"
+  },
+  {
+   "pill": "Columns"
+  },
+  {
+   "frames": {
+    "name": "morph-grid-to-columns",
+    "every": 110,
+    "count": 6
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "02-columns"
+  },
+  {
+   "pill": "Scatter"
+  },
+  {
+   "frames": {
+    "name": "morph-columns-to-scatter",
+    "every": 110,
+    "count": 6
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "03-scatter"
+  },
+  {
+   "pill": "Clusters"
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "04-clusters"
+  },
+  {
+   "pill": "Grid"
+  },
+  {
+   "settle": true
+  },
+  {
+   "label": "click a dot",
+   "clickMark": 5
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "selectCalls": 1,
+    "lastMulti": false,
+    "text": "1 of 240 selected"
+   }
+  },
+  {
+   "shot": "05-selected"
+  },
+  {
+   "label": "ctrl-click a second dot",
+   "clickMark": 40,
+   "ctrl": true
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "selectCalls": 2,
+    "lastMulti": true,
+    "text": "2 of 240 selected"
+   }
+  },
+  {
+   "label": "hover",
+   "hoverMark": 3
+  },
+  {
+   "expect": {
+    "tooltips": 1
+   }
+  },
+  {
+   "shot": "06-tooltip"
+  },
+  {
+   "label": "context menu",
+   "contextMark": 3
+  },
+  {
+   "expect": {
+    "contextMenus": 1
+   }
+  },
+  {
+   "label": "clear",
+   "click": [
+    880,
+    550
+   ]
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "clears": 1,
+    "text": "240 items by Region"
+   }
+  },
+  {
+   "label": "drill zoom into a group",
+   "clickText": "North"
+  },
+  {
+   "frames": {
+    "name": "drill-zoom",
+    "every": 110,
+    "count": 6
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "text": "North:"
+   }
+  },
+  {
+   "shot": "07-drill-north"
+  },
+  {
+   "label": "back",
+   "clickText": "Back"
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "text": "240 items by Region"
+   }
+  },
+  {
+   "label": "camera zoom",
+   "dblclickMark": 12
+  },
+  {
+   "frames": {
+    "name": "camera-zoom",
+    "every": 110,
+    "count": 6
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "08-camera-zoom"
+  },
+  {
+   "dblclick": [
+    880,
+    550
+   ]
+  },
+  {
+   "settle": true
+  },
+  {
+   "pill": "Scatter"
+  },
+  {
+   "settle": true
+  },
+  {
+   "label": "brush a range",
+   "drag": {
+    "from": [
+     300,
+     200
+    ],
+    "to": [
+     560,
+     420
+    ]
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "minSelectCalls": 3,
+    "text": "selected"
+   }
+  },
+  {
+   "shot": "09-brush"
+  },
+  {
+   "click": [
+    880,
+    550
+   ]
+  },
+  {
+   "settle": true
+  },
+  {
+   "label": "keyboard",
+   "focus": ".kit-svg"
+  },
+  {
+   "key": "ArrowRight",
+   "times": 3
+  },
+  {
+   "key": "Enter"
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "minSelectCalls": 4
+   }
+  },
+  {
+   "shot": "10-keyboard"
+  },
+  {
+   "key": "Escape"
+  },
+  {
+   "settle": true
+  },
+  {
+   "label": "cross-filter in: highlight East",
+   "highlight": {
+    "Region": [
+     "East"
+    ]
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "11-highlight-in"
+  },
+  {
+   "highlight": null
+  },
+  {
+   "label": "cross-filter in: filter to two stages",
+   "filter": {
+    "Stage": [
+     "Proposal",
+     "Won"
+    ]
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "12-filtered-in"
+  },
+  {
+   "filter": null
+  },
+  {
+   "settle": true
+  },
+  {
+   "label": "too many points",
+   "objects": {
+    "view": {
+     "maxItems": 100
+    }
+   }
+  },
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "text": "Showing 100 of 240"
+   }
+  },
+  {
+   "shot": "13-too-many"
+  },
+  {
+   "label": "reduce motion",
+   "objects": {
+    "motion": {
+     "reduceMotion": true
+    }
+   }
+  },
+  {
+   "pill": "Columns"
+  },
+  {
+   "frames": {
+    "name": "reduce-motion",
+    "every": 110,
+    "count": 3
+   }
+  },
+  {
+   "expect": {
+    "noRenderFailures": true
+   }
+  }
+ ]
+}

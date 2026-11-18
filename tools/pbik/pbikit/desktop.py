@@ -5,7 +5,7 @@ caller can tell "couldn't check" from "clean". reload refuses while Desktop repo
 Exit codes: 0 ok, 3 bridge not available, 4 unsaved changes (state --fail-if-dirty, reload), 5 Desktop still
 opening after the wait (say "still opening", never "not ready").
 """
-import json, os, pathlib, shutil, subprocess, sys
+import json, os, pathlib, shutil, subprocess, sys, time
 
 UNAVAILABLE, DIRTY = 3, 4
 DIRTY_KEYS = ("isdirty", "dirty", "hasunsavedchanges", "unsavedchanges", "unsaved", "ismodified", "modified")
@@ -123,15 +123,19 @@ def plain_desktop_error(text):
     return "error: Power BI Desktop couldn't do that step. I'll look at what it said before going on."
 
 
-def wait_ready(bridge=None, wait=None):
+def wait_ready(bridge=None, wait=None, tries=30, pause=3.0):
     """After `desktop open`: wait until Desktop answers (still-opening lines meanwhile). Returns True when ready."""
-    try:
-        run("state", bridge=bridge, wait=wait)
-        return True
-    except SystemExit as e:
-        if e.code in (NOT_READY, UNAVAILABLE):
-            return False
-        raise
+    for attempt in range(tries):
+        try:
+            run("state", bridge=bridge, wait=wait)
+            return True
+        except SystemExit as e:
+            if e.code in (NOT_READY, UNAVAILABLE):
+                return False
+            if attempt + 1 == tries:     # Desktop answers "task cancelled" (exit 1) while it is still loading the report
+                raise
+            time.sleep(pause)
+    return False
 
 
 def dirty_flag(obj):
@@ -332,13 +336,19 @@ def open_report(root, pbip, bridge=None, wait=True, start=None, pids=None, ready
     return 0, lines + ["Power BI Desktop has the report open."]
 
 
-def remember_open(root, folder, read_state=None, bridge=None):
+def remember_open(root, folder, read_state=None, bridge=None, tries=20, wait=3.0):
     """Right after opening: Desktop's state with only its own on-open marks (compared before a reload or close)."""
     from .synth import read_json, write_json
     rec = read_json(record_file(root)) or {}
-    try:
-        st = read_state() if read_state else json.loads(run("state", bridge=bridge))
-    except (SystemExit, json.JSONDecodeError, ValueError):
+    st = None
+    for attempt in range(tries):                 # Desktop answers "task cancelled" while it is still loading (v1.11)
+        try:
+            st = read_state() if read_state else json.loads(run("state", bridge=bridge))
+            break
+        except (SystemExit, json.JSONDecodeError, ValueError):
+            if attempt + 1 < tries:
+                time.sleep(wait)
+    if st is None:
         return rec
     rec.update(state=normalise(st), files=files_hash(folder) if folder else rec.get("files"))
     write_json(record_file(root), rec)

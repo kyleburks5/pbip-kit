@@ -1,0 +1,19 @@
+{
+  "Visual_NoData": "No data yet",
+  "Visual_NoDataHint": "Add an Item field (one dot per row). Group and Stage arrange the dots; X and Y draw the scatter.",
+  "Visual_Loading": "Loading more rows",
+  "Visual_TooMany": "Too many points",
+  "Visual_TooManyHint": "Showing {0} of {1} items. Filter the page to see the rest.",
+  "Visual_Views": "Views",
+  "Visual_View_grid": "Grid",
+  "Visual_View_columns": "Columns",
+  "Visual_View_scatter": "Scatter",
+  "Visual_View_clusters": "Clusters",
+  "Visual_Headline_Highlighted": "{0} of {1} highlighted from another visual{2}.",
+  "Visual_All": "All",
+  "Visual_Headline_Selected": "{0} of {1} selected. {2} holds {3}% of the selection.",
+  "Visual_Headline_Drilled": "{0}: {1}, {2}% of all {3}.",
+  "Visual_Headline_ByGroup": "{0} by {1}. {2} holds {3}% of them.",
+  "Visual_Headline_Items": "{0}.",
+  "Visual_Item": "item"
+}

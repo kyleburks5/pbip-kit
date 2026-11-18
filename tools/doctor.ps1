@@ -4,8 +4,8 @@
 #   FAIL  the kit can't run that step: the line under it says what to ask IT (docs/IT-REQUEST.md is the full request)
 # Checks: Python, pip or an offline install, jsonschema (optional), pbik, the PowerShell execution policy, Node.js /
 # npx and npm registry access (the modeling MCP and daxlib-mcp start through npx), Power BI Desktop against
-# VERSIONS.md, compatibility level 1702 (DAX Lib), the Desktop Bridge, Deneb (custom visuals), Git, proxy, the kit
-# folder and the Copilot files.
+# VERSIONS.md, compatibility level 1702 (DAX Lib), the Desktop Bridge, Deneb (custom visuals), the app-visual tools
+# (pbik tools check), Git, proxy, the kit folder and the Copilot files.
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File tools\doctor.ps1 [-Offline]
 #   -Offline  skip the network checks (pip index, npm registry)
 # Exits 1 if anything FAILs (NO-GO). Changes nothing (temp files only, removed).
@@ -214,8 +214,22 @@ if ($projCv -eq $false) {
     Report 'PASS' 'Deneb' 'not blocked by Desktop policy (the tenant setting can still block it: if Deneb doesn''t load in Desktop, use the fallback)'
 }
 
+# ---------------------------------------------------------------- App-visual tools (v1.11, docs/design/app-visuals.md)
+# Optional: only the HTML, Deneb-harness and kit custom-visual routes need them. Installed outside the repo, no admin.
+if ($py) {
+    $tj = (& python (Join-Path $root 'tools\pbik\pbik.py') tools check --json 2>$null) -join "`n"
+    try { $trows = $tj | ConvertFrom-Json } catch { $trows = $null }
+    if (-not $trows) { Report 'WARN' 'App-visual tools' 'pbik tools check gave no answer' 'the agent runs: python tools\pbik\pbik.py tools install' }
+    foreach ($t in $trows) {
+        $name = if ($t.item.Length -gt 26) { $t.item.Substring(0, 26) } else { $t.item }
+        if ($t.status -eq 'installed') { Report 'PASS' $name "$($t.have) ($($t.licence))" }
+        elseif ($t.status -eq 'recorded') { Report 'PASS' $name "$($t.want) pinned, not installed yet (later round)" }
+        else { Report 'WARN' $name "$($t.status) (wanted $($t.want))" "the agent runs: python tools\pbik\pbik.py $($t.fix -replace '^pbik ', ''); without it the kit custom-visual route is off and pbik builds the fallback" }
+    }
+}
+
 # ---------------------------------------------------------------- Git
-$git = Get-Command git -ErrorAction SilentlyContinue
+$git =Get-Command git -ErrorAction SilentlyContinue
 if (-not $git) { Report 'FAIL' 'Git' 'git is not on PATH' 'Git for Windows (git-scm.com or the Company Portal): the kit commits after each step' }
 else {
     $gn = (& git config user.name 2>$null); $ge = (& git config user.email 2>$null)

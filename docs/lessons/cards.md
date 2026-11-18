@@ -19,6 +19,7 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 | C-10 | The KPI card is its own container, or sits on a shared panel | `pbik validate` warns (pbikit/kpicards.py); design/scripts/card_space.py flags empty space |
 | C-11 | Background shapes keep their layer order | `pbik validate` warns (pbikit/kpicards.py `layer_order`) |
 | C-12 | An SVG image card can take a Text visual calculation | `pbik build` writes it for a `udfCard` in mode `calc` (tools/pbik/tests/test_udf.py) |
+| C-13 | Size an SVG card image to its tile | `pbik validate` warns (pbikit/validate.py `check_card_images`) and says the size to draw |
 <!-- /lessons:index -->
 
 ## C-01 Shapes need their fill set explicitly
@@ -108,3 +109,10 @@ Read by /plan, /build and /fix. Format and placement: docs/lessons/README.md. Sh
 - **Why:** no report-level measure is needed for each card; the image comes straight from the visual.
 - **Enforced by:** `pbik build` writes it for a `udfCard` in mode `calc` (tools/pbik/tests/test_udf.py)
 - **Source:** UDF KPI card study, Study 2 (2026-11-15); confirmed on the UDF card gallery (2026-11-16, U-1)
+
+## C-13 Size an SVG card image to its tile
+- **Rule:** Draw an SVG card image with the tile's width:height (`_W = _H x tile width / tile height`).
+- **Why:** the new card scales its image to the tile's width, not to fit inside it: 160x44 bars in a 571x48 tile
+  were drawn 571x156 and cut top and bottom.
+- **Enforced by:** `pbik validate` warns (pbikit/validate.py `check_card_images`) and says the size to draw
+- **Source:** v1.11 Desktop review, 2026-11-17

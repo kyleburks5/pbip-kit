@@ -19,6 +19,7 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 | B-13 | Roundtrip after every hand polish, then update layout.json | – |
 | B-14 | Image cards get no saved sort | `pbik build` drops `sort` from a `udfCard` (tools/pbik/tests/test_udf.py) |
 | B-15 | Build snaps to the grid and writes missing alt text; N/A never covers a "no" | `pbik build` (gridsnap.py, auto alt text); `pbik score` (mark_na); tests/test_v17.py PolishV110Tests |
+| B-16 | Kit visuals send their click filter after the move lands | the kit template (scene.ts `Later`, updates.ts `UpdateGate`); the harness simulates the round trip and the empty update (`roundTrip`, `emptyFirst`) and checks `smooth`; validate warns on a missing NoFilter |
 <!-- /lessons:index -->
 
 ## B-01 Build through the kit, never by hand
@@ -107,3 +108,13 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 - **Why:** the UDF card gallery lost alignment and accessibility to 1-8 px slips and text boxes without alt text.
 - **Enforced by:** `pbik build` (gridsnap.py, auto alt text); `pbik score` (mark_na); tests/test_v17.py PolishV110Tests
 - **Source:** kit v1.10 (2026-11-16)
+
+## B-16 Kit visuals send their click filter after the move lands
+- **Rule:** A kit visual shows a click at once and sends its filter (and its saved view) after the move lands; an
+  update that brings the same rows draws nothing again; new rows morph by key; the empty update Desktop sends while
+  loading never removes a layer; kit visuals never filter the page's slicers (NoFilter, written by pbik build).
+- **Why:** Desktop redraws the rest of the page on the thread the visual animates on when a filter or a save
+  arrives: 30-46% frozen frames on clicks, a blank org chart after the empty update, pills shrinking to the click.
+- **Enforced by:** the kit template (scene.ts `Later`, updates.ts `UpdateGate`); the harness simulates the round
+  trip and the empty update (`roundTrip`, `emptyFirst`) and checks `smooth`; validate warns on a missing NoFilter
+- **Source:** v1.11 Desktop reviews, 2026-11-17

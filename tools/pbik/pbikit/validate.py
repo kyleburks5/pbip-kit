@@ -504,6 +504,202 @@ def check_limits(fd, rep, pages, limits=None):
         fd.err("limits", f"report definition files are {rmb:.0f} MB; at most {lim['report files MB']} MB")
 
 
+TOKEN_GROUPS = ("canvas", "colors", "polarity", "chart", "font", "fontPt", "container", "control", "table", "theme", "badges", "a11y")
+DECOR_TYPES = {"shape", "basicShape", "image", "textbox"}
+SLICER_TYPES = {"slicer", "advancedSlicerVisual", "listSlicer", "textSlicer"}
+
+
+def _visual_tables(model, d):
+    """Model tables a visual's fields read (columns' tables, and the tables behind its measures)."""
+    out = set()
+    for kind, ent, schema, prop, _ in walk_fields(d.get("visual", {}).get("query", {})):
+        if schema == "extension" or ent not in model.tables:
+            continue
+        if kind == "Column":
+            out.add(model.tables[ent].name.casefold())
+        else:
+            out |= tmdl.measure_tables(model, model.tables[ent].name, prop)
+    return out
+
+
+def check_page_layers(fd, rep, pages):
+    """Three ways a click does nothing (Desktop review, 2026-11-17): a shape, image or text box drawn above a visual
+    people click; slicers on different fields joined in one sync group (a template's leftover group did this to every
+    pill slicer); a slicer whose table has no relationship path to a visual on its page."""
+    model = rep.model()
+    groups = {}                                       # sync group -> {field: [where]}
+    for name, pd, pfolder in pages:
+        vis = []
+        docs = [(d, f) for d, f in rep.visuals(pfolder)]
+        vgroups = {d.get("name"): d for d, f in docs if "visualGroup" in d}
+
+        def placed(d):
+            # page position and visibility: a grouped visual's position is relative to its group, and a hidden group
+            # (a pane a button shows) hides everything in it (rep8's filter pane, 2026-11-17)
+            p = dict(d.get("position", {}))
+            hidden, g = bool(d.get("isHidden")), d.get("parentGroupName")
+            while g and g in vgroups:
+                gp = vgroups[g].get("position", {})
+                p["x"] = p.get("x", 0) + gp.get("x", 0)
+                p["y"] = p.get("y", 0) + gp.get("y", 0)
+                hidden = hidden or bool(vgroups[g].get("isHidden"))
+                g = vgroups[g].get("parentGroupName")
+            return p, hidden
+
+        for d, f in docs:
+            where = f"{pd.get('displayName')}/{f.parent.name}"
+            if "visualGroup" in d:
+                continue
+            p, hidden = placed(d)
+            if hidden and d.get("visual", {}).get("visualType") in DECOR_TYPES:
+                continue                               # not on screen until shown: catches no clicks
+            vis.append((where, d, d.get("visual", {}).get("visualType"), p))
+        off = {(i.get("source"), i.get("target")) for i in pd.get("visualInteractions", []) or []
+               if i.get("type") == "NoFilter"}
+        for where, d, vt, p in vis:
+            if vt not in DECOR_TYPES:
+                continue
+            for w2, d2, vt2, p2 in vis:
+                if vt2 in DECOR_TYPES or w2 == where or p.get("z", 0) <= p2.get("z", 0):
+                    continue
+                ox = min(p["x"] + p["width"], p2["x"] + p2["width"]) - max(p["x"], p2["x"])
+                oy = min(p["y"] + p["height"], p2["y"] + p2["height"]) - max(p["y"], p2["y"])
+                if ox > 1 and oy > 1:
+                    fd.warn(where, f"{vt} sits above {w2.split('/')[-1]} ({vt2}) and catches its clicks: "
+                                   f"put it behind (lower z) or move it")
+        for where, d, vt, p in vis:
+            if vt not in SLICER_TYPES:
+                continue
+            cols = [(e, pr) for k, e, s_, pr, _ in walk_fields(d.get("visual", {}).get("query", {})) if k == "Column"]
+            sg = d.get("visual", {}).get("syncGroup", {}).get("groupName")
+            if sg and cols:
+                groups.setdefault(sg, {}).setdefault(f"{cols[0][0]}[{cols[0][1]}]", []).append(where)
+            if not model or not cols or cols[0][0] not in model.tables:
+                continue
+            tname = model.tables[cols[0][0]].name
+            if not any(r.from_column and r.to_column and tname.casefold() in (r.from_column[0].casefold(), r.to_column[0].casefold())
+                       for r in model.relationships):
+                # a disconnected table (a parameter or what-if table): it filters only the measures that read it,
+                # which is deliberate; say so once, not per visual
+                print(f"note    {where}: {cols[0][0]} has no relationships: this slicer only changes measures that read it")
+                continue
+            reach = tmdl.filter_reach(model, tname)
+            for w2, d2, vt2, p2 in vis:
+                if w2 == where or vt2 in DECOR_TYPES or vt2 in SLICER_TYPES or vt2 == "actionButton":
+                    continue
+                if (d.get("name"), d2.get("name")) in off:
+                    continue
+                used = _visual_tables(model, d2)
+                if used and not used & reach:
+                    fd.warn(where, f"{cols[0][0]}[{cols[0][1]}] can't filter {w2.split('/')[-1]}: no relationship "
+                                   f"path from {cols[0][0]} to {', '.join(sorted(used))}")
+    for g, fields in groups.items():
+        if len(fields) > 1:
+            fd.warn(f"sync group {g!r}", "slicers on different fields share it (" + ", ".join(
+                f"{k}: {', '.join(v)}" for k, v in sorted(fields.items())) + "); a sync group is for one field: "
+                "give each field its own group or remove `sync`")
+
+
+def check_exported_pages(fd, rep, pages, lay):
+    """A page marked `exported` in layout.json (exported to PDF / PowerPoint, or sent by subscription) draws only
+    certified visuals there: native or Deneb. A private kit visual (or any uncertified custom visual) on it would be
+    blank in the export (Microsoft's custom visuals FAQ; docs/design/app-visuals.md)."""
+    if not lay:
+        return
+    marked = {sp.get("displayName"): k for k, sp in (lay.get("pages") or {}).items() if isinstance(sp, dict) and sp.get("exported")}
+    if not marked:
+        return
+    rd = load(rep.defn / "report.json") if (rep.defn / "report.json").exists() else {}
+    private = {r.get("name") for r in rd.get("resourcePackages", []) if r.get("type") == "CustomVisual"}
+    public = set(rd.get("publicCustomVisuals", [])) - {DN.TYPE}
+    for name, pd, pfolder in pages:
+        if pd.get("displayName") not in marked:
+            continue
+        for d, f in rep.visuals(pfolder):
+            vt = d.get("visual", {}).get("visualType")
+            if vt in private or vt in public:
+                fd.warn(f"{pd.get('displayName')}/{f.parent.name}",
+                        f"page {marked[pd['displayName']]} is exported / subscribed but this is a "
+                        f"{'kit (private)' if vt in private else 'custom'} visual: exports draw certified visuals only, "
+                        "so it would be blank there; use its native or Deneb fallback (pbik build does for kit visuals)")
+
+
+def check_kit_filters_slicers(fd, rep, pages):
+    """A kit visual's click is a real filter, and a filter from a visual also filters the slicers on its page: the
+    pills shrink to what was clicked and stay so (Desktop review 2026-11-17). Each kit (private) visual needs a
+    NoFilter interaction toward every slicer on its page; pbik build writes them."""
+    rd = load(rep.defn / "report.json") if (rep.defn / "report.json").exists() else {}
+    private = {r.get("name") for r in rd.get("resourcePackages", []) if r.get("type") == "CustomVisual"}
+    if not private:
+        return
+    for name, pd, pfolder in pages:
+        vis = [(d, f) for d, f in rep.visuals(pfolder) if "visualGroup" not in d]
+        kits = [d for d, f in vis if d.get("visual", {}).get("visualType") in private]
+        slicers = [d for d, f in vis if d.get("visual", {}).get("visualType") in SLICER_TYPES]
+        off = {(i.get("source"), i.get("target")) for i in pd.get("visualInteractions", []) or [] if i.get("type") == "NoFilter"}
+        for k in kits:
+            for sl in slicers:
+                if (k.get("name"), sl.get("name")) not in off:
+                    fd.warn(f"{pd.get('displayName')}/{k.get('name')}",
+                            f"this kit visual's click filter also filters the slicer {sl.get('name')} (its pills shrink "
+                            "to the click): add a NoFilter interaction (pbik build writes it)")
+
+
+def _svg_size(expr):
+    """An SVG measure's drawn size: VAR _W / _H, or a literal width='..' height='..' (None if it can't tell)."""
+    tag = re.search(r"<svg[^>]*>", expr or "")
+    if tag:                                            # the svg element's own size, never a shape's inside it
+        w = re.search(r"width=['\"](\d+(?:\.\d+)?)['\"]", tag.group(0))
+        h = re.search(r"height=['\"](\d+(?:\.\d+)?)['\"]", tag.group(0))
+        if w and h:
+            return float(w.group(1)), float(h.group(1))
+    w = re.search(r"VAR\s+_W\s*=\s*(\d+(?:\.\d+)?)", expr or "")      # sized by variables: VAR _W / _H
+    h = re.search(r"VAR\s+_H\s*=\s*(\d+(?:\.\d+)?)", expr or "")
+    return (float(w.group(1)), float(h.group(1))) if w and h else None
+
+
+def check_card_images(fd, rep, pages):
+    """A new card scales its image to the tile's width (Desktop review 2026-11-17: 160x44 bars in a 571x48 tile were
+    drawn 571x156 and cut top and bottom). The SVG's width:height must not be narrower than the tile's."""
+    model = rep.model()
+    if not model:
+        return
+    ext = {}
+    ef = rep.defn / "reportExtensions.json"
+    if ef.exists():
+        for e in load(ef).get("entities", []):
+            for m in e.get("measures", []):
+                ext[m.get("name")] = m.get("expression", "")
+    def model_expr(name):
+        homes = model.measure_home(name)
+        return model.tables[homes[0]].measures[name].expression if homes else None
+    for name, pd, pfolder in pages:
+        for d, f in rep.visuals(pfolder):
+            for e in d.get("visual", {}).get("objects", {}).get("image", []) or []:
+                props = e.get("properties", {})
+                url = (props.get("imageUrl") or {}).get("expr", {}).get("Measure")
+                lit = lambda k: str((props.get(k) or {}).get("expr", {}).get("Literal", {}).get("Value", ""))   # noqa: E731
+                if not url or lit("imageAreaSize") not in ("100L", "100D", "100") or lit("fit") != "'Fit'":
+                    continue                           # only the full-tile image (area 100, Fit), as seen in Desktop
+                mname = url.get("Property")
+                expr = ext.get(mname) if url.get("Expression", {}).get("SourceRef", {}).get("Schema") == "extension" else None
+                if expr is not None:
+                    ref = re.fullmatch(r"\s*\[([^\]]+)\]\s*", expr)
+                    expr = model_expr(ref.group(1)) if ref else expr
+                else:
+                    expr = model_expr(mname)
+                size = _svg_size(expr)
+                pos = d.get("position", {})
+                if not size or not pos.get("height"):
+                    continue
+                svg, tile = size[0] / size[1], pos["width"] / pos["height"]
+                if svg < tile * 0.85:
+                    fd.warn(f"{pd.get('displayName')}/{f.parent.name}",
+                            f"card image {mname}: the SVG is {size[0]:g}x{size[1]:g} (width:height {svg:.1f}) in a "
+                            f"{pos['width']:g}x{pos['height']:g} tile ({tile:.1f}): the card scales it to the tile's width, "
+                            f"so it is cut top and bottom; draw it about {round(size[1] * tile)}x{size[1]:g}")
+
+
 def check_target(fd, rep, files, rel):
     t = rep.target
     if not t.pinned:
@@ -601,6 +797,9 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
                         lit = val.get("expr", {}).get("Literal", {}).get("Value") if isinstance(val, dict) else None
                         if re.search(r"size$", prop, re.I) and isinstance(lit, str) and lit.startswith("'"):
                             fd.err(where, f"{oname}.{prop} is text ({lit}); a size must be a number such as 27D")
+                        elif isinstance(lit, str) and re.fullmatch(r"'(%s)\.[A-Za-z][A-Za-z0-9]*'" % "|".join(TOKEN_GROUPS), lit):
+                            fd.err(where, f"{oname}.{prop} is the token name {lit}, not its value: an unresolved token "
+                                          "(a button slicer with one took no clicks in Desktop); fix the layout props")
             if d.get("visual", {}).get("visualType") == "advancedSlicerVisual":
                 slicers.append((where, m.group(1) if m else None, d))
             if d.get("visual", {}).get("visualType") == DN.TYPE:
@@ -751,6 +950,10 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     # ---- Microsoft's schema, property by property (warnings; errors with --strict), and the filter pane
     check_schema_props(fd, rep, pages, layout, strict_schema)
     check_filter_pane(fd, rep, pages)
+    check_page_layers(fd, rep, pages)
+    check_card_images(fd, rep, pages)
+    check_kit_filters_slicers(fd, rep, pages)
+    check_exported_pages(fd, rep, pages, load(layout) if layout else None)
     check_annotations(fd, rep, pages)
     check_limits(fd, rep, pages)
     check_resources(fd, rep)

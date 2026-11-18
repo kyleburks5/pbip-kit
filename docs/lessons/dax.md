@@ -18,6 +18,7 @@ docs/lessons/README.md.
 | D-09 | Conditional counts return 0, not blank | – |
 | D-10 | Pass a measure to a UDF as an expression when it is worked out per month | – |
 | D-11 | Test a function with a metric and a period that have data | – |
+| D-12 | Headline measures work in the current filters and are never blank | the live-headline pattern's checks (a DAX query per audit state, including a slicer on another column and the empty case); kit visuals use `count()` (kit/words.ts) |
 <!-- /lessons:index -->
 
 ## D-01 Test new DAX query-scoped first
@@ -91,3 +92,12 @@ docs/lessons/README.md.
 - **Why:** with nothing picked every input was blank, and the run drew cards for empty values that looked like a pass.
 - **Enforced by:** not enforced (read at query-scoped tests; audit.json keeps the empty state separate)
 - **Source:** UDF KPI card study, Study 2 (2026-11-15), G-12
+
+## D-12 Headline measures work in the current filters and are never blank
+- **Rule:** A lowest / highest headline ranks the members the page shows (`VALUES`, not a member column's
+  `ALLSELECTED`), breaks ties in a fixed order, returns a sentence for none, one and several, and its counts agree
+  with their noun ("1 site", not "1 sites" or "site(s)").
+- **Why:** "Site 10 has the lowest status" came from all 24 sites while the page showed West, so the card read "--".
+- **Enforced by:** the live-headline pattern's checks (a DAX query per audit state, including a slicer on another
+  column and the empty case); kit visuals use `count()` (kit/words.ts)
+- **Source:** v1.11 Desktop review, 2026-11-17
