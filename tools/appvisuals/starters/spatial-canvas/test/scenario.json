@@ -1,0 +1,181 @@
+{
+ "_note": "Made-up shots on the generic court: zones by the same rule as the model, filter on click, ranked row.",
+ "viewport": {
+  "width": 960,
+  "height": 600
+ },
+ "objects": {
+  "honest": {
+   "minSample": 11,
+   "mode": "fade"
+  },
+  "space": {
+   "shape": "court",
+   "start": "zones"
+  }
+ },
+ "data": {
+  "rowsFile": "data/shots.json",
+  "roles": {
+   "Item": "Shot",
+   "Zone": "Zone",
+   "Group": "Kind",
+   "X": "X",
+   "Y": "Y",
+   "Outcome": "Made"
+  },
+  "measures": [
+   "X",
+   "Y",
+   "Outcome"
+  ],
+  "formats": {
+   "X": "0.0",
+   "Y": "0.0",
+   "Made": "0"
+  }
+ },
+ "steps": [
+  {
+   "label": "start",
+   "expect": {
+    "renderEvents": true,
+    "noRenderFailures": true,
+    "text": "stands out",
+    "state": {
+     "mismatch": 0,
+     "view": "zones"
+    }
+   }
+  },
+  {
+   "shot": "01-zones",
+   "golden": 0.02
+  },
+  {
+   "expect": {
+    "noOverlap": true,
+    "minTextPx": 11
+   }
+  },
+  {
+   "pill": "Points"
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "02-points",
+   "golden": 0.02
+  },
+  {
+   "transition": {
+    "pill": "Ranked"
+   },
+   "name": "to-ranked",
+   "ms": 800,
+   "every": 50
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "03-ranked",
+   "golden": 0.02
+  },
+  {
+   "expect": {
+    "noBlank": "to-ranked",
+    "minTextPx": 11,
+    "noOverlap": true
+   }
+  },
+  {
+   "pill": "Zones"
+  },
+  {
+   "settle": true
+  },
+  {
+   "clickSelector": "path.kit-zone[aria-label^='At the rim']"
+  },
+  {
+   "wait": 1500
+  },
+  {
+   "expect": {
+    "filterValues": [
+     "rim"
+    ],
+    "state": {
+     "picked": [
+      "rim"
+     ]
+    },
+    "text": "At the rim:"
+   }
+  },
+  {
+   "shot": "04-picked",
+   "golden": 0.02
+  },
+  {
+   "markMoves": "after-pick"
+  },
+  {
+   "wait": 1500
+  },
+  {
+   "expect": {
+    "movesSince": {
+     "mark": "after-pick",
+     "max": 0
+    }
+   }
+  },
+  {
+   "clickSelector": "path.kit-zone[aria-label^='Three top']",
+   "ctrl": true
+  },
+  {
+   "wait": 1500
+  },
+  {
+   "expect": {
+    "text": "Three top",
+    "state": {
+     "picked": [
+      "rim",
+      "three-top"
+     ]
+    }
+   }
+  },
+  {
+   "shot": "05-gap",
+   "golden": 0.02
+  },
+  {
+   "focus": "path.kit-zone"
+  },
+  {
+   "key": "Escape"
+  },
+  {
+   "wait": 1500
+  },
+  {
+   "expect": {
+    "state": {
+     "picked": []
+    }
+   }
+  },
+  {
+   "measure": {
+    "clickSelector": "path.kit-zone[aria-label^='Paint']"
+   },
+   "ms": 1200
+  }
+ ]
+}

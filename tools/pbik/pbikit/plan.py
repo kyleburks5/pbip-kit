@@ -133,8 +133,8 @@ def kpis(layout):
     """[(page, label, measure, compared with)] for every card."""
     out = []
     for v in layout.get("visuals", []):
-        if v.get("type") not in DATA_TYPES:
-            continue
+        if v.get("type") not in DATA_TYPES or v.get("pattern") == "live-headline":
+            continue                                   # a headline sentence is words, not a number to compare
         fields = [_plain_field(f) for f in (v.get("bindings") or {}).get("Data", [])]
         if not fields:
             continue
@@ -172,6 +172,8 @@ def comparison(v):
             word = re.sub(r"^vs\.?\s+", "", str(lab["title"]), flags=re.I)
         if word and word not in found:
             found.append(word)
+    if not found and v.get("comparison"):           # layout `comparison`: the visual beside it that carries it
+        found.append(f"shown in {v['comparison']}")
     return ", ".join(found)
 
 

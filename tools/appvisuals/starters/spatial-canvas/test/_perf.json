@@ -1,0 +1,90 @@
+{
+ "_note": "Stutter check (real time): a zone click with the filter round trip, view changes; target no frame over 100 ms, under 5% frozen.",
+ "viewport": {
+  "width": 960,
+  "height": 600
+ },
+ "realtime": true,
+ "objects": {
+  "honest": {
+   "minSample": 11,
+   "mode": "fade"
+  },
+  "space": {
+   "shape": "court",
+   "start": "zones"
+  }
+ },
+ "data": {
+  "rowsFile": "data/shots.json",
+  "roles": {
+   "Item": "Shot",
+   "Zone": "Zone",
+   "Group": "Kind",
+   "X": "X",
+   "Y": "Y",
+   "Outcome": "Made"
+  },
+  "measures": [
+   "X",
+   "Y",
+   "Outcome"
+  ]
+ },
+ "steps": [
+  {
+   "wait": 1200
+  },
+  {
+   "measure": {
+    "clickSelector": "path.kit-zone[aria-label^='Paint']"
+   },
+   "ms": 1600
+  },
+  {
+   "expect": {
+    "smooth": {
+     "longest": 100,
+     "frozen": 5
+    }
+   }
+  },
+  {
+   "wait": 600
+  },
+  {
+   "measure": {
+    "clickText": "Ranked"
+   },
+   "ms": 1200
+  },
+  {
+   "expect": {
+    "smooth": {
+     "longest": 100,
+     "frozen": 5
+    }
+   }
+  },
+  {
+   "wait": 300
+  },
+  {
+   "measure": {
+    "clickText": "Points"
+   },
+   "ms": 1200
+  },
+  {
+   "expect": {
+    "smooth": {
+     "longest": 100,
+     "frozen": 5
+    }
+   }
+  },
+  {
+   "probe": "document.querySelector('#harness-visual .kit-root').kitQuality()"
+  }
+ ]
+}

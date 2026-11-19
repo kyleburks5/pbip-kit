@@ -13,7 +13,9 @@ HEAD = re.compile(r"^#+\s*pattern choices[^\n]*\n(.*?)(?=^#+ |\Z)", re.I | re.M 
 
 
 def known_patterns(root=ROOT):
-    return {f.stem for f in (root / "docs" / "patterns").glob("*.md") if f.name != "README.md"}
+    """Pattern pages: docs/patterns/*.md and the app-visual library docs/patterns/app-visuals/*.md (v1.11.2)."""
+    pages = list((root / "docs" / "patterns").glob("*.md")) + list((root / "docs" / "patterns" / "app-visuals").glob("*.md"))
+    return {f.stem for f in pages if f.name not in ("README.md", "describe-a-visual.md")}
 
 
 def known_presets(root=ROOT):

@@ -203,6 +203,80 @@ class CardImageSizeTests(unittest.TestCase):
         self.assertIsNone(_svg_size("VAR _BarW = 22"))
 
 
+class HonestDataTests(unittest.TestCase):
+    """v1.11.2: the small-sample threshold and privacy mode (docs/patterns/honest-data.md)."""
+    def setUp(self):
+        from pbikit import honest
+        self.H = honest
+        self.tmp = pathlib.Path(tempfile.mkdtemp(prefix="pbik_honest_"))
+        (self.tmp / "design" / "specs").mkdir(parents=True)
+        self.vis = self.tmp / "visuals" / "v"
+        self.vis.mkdir(parents=True)
+        (self.vis / "capabilities.json").write_text(json.dumps({"objects": {"honest": {"properties": {}}}}), encoding="utf-8")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def project(self, doc):
+        (self.tmp / "design" / "specs" / "project.json").write_text(json.dumps(doc), encoding="utf-8")
+
+    def test_defaults_fade_at_home_suppress_at_work(self):
+        self.project({"catalog": "home"})
+        self.assertEqual(self.H.settings(self.tmp)["mode"], "fade")
+        self.project({"catalog": "work"})
+        self.assertEqual(self.H.settings(self.tmp), {"minSample": 11, "mode": "suppress", "source": "default"})
+
+    def test_project_setting_wins(self):
+        self.project({"catalog": "work", "honestData": {"minSample": 20, "mode": "fade"}})
+        self.assertEqual(self.H.settings(self.tmp)["minSample"], 20)
+        self.assertEqual(self.H.settings(self.tmp)["mode"], "fade")
+        self.project({"honestData": {"mode": "hide"}})
+        self.assertTrue(self.H.errors(self.tmp))
+
+    def test_props_only_for_visuals_with_the_object_and_not_over_the_layout(self):
+        self.project({"catalog": "work"})
+        self.assertEqual(self.H.props_for({}, self.vis, self.tmp), {"honest.minSample@none": 11, "honest.mode@none": "suppress"})
+        self.assertEqual(self.H.props_for({"props": {"honest.mode@none": "fade"}}, self.vis, self.tmp), {"honest.minSample@none": 11})
+        (self.vis / "capabilities.json").write_text("{}", encoding="utf-8")
+        self.assertEqual(self.H.props_for({}, self.vis, self.tmp), {})
+
+
+class StarterTests(unittest.TestCase):
+    """v1.11.2: kit visual starters (`pbik visual new <name> --from spatial-canvas`) and the shared court rule."""
+    def test_new_from_starter(self):
+        from pbikit import appvisual as AV
+        tmp = pathlib.Path(tempfile.mkdtemp(prefix="pbik_starter_"))
+        try:
+            self.assertIn("spatial-canvas", AV.starters())
+            d = AV.new("shot-map", project=tmp, start="spatial-canvas")
+            self.assertTrue((d / "src" / "settings.ts").exists(), "the starter's own settings")
+            self.assertTrue((d / "src" / "kit" / "patterns" / "spatial.ts").exists(), "kit modules come from the template")
+            self.assertTrue((d / "test" / "body.json").exists())
+            self.assertFalse((d / "test" / "fetchmore.json").exists(), "the template's unit-chart scenarios are dropped")
+            self.assertIn("honest", json.loads((d / "capabilities.json").read_text(encoding="utf-8"))["objects"])
+            with self.assertRaises(AV.VisualError):
+                AV.new("other", project=tmp, start="no-such-starter")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_court_rule_matches_the_starter_rows(self):
+        sys.path.insert(0, str(KIT / "design" / "scripts"))
+        import space_svg
+        rows = json.loads((KIT / "tools" / "appvisuals" / "starters" / "spatial-canvas" / "test" / "data" / "shots.json").read_text(encoding="utf-8"))
+        self.assertEqual([r for r in rows if space_svg.court_zone(r["X"], r["Y"]) != r["Zone"]], [])
+        for name in space_svg.SPACES:
+            text, rng = space_svg.svg(name, "#5B6474")
+            self.assertTrue(text.startswith("<svg") and rng["x"][0] < rng["x"][1], name)
+
+    def test_app_visual_patterns_are_known_to_plan(self):
+        sys.path.insert(0, str(KIT / "design" / "scripts"))
+        import pattern_choices
+        k = pattern_choices.known_patterns()
+        for p in ("spatial-canvas", "honest-data", "breakdown-wall", "focus-dim", "live-headline"):
+            self.assertIn(p, k)
+        self.assertNotIn("describe-a-visual", k)
+
+
 class DocsTests(unittest.TestCase):
     def test_exported_setting_documented(self):
         self.assertIn("`exported: true`", (KIT / "tools" / "pbik" / "README.md").read_text(encoding="utf-8"))

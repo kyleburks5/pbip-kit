@@ -319,8 +319,14 @@ export class Interaction {
     }
 
     /** The camera that fits a world rectangle into the view (for zoom-to-item). */
+    /**
+     * The camera that frames a box with `pad` around it, centred in the safe area: the visual minus what its own
+     * header, docked panels and legends cover (Layers.insets), so a framed item never sits under one of them.
+     */
     fit(x: number, y: number, w: number, h: number, pad = 24): Camera {
-        const k = Math.min((this.layers.width - pad * 2) / Math.max(1, w), (this.layers.height - pad * 2) / Math.max(1, h));
-        return { k, x: (this.layers.width - w * k) / 2 - x * k, y: (this.layers.height - h * k) / 2 - y * k };
+        const s = this.layers.insets;
+        const W = Math.max(10, this.layers.width - s.left - s.right), H = Math.max(10, this.layers.height - s.top - s.bottom);
+        const k = Math.min((W - pad * 2) / Math.max(1, w), (H - pad * 2) / Math.max(1, h));
+        return { k, x: s.left + (W - w * k) / 2 - x * k, y: s.top + (H - h * k) / 2 - y * k };
     }
 }

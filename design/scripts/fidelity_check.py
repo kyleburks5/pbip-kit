@@ -314,6 +314,18 @@ def desktop_screenshot(report_dir, page, out, w, h):
     return out
 
 
+
+def own_marks_only(root, report_dir):
+    """True when Desktop's unsaved marks are proven to be only its own from opening or the kit's reload (the same proof
+    `pbik desktop reload` uses: pbikit.desktop.why_not_close); any doubt is False (v1.11.2, Rep test 1)."""
+    try:
+        import json as _j, sys as _s
+        _s.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "tools" / "pbik"))
+        from pbikit import desktop as DK
+        return DK.why_not_close(root, report_dir, _j.loads(DK.run("state"))) is None
+    except Exception:                                  # no bridge, no state, no record: not proven
+        return False
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--project", default=str(KIT), help="the project root (default: this kit)")
@@ -344,6 +356,9 @@ def main(argv=None):
         if code == 4 and a.assume_saved:
             print("Desktop reports unsaved changes; going on as asked (--assume-saved): the files are taken as what "
                   "it shows.")
+        elif code == 4 and own_marks_only(root, report_dir):
+            print("Desktop's only unsaved marks are its own (from opening or the kit's last reload): the files are "
+                  "what it shows.")
         elif code == 4:
             print("Desktop has unsaved changes: the files aren't what it shows. Save (or close without saving and "
                   "reopen), then run the check again.")

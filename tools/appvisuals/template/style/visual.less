@@ -252,3 +252,73 @@ button.kit-crumb {
 .kit-root.has-clear .kit-headline {
     right: calc(var(--kit-pad) + 96px);
 }
+
+/* loading placeholders while Desktop queries (kit/scene.ts placeholder) */
+.kit-skeleton {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.kit-sk {
+    position: absolute;
+    border-radius: 6px;
+    background: var(--kit-fg2);
+    opacity: 0.12;
+    animation: kit-sk-pulse 1.6s ease-in-out infinite;
+}
+.kit-sk-dot {
+    border-radius: 50%;
+}
+.kit-sk-space {
+    border-radius: var(--kit-radius, 8px);
+    opacity: 0.08;
+}
+@keyframes kit-sk-pulse {
+    0%, 100% { opacity: 0.12; }
+    50% { opacity: 0.06; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .kit-sk { animation: none; }
+}
+.kit-hc .kit-sk {
+    background: none;
+    border: 1px dashed var(--kit-fg);
+    opacity: 1;
+    animation: none;
+}
+/* the docked readout (focus-dim): details beside the drawing, never over it */
+.kit-readout {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    padding: var(--kit-pad);
+    background: var(--kit-panel);
+    border-left: 1px solid var(--kit-line, rgba(127,127,127,0.2));
+    color: var(--kit-fg);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.kit-readout-title {
+    font-size: var(--kit-head);
+    font-weight: 600;
+}
+.kit-readout-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-variant-numeric: tabular-nums;
+}
+.kit-readout-note {
+    color: var(--kit-fg2);
+}
+.kit-zone {
+    cursor: pointer;
+    outline: none;
+}
+.kit-zone:focus-visible {
+    stroke: var(--kit-selected);
+    stroke-width: 2px;
+}

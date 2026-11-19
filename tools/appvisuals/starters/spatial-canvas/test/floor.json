@@ -1,0 +1,57 @@
+{
+ "_note": "Clinic floor, made up: visits seen within target by room, against a 75% benchmark.",
+ "viewport": {
+  "width": 960,
+  "height": 600
+ },
+ "objects": {
+  "honest": {
+   "minSample": 11,
+   "mode": "fade"
+  },
+  "space": {
+   "shape": "floor",
+   "start": "zones"
+  }
+ },
+ "data": {
+  "rowsFile": "data/floor.json",
+  "roles": {
+   "Item": "Visit",
+   "Zone": "Room",
+   "X": "X",
+   "Y": "Y",
+   "Outcome": "OnTime",
+   "Benchmark": "Target"
+  },
+  "measures": [
+   "X",
+   "Y",
+   "Outcome",
+   "Benchmark"
+  ]
+ },
+ "steps": [
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "noRenderFailures": true,
+    "state": {
+     "mismatch": 0
+    }
+   }
+  },
+  {
+   "shot": "floor-zones",
+   "golden": 0.02
+  },
+  {
+   "expect": {
+    "noOverlap": true,
+    "minTextPx": 11
+   }
+  }
+ ]
+}

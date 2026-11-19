@@ -307,6 +307,9 @@ def check_udf_cards(fd, rep, lay, project=None):
 
 
 def check_deneb(fd, rep, denebs, lay, project=None):
+    from . import honest as HD                     # project.json honestData (small-sample rule, privacy mode)
+    for e in HD.errors(rep.path.parent):
+        fd.err("project.json", e)
     if denebs and (versions.target_for(rep.path.parent, project)[1] or {}).get("customVisuals") is False:
         fd.warn("project.json", f"customVisuals is false but {len(denebs)} Deneb visual(s) are built: rerun pbik build "
                 "(it builds their fallbacks)")

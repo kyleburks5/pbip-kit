@@ -61,7 +61,7 @@ TAGS = {"cardVisual": "Card (new)", "card": "Card", "multiRowCard": "Multi-row c
         "treemap": "Treemap", "map": "Map", "filledMap": "Filled map", "ribbonChart": "Ribbon chart",
         "deneb": "Deneb"}
 PATTERNS = {"range-band", "dumbbell", "small-multiples-expected", "brushed-range", "partial-period", "freshness-line",
-            "exception-list", "direct-labels", "rail-panel", "panel"}                       # docs/patterns/; one renderer each in JS (P)
+            "exception-list", "direct-labels", "rail-panel", "panel", "live-headline"}                       # docs/patterns/; one renderer each in JS (P)
 VEGA_MODES = {"cdn": "cdn", "auto": "cdn", "offline": "offline", "subset": "offline"}   # auto, subset: older names
 VEGA_CDN = ["https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js",
             "https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js",
@@ -299,7 +299,8 @@ def container(R, v):
             continue
         tv = {"text": tv} if isinstance(tv, str) else tv
         fam, wt = R.font(tv.get("font", dfont))
-        box[key] = {"text": tv.get("text") or (f"[{tv['measure'].strip('[]')}]" if tv.get("measure") else ""),
+        # a title measure shows its `preview` (what it will say) in the plan picture, else its name in brackets
+        box[key] = {"preview": bool(tv.get("preview")), "text": tv.get("text") or tv.get("preview") or (f"[{tv['measure'].strip('[]')}]" if tv.get("measure") else ""),
                     "measure": bool(tv.get("measure")), "size": pt_px(R.number(tv.get("size", dsize), default=10)),
                     "color": R.colour(tv.get("color", dcol), "#252423"), "weight": wt, "family": fam,
                     "align": tv.get("align", "left")}
@@ -811,7 +812,7 @@ html, body {{ margin: 0; background: #2b3138; font-family: '{fam}', 'Segoe UI', 
 .grp[hidden], .v[hidden] {{ display: none !important; }}
 .grp > .v {{ pointer-events: auto; }}
 .v {{ position: absolute; overflow: hidden; display: flex; flex-direction: column; }}
-.v .ttl {{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; }}
+.v .ttl {{ white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; flex: none; }}  /* titles wrap to two lines, as Power BI's title text wrap does */
 .v .body {{ flex: 1; min-height: 0; position: relative; }}
 .badge {{ position: absolute; top: 2px; left: 2px; z-index: 40; background: #111; color: #fff; font: 600 11px/1 Consolas, monospace; padding: 3px 5px; border-radius: 4px; }}
 .tag {{ position: absolute; top: 2px; right: 2px; z-index: 40; white-space: nowrap; font: 600 10px/1 '{fam}'; padding: 3px 7px; border-radius: 10px; color: {tag_native.get('text')}; background: {tag_native.get('fill')}; }}
@@ -824,6 +825,7 @@ body.notag .ptn {{ display: none; }}
 .vlnote {{ position: absolute; left: 4px; bottom: 3px; font-size: 10px; color: #8a5b00; }}
 body.nobadge .badge, body.notag .tag, body.notag .nodata, body.notag .hiddenrows, body.notag .vlnote {{ display: none; }}
 body.shot #bar, body.shot #nodata-banner {{ display: none; }}
+body.shot {{ overflow: hidden; }}   /* a full-width header band must not add scrollbars over the picture */
 #nodata-banner {{ position: sticky; top: 0; z-index: 49; background: #C62828; color: #fff; font-weight: 600; font-size: 14px; padding: 8px 16px; text-align: center; }}
 body.shot #stage {{ padding: 0; }}
 .nodata {{ position: absolute; right: 4px; bottom: 3px; font-size: 10px; color: #8a96a3; }}
@@ -833,7 +835,7 @@ svg text {{ font-family: '{fam}', sans-serif; }}
 table.grid {{ width: 100%; border-collapse: collapse; table-layout: fixed; }}
 table.grid th, table.grid td {{ padding: 4px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }}
 table.grid th:first-child, table.grid td:first-child, table.grid .l {{ text-align: left; }}
-.placeholder {{ position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px dashed #b0b8c2; background: repeating-linear-gradient(45deg, rgba(0,0,0,.025) 0 8px, transparent 8px 16px); color: #6b7682; font-size: 13px; }}
+.placeholder {{ position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px dashed #b0b8c2; background: repeating-linear-gradient(45deg, rgba(0,0,0,.025) 0 8px, transparent 8px 16px); color: var(--muted, #6b7682); font-size: 13px; }}
 </style></head>
 <body>
 <div id="bar"><span id="tabs"></span><button id="labels" class="on" type="button" aria-pressed="true" title="Show or hide every visual ID badge, visual-type tag and wireframe note">Labels</button><span class="hint">B ID badges · T visual tags · 1–9 pages · {html.escape("aggregates only, groups under 5 hidden" if have else "no data: sample shapes")}</span></div>
@@ -857,6 +859,7 @@ const C = S.tokens.colors, FONT = (S.tokens.font || {}).family || 'Segoe UI';
 const PX = pt => (pt || 0);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const txt = (C.text || '#252423'), muted = (C.textMuted || '#605E5C'), grid = (C.border || '#E1DFDD');
+document.documentElement.style.setProperty('--muted', muted);   // placeholders read on dark themes too
 
 // ---- number format from a Power BI format string (the parts the kit uses)
 function fmt(v, f) {
@@ -1180,13 +1183,38 @@ function lineChart(s, el, w, h, area) {
       else if (i === n - 1 && n > 1) ends[1].push({x: X(i) + 8, y: Y(v) + lpx * .35, t, x_: x});
       else add(g, 'text', {...labelStyle(s, x), x: X(i), y: Y(v) - 8, 'text-anchor': 'middle'}, t); });
   });
-  [0, 1].forEach(side => ends[side].sort((a, b) => a.y - b.y).forEach((e, k, a) => { if (k && e.y - a[k - 1].y < lpx + 1) e.y = a[k - 1].y + lpx + 1;
+  [0, 1].forEach(side => ends[side].sort((a, b) => a.y - b.y).forEach((e, k, a) => { if (k && e.y - a[k - 1].y < lpx * 1.7) e.y = a[k - 1].y + lpx * 1.7;
     add(g, 'text', {...labelStyle(s, e.x_), x: e.x, y: e.y, 'text-anchor': side ? 'start' : 'end'}, e.t); }));
   const cf = CA.font || {}, ct = {'font-size': cpx, fill: CA.color || muted, 'font-family': cf.family || FONT, 'font-weight': cf.weight || 400, 'text-anchor': 'middle'};
   if (catAx) cats.forEach((c, i) => { if (n <= 14 || i % Math.ceil(n / 12) === 0) add(g, 'text', {...ct, x: X(i), y: h - lg.bottom - 6}, label(d, String(c ?? '').slice(0, 10))); });
   refLines(s, d, g, {padL, padT, W, H, band: W / Math.max(n, 1), n, cats, horizontal: false, sc: v => (v - lo) / span * H, fmt: vf});
 }
 R.lineChart = (s, el, w, h) => lineChart(s, el, w, h, false);
+// scatter: example points (never data) in the series colours, axes with titles, reference lines (v1.11.2: Rep test 1)
+R.scatterChart = (s, el, w, h) => {
+  const g = svg(w, h); el.appendChild(g);
+  const names = ((s.fields || []).filter(f => /legend|series/i.test(f.role || '')).length ? ['Group A', 'Group B', 'Group C'] : ['Items']);
+  const lg = legend(s, g, names.length > 1 ? names : [], w, h, (n, k) => color(s, n, k));
+  const padL = lg.left + 30, padR = lg.right + 10, padT = lg.top + 10, padB = lg.bottom + 22, W = Math.max(w - padL - padR, 4), H = Math.max(h - padT - padB, 4);
+  [0, .25, .5, .75, 1].forEach(t => add(g, 'line', {x1: padL, x2: padL + W, y1: padT + H * t, y2: padT + H * t, stroke: grid}));
+  let seed = 11; const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const pts = [];
+  for (let i = 0; i < 28; i++) { const k = i % names.length, x = r(), y = .15 + .7 * r();
+    pts.push([padL + x * W, padT + (1 - y) * H]);
+    add(g, 'circle', {cx: padL + x * W, cy: padT + (1 - y) * H, r: 5, fill: color(s, names[k], k), opacity: .85}); }
+  const ft = {'font-size': 12, fill: muted, 'font-family': FONT};
+  const xs = (s.fields || []).filter(f => /^x/i.test(f.role || '')), ys = (s.fields || []).filter(f => /^y/i.test(f.role || ''));
+  if (xs.length) add(g, 'text', {...ft, x: padL + W / 2, y: h - lg.bottom - 4, 'text-anchor': 'middle'}, xs[0].label);
+  if (ys.length) add(g, 'text', {...ft, x: lg.left + 12, y: padT + H / 2, 'text-anchor': 'middle', transform: `rotate(-90 ${lg.left + 12} ${padT + H / 2})`}, ys[0].label);
+  (s.refStyle || []).forEach((st, k) => { const y = padT + H * .55;            // value-axis line: where "no change" sits
+    add(g, 'line', {x1: padL, x2: padL + W, y1: y, y2: y, stroke: st.color, 'stroke-width': st.width || 1, 'stroke-dasharray': st.dash ? '5 4' : ''});
+    const lab = ((D[s.id] || {}).refLines || [])[k]; if (!lab || !lab.label) return;
+    // label placement rule: the line's left end, above or below it, wherever no point sits; never over points or past the edge
+    const lw = tw(lab.label, 12), hits = yy => pts.filter(([px, py]) => px < padL + lw + 14 && Math.abs(py - yy) < 10).length;
+    const ly = hits(y - 8) <= hits(y + 14) ? y - 6 : y + 16;
+    add(g, 'rect', {x: padL + 2, y: ly - 11, width: lw + 8, height: 15, fill: C.card || '#fff', opacity: .85, rx: 3});
+    add(g, 'text', {...ft, x: padL + 6, y: ly, 'text-anchor': 'start'}, lab.label); });
+};
 R.areaChart = (s, el, w, h) => lineChart(s, el, w, h, true);
 R.stackedAreaChart = R.areaChart;
 R.clusteredBarChart = (s, el, w, h) => axisChart(s, el, w, h, true, 'cluster');
@@ -1285,7 +1313,8 @@ function matrixGrid(s, el, w, h) {
 }
 R.tableEx = (s, el, w, h) => tableGrid(s, el, w, h, false);
 R.pivotTable = matrixGrid;
-function members(s, n) { const d = D[s.id]; if (d) return d.rows.map(r => String(r[0])); const it = s.slicer.items;
+function members(s, n) { const it = s.slicer.items; if (Array.isArray(it)) return it.map(String);   // the layout's own labels first
+  const d = D[s.id]; if (d) return d.rows.map(r => String(r[0]));
   return Array.isArray(it) ? it.map(String) : Array.from({length: typeof it === 'number' ? it : (n || 4)}, (_, i) => 'Item ' + (i + 1)); }
 // rail + panel pickers: image list (a round picture and the name per row), image cards (a picture over the name)
 function pickerTiles(s, el, w, h) {
@@ -1354,6 +1383,13 @@ const tint = C.slateTint || C.neutralTint || '#EDF0F6', good = C.good || C.teal 
 function frame(w, h, padL, padB, padT, padR) { return {padL, padB, padT, padR, W: Math.max(w - padL - padR, 4), H: Math.max(h - padT - padB, 4)}; }
 function seasonal(s, n, k) { const r = seed(s.id + (k || '')); return Array.from({length: n}, (_, i) => 50 + 25 * Math.sin(i / n * Math.PI * 2) + r() * 8); }
 function gridLines(g, f) { for (let t = 0; t <= 4; t++) { const y = f.padT + f.H * t / 4; add(g, 'line', {x1: f.padL, x2: f.padL + f.W, y1: y, y2: y, stroke: grid}); } }
+// live headline (app-visuals/live-headline.md): one sentence, left-aligned at the headline size, never a number
+P['live-headline'] = (s, el, w, h) => {
+  const d = D[s.id] || {}, c = s.card || {};
+  const t = d.preview || s.preview || 'One sentence on what this view shows';
+  el.style.justifyContent = 'center';
+  el.insertAdjacentHTML('beforeend', `<div style="font-family:'${FONT}';font-weight:600;font-size:${Math.min(c.valueSize || 22, Math.max(14, h * .36))}px;color:${c.valueColor || C.text || txt};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px">${esc(t)}</div>`);
+};
 P['range-band'] = (s, el, w, h) => {
   if (!/line|area/i.test(s.type)) return (R[s.type] || R._unknown)(s, el, w, h);
   const d = dataOf(s, 12), sr = series(d); let cats = sr.cats, lo, hi, val;
@@ -1473,10 +1509,16 @@ P['direct-labels'] = (s, el, w, h) => {
   const rg = valueRange(lo, hi, null, d, false, lo >= 0), span = (rg.hi - rg.lo) || 1;
   const n = Math.max(...ss.map(x => x.values.length)), X = i => f.padL + (n > 1 ? f.W * i / (n - 1) : f.W / 2), Y = v => f.padT + f.H - ((v ?? rg.lo) - rg.lo) / span * f.H;
   gridLines(g, f);
+  const cats = (series(d).cats || []).map(c => String(c ?? '').slice(0, 3));
+  if (s.catAxis !== false && !d.sample) cats.forEach((c, i) => add(g, 'text', {x: X(i), y: f.padT + f.H + 16, 'font-size': 11, fill: muted, 'text-anchor': 'middle'}, c));
+  if (s.valAxis !== false && !d.sample) [0, 2, 4].forEach(t => { const v = rg.lo + span * (1 - t / 4);
+    add(g, 'text', {x: f.padL - 6, y: f.padT + f.H * t / 4 + 4, 'font-size': 11, fill: muted, 'text-anchor': 'end'}, tickFmt(v, (ss[0] || {}).format, null, span / 4)); });
   const ends = [];
   ss.forEach((x, k) => { const c = color(s, x.name, k); add(g, 'polyline', {points: x.values.map((v, i) => `${X(i)},${Y(v)}`).join(' '), fill: 'none', stroke: c, 'stroke-width': 3});
     let i = x.values.length - 1; while (i > 0 && x.values[i] == null) i--; ends.push({y: Y(x.values[i]), x: X(i), c, name: x.name}); });
-  ends.sort((a, b) => a.y - b.y).forEach((e, k, a) => { if (k && e.y - a[k - 1].y < 13) e.y = a[k - 1].y + 13;
+  refLines(s, d, g, {padL: f.padL, padT: f.padT, W: f.W, H: f.H, band: f.W / Math.max(n, 1), n, cats, horizontal: false,
+    sc: v => (v - rg.lo) / span * f.H, fmt: v => tickFmt(v, (ss[0] || {}).format, null, span / 4)});   // the SLA, a target
+  ends.sort((a, b) => a.y - b.y).forEach((e, k, a) => { if (k && e.y - a[k - 1].y < 20) e.y = a[k - 1].y + 20;   // room between line-end labels
     add(g, 'text', {x: e.x + 6, y: e.y + 4, 'font-size': 12, 'font-weight': 600, fill: e.c}, String(e.name)); });
 };
 
@@ -1629,7 +1671,7 @@ function draw(s, el) {
   el.dataset.bg = b.bg || '#ffffff';
   const T = (D[s.id] || {}).titles || {};            // title measures evaluated by wireframe_data.py
   const ttl = k => b[k] && T[k] != null ? {...b[k], text: String(T[k]), measure: false} : b[k];
-  const add_t = t => t && el.insertAdjacentHTML('beforeend', `<div class="ttl" style="font-family:'${t.family}';font-weight:${t.weight};font-size:${t.size}px;color:${t.color};text-align:${t.align}${t.measure ? ';font-style:italic' : ''}">${esc(t.text)}</div>`);
+  const add_t = t => t && el.insertAdjacentHTML('beforeend', `<div class="ttl" style="font-family:'${t.family}';font-weight:${t.weight};font-size:${t.size}px;color:${t.color};text-align:${t.align}${t.measure && !t.preview ? ';font-style:italic' : ''}">${esc(t.text)}</div>`);
   const title = ttl('title'); add_t(title); add_t(ttl('subtitle'));
   const body = document.createElement('div'); body.className = 'body'; el.appendChild(body);
   body.style.display = 'flex'; body.style.flexDirection = 'column';

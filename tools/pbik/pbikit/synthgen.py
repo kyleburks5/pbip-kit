@@ -329,6 +329,8 @@ def generate(root, name, out_folder=None, notes=None):
     check_kept_rows(c, g)
     folder = pathlib.Path(out_folder) if out_folder else pathlib.Path(root) / f"{name}.SemanticModel"
     chash = content_hash(c)                       # before month_sorts sets sort-by columns in memory
+    from .synth import with_planned_columns
+    with_planned_columns(c, g)                    # the plan's calculated columns (top N + Other, bands)
     said = month_sorts(c, g)
     if notes is not None:
         notes.extend(said)
@@ -372,6 +374,8 @@ def verify(root, model_folder):
     """(errors, notes): the synthetic model against the contract slice."""
     c = load_contract(root, need_approval=False)
     g = read_json(specs(root) / "generate.json", {})
+    from .synth import with_planned_columns
+    with_planned_columns(c, g)
     m = tmdl.load(model_folder)
     errs, notes = [], []
     if not DC.is_synthetic(model_folder):

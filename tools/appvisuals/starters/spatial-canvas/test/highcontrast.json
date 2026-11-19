@@ -1,0 +1,53 @@
+{
+ "_note": "High contrast: host colours only.",
+ "viewport": {
+  "width": 960,
+  "height": 600
+ },
+ "highContrast": true,
+ "objects": {
+  "honest": {
+   "minSample": 11,
+   "mode": "fade"
+  },
+  "space": {
+   "shape": "court",
+   "start": "zones"
+  }
+ },
+ "data": {
+  "rowsFile": "data/shots.json",
+  "roles": {
+   "Item": "Shot",
+   "Zone": "Zone",
+   "Group": "Kind",
+   "X": "X",
+   "Y": "Y",
+   "Outcome": "Made"
+  },
+  "measures": [
+   "X",
+   "Y",
+   "Outcome"
+  ],
+  "formats": {
+   "X": "0.0",
+   "Y": "0.0",
+   "Made": "0"
+  }
+ },
+ "steps": [
+  {
+   "settle": true
+  },
+  {
+   "shot": "high-contrast",
+   "golden": 0.02
+  },
+  {
+   "expect": {
+    "noRenderFailures": true
+   }
+  }
+ ]
+}

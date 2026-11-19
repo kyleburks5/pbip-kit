@@ -19,7 +19,8 @@ import { Motion, Mark } from "./kit/motion";
 import { Layers, MarkLayer, Camera } from "./kit/layers";
 import { records, fetchMore, RecordSet, DataRecord } from "./kit/data";
 import { Interaction, Selectable } from "./kit/interaction";
-import { applyTheme, pills, stateMessage, clearState, chromeBottom, clearChip, Later } from "./kit/scene";
+import { applyTheme, pills, stateMessage, clearState, chromeBottom, clearChip, Later, LoadingGate } from "./kit/scene";
+import { Quality } from "./kit/quality";
 import { registerFonts } from "./kit/fonts";
 import { Unit, Box, Cell, Placed, Order, orderOf, grid, columns, scatter, clusters } from "./kit/patterns/layouts";
 import { emphasis } from "./kit/patterns/emphasis";
@@ -41,6 +42,8 @@ const ICON: Record<string, string> = { grid: "grid", columns: "columns", scatter
 
 export class Visual implements IVisual {
     private meter: FrameMeter;
+    private quality: Quality;
+    private loading = new LoadingGate();
     private gate = new UpdateGate();
     private ready = false;
     private later = new Later();
@@ -79,6 +82,16 @@ export class Visual implements IVisual {
         this.layers = new Layers(options.element);
         this.meter = new FrameMeter(this.layers.root.node());
         this.markLayer = new MarkLayer(this.layers);
+        // automatic quality step-down when moves run slow (kit/quality.ts): sharpness, stagger, renderer switch points
+        this.quality = new Quality((t, why) => {
+            this.layers.maxRatio = t.maxRatio;
+            this.layers.resize(this.layers.width, this.layers.height);
+            this.markLayer.svgMax = t.svgMax;
+            this.markLayer.canvasMax = t.canvasMax;
+            this.meter.note(why);
+        });
+        this.quality.expose(this.layers.root.node());
+        this.motion.onFrame = gap => this.quality.frame(gap);
         this.layers.svg.append("g").classed("kit-labels", true);          // above the brush: labels are clickable
         this.layers.html.append("div").classed("kit-top", true);
         this.headlineEl = this.layers.html.append("div").classed("kit-headline", true).attr("aria-live", "polite").node();
@@ -169,7 +182,8 @@ export class Visual implements IVisual {
             this.colors = new ColorScale(this.theme, this.colors);
             this.motion.options = {
                 animate: s.motion.animate.value, duration: s.motion.speed.value,
-                easing: String(s.motion.easing.value.value), stagger: s.motion.stagger.value, reduce: s.motion.reduceMotion.value
+                easing: String(s.motion.easing.value.value), stagger: s.motion.stagger.value * this.quality.current.stagger,
+                reduce: s.motion.reduceMotion.value
             };
             this.layers.resize(options.viewport.width, options.viewport.height);
             applyTheme(this.layers.root, this.theme, s.layout.padding.value, s.layout.gap.value);
@@ -191,6 +205,12 @@ export class Visual implements IVisual {
                     this.host.eventService.renderingFinished(options);
                     return;
                 }
+            }
+            // Desktop is still querying: quiet shapes, not "No data" (kit/scene.ts LoadingGate)
+            if (this.loading.wait(this.layers.html, "dots", this.t("Loading", "Loading"), !!dv || this.ready,
+                () => this.update({ ...options, dataViews: [] }))) {
+                this.host.eventService.renderingFinished(options);
+                return;
             }
             if (!this.data.roles.has("Item")) {
                 this.markLayer.active.clear();

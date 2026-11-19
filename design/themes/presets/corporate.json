@@ -32,5 +32,9 @@
   },
   "control": {
     "radius": 4
+  },
+  "card": {
+    "_note": "KPI cards: label, value, comparison and chart aligned (polish follows this).",
+    "align": "left"
   }
 }

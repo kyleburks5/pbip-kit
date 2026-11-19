@@ -110,6 +110,7 @@ Step 1 facts about the toolchain:
 | --- | --- |
 | `tools/appvisuals/` (repo) | pins (above); `template/` the app-visual starter (TypeScript + D3, from the Dot Plot, NOTICE.md); `harness/` the offline fake host (README.md lists every step); `deneb/` the Deneb starter spec and its test |
 | `docs/patterns/app-visuals/` (repo, step 3) | "Use when" pages and reusable modules (morph, unit chart, drill zoom, pills, range select, headline, focus) |
+| tools/appvisuals/starters/<name>/ | whole visuals built on the template (today `spatial-canvas`): `pbik visual new <name> --from <starter>` copies the template, then the starter's visual, settings, capabilities and harness scenarios |
 | a project's `visuals/<name>/` | that visual's source, made by `pbik visual new` (committed with the project), with `test/*.json` harness scenarios |
 | a project's `design/deneb/<name>.vl.json` | a Deneb chart's spec and `<name>.test.json` |
 | `<tools>\builds\<hash>-<name>\` | the build copy, the `node_modules` junction, `dist\*.pbiviz`, `harness\visual.js/.css`, `kit-build.json` (never in the repo) |

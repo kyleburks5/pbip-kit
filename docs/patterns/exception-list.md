@@ -14,10 +14,11 @@
 - Next to a summary chart: the chart shows normal, the list names the exceptions.
 
 ## Design
-- Title from a measure with the count: "4 stores below target".
+- Title from a measure with the count and the rule's threshold: "4 stores below target", "3 claims over 30 days".
 - Columns: member, the gap (signed, coloured by severity), the value, the baseline, and why ("Below target 3 months").
 - Sorted by severity. A small `red` / `slate` status chip or symbol per row; never colour alone.
-- Empty state: "No exceptions" (a card shown when the count is 0, or the title measure says it).
+- Empty state: a plain sentence with the rule, never a blank table: "No stores below target." (the title measure
+  says it when the count is 0). Small groups follow [honest data](honest-data.md).
 
 ## Build (visual-method ladder)
 | Step | How | Draws | Status |

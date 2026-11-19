@@ -15,6 +15,20 @@
   the host's selected colour as the stroke.
 - Colour is never the only signal: the headline says how many are selected.
 
+## Docked readout (details beside, never over)
+
+- Hovering or focusing an item shows its details in a readout docked at the visual's right edge (or a panel beside a
+  native visual), not a pop-up over the marks: the data stays visible and the reader can compare. The readout lists
+  the item, its count, its rate and what it is judged against ("Usual for Outpatient 61-86%", "+10 points vs
+  benchmark"), with the small-sample note from [honest data](../honest-data.md).
+- The drawing is framed in what the readout leaves (`Layers.insets`, `Interaction.fit`): nothing sits under it.
+- **Idle standout**: while nothing is hovered or picked, the readout (and the headline) shows the standout: the item
+  with the best score among those with enough rows (`standout()` in honest.ts; none qualify: none is shown). Native:
+  a card bound to a "standout" text measure, and the matching item's colour by a `cf` measure. Example: a clinic
+  floor's best room on time; the region with the largest gain this month.
+- Native route: a card or table in a panel beside the chart, filtered by the chart's selection (Edit interactions:
+  Filter), with its empty state showing the standout measure.
+
 ## Build
 
 | Route | What it draws | Pick it when |

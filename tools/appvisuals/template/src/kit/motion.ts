@@ -17,6 +17,8 @@ export interface MarkState {
     color: string;
     alpha: number;
     stroke?: string;
+    /** Encode with shape as well as colour: "ring" draws the mark hollow (a miss, an estimate, a not-yet). */
+    shape?: "disc" | "ring";
 }
 
 export interface Mark extends MarkState {
@@ -52,8 +54,19 @@ export class Motion {
     private current = new Map<string, MarkState>();
     private running: Timer | null = null;
     private finishing: (() => void) | null = null;
+    private lastFrame = 0;
+    /** Each animation frame of a move gets the gap since the last one (ms): the quality governor listens (quality.ts). */
+    onFrame: ((gapMs: number) => void) | null = null;
 
     constructor(public options: MotionOptions) { }
+
+    private beat(): void {
+        const now = performance.now();
+        if (this.lastFrame && this.onFrame) {
+            this.onFrame(now - this.lastFrame);
+        }
+        this.lastFrame = now;
+    }
 
     get reduced(): boolean {
         return !this.options.animate || this.options.reduce || systemPrefersReducedMotion() || this.options.duration <= 0;
@@ -125,7 +138,9 @@ export class Motion {
         const colors = all.map((t, i) => (start[i].color === t.color ? null : interpolateRgb(start[i].color, t.color)));
         return new Promise<void>(resolve => {
             this.finishing = () => { end(); resolve(); };
+            this.lastFrame = 0;
             this.running = timer(elapsed => {
+                this.beat();
                 const frame: Mark[] = new Array(all.length);
                 for (let i = 0; i < all.length; i++) {
                     const a = start[i], b = all[i];
@@ -137,7 +152,8 @@ export class Motion {
                         r: Math.max(0, a.r + (b.r - a.r) * p),
                         alpha: a.alpha + (b.alpha - a.alpha) * p,
                         color: colors[i] ? colors[i](p) : b.color,
-                        stroke: b.stroke
+                        stroke: b.stroke,
+                        shape: p < 0.5 ? a.shape : b.shape
                     };
                 }
                 draw(frame);
@@ -166,8 +182,10 @@ export class Motion {
             return Promise.resolve();
         }
         const ez = this.easing();
+        this.lastFrame = 0;
         return new Promise<void>(resolve => {
             const t = timer(elapsed => {
+                this.beat();
                 const p = ez(Math.min(1, elapsed / duration));
                 onFrame(a + (b - a) * p);
                 if (p >= 1) {
@@ -176,6 +194,61 @@ export class Motion {
                 }
             });
         });
+    }
+}
+
+/**
+ * Frame-rate independent smoothing: move `current` towards `target` by the share that `rate` (per second) gives over
+ * `dtMs`, so a follow move looks the same at 30 and at 120 frames a second (current + (target - current) * (1 - e^(-rate dt))).
+ */
+export function damp(current: number, target: number, rate: number, dtMs: number): number {
+    return current + (target - current) * (1 - Math.exp(-rate * Math.max(0, dtMs) / 1000));
+}
+
+/**
+ * A value that follows a moving target smoothly (a camera following a selection, a highlight's strength, a readout
+ * sliding beside the pointer). set() a new target; it runs its own timer until it arrives, then stops.
+ * Reduce motion: it jumps.
+ */
+export class Follow {
+    value: number[];
+    private target: number[];
+    private t: Timer | null = null;
+    private last = 0;
+    constructor(start: number[], private onChange: (v: number[]) => void, private rate = 10, private reduced: () => boolean = () => false) {
+        this.value = start.slice();
+        this.target = start.slice();
+    }
+    set(target: number[]): void {
+        this.target = target.slice();
+        if (this.reduced()) {
+            this.stop();
+            this.value = target.slice();
+            this.onChange(this.value);
+            return;
+        }
+        if (!this.t) {
+            this.last = 0;
+            this.t = timer(elapsed => {
+                const dt = this.last ? elapsed - this.last : 16;
+                this.last = elapsed;
+                this.value = this.value.map((v, i) => damp(v, this.target[i], this.rate, dt));
+                const done = this.value.every((v, i) => Math.abs(v - this.target[i]) < 1e-3 * (1 + Math.abs(this.target[i])));
+                if (done) {
+                    this.value = this.target.slice();
+                }
+                this.onChange(this.value);
+                if (done) {
+                    this.stop();
+                }
+            });
+        }
+    }
+    stop(): void {
+        if (this.t) {
+            this.t.stop();
+            this.t = null;
+        }
     }
 }
 

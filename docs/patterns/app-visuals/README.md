@@ -22,6 +22,7 @@ visual made with `pbik visual new` has them; `pbik visual refresh` brings an old
 | [Map](map.md) (`map`) | Where are things, and which places stand out? | kit custom visual (native: filled / shape map) | the `state-map` visual: us-atlas + topojson-client + flubber |
 | [Network and org chart](network-org.md) (`network-org`) | Who belongs where, and how do they group another way? | kit custom visual (native: decomposition tree) | the `org-chart` visual: d3-flextree + d3-force |
 | [3D scene](3d-scene.md) (`3d-blocks`) | How big is each place, how is it doing, what is inside? | kit custom visual (Three.js) | the `site-blocks` visual |
+| [Spatial canvas](../spatial-canvas.md) (`spatial-canvas`) | Where in a space do things happen, which areas run hot or cold, and which ranks first? | kit custom visual (native: scatter over a picture) | `spatial.ts` + `honest.ts`; the `spatial-canvas` starter |
 
 ## Page polish (no custom visual needed)
 
@@ -77,5 +78,17 @@ these patterns and routes.
   show it when they land; the harness `measure` / `perf` steps report frozen frames (over 50 ms) per move.
 - Motion always has an off switch (the visual's Reduce motion, and the system setting) and never carries meaning by
   itself: the end state says everything.
+- Slow machines: every kit visual steps its own quality down when moves run slow (kit/quality.ts: an average frame
+  over 20 ms steps one tier, over 33 ms two; sharpness, stagger and the SVG / Canvas / WebGL switch points), never
+  back up in a session and never changing what is shown. The harness checks it with `cpuThrottle` and `qualityAtLeast`.
+- Loading: Desktop's empty first update draws quiet placeholder shapes in the visual's own layout
+  (`placeholder()`, `LoadingGate` in scene.ts), never "No data"; a second empty update means nothing is bound.
+  Harness: `holdEmpty` and the `load` step.
+- Follow moves (a camera following a pick, a highlight easing in) use `damp()` / `Follow` (motion.ts): frame-rate
+  independent, the same at 30 and 120 frames a second; reduce motion jumps.
+- Framing keeps clear of the visual's own header and docked panels: set `Layers.insets`; `Interaction.fit` (and
+  `frameMark`, `flyTo`) centre in what is left.
+- Encode with shape as well as colour: a mark's `shape: "ring"` draws it hollow in SVG, Canvas and WebGL (done vs
+  not, actual vs estimate); see [honest data](../honest-data.md).
 - Colours come from the theme or tokens (an SVG measure names the token in a comment); nothing is a fixed colour.
 - Numbers drawn in an image or written in a headline are part of the numbers audit (`svg` and text entries).

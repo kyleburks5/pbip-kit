@@ -33,6 +33,13 @@ export class Layers {
     width = 0;
     height = 0;
     ratio = 1;
+    /** The quality tier's cap on device pixels per CSS pixel (quality.ts); 3 = full. */
+    maxRatio = 3;
+    /**
+     * The safe area: what the visual's own header, docked panels and legends cover (px from each edge). Camera
+     * framing (Interaction.fit) centres in what is left, so a framed item never sits under a panel.
+     */
+    insets = { top: 0, right: 0, bottom: 0, left: 0 };
 
     constructor(host: HTMLElement) {
         this.root = select(host).append("div").classed("kit-root", true);
@@ -60,7 +67,7 @@ export class Layers {
     resize(width: number, height: number): void {
         this.width = Math.max(0, Math.floor(width));
         this.height = Math.max(0, Math.floor(height));
-        this.ratio = Math.min(3, window.devicePixelRatio || 1);
+        this.ratio = Math.min(this.maxRatio, window.devicePixelRatio || 1);
         for (const c of [this.gl, this.canvas]) {
             const w = Math.floor(this.width * this.ratio), h = Math.floor(this.height * this.ratio);
             if (c.width !== w || c.height !== h) {     // setting a canvas size wipes it (and a WebGL one reallocates):
@@ -86,11 +93,12 @@ export class SvgMarks implements MarkRenderer {
             .classed("kit-mark", true)
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
-            .attr("r", d => d.r)
-            .attr("fill", d => d.color)
+            .attr("r", d => (d.shape === "ring" ? Math.max(0, d.r - 1 / cam.k) : d.r))
+            .attr("fill", d => (d.shape === "ring" ? "none" : d.color))
             .attr("fill-opacity", d => d.alpha)
-            .attr("stroke", d => d.stroke || null)
-            .attr("stroke-width", d => (d.stroke ? 1.5 / cam.k : null));
+            .attr("stroke", d => (d.shape === "ring" ? d.color : d.stroke || null))
+            .attr("stroke-opacity", d => (d.shape === "ring" ? d.alpha : null))
+            .attr("stroke-width", d => (d.shape === "ring" ? 2 / cam.k : d.stroke ? 1.5 / cam.k : null));
     }
     clear(): void {
         this.layers.marksG.selectAll("circle.kit-mark").remove();
@@ -111,8 +119,15 @@ export class CanvasMarks implements MarkRenderer {
                 continue;
             }
             ctx.globalAlpha = m.alpha;
-            ctx.fillStyle = m.color;
             ctx.beginPath();
+            if (m.shape === "ring") {                           // hollow: shape carries the meaning, not colour alone
+                ctx.arc(m.x, m.y, Math.max(0, m.r - 1 / cam.k), 0, Math.PI * 2);
+                ctx.lineWidth = 2 / cam.k;
+                ctx.strokeStyle = m.color;
+                ctx.stroke();
+                continue;
+            }
+            ctx.fillStyle = m.color;
             ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
             ctx.fill();
             if (m.stroke) {
@@ -131,10 +146,11 @@ export class CanvasMarks implements MarkRenderer {
     }
 }
 
-const VS = `attribute vec2 p; attribute float s; attribute vec4 c; uniform vec2 v; uniform vec3 cam; uniform float ratio;
-varying vec4 vc; void main(){ vec2 q = (p * cam.x + cam.yz) / v * 2.0 - 1.0; gl_Position = vec4(q.x, -q.y, 0.0, 1.0);
-gl_PointSize = s * 2.0 * cam.x * ratio; vc = c; }`;
-const FS = `precision mediump float; varying vec4 vc; void main(){ vec2 d = gl_PointCoord - 0.5; if (dot(d, d) > 0.25) discard;
+const VS = `attribute vec2 p; attribute float s; attribute vec4 c; attribute float h; uniform vec2 v; uniform vec3 cam; uniform float ratio;
+varying vec4 vc; varying float vh; varying float vpx; void main(){ vec2 q = (p * cam.x + cam.yz) / v * 2.0 - 1.0; gl_Position = vec4(q.x, -q.y, 0.0, 1.0);
+gl_PointSize = s * 2.0 * cam.x * ratio; vc = c; vh = h; vpx = gl_PointSize; }`;
+const FS = `precision mediump float; varying vec4 vc; varying float vh; varying float vpx; void main(){ vec2 d = gl_PointCoord - 0.5;
+float r2 = dot(d, d); if (r2 > 0.25) discard; if (vh > 0.5) { float inner = 0.5 - 2.0 / max(vpx, 4.0); if (r2 < inner * inner) discard; }
 gl_FragColor = vec4(vc.rgb * vc.a, vc.a); }`;
 
 function rgba(color: string, alpha: number): [number, number, number, number] {
@@ -198,10 +214,10 @@ export class GlMarks implements MarkRenderer {
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        const data = new Float32Array(marks.length * 7);
+        const data = new Float32Array(marks.length * 8);
         marks.forEach((m, i) => {
             const c = rgba(m.color, m.alpha);
-            data.set([m.x, m.y, m.r, c[0], c[1], c[2], c[3]], i * 7);
+            data.set([m.x, m.y, m.r, c[0], c[1], c[2], c[3], m.shape === "ring" ? 1 : 0], i * 8);
         });
         gl.useProgram(this.prog);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
@@ -209,11 +225,12 @@ export class GlMarks implements MarkRenderer {
         const at = (name: string, size: number, offset: number) => {
             const loc = gl.getAttribLocation(this.prog, name);
             gl.enableVertexAttribArray(loc);
-            gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 28, offset);
+            gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 32, offset);
         };
         at("p", 2, 0);
         at("s", 1, 8);
         at("c", 4, 12);
+        at("h", 1, 28);
         gl.uniform2f(gl.getUniformLocation(this.prog, "v"), this.layers.width, this.layers.height);
         gl.uniform3f(gl.getUniformLocation(this.prog, "cam"), cam.k, cam.x, cam.y);
         gl.uniform1f(gl.getUniformLocation(this.prog, "ratio"), this.layers.ratio);

@@ -54,3 +54,47 @@ export function headline(h: HeadlineInput): string {
     }
     return fill(h.t("Headline_Items", "{0}."), count(total, h.t("Item", "item")));
 }
+
+export interface GapMetric {
+    label: string;                  // "first-visit resolution"
+    better: "high" | "low";
+    format: (v: number) => string;
+    a: number | null;               // side A's value
+    b: number | null;               // side B's value
+    norm?: [number, number];        // the range both are judged on (all members' low and high); default: the two values
+}
+
+export interface GapSides { a: string; b: string }
+
+/**
+ * The biggest gap between two members across several measures, in one sentence: "North is 2.3x South on first-visit
+ * resolution" (a ratio when both are positive and higher is better), else "North leads South on wait time by 4 days".
+ * Measures are compared on a shared 0..1 scale (each measure's own range), so units don't decide the pick. Null when
+ * no measure separates them (then say nothing rather than something weak).
+ */
+export function biggestGap(sides: GapSides, metrics: GapMetric[], t: (key: string, english: string) => string = (_k, e) => e): string | null {
+    let best: { m: GapMetric; gap: number; aWins: boolean } | null = null;
+    for (const m of metrics) {
+        if (m.a == null || m.b == null || !Number.isFinite(m.a) || !Number.isFinite(m.b)) {
+            continue;
+        }
+        const [lo, hi] = m.norm || [Math.min(m.a, m.b), Math.max(m.a, m.b)];
+        const span = hi - lo || Math.max(Math.abs(m.a), Math.abs(m.b), 1);
+        const na = (m.a - lo) / span, nb = (m.b - lo) / span;
+        const gap = Math.abs(na - nb);
+        const aWins = m.better === "high" ? m.a >= m.b : m.a <= m.b;
+        if (gap > 0.001 && (!best || gap > best.gap)) {
+            best = { m, gap, aWins };
+        }
+    }
+    if (!best) {
+        return null;
+    }
+    const { m, aWins } = best;
+    const w = aWins ? sides.a : sides.b, l = aWins ? sides.b : sides.a;
+    const wv = aWins ? m.a : m.b, lv = aWins ? m.b : m.a;
+    if (m.better === "high" && wv > 0 && lv > 0 && wv / lv >= 1.1 && wv / lv < 100) {
+        return fill(t("Headline_GapRatio", "{0} is {1}× {2} on {3}."), w, (wv / lv).toFixed(1), l, m.label);
+    }
+    return fill(t("Headline_GapLead", "{0} leads {1} on {2} by {3}."), w, l, m.label, m.format(Math.abs(wv - lv)));
+}

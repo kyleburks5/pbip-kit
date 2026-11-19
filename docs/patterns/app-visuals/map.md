@@ -34,6 +34,15 @@ data) read with `topojson-client` (ISC), drawn with `d3-geo` `geoPath()`; flubbe
 the cartogram. The map adds about 60 KB to the package (165 KB in all). Other shape sets (world-atlas countries,
 us-atlas counties) work the same way; bundle only the one a visual uses.
 
+## Map to ranked row, and clickable areas anywhere
+
+- **Map → ranked row**: each area's own shape slides out of the map into a row sorted by its value, with its rank,
+  name and value under it, and back again (`lineup()` in kit/patterns/spatial.ts works on any set of shapes with
+  boxes: states, counties, service areas, rooms). Use it when "where" and "which is best" are both questions; one
+  pill switches them. Health example: counties by uninsured rate; sales: regions by growth.
+- Spaces that aren't geographic (a court, a body outline, a floor plan, a care pathway) use the
+  [spatial canvas](../spatial-canvas.md), which shares the zone, click-to-filter and ranked-row code with this map.
+
 ## Checks
 
 Harness: `map-to-bubbles` and `bubbles-to-dots` frame strips, a state click (`clickSelector`

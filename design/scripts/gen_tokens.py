@@ -303,10 +303,15 @@ def build_tokens(base, colors, mode, source, preset=None, ref=None, changes=(), 
                              "(warning as text), selected + onSelected. teal*/red*/slate*/accent/neutral follow "
                              "their roles so layouts written for the clean palette re-skin unchanged."),
                    **colors}
-    series = ["brand", "badMark", "second", "primary" if K.contrast(colors["primary"], colors["card"]) >= 3 else "text",
-              "brandLight", "secondLight"] + [f"series{i + 1}" for i in range(extras)]
-    t.setdefault("chart", {}).update({"_note": "Series order for the theme's dataColors, as names from colors.",
-                                      "series": series[:4] + series[6:] + series[4:6]})
+    # groups get neutral colours: brand, second, the preset's extras, then the darker roles; the good and bad colours
+    # mean something, so a group never gets red early (v1.11.2, Rep test 1 feedback)
+    series = ["brand", "second"] + [f"series{i + 1}" for i in range(extras)] + \
+        ["primary" if K.contrast(colors["primary"], colors["card"]) >= 3 else "text", "brandLight", "secondLight", "badMark"]
+    if ((preset or {}).get("emphasis") or {}).get("rule") == "one-accent":
+        accent = ("brand", "brandLight")                              # the accent and its own lighter shade
+        series = [x for x in series if x not in accent] + list(accent)   # mark the highlight only, never a group
+    t.setdefault("chart", {}).update({"_note": "Series order for the theme's dataColors, as names from colors: neutral first, "
+                                               "badMark last.", "series": series})
     t["tags"] = {"_note": "Wireframe tags (press T): native / svg / html; text 4.5:1 on its fill.",
                  "native": {"text": "warning", "fill": "secondTint"},
                  "svg": {"text": "brandText", "fill": "brandTint"},
@@ -317,9 +322,14 @@ def build_tokens(base, colors, mode, source, preset=None, ref=None, changes=(), 
                    "neutral": {"text": "textMuted", "fill": "neutralTint"},
                    "brand": {"text": "brandText", "fill": "brandTint"}}
     for src in (preset or {}, ref or {}):
-        for key in ("font", "container", "control", "fontPt"):
+        for key in ("font", "container", "control", "fontPt", "card", "emphasis"):
             if isinstance(src.get(key), dict):
                 t.setdefault(key, {}).update(src[key])
+    if preset is not None:                      # a preset's own font families and emphasis replace any earlier ones
+        if "families" not in (preset.get("font") or {}):
+            t.get("font", {}).pop("families", None)
+        if "emphasis" not in preset:
+            t.pop("emphasis", None)
     if mode == "dark":                          # a dark shadow on a dark canvas: deeper and darker
         sh = t.setdefault("container", {})
         sh.setdefault("shadow", "0 1px 2px rgba(0,0,0,0.30), 0 6px 16px rgba(0,0,0,0.35)")

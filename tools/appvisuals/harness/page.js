@@ -56,9 +56,12 @@
       if (cfg.emptyFirst !== false) {
         state.visual.update({ dataViews: [], viewport: state.viewport, type: 2, viewMode: 1, editMode: 0, operationKind: 0, isInFocus: false, jsonFilters: [] });
       }
+      // `holdEmpty`: stay on the empty (loading) update until a `load` step, to see what the visual draws meanwhile
+      if (cfg.holdEmpty && cfg.emptyFirst !== false) return { rows: 0 };
       update();
       return { rows: state.rowsShown };
     },
+    load() { update(); return { rows: state.rowsShown }; },
     setObjects(objects) { state.objects = Object.assign({}, state.objects, objects); update(4); },
     /** A bookmark: what Power BI keeps for a visual (filterState properties, its filter, its selection). */
     saveBookmark(name) {

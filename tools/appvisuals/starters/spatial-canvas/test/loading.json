@@ -1,0 +1,61 @@
+{
+ "_note": "Desktop's empty first update: quiet placeholder shapes, then the space.",
+ "viewport": {
+  "width": 960,
+  "height": 600
+ },
+ "holdEmpty": true,
+ "objects": {
+  "honest": {
+   "minSample": 11,
+   "mode": "fade"
+  }
+ },
+ "data": {
+  "rowsFile": "data/shots.json",
+  "roles": {
+   "Item": "Shot",
+   "Zone": "Zone",
+   "Group": "Kind",
+   "X": "X",
+   "Y": "Y",
+   "Outcome": "Made"
+  },
+  "measures": [
+   "X",
+   "Y",
+   "Outcome"
+  ],
+  "formats": {
+   "X": "0.0",
+   "Y": "0.0",
+   "Made": "0"
+  }
+ },
+ "steps": [
+  {
+   "shot": "loading",
+   "golden": 0.02
+  },
+  {
+   "expect": {
+    "text": ""
+   }
+  },
+  {
+   "load": true
+  },
+  {
+   "expect": {
+    "noRenderFailures": true,
+    "state": {
+     "view": "zones"
+    }
+   }
+  },
+  {
+   "shot": "loaded",
+   "golden": 0.02
+  }
+ ]
+}

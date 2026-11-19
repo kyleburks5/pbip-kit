@@ -50,6 +50,12 @@ function generate(g) {
 const data = Object.assign({}, sc.data);
 if (data.generate) data.rows = generate(data.generate);
 if (data.rowsFile) data.rows = JSON.parse(fs.readFileSync(abs(data.rowsFile), "utf8"));
+// `repeat`: {n, key, jitter: {field: amount}}: n copies of the rows (key made unique, fields nudged), a heavy page
+if (data.repeat) {
+  const { n, key, jitter = {} } = data.repeat; let seed = 3; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  data.rows = Array.from({ length: n }, (_, i) => data.rows.map(row => Object.assign({}, row, { [key]: `${row[key]}-${i}` },
+    Object.fromEntries(Object.entries(jitter).map(([f, a]) => [f, Math.round((row[f] + (r() - 0.5) * 2 * a) * 100) / 100]))))).flat();
+}
 const theme = sc.theme ? (typeof sc.theme === "string" ? JSON.parse(fs.readFileSync(abs(sc.theme), "utf8")) : sc.theme) : {};
 
 // ---------------------------------------------------------------- run
@@ -68,6 +74,9 @@ async function runOnce(record) {
   if (record) ctxOpts.recordVideo = { dir: outDir, size: ctxOpts.viewport };
   const ctx = await browser.newContext(ctxOpts);
   const page = await ctx.newPage();
+  // `cpuThrottle`: slow the page's CPU (Chrome DevTools throttling, e.g. 6 = six times slower) to see a visual's
+  // quality step-down (kit/quality.ts) take over, as on a slow laptop
+  if (sc.cpuThrottle) { const cdp = await ctx.newCDPSession(page); await cdp.send("Emulation.setCPUThrottlingRate", { rate: sc.cpuThrottle }); }
   // no network: anything other than the local files is blocked and listed (a visual must not call out)
   await page.route("**/*", route => {
     const u = route.request().url();
@@ -100,7 +109,7 @@ async function runOnce(record) {
     await page.addStyleTag({ path: abs(sc.bundle.css) });
     await page.addScriptTag({ path: abs(sc.bundle.js) });
     await page.evaluate(cfg => window.harness.loadVisual(cfg), { guid: sc.bundle.guid, data, objects: sc.objects || {}, theme, viewport,
-      highContrast: !!sc.highContrast, window: data.window || 0, allowInteractions: sc.allowInteractions, roundTrip: sc.roundTrip, emptyFirst: sc.emptyFirst });
+      highContrast: !!sc.highContrast, window: data.window || 0, allowInteractions: sc.allowInteractions, roundTrip: sc.roundTrip, emptyFirst: sc.emptyFirst, holdEmpty: sc.holdEmpty });
   }
   await settle();
 
@@ -218,6 +227,7 @@ async function runOnce(record) {
         if (t.click3d) { const xy = await page.evaluate(n => document.querySelector("#harness-visual .kit-root").kitProject(n), t.click3d); await page.mouse.click(b.x + xy[0], b.y + xy[1]); }
         else if (t.clickText) await page.locator("#harness-visual").getByText(t.clickText, { exact: true }).first().click();
         else if (t.clickSelector) await page.locator(`#harness-visual ${t.clickSelector}`).nth(t.index || 0).click({ force: true });
+        else if (t.pill) await page.getByRole("tab", { name: t.pill }).click();
         for (let ms = 0; ms < (s.ms || 700); ms += (s.every || 25)) { await tick(s.every || 25); samples.push(await ink()); }
         const end = samples.at(-1) ?? start, low = Math.min(...samples);
         report.transitions = (report.transitions || []).concat({ name: s.name || JSON.stringify(t), start, end, low, ratio: Math.round(low / Math.max(1, Math.min(start, end)) * 100) / 100, samples });
@@ -276,6 +286,7 @@ async function runOnce(record) {
         }, [b.x + s.pinch.at[0], b.y + s.pinch.at[1], s.pinch.scale || 2]);
       }
       else if (s.wait != null) await tick(s.wait);
+      else if (s.load) { await page.evaluate(() => window.harness.load()); await settle(); }
       else if (s.settle) await settle();
       else if (s.pill) { await page.getByRole("tab", { name: s.pill }).click(); }
       else if (s.clickText) { await page.locator("#harness-visual").getByText(s.clickText, { exact: true }).first().click({ modifiers: mods(s) }); }
@@ -341,7 +352,7 @@ async function runOnce(record) {
             const head = root.querySelector(".kit-headline");
             if (head && head.textContent.trim()) { const rg = document.createRange(); rg.selectNodeContents(head); add("headline", rg.getBoundingClientRect()); }
             root.querySelectorAll(".kit-top > *").forEach((el, i) => add(`top row ${el.className || el.tagName} ${i}`, el.getBoundingClientRect()));
-            root.querySelectorAll(".kit-card, .kit-detail3d").forEach((el, i) => { if (getComputedStyle(el).display !== "none") add(`panel ${i}`, el.getBoundingClientRect()); });
+            root.querySelectorAll(".kit-card, .kit-detail3d, .kit-readout").forEach((el, i) => { if (getComputedStyle(el).display !== "none") add(`panel ${i}`, el.getBoundingClientRect()); });
             const cut = Math.max(0, ...boxes.map(b => b.b));
             root.querySelectorAll("svg text, .kit-label3d").forEach(el => {
               const cs = getComputedStyle(el);
@@ -381,6 +392,7 @@ async function runOnce(record) {
           const tooSmall = small.filter(([, px]) => px < e.minTextPx);
           res.push([`all text at least ${e.minTextPx} px`, !tooSmall.length, tooSmall.slice(0, 6).concat([[`${small.length} texts`, Math.min(...small.map(x => x[1]))]])]);
         }
+        if (e.qualityAtLeast != null) { const q = await page.evaluate(() => { const r = document.querySelector("#harness-visual .kit-root"); return r && r.kitQuality ? r.kitQuality() : null; }); res.push([`quality stepped down to tier ${e.qualityAtLeast} or lower`, !!q && q.tier >= e.qualityAtLeast, q]); }
         if (e.smooth) {
           // the last `perf` / `measure` result: no frame over e.smooth.longest ms and under e.smooth.frozen % frozen
           const m = (report.perf || []).at(-1) || {};

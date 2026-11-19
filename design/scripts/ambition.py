@@ -17,7 +17,7 @@ PARTS = ("baseline", "normal", "exception", "partial")
 def headline_issues(visuals):
     out = []
     for v in visuals:
-        if v.get("type") not in HEADLINE or not v.get("bindings") or v.get("pattern") == "freshness-line":
+        if v.get("type") not in HEADLINE or not v.get("bindings") or v.get("pattern") in ("freshness-line", "live-headline"):   # a sentence, not a number
             continue
         values = [x for k, b in v["bindings"].items() for x in (b if isinstance(b, list) else [b])]
         has_ref = bool((v.get("referenceLabels") or {}).get("labels"))

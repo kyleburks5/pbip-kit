@@ -235,4 +235,75 @@ export function clearState(parent: Div): void {
     parent.selectAll(".kit-state").remove();
 }
 
+export type PlaceholderShape = "dots" | "bars" | "space" | "cards";
+
+/**
+ * Loading: Desktop sends an empty update (no data view) while it queries. Draw quiet placeholder shapes in the
+ * visual's own layout (dots, bars, a space with zones, cards) instead of a blank box or a "No data" message; the
+ * real drawing replaces them on the next update. Static under reduce motion; never shown once rows have arrived.
+ */
+export function placeholder(parent: Div, shape: PlaceholderShape, label = "Loading"): Div {
+    parent.selectAll(".kit-skeleton").remove();
+    const s = parent.append("div").classed("kit-skeleton kit-ui", true).attr("role", "status").attr("aria-label", label)
+        .attr("data-shape", shape);
+    const box = (cls: string, l: number, t: number, w: number, h: number) => s.append("div").classed(`kit-sk ${cls}`, true)
+        .style("left", `${l}%`).style("top", `${t}%`).style("width", `${w}%`).style("height", `${h}%`);
+    box("kit-sk-line", 4, 5, 34, 5);
+    box("kit-sk-line", 4, 13, 20, 4);
+    if (shape === "bars") {
+        [62, 48, 40, 31, 22, 15].forEach((w, i) => box("kit-sk-bar", 4, 24 + i * 12, w, 7));
+    } else if (shape === "cards") {
+        [0, 1, 2].forEach(i => box("kit-sk-card", 4 + i * 32, 24, 28, 30));
+        box("kit-sk-card", 4, 60, 92, 32);
+    } else if (shape === "space") {
+        box("kit-sk-space", 4, 24, 62, 70);
+        [0, 1, 2, 3].forEach(i => box("kit-sk-line", 70, 26 + i * 9, 26, 5));
+    } else {
+        let seed = 7;
+        const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+        for (let i = 0; i < 28; i++) {
+            box("kit-sk-dot", 6 + rnd() * 86, 26 + rnd() * 64, 2.2, 3.6);
+        }
+    }
+    return s;
+}
+
+export function clearPlaceholder(parent: Div): void {
+    parent.selectAll(".kit-skeleton").remove();
+}
+
+/**
+ * Loading or nothing bound? Both can arrive as an update with no data view. The first one shows the placeholder
+ * (Desktop loading, however long the query takes); a second one means no fields are bound, and the visual draws
+ * "No data". `giveUpMs` (off by default) also ends the wait on a timer, for a host that sends only one update.
+ */
+export class LoadingGate {
+    private empties = 0;
+    private timer: number | null = null;
+    /** True when the visual should stop here (the placeholder is showing). */
+    wait(parent: Div, shape: PlaceholderShape, label: string, hasData: boolean, onGiveUp: () => void, giveUpMs = 0): boolean {
+        if (hasData) {
+            this.done(parent);
+            return false;
+        }
+        this.empties++;
+        if (this.empties === 1) {
+            placeholder(parent, shape, label);
+            if (giveUpMs > 0) {
+                this.timer = window.setTimeout(() => { this.timer = null; clearPlaceholder(parent); onGiveUp(); }, giveUpMs);
+            }
+            return true;
+        }
+        this.done(parent);
+        return false;
+    }
+    done(parent: Div): void {
+        if (this.timer != null) {
+            window.clearTimeout(this.timer);
+            this.timer = null;
+        }
+        clearPlaceholder(parent);
+    }
+}
+
 export { select };

@@ -30,7 +30,15 @@ WEIGHTS = {"title": "Regular", "cardTitle": "Semibold", "header": "Semibold", "k
            "caption": "Regular", "tableHeader": "Semibold", **{k: v for k, v in F.get("weights", {}).items() if not k.startswith("_")}}
 
 
+# A family per text role (tokens font.families, dark glass preset 2026-11-18): e.g. condensed "DIN" for titles and
+# numbers (its figures line up) over Segoe UI text. A role's own family is used as named (no weight is added: Power BI
+# has "Segoe UI Semibold" but no "DIN Semibold").
+FAMILIES = {k: v for k, v in F.get("families", {}).items() if not k.startswith("_") and v}
+
+
 def face(role):
+    if role in FAMILIES and FAMILIES[role] != FONT:
+        return FAMILIES[role]
     w = WEIGHTS.get(role, "Regular")
     return FONT if w in ("Regular", "Normal", "") else f"{FONT} {w}"
 
@@ -180,8 +188,11 @@ theme = {
                                      "valueFontColor": solid(C["text"]), "valueDisplayUnits": 1}],
             # No detailFontColor here: the per-card good/bad/neutral color must not be shadowed by a theme color.
             # Rep 2: caption-size reference line in the 176px callouts; the pill never wraps mid-text.
+            # The change chip sits on the card's own colour: Desktop's default chip is light, unreadable on a dark
+            # card (v1.11.2, Rep test 1 in Desktop). A per-card background measure still wins.
             "referenceLabelDetail": [{"$id": "default", "show": True, "detailFontFamily": FONT,
-                                      "detailFontSize": P["caption"], "textWrap": False}],
+                                      "detailFontSize": P["caption"], "textWrap": False,
+                                      "detailBackgroundColor": solid(C["card"])}],
         }},
         # Detail table: muted semibold caption headers, body-size values, horizontal rules only, no banding/totals.
         "tableEx": {"*": {

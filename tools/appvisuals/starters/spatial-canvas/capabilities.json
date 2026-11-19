@@ -1,0 +1,516 @@
+{
+  "dataRoles": [
+    {
+      "name": "Item",
+      "kind": "Grouping",
+      "displayName": "Item (one point per row)"
+    },
+    {
+      "name": "Zone",
+      "kind": "Grouping",
+      "displayName": "Zone (the model's zone or stage, for filtering)"
+    },
+    {
+      "name": "Group",
+      "kind": "Grouping",
+      "displayName": "Group (judged against its own range)"
+    },
+    {
+      "name": "X",
+      "kind": "Measure",
+      "displayName": "X"
+    },
+    {
+      "name": "Y",
+      "kind": "Measure",
+      "displayName": "Y"
+    },
+    {
+      "name": "Outcome",
+      "kind": "Measure",
+      "displayName": "Outcome (1 = success, 0 = not)"
+    },
+    {
+      "name": "Benchmark",
+      "kind": "Measure",
+      "displayName": "Benchmark rate (optional)"
+    },
+    {
+      "name": "Order",
+      "kind": "Measure",
+      "displayName": "Order (tracks)"
+    },
+    {
+      "name": "Tooltips",
+      "kind": "Measure",
+      "displayName": "Tooltips"
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "conditions": [
+        {
+          "Item": {
+            "max": 1
+          },
+          "Zone": {
+            "max": 1
+          },
+          "Group": {
+            "max": 1
+          },
+          "X": {
+            "max": 1
+          },
+          "Y": {
+            "max": 1
+          },
+          "Outcome": {
+            "max": 1
+          },
+          "Benchmark": {
+            "max": 1
+          },
+          "Order": {
+            "max": 1
+          }
+        }
+      ],
+      "categorical": {
+        "categories": {
+          "select": [
+            {
+              "for": {
+                "in": "Item"
+              }
+            },
+            {
+              "for": {
+                "in": "Zone"
+              }
+            },
+            {
+              "for": {
+                "in": "Group"
+              }
+            }
+          ],
+          "dataReductionAlgorithm": {
+            "window": {
+              "count": 30000
+            }
+          }
+        },
+        "values": {
+          "select": [
+            {
+              "for": {
+                "in": "X"
+              }
+            },
+            {
+              "for": {
+                "in": "Y"
+              }
+            },
+            {
+              "for": {
+                "in": "Outcome"
+              }
+            },
+            {
+              "for": {
+                "in": "Benchmark"
+              }
+            },
+            {
+              "for": {
+                "in": "Order"
+              }
+            },
+            {
+              "for": {
+                "in": "Tooltips"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "objects": {
+    "colors": {
+      "properties": {
+        "accent": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "background": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "text": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "dimOpacity": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "cold": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "hot": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "fonts": {
+      "properties": {
+        "family": {
+          "type": {
+            "formatting": {
+              "fontFamily": true
+            }
+          }
+        },
+        "size": {
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        },
+        "headlineSize": {
+          "type": {
+            "formatting": {
+              "fontSize": true
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "properties": {
+        "padding": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "gap": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "radius": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "shadow": {
+          "type": {
+            "bool": true
+          }
+        },
+        "markSize": {
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    },
+    "motion": {
+      "properties": {
+        "animate": {
+          "type": {
+            "bool": true
+          }
+        },
+        "speed": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "easing": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "cubicInOut",
+                "displayName": "cubicInOut"
+              },
+              {
+                "value": "cubicOut",
+                "displayName": "cubicOut"
+              },
+              {
+                "value": "quadInOut",
+                "displayName": "quadInOut"
+              },
+              {
+                "value": "expInOut",
+                "displayName": "expInOut"
+              },
+              {
+                "value": "backOut",
+                "displayName": "backOut"
+              },
+              {
+                "value": "linear",
+                "displayName": "linear"
+              }
+            ]
+          }
+        },
+        "stagger": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "reduceMotion": {
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "interaction": {
+      "properties": {
+        "tooltips": {
+          "type": {
+            "bool": true
+          }
+        },
+        "clickMode": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "crossFilter",
+                "displayName": "crossFilter"
+              },
+              {
+                "value": "filter",
+                "displayName": "filter"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "general": {
+      "properties": {
+        "filter": {
+          "type": {
+            "filter": true
+          }
+        }
+      }
+    },
+    "state": {
+      "properties": {
+        "view": {
+          "type": {
+            "text": true
+          },
+          "filterState": true
+        },
+        "drill": {
+          "type": {
+            "text": true
+          },
+          "filterState": true
+        },
+        "camera": {
+          "type": {
+            "text": true
+          },
+          "filterState": true
+        }
+      }
+    },
+    "debug": {
+      "displayName": "Debug",
+      "properties": {
+        "meter": {
+          "type": {
+            "bool": true
+          }
+        },
+        "selfTest": {
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "space": {
+      "properties": {
+        "shape": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "court",
+                "displayName": "court"
+              },
+              {
+                "value": "pitch",
+                "displayName": "pitch"
+              },
+              {
+                "value": "body",
+                "displayName": "body"
+              },
+              {
+                "value": "floor",
+                "displayName": "floor"
+              },
+              {
+                "value": "areas",
+                "displayName": "areas"
+              },
+              {
+                "value": "track",
+                "displayName": "track"
+              },
+              {
+                "value": "custom",
+                "displayName": "custom"
+              }
+            ]
+          }
+        },
+        "scale": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "custom": {
+          "type": {
+            "text": true
+          }
+        },
+        "start": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "dots",
+                "displayName": "dots"
+              },
+              {
+                "value": "zones",
+                "displayName": "zones"
+              },
+              {
+                "value": "ranked",
+                "displayName": "ranked"
+              }
+            ]
+          }
+        },
+        "pills": {
+          "type": {
+            "bool": true
+          }
+        },
+        "headline": {
+          "type": {
+            "bool": true
+          }
+        },
+        "readout": {
+          "type": {
+            "bool": true
+          }
+        },
+        "readoutWidth": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "labels": {
+          "type": {
+            "bool": true
+          }
+        },
+        "benchmarkSpan": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "standout": {
+          "type": {
+            "bool": true
+          }
+        }
+      }
+    },
+    "honest": {
+      "displayName": "Honest data",
+      "properties": {
+        "minSample": {
+          "type": {
+            "numeric": true
+          }
+        },
+        "mode": {
+          "type": {
+            "enumeration": [
+              {
+                "value": "fade",
+                "displayName": "fade"
+              },
+              {
+                "value": "suppress",
+                "displayName": "suppress"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "tooltips": {
+    "supportedTypes": {
+      "default": true,
+      "canvas": true
+    },
+    "roles": [
+      "Tooltips"
+    ]
+  },
+  "supportsHighlight": true,
+  "supportsKeyboardFocus": true,
+  "supportsMultiVisualSelection": true,
+  "supportsLandingPage": true,
+  "supportsEmptyDataView": true,
+  "suppressDefaultTitle": false,
+  "privileges": [],
+  "supportsSynchronizingFilterState": true
+}

@@ -1,0 +1,78 @@
+{
+ "_note": "Health insurance, made up: claim lines by body region, approval rate judged per claim type; click filters.",
+ "viewport": {
+  "width": 900,
+  "height": 640
+ },
+ "objects": {
+  "honest": {
+   "minSample": 11,
+   "mode": "fade"
+  },
+  "space": {
+   "shape": "body",
+   "start": "zones"
+  }
+ },
+ "data": {
+  "rowsFile": "data/body.json",
+  "roles": {
+   "Item": "Claim",
+   "Zone": "Region",
+   "Group": "Type",
+   "X": "X",
+   "Y": "Y",
+   "Outcome": "Approved"
+  },
+  "measures": [
+   "X",
+   "Y",
+   "Outcome"
+  ]
+ },
+ "steps": [
+  {
+   "settle": true
+  },
+  {
+   "expect": {
+    "noRenderFailures": true,
+    "state": {
+     "mismatch": 0
+    }
+   }
+  },
+  {
+   "shot": "body-zones",
+   "golden": 0.02
+  },
+  {
+   "clickSelector": "path.kit-zone[aria-label^='Chest']"
+  },
+  {
+   "wait": 1500
+  },
+  {
+   "expect": {
+    "filterValues": [
+     "chest"
+    ]
+   }
+  },
+  {
+   "pill": "Ranked"
+  },
+  {
+   "settle": true
+  },
+  {
+   "shot": "body-ranked",
+   "golden": 0.02
+  },
+  {
+   "expect": {
+    "minTextPx": 11
+   }
+  }
+ ]
+}

@@ -944,7 +944,7 @@ def apply_cf(ctx, vid, v, d):
                 sel = {"data": [{"dataViewWildcard": {"matchingOption": 1}}], "metadata": qref(ctx.field(target))}
             elif target:                       # charts: Desktop saves fx per data point without the column
                 sel = {"data": [{"dataViewWildcard": {"matchingOption": 1}}]}
-            elif c.get("perPoint"):
+            elif c.get("perPoint") or c.get("emphasis"):   # emphasis (top / last item): a colour per data point
                 sel = {"data": [{"dataViewWildcard": {"matchingOption": 1}}]}
             else:
                 sel = selector_of(ctx, c.get("selector"))

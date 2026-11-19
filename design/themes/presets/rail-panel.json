@@ -46,5 +46,9 @@
       "caption": "Regular",
       "tableHeader": "Semibold"
     }
+  },
+  "card": {
+    "_note": "KPI cards: label, value, comparison and chart aligned (polish follows this).",
+    "align": "left"
   }
 }

@@ -76,6 +76,39 @@ Results: "East holds 26% of total amount, the most of any region." (no filter); 
 (East and the months up to June); "No data in this view." when nothing qualifies. In a kit visual: `headline({keys, selected,
 highlighted, drilled, allCount, groupName, groupOf, t})`, every sentence a localisable template.
 
+## Biggest gap (two members, several measures)
+
+"North is 2.3× South on first-visit resolution." For a comparison page (two plans, two clinics, two regions): of
+several measures, the one where the two members are furthest apart on a shared 0..1 scale (each measure's own range
+across all members, so units don't decide), phrased as a ratio when both are positive and higher is better, else as a
+lead in the measure's units ("North leads South on wait time by 4 days"). Nothing to say (no measure separates them):
+"North and South are level." Kit visuals: `biggestGap(sides, metrics)` (headline.ts); the spatial canvas uses it when
+two areas are Ctrl-clicked. Native: one text measure (a sketch: adapt the names and test it query-scoped first,
+docs/lessons/dax.md):
+
+```dax
+Headline Gap =
+VAR _A = "North"  VAR _B = "South"                      -- or the two picked members (SELECTEDVALUE of two slicers)
+VAR _R = ADDCOLUMNS ( DATATABLE ( "M", STRING, "Up", INTEGER, { { "first-visit resolution", 1 }, { "wait time", 0 } } ),
+    "@a", SWITCH ( [M], "first-visit resolution", CALCULATE ( [FVR], Region[Region] = _A ), CALCULATE ( [Wait days], Region[Region] = _A ) ),
+    "@b", SWITCH ( [M], "first-visit resolution", CALCULATE ( [FVR], Region[Region] = _B ), CALCULATE ( [Wait days], Region[Region] = _B ) ),
+    "@lo", SWITCH ( [M], "first-visit resolution", MINX ( ALL ( Region[Region] ), [FVR] ), MINX ( ALL ( Region[Region] ), [Wait days] ) ),
+    "@hi", SWITCH ( [M], "first-visit resolution", MAXX ( ALL ( Region[Region] ), [FVR] ), MAXX ( ALL ( Region[Region] ), [Wait days] ) ) )
+VAR _Top = TOPN ( 1, _R, ABS ( DIVIDE ( [@a] - [@b], [@hi] - [@lo] ) ), DESC, [M], ASC )
+VAR _M = MAXX ( _Top, [M] )  VAR _Up = MAXX ( _Top, [Up] )
+VAR _a = MAXX ( _Top, [@a] )  VAR _b = MAXX ( _Top, [@b] )
+VAR _AW = IF ( _Up = 1, _a >= _b, _a <= _b )
+VAR _W = IF ( _AW, _A, _B )  VAR _L = IF ( _AW, _B, _A )
+VAR _wv = IF ( _AW, _a, _b )  VAR _lv = IF ( _AW, _b, _a )
+RETURN IF ( ISBLANK ( _a ) || ISBLANK ( _b ) || _a = _b, _A & " and " & _B & " are level.",
+    IF ( _Up = 1 && _lv > 0 && DIVIDE ( _wv, _lv ) >= 1.1,
+        _W & " is " & FORMAT ( DIVIDE ( _wv, _lv ), "0.0" ) & "× " & _L & " on " & _M & ".",
+        _W & " leads " & _L & " on " & _M & " by " & FORMAT ( ABS ( _wv - _lv ), "#,0.0" ) & "." ) )
+```
+
+Examples: health plan, "Plan A is 1.4× Plan B on preventive visits per member"; sales, "Online leads Stores on
+margin by 6.2 points". Audit: the ratio against `DIVIDE` of the two values, and the "level" case.
+
 ## Checks
 
 Numbers audit: the share in the sentence against `DIVIDE` of the two totals in each audit state (a text entry).

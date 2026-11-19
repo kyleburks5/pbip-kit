@@ -25,6 +25,7 @@ KIT = pathlib.Path(__file__).resolve().parents[3]
 TEMPLATE = KIT / "tools" / "appvisuals" / "template"
 HARNESS = KIT / "tools" / "appvisuals" / "harness"
 DENEB_STARTER = KIT / "tools" / "appvisuals" / "deneb"
+STARTERS = KIT / "tools" / "appvisuals" / "starters"
 NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{1,60}$")
 FONT_FILES = [("Inter", "400", "inter-latin-400-normal.woff2"), ("Inter", "600", "inter-latin-600-normal.woff2")]
 # the kit's own bundle checks, on top of pbiviz's certification audit (no network, no dynamic code, nothing external)
@@ -76,8 +77,15 @@ def check_name(name):
 
 
 # ------------------------------------------------------------------------------------------------ new
-def new(name, deneb=False, display=None, project="."):
+def starters():
+    """The kit's visual starters (tools/appvisuals/starters/<name>): whole visuals built on the template."""
+    return sorted(p.name for p in STARTERS.iterdir() if p.is_dir()) if STARTERS.exists() else []
+
+
+def new(name, deneb=False, display=None, project=".", start=None):
     check_name(name)
+    if start and start not in starters():
+        raise VisualError(f"no visual starter called {start!r} (starters: {', '.join(starters()) or 'none'})")
     if kind(name, project):
         raise VisualError(f"there is already a visual called {name}")
     if deneb:
@@ -100,7 +108,20 @@ def new(name, deneb=False, display=None, project="."):
     pk = json.loads((d / "package.json").read_text(encoding="utf-8"))
     pk["name"] = re.sub(r"[^a-z0-9-]", "-", name.lower())
     (d / "package.json").write_text(json.dumps(pk, indent=2) + "\n", encoding="utf-8")
-    print(f"Made the custom visual {name} from the kit's app-visual template (id {guid}).")
+    if start:                          # a starter: its own visual, settings, capabilities and tests over the template
+        src = STARTERS / start
+        for f in src.rglob("*"):
+            if f.is_file() and "golden" not in f.parts:
+                dst = d / f.relative_to(src)
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, dst)
+        if (src / "test").exists():    # the template's own scenarios belong to the unit chart
+            for t in (TEMPLATE / "test").glob("*.json"):
+                if not (src / "test" / t.name).exists():
+                    (d / "test" / t.name).unlink(missing_ok=True)
+        print(f"Made the custom visual {name} from the kit starter {start} (id {guid}).")
+    else:
+        print(f"Made the custom visual {name} from the kit's app-visual template (id {guid}).")
     print("note: the author email and support link are the kit's placeholders; an organisation sets its own before IT "
           "review (pbiviz.json author.email, visual.supportUrl)")
     return d
@@ -591,5 +612,11 @@ def resolve(visuals, no_custom, project=".", exported=(), log=None):
             errors.append(f"{v['id']}: the custom visual {name!r} isn't built (`pbik visual build {name}`)")
             continue
         register_names.append(name)
-        out.append({**v, "type": st["guid"], "_custom": name, "_swapFrom": fb["type"]})
+        from . import honest as HD                 # small-sample threshold and privacy mode from project.json
+        extra = HD.props_for(v, src_dir(name, project), project)
+        props = {**(v.get("props") or {}), **extra} if extra else v.get("props")
+        w = {**v, "type": st["guid"], "_custom": name, "_swapFrom": fb["type"]}
+        if props:
+            w["props"] = props
+        out.append(w)
     return out, errors, register_names

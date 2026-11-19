@@ -15,6 +15,17 @@ periods are not in order (the measure needs a sortable period column).
   the card's own numbers carry the values.
 - Alt text names the value, the change and "current month highlighted against the eleven before".
 
+## Native route: KPI tile with a small this-year vs last-year chart
+
+When the comparison is this year against last year by month (not "this period against the last twelve"), build it
+natively: one panel shape; a new card (label, value, reference label with the change vs last year) on the top half;
+a clustered column chart on the bottom half with Month on the axis and `[Value LY]`, `[Value]` as two series (last
+year in `colors.secondLight`, this year in `colors.brand`), axes, gridlines and legend off, data labels off, the card
+and the chart with no background of their own ([panel](../panel.md)). A row of 4 to 6 such tiles makes the KPI strip.
+Health example: members, claims, cost per member, approval rate; sales: revenue, units, margin, orders. Pick SVG
+mini bars (below) when the tile is too small for a chart (under about 120 px high) or the current period must be
+highlighted.
+
 ## Build
 
 Checked first (svg.md order): DaxLib.SVG `Compound.Bars` / `Viz.Bars` colour one bar only as the minimum or maximum,

@@ -456,7 +456,8 @@ class PatternTests(unittest.TestCase):
         out, spec = self.gallery()
         for name in G.PATTERNS:
             self.assertIn(f"P['{name}'] = ", out, name)
-            self.assertTrue((KIT / "docs" / "patterns" / f"{name}.md").exists(), name)
+            self.assertTrue((KIT / "docs" / "patterns" / f"{name}.md").exists()
+                            or (KIT / "docs" / "patterns" / "app-visuals" / f"{name}.md").exists(), name)
         self.assertEqual({s["pattern"] for s in spec["visuals"]} - {None}, G.PATTERNS)  # P3: pickers, cards too
         self.assertIn("pattern: ${esc(s.pattern)}", out)
 

@@ -469,6 +469,7 @@ def _main(argv=None):
     vn.add_argument("name")
     vn.add_argument("--deneb", action="store_true")
     vn.add_argument("--display")
+    vn.add_argument("--from", dest="start", help="a kit visual starter (tools/appvisuals/starters), e.g. spatial-canvas")
     vb = vis.add_parser("build", help="lint, package and check (custom); check the spec (Deneb)")
     vb.add_argument("name")
     vt = vis.add_parser("test", help="the offline harness: screenshots, frames and checks")
@@ -555,7 +556,7 @@ def _main(argv=None):
         from . import appvisual as AV
         try:
             if args.sub == "new":
-                AV.new(args.name, args.deneb, args.display)
+                AV.new(args.name, args.deneb, args.display, start=args.start)
             elif args.sub == "build":
                 AV.build(args.name)
             elif args.sub == "test":

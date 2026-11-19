@@ -23,6 +23,9 @@ number), then picks patterns from here and names them on each visual in layout.j
 | [SVG KPI card](svg-kpi-card.md) (`svg-kpi-card`) | What is the headline number, how did it change, and what is its trend? | stub: new card with a reference label first | 2 SVG (optional: a card function from the kit UDF library as a `udfCard`, inline by default; `cardVisual.svg-kpi-card`: clean harvest, confirm in Desktop) |
 | [Shared panel](panel.md) (`panel`) | Which numbers and charts belong together? | One shape; the visuals on it have no background of their own | 1 native (`shape.panel`: clean harvest, confirm in Desktop) |
 | [Rail + panel layout](rail-panel.md) (`rail-panel`, a layout style) | Which member am I looking at, and what is its whole story? | Rail shape at the page edge with pickers; one panel; tabs | 1 native (preset `rail-panel`, optional) |
+| [Spatial canvas](spatial-canvas.md) (`spatial-canvas`) | Where in a space (court, body, floor plan, pathway, service areas) do things happen, and which areas run hot or cold? | Scatter over a kit-drawn picture of the space; areas in a table | 4 kit custom visual for clickable areas (`--from spatial-canvas`); 1 native for points only |
+| [Honest data](honest-data.md) (`honest-data`) | Can I trust this number, and is it good for its kind? | Measures blank or faded under the small-sample threshold, colour within the group's own band, shape as well as colour | 1 native (kit visuals: `honest.ts`) |
+| [Breakdown wall](breakdown-wall.md) (`breakdown-wall`) | For the measure I pick, how does every way of slicing it compare with last year? | Metric picker + SWITCH measures with a dynamic format string, one table per dimension | 1 native |
 
 ## App-visual patterns (v1.11)
 

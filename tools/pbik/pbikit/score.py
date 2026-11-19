@@ -23,6 +23,7 @@ ITEMS = {1: "matches the approved picture (my own judgment)", 2: "alignment and 
          15: "finished look (header band, styled filter)"}
 AGENT = (1, 3, 7)
 TARGET = 7
+PICKERS = ("slicer", "advancedSlicerVisual", "listSlicer", "textSlicer")
 BUDGET = 12                      # data visuals per page before it counts as clutter (patterns' own budgets are lower)
 HEX = re.compile(r"#[0-9A-Fa-f]{6}\b|#[0-9A-Fa-f]{3}\b")
 DECOR = {"shape", "basicShape", "textbox", "image"}
@@ -52,8 +53,11 @@ def overlaps(layout):
                     and b["y"] < a["y"] + a["h"]):
                 bad.append(f"{a['id']}/{b['id']}")
     per_page = {}
+    partners = {v.get("comparison") for v in vs if v.get("comparison")}     # a KPI card's own chart: one tile with it
     for v in vs:
-        if v.get("bindings") and not _image_card(v):    # a card and its image card read as one tile (v1.11)
+        if v.get("type") in PICKERS:                     # pickers are the page's controls, not data to read (v1.11.2)
+            continue
+        if v.get("bindings") and not _image_card(v) and v["id"] not in partners:   # card + image card: one tile (v1.11)
             per_page[v["page"]] = per_page.get(v["page"], 0) + 1
     crowded = [p for p, n in per_page.items() if n > BUDGET]
     return bad, crowded

@@ -26,6 +26,14 @@ LOWER = re.compile(r"\b(returns?|refunds?|costs?|expenses?|spend|complaints?|chu
                    re.I)
 
 
+
+def _card_align(tokens):
+    """KPI card alignment from the tokens' `card.align` (a preset setting: left, center or right); left when the tokens
+    don't say (v1.11.2: label, value, comparison and chart line up on the left edge)."""
+    a = ((tokens or {}).get("card") or {}).get("align")
+    return a if a in ("left", "center", "right") else "left"
+
+
 def lower_is_better(layout, name):
     """True when a fall in this measure is good: layout.json `lowerIsBetter` (names, or {name: false} to say no)."""
     lib = layout.get("lowerIsBetter")
@@ -104,10 +112,11 @@ def polish(layout, tokens=None, planned=None, measures=None):
         t = v.get("type")
         if t == "cardVisual":
             props = v.setdefault("props", {})
-            if not any(k.startswith("value.horizontalAlignment") for k in props):
-                props["value.horizontalAlignment@default"] = "center"
-                props.setdefault("label.horizontalAlignment@default", "center")
-                said.append(f"{v['id']}: the number centred, so the card fills its space")
+            if not any(k.startswith("value.horizontalAlignment") for k in props) and v.get("pattern") != "live-headline":
+                align = _card_align(tokens)            # the preset's card.align (tokens.json); left by default
+                props["value.horizontalAlignment@default"] = align
+                props.setdefault("label.horizontalAlignment@default", align)
+                said.append(f"{v['id']}: the number {'centred' if align == 'center' else align + '-aligned'} (the style's card alignment)")
             rl = v.get("referenceLabels")
             if isinstance(rl, dict):
                 for key in ("detailSize", "valueSize"):     # the change line at body size (the title: the theme's)
@@ -128,7 +137,7 @@ def polish(layout, tokens=None, planned=None, measures=None):
                     if not is_comparison(lab.get("value", "")):
                         continue
                     cmp_name = name_of(lab["value"])
-                    table = table_of(lab["value"]) or (planned.get(cmp_name) or {}).get("table") or "_Measures"
+                    table = table_of(lab["value"]) or (planned.get(cmp_name) or {}).get("table") or layout.get("measureTable") or "_Measures"
                     base, date = _base(lab["value"], planned), _date_of(lab["value"], planned)
                     if not base or not date:
                         why_not.append(f"{v['id']}: the change isn't coloured: I can't tell which number it compares "
@@ -154,13 +163,27 @@ def polish(layout, tokens=None, planned=None, measures=None):
                     said.append(f"{v['id']}: {title}'s value with the change beside it, ▲ / ▼ in green or red")
         if t in ("tableEx", "pivotTable"):
             have = {json.dumps(c.get("target") or c.get("field")) for c in v.get("cf", [])}
+            for c in v.get("cf", []):                    # coloured before: "lower is better" may have changed since
+                col = name_of(c.get("measure", "")) if c.get("type") == "measure" else ""
+                cmp_name = col[: -len(" colour")] if col.endswith(" colour") else ""
+                shown = {name_of(f) for f in (v.get("bindings") or {}).get("Values", [])}
+                if cmp_name in shown and col in planned and planned[col].get("dataType") == "string":   # the kit's own
+                    lower = lower_is_better(layout, cmp_name)
+                    expr = _colour(cmp_name, good, bad, lower)
+                    if planned[col].get("expression") != expr:
+                        planned[col]["expression"] = expr
+                        if lower:
+                            c["lowerIsBetter"] = True
+                        else:
+                            c.pop("lowerIsBetter", None)
+                        said.append(f"{v['id']}: {cmp_name} coloured {'lower' if lower else 'higher'} is better")
             for f in (v.get("bindings") or {}).get("Values", []):
                 if not is_comparison(f) or json.dumps(_field(f)) in have:
                     continue
                 cmp_name = name_of(f)
                 col = f"{cmp_name} colour"              # a colour measure: the form Desktop saves for a table column
                 lower = lower_is_better(layout, cmp_name) or lower_is_better(layout, _base(f, planned))
-                planned[col] = {"table": table_of(f) or "_Measures", "expression":
+                planned[col] = {"table": table_of(f) or layout.get("measureTable") or "_Measures", "expression":
                                 _colour(cmp_name, good, bad, lower), "dataType": "string"}
                 rule = {"type": "measure", "object": "values", "property": "fontColor", "measure": f"[{col}]",
                         "target": _field(f)}

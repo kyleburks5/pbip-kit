@@ -1,0 +1,63 @@
+{
+  "_note": "Dark glass preset (the maintainer's house style, study 2026-11-18, GENERIC): a deep navy canvas with slightly lighter 'glass' panels and thin edges, one warm accent for the highlight, muted data colours, Segoe UI Semibold titles and numbers, Light captions. Layout: a left rail with the pickers, docked side panels instead of pop-ups (docs/patterns/rail-panel.md, app-visuals/focus-dim.md); entrance on open, then still. Colours are the kit's own choice; /theme checks every pair for AA.",
+  "name": "dark-glass",
+  "description": "Navy canvas, glass panels with thin edges, one warm amber accent on the top or selected item, muted data, Segoe UI Semibold titles and numbers.",
+  "mode": "dark",
+  "brand": [
+    "primary=#E6ECF5",
+    "brand=#F2A541",
+    "bad=#F07B72",
+    "good=#4CC38A",
+    "second=#8C9BB2",
+    "#5DA9E9",
+    "#3FB8AF",
+    "#7C8FB0",
+    "#5E9C92"
+  ],
+  "colors": {
+    "background": "#0B1220",
+    "card": "#141D30",
+    "border": "#26344D",
+    "text": "#E6ECF5",
+    "textMuted": "#9AA8BD",
+    "selected": "#F2A541"
+  },
+  "container": {
+    "radius": 14,
+    "borderWidth": 1,
+    "padding": 20,
+    "paddingTop": 14,
+    "shadow": "0 1px 2px rgba(0,0,0,0.35), 0 10px 24px rgba(0,0,0,0.40)",
+    "pbiShadow": {
+      "_note": "One deep soft shadow under each glass panel; the thin edge does the separating.",
+      "blur": 16,
+      "distance": 6,
+      "transparency": 62
+    }
+  },
+  "control": {
+    "radius": 10
+  },
+  "font": {
+    "weights": {
+      "_note": "Segoe UI family: Semibold for titles and big numbers, Regular for labels and body, Light for captions.",
+      "title": "Semibold",
+      "cardTitle": "Semibold",
+      "header": "Semibold",
+      "kpi": "Semibold",
+      "body": "Regular",
+      "caption": "Light",
+      "tableHeader": "Semibold"
+    }
+  },
+  "card": {
+    "_note": "KPI cards: label, value, comparison and chart aligned (polish follows this).",
+    "align": "left"
+  },
+  "emphasis": {
+    "_note": "One accent only: amber marks the top, selected or current item and nothing else; charts are muted (second); groups get blue, teal and grey (the accent is last in the series order). Layout cf with emphasis: top (the largest bar) or last (the current month).",
+    "rule": "one-accent",
+    "muted": "second",
+    "accent": "brand"
+  }
+}
