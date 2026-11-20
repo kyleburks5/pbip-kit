@@ -188,9 +188,28 @@ def boxes(visuals):
     return out
 
 
-def reading_order(items):
+def reading_order(items, columns=()):
     """items: [(name, x, y, w, h)] -> names in reading order: rows top to bottom (a visual joins the row while its
-    top is above the middle of the row's shortest visual), left to right in a row."""
+    top is above the middle of the row's shortest visual), left to right in a row. columns: [(x, y, w, h)] of
+    full-height panels (a left rail, a side panel, panel-style channel panels): the band above them reads first, then
+    each panel's visuals as a block, the blocks left to right with the visuals outside any panel as one more block
+    (v1.12, tests 1-3)."""
+    if columns:
+        top = min(c[1] for c in columns)
+        band = [it for it in items if it[2] + it[4] <= top + 1]
+        rest = [it for it in items if it not in band]
+        blocks = []
+        for cx, cy, cw, ch in sorted(columns):
+            inside = [it for it in rest if it[1] >= cx - 1 and it[1] + it[3] <= cx + cw + 1
+                      and it[2] >= cy - 1 and it[2] + it[4] <= cy + ch + 1]
+            if inside:
+                blocks.append(inside)
+                rest = [it for it in rest if it not in inside]
+        if rest:
+            blocks.append(rest)
+        if len(blocks) > 1 or band:
+            return reading_order(band) + [n for b in sorted(blocks, key=lambda b: min(it[1] for it in b))
+                                          for n in reading_order(b)]
     rows = []
     for it in sorted(items, key=lambda t: (t[2], t[1])):
         if rows:
@@ -242,7 +261,8 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
                                                            isinstance(lit_alt, str) else ""):
                     fd.warn(where, "a11y: text box text isn't in its alt text (container.altText): screen readers "
                                    "read the alt text, so repeat the text there (Microsoft Learn checklist, Textbox)")
-            if bound and vt not in NO_SORT and not hidden and not (vis.get("query") or {}).get("sortDefinition"):
+            kit_vis = str(vt or "").startswith(("pbik", "deneb"))     # a kit or Deneb visual keeps its own order
+            if bound and vt not in NO_SORT and not kit_vis and not hidden and not (vis.get("query") or {}).get("sortDefinition"):
                 unsorted.append(f.parent.name)
             if name in decorative:
                 if not hidden and (d.get("position") or {}).get("tabOrder", 0) >= 0:
@@ -297,7 +317,10 @@ def check(fd, pages, rep, page_bg_of, min_pt=10, decorative=None):
                                f"({', '.join(unsorted[:6])}{' ...' if len(unsorted) > 6 else ''}): the accessible "
                                "Show data table follows the visual's sort, so set `sort` in layout.json (Microsoft "
                                "Learn checklist, Sort order)")
-        want = reading_order([t[:5] for t in tab])
+        kinds = {d.get("name", f_.parent.name): (d.get("visual") or {}).get("visualType") for d, f_ in vs}
+        columns = [bx[n][:4] for n in bx if kinds.get(n) in ("shape", "basicShape")
+                   and bx[n][3] >= 700 and 0 < bx[n][2] <= 960]      # full-height panels, at most half the page wide
+        want = reading_order([t[:5] for t in tab], columns)
         got = [t[0] for t in sorted(tab, key=lambda t: t[5])]
         if want != got:
             k = next(i for i, (a, b) in enumerate(zip(want, got)) if a != b)

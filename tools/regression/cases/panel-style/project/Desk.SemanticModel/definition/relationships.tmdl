@@ -1,0 +1,7 @@
+relationship e6291e1c-4765-9eaa-81c0-b08a9d286150
+	fromColumn: DataTable.'Date Received'
+	toColumn: Date.Date
+
+relationship e221dc8f-06cc-993f-1cad-e2b83ba81f0c
+	fromColumn: DataTable.'Interaction Type'
+	toColumn: Channel.'Interaction Type'

@@ -23,9 +23,8 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 <!-- /lessons:index -->
 
 ## B-01 Build through the kit, never by hand
-- **Rule:** Run `design/scripts/gen_theme.py`, then `pbik build` from `design/specs/layout.json` alone (theme, opening
-  page, navigator states and every visual setting are layout keys). Anything layout.json can't express, even with
-  `props` and `{"raw": ...}` copied from a Desktop-saved file, is a pbik gap: stop and report it by visual ID.
+- **Rule:** Run gen_theme.py, then `pbik build` from layout.json alone (theme, opening page, navigator states and
+  every setting are layout keys); what it can't express, even with `{"raw": ...}`, is a pbik gap: report it by ID.
 - **Why:** per-rep build.py scripts and patches drifted from layout.json and couldn't be rerun safely.
 - **Enforced by:** not enforced (read at /build, which forbids build code)
 - **Source:** pbik 0.6 (kit v0.3)
@@ -37,10 +36,9 @@ Read by /plan (layout.json keys), /build and /fix. Format and placement: docs/le
 - **Source:** CLAUDE.md before v0.5 (rep not recorded)
 
 ## B-04 Copy a setting Desktop saved instead of guessing
-- **Rule:** Before restyling, look up object and property names and enum values in a Desktop-saved visual.json (the
-  Patterns page, design/templates/, an earlier rep). When a Desktop setting fixes what pbik can't write, save once,
-  diff that visual.json against an untouched sibling and copy the exact JSON into layout.json `props` (`{"raw": ...}`).
-  A setting worth reusing goes on the Patterns page and into a template (`pbik templates harvest`).
+- **Rule:** Look up object, property and enum names in a Desktop-saved visual.json (Patterns page, templates, an
+  earlier rep). For a Desktop-only fix, save once, diff against an untouched sibling, copy the exact JSON into layout
+  `props` (`{"raw": ...}`); a setting worth reusing goes into a template (`pbik templates harvest`).
 - **Why:** guessed names validate but Desktop ignores them.
 - **Enforced by:** `pbik validate` warns on settings outside the catalog (`pbik catalog show`)
 - **Source:** Rep 7

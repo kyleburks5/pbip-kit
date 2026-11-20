@@ -348,6 +348,8 @@ def show(root, layout=None, purposes=None, assumptions=None, shoot=None, notes=N
     (out / "plan.md").write_text(text, encoding="utf-8")
     if notes is not None:
         notes.extend(f"Contrast: {x}" for x in faint)
+        from . import polish as PO                 # a list title that counts with another rule than the list's
+        notes.extend(PO.count_titles(lay, PO.project_expressions(root)))
     return pngs, text, plan_hash(lay, plan)
 
 

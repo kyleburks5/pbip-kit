@@ -766,7 +766,7 @@ class PolishTests(unittest.TestCase):
                           "[Orders Amount vs LY % colour]"))
         self.assertEqual(card["props"]["value.horizontalAlignment@default"], "left")   # tokens without card.align
         self.assertEqual(card["referenceLabels"]["detailSize"], "body")
-        lay2 = polish_layout()                       # a style that centres its cards (tokens card.align, v1.11.2)
+        lay2 = polish_layout()                       # a style that centres its cards (tokens card.align, v1.12)
         PO.polish(lay2, {"colors": {}, "card": {"align": "center"}}, json.loads(json.dumps(PLANNED)))
         self.assertEqual(next(v for v in lay2["visuals"] if v["id"] == "P1-V02")["props"]["value.horizontalAlignment@default"], "center")
         self.assertIn("SAMEPERIODLASTYEAR ( Calendar[Date] )", planned["Fact Orders Amount LY"]["expression"])

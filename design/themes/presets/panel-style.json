@@ -1,0 +1,118 @@
+{
+  "_note": "Panel style layout preset (the maintainer's house style, learned from Rep 9, v1.12, GENERIC): a full-width near-black header band, white panels with radius 20 and one soft shadow on a light neutral canvas, one identity colour per member (mark for bars, text shade for type at 4.5:1 or better, tint for the icon circle), histogram bars past the threshold in outSla grey, change chips on good / bad / neutral tints. memberPalette is the default member order (Rep 9: Calls blue, Chats green, Emails teal, Escalations red; then purple, amber); a member's own `color` in the spec wins. Layout: docs/patterns/panel-style-layout.md (pbik layout panels).",
+  "name": "panel-style",
+  "description": "Dark header band, white rounded panels with a soft shadow, an identity colour per member, chips on tints.",
+  "mode": "light",
+  "brand": [
+    "primary=#161D2B",
+    "brand=#2447A8",
+    "bad=#B3261E",
+    "good=#13795B",
+    "second=#5B6579"
+  ],
+  "colors": {
+    "primary": "#161D2B",
+    "header": "#161D2B",
+    "onDark": "#FFFFFF",
+    "onDarkMuted": "#AEB8CB",
+    "headerControl": "#232C3D",
+    "background": "#EEF1F6",
+    "card": "#FFFFFF",
+    "border": "#E1E6EE",
+    "divider": "#EDF0F5",
+    "rule": "#D3D9E2",
+    "text": "#1A2233",
+    "textMuted": "#5B6579",
+    "outSla": "#C5CCD8",
+    "track": "#E8ECF2",
+    "selected": "#2447A8",
+    "onSelected": "#FFFFFF",
+    "good": "#13795B",
+    "goodTint": "#E4F4EE",
+    "bad": "#B3261E",
+    "badTint": "#FCEAE8",
+    "neutral": "#4A5568",
+    "neutralTint": "#EDF0F5"
+  },
+  "memberPalette": [
+    {
+      "name": "blue",
+      "mark": "#3A63D8",
+      "text": "#2447A8",
+      "tint": "#EAF0FD"
+    },
+    {
+      "name": "green",
+      "mark": "#1E9C77",
+      "text": "#16765A",
+      "tint": "#E6F6F0"
+    },
+    {
+      "name": "teal",
+      "mark": "#1A93B8",
+      "text": "#0E6B86",
+      "tint": "#E5F5FA"
+    },
+    {
+      "name": "red",
+      "mark": "#E25751",
+      "text": "#B23A36",
+      "tint": "#FDECEB"
+    },
+    {
+      "name": "purple",
+      "mark": "#7A4FC2",
+      "tint": "#F1ECFA"
+    },
+    {
+      "name": "amber",
+      "mark": "#C4730F",
+      "tint": "#FBF1E3"
+    }
+  ],
+  "fontPt": {
+    "title": 23,
+    "subtitle": 12,
+    "cardTitle": 18,
+    "chartTitle": 12,
+    "label": 10,
+    "body": 11,
+    "kpi": 36,
+    "chip": 11,
+    "caption": 10
+  },
+  "font": {
+    "title": 30,
+    "subtitle": 15,
+    "cardTitle": 24,
+    "chartTitle": 15,
+    "label": 13,
+    "body": 14,
+    "kpi": 48,
+    "chip": 13,
+    "caption": 13
+  },
+  "container": {
+    "radius": 20,
+    "borderWidth": 0,
+    "padding": 24,
+    "paddingTop": 20,
+    "shadow": "0 1px 2px rgba(22,29,43,0.05), 0 10px 28px rgba(22,29,43,0.08)",
+    "pbiShadow": {
+      "blur": 14,
+      "distance": 4,
+      "transparency": 92
+    }
+  },
+  "chip": {
+    "radius": 12,
+    "height": 26,
+    "paddingX": 10
+  },
+  "header": {
+    "height": 200
+  },
+  "card": {
+    "align": "left"
+  }
+}

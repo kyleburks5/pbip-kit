@@ -23,6 +23,18 @@
   and, through a colour measure, the selected member.
 - Everything except the rail stays on the 12-column grid and the 32px margin.
 
+## Dense form (the house style, v1.12)
+The default layout when a request names no look (design/themes/presets/README.md "Styles"): an overview page keeps
+the rail and puts its content in panels.
+- **Rail** (columns 1-2, inner edge x 321): the page title at the top (on a drill-through page, the Back button above
+  it), then every picker, lined up by `pbik layout polish`: one left edge and width (the rail less 32 px each side),
+  40 px pills, 24 px between pickers (pbikit/polish.py `rail_pickers`).
+- **Content** (columns 3-12): the headline sentence on the background at the top, a KPI panel (pattern `panel`, the
+  cards on it without boxes of their own), then rows of charts and lists, each in its own panel (the container, no
+  shared panel for a single visual).
+- **Details** open in a side panel (a docked group or a drill-through page), never a pop-up over the content.
+- No header band (polish adds none on a rail page).
+
 ## Build (visual-method ladder)
 - 1 native throughout: shape (rail, `pattern: "rail-panel"`), new card (header title, profile, KPIs), new slicers
   (image list, image cards), bookmark navigator, groups and bookmarks, scatter or any chart.
@@ -51,24 +63,16 @@
   shadow) and the picker tiles (`advancedSlicerVisual.image-list`: a round picture and the name per row;
   `advancedSlicerVisual.image-cards`: a picture over the name per card).
 
-## Desktop checks before a big build (from the study; none confirmed yet)
-1. An image visual bound to a measure (source type image data): does it render, and could an SVG measure go there?
-   Change .claude/rules/svg.md only if yes.
-2. The hidden-from-tab-order value Desktop writes and keeps today (the kit writes -9999000; other files show -1,
-   -1001, ...). Change the kit only if Desktop disagrees.
-3. `bookmarkNavigator.tabs-underline` built by pbik keeps its accent-bar state selectors and the selected-bookmark
-   binding after a save (`pbik roundtrip`).
-4. A display-only tab bookmark (Data unchecked) that shows one group and hides two round-trips.
-5. A picker's saved default selection (`selection`) on a new slicer: Desktop keeps it and opens on it (roadmap gap 30).
-6. A card fill-image watermark (`fillCustom.image` with a registered image and its transparency) on
-   `cardVisual.profile-card`.
-7. A chart over an image: fixed axis start and end keep the points aligned at Fit to page (`scatterChart.on-image`
-   + `image.titled`).
-8. Schema versions: two templates were saved at visualContainer 2.8.0; check them against project.json
-   `targetDesktop` before building from them.
-9. Label transparency on a new card: only if `pbik validate` should flag muting text by transparency (A-02).
-
-The other clean templates need the usual `/smoke`-style confirm in Desktop before a big build.
+## Desktop checks before a big build (from the study; none confirmed yet; other templates: a /smoke-style check)
+1. An image visual bound to a measure renders (then an SVG measure could go there; .claude/rules/svg.md only if yes).
+2. The hidden-from-tab-order value Desktop keeps today (the kit writes -9999000; other files show -1, -1001).
+3. `bookmarkNavigator.tabs-underline` keeps its accent-bar states and selected-bookmark binding after a save.
+4. A display-only tab bookmark (Data unchecked) showing one group and hiding two round-trips.
+5. A picker's saved `selection` on a new slicer is kept and opened on (roadmap gap 30).
+6. A card fill-image watermark (`fillCustom.image`, transparency) on `cardVisual.profile-card`.
+7. `scatterChart.on-image` + `image.titled`: fixed axis start and end keep the points aligned at Fit to page.
+8. Two templates saved at visualContainer 2.8.0: check them against project.json `targetDesktop` first.
+9. Label transparency on a new card, only if `pbik validate` should flag muting text that way (A-02).
 
 ## Audit
 The profile card and KPI numbers follow the usual audit entries; the picker's default member is the audit's first

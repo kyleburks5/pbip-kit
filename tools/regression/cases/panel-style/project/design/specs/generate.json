@@ -1,0 +1,226 @@
+{
+  "plannedMeasures": {
+    "Avg Days vs SLA colour": {
+      "table": "DataTable",
+      "expression": "IF ( ISBLANK ( [Avg Days vs SLA] ), BLANK (), IF ( [Avg Days vs SLA] <= 0, \"#026E75\", \"#A84545\" ) )",
+      "dataType": "string"
+    },
+    "SLA Breaches PY": {
+      "table": "DataTable",
+      "formatString": "#,0",
+      "expression": "CALCULATE ( [SLA Breaches], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )"
+    },
+    "SLA Breaches vs PY %": {
+      "table": "DataTable",
+      "formatString": "+0.0%;-0.0%;0.0%",
+      "expression": "DIVIDE ( [SLA Breaches] - [SLA Breaches PY], [SLA Breaches PY] )"
+    },
+    "Breach rate shown": {
+      "table": "DataTable",
+      "formatString": "0.0%",
+      "expression": "IF ( [Interactions] < 11, BLANK (), DIVIDE ( [SLA Breaches], [Interactions] ) )  // honest data: no rate under 11 tickets"
+    },
+    "Breach colour": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "IF ( [Breach rate shown] > 0.2, \"#A84545\", \"#1D2733\" )  // tokens bad / text"
+    },
+    "Backing up title": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _n = COUNTROWS ( FILTER ( VALUES ( 'DataTable'[Category] ), [Breach rate shown] > 0.1 ) ) RETURN IF ( _n = 0, \"No categories with more than 10% of tickets breaching SLA\", _n & IF ( _n = 1, \" category\", \" categories\" ) & \" with more than 10% of tickets breaching SLA\" )"
+    },
+    "Headline Service": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _t = [Interactions] VAR _top = TOPN ( 1, FILTER ( VALUES ( 'DataTable'[Category] ), [SLA Breaches] > 0 ), [SLA Breaches], DESC, 'DataTable'[Category], ASC ) VAR _c = MAXX ( _top, 'DataTable'[Category] ) RETURN IF ( ISBLANK ( _t ), \"No tickets in this view.\", FORMAT ( _t, \"#,0\" ) & IF ( _t = 1, \" ticket; \", \" tickets; \" ) & FORMAT ( [SLA Compliance %], \"0%\" ) & \" within SLA\" & IF ( ISBLANK ( _c ), \".\", \"; \" & _c & \" has the most breaches.\" ) )"
+    },
+    "Category tickets title": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _c = SELECTEDVALUE ( 'DataTable'[Category], \"All categories\" ) VAR _t = [Interactions] RETURN \"Tickets in \" & _c & \": \" & FORMAT ( _t, \"#,0\" ) & IF ( _t = 1, \" ticket, \", \" tickets, \" ) & FORMAT ( [SLA Compliance %], \"0%\" ) & \" within SLA\""
+    },
+    "Avg Resolution Days PY": {
+      "table": "DataTable",
+      "formatString": "0.00",
+      "expression": "CALCULATE ( [Avg Resolution Days], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )"
+    },
+    "Avg Resolution Days vs PY %": {
+      "table": "DataTable",
+      "formatString": "+0.0%;-0.0%;0.0%",
+      "expression": "VAR _py = [Avg Resolution Days PY] RETURN IF ( NOT ISBLANK ( _py ), DIVIDE ( [Avg Resolution Days] - _py, _py ) )"
+    },
+    "Resolution vs SLA text": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _d = [Avg Days vs SLA] RETURN IF ( ISBLANK ( _d ), BLANK (), FORMAT ( ABS ( _d ), \"0.0\" ) & \" days \" & IF ( _d <= 0, \"under\", \"over\" ) & \" on average\" )"
+    },
+    "Interactions vs PY % colour": {
+      "table": "DataTable",
+      "expression": "IF ( ISBLANK ( [Interactions vs PY %] ), BLANK (), IF ( [Interactions vs PY %] >= 0, \"#026E75\", \"#A84545\" ) )",
+      "dataType": "string"
+    },
+    "SLA Compliance vs PY (pts) colour": {
+      "table": "DataTable",
+      "expression": "IF ( ISBLANK ( [SLA Compliance vs PY (pts)] ), BLANK (), IF ( [SLA Compliance vs PY (pts)] >= 0, \"#13795B\", \"#B3261E\" ) )",
+      "dataType": "string"
+    },
+    "SLA Breaches vs PY % colour": {
+      "table": "DataTable",
+      "expression": "IF ( ISBLANK ( [SLA Breaches vs PY %] ), BLANK (), IF ( [SLA Breaches vs PY %] <= 0, \"#13795B\", \"#B3261E\" ) )",
+      "dataType": "string"
+    },
+    "Avg Resolution Days vs PY % colour": {
+      "table": "DataTable",
+      "expression": "IF ( ISBLANK ( [Avg Resolution Days vs PY %] ), BLANK (), IF ( [Avg Resolution Days vs PY %] <= 0, \"#13795B\", \"#B3261E\" ) )",
+      "dataType": "string"
+    },
+    "Interactions Share Rest": {
+      "table": "DataTable",
+      "formatString": "0.0%",
+      "expression": "IF ( ISBLANK ( [Share of Interactions %] ), BLANK (), 1 - [Share of Interactions %] )"
+    },
+    "Interactions Share Title": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "IF ( ISBLANK ( [Share of Interactions %] ), \"–\", FORMAT ( [Share of Interactions %], \"0.0%\" ) & \" of all interactions\" )"
+    },
+    "Interactions Change Text": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _N = [Interactions] VAR _PY = [Interactions PY] VAR _D = _N - _PY VAR _P = DIVIDE ( _D, _PY ) VAR _Y = SELECTEDVALUE ( 'Date'[Year] ) VAR _Vs = IF ( ISBLANK ( _Y ), \"vs last year\", \"vs \" & ( _Y - 1 ) ) VAR _No = IF ( ISBLANK ( _Y ), \"No last year\", \"No \" & ( _Y - 1 ) & \" data\" ) VAR _Sign = IF ( _D > 0, \"+\", IF ( _D < 0, \"−\", \"\" ) ) RETURN IF ( ISBLANK ( _N ), \"–\", IF ( ISBLANK ( _PY ), _No, IF ( _D > 0, \"▲ \", IF ( _D < 0, \"▼ \", \"■ \" ) ) & _Sign & FORMAT ( ABS ( _D ), \"#,0\" ) & \" · \" & _Sign & FORMAT ( ABS ( _P ), \"0.0%\" ) & \" \" & _Vs ) )"
+    },
+    "Interactions Change Font": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _D = [Interactions] - [Interactions PY] VAR _Up = IF ( SELECTEDVALUE ( 'Channel'[Interaction Type] ) IN { \"Escalations\" }, -1, 1 ) RETURN IF ( ISBLANK ( [Interactions PY] ) || _D = 0, \"#4A5568\", IF ( _D * _Up > 0, \"#13795B\", \"#B3261E\" ) )"
+    },
+    "Interactions Change Fill": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _D = [Interactions] - [Interactions PY] VAR _Up = IF ( SELECTEDVALUE ( 'Channel'[Interaction Type] ) IN { \"Escalations\" }, -1, 1 ) RETURN IF ( ISBLANK ( [Interactions PY] ) || _D = 0, \"#EDF0F5\", IF ( _D * _Up > 0, \"#E4F4EE\", \"#FCEAE8\" ) )"
+    },
+    "Y Axis Max Quarter": {
+      "table": "DataTable",
+      "formatString": "0",
+      "expression": "MAXX ( VALUES ( 'Date'[Quarter] ), [Interactions] ) * 1.3"
+    },
+    "Resolution time Bar Colour": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "VAR _X = SELECTEDVALUE ( 'DataTable'[Resolution Time (Days) Bin] ) VAR _T = [SLA Days] RETURN IF ( ISBLANK ( _X ) || ISBLANK ( _T ) || _X > _T, \"#C5CCD8\", SWITCH ( SELECTEDVALUE ( 'Channel'[Interaction Type] ), \"Calls\", \"#3A63D8\", \"Chats\", \"#1E9C77\", \"Emails\", \"#1A93B8\", \"Escalations\", \"#E25751\", \"#C5CCD8\" ) )"
+    },
+    "Resolution time Subtitle": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "IF ( ISBLANK ( [Interactions] ), \"–\", FORMAT ( [Interactions Within SLA], \"#,0\" ) & \" within SLA (\" & FORMAT ( [SLA Compliance %], \"0.0%\" ) & \") · SLA \" & [SLA Days] & \" days · avg \" & FORMAT ( [Avg Resolution Days], \"0.00\" ) & \" days\" )"
+    },
+    "Y Axis Max Resolution time": {
+      "table": "DataTable",
+      "formatString": "0",
+      "expression": "MAXX ( VALUES ( 'DataTable'[Resolution Time (Days) Bin] ), [Interactions] ) * 1.3"
+    },
+    "Interactions vs PY colour": {
+      "table": "DataTable",
+      "expression": "IF ( ISBLANK ( [Interactions vs PY] ), BLANK (), IF ( [Interactions vs PY] >= 0, \"#13795B\", \"#B3261E\" ) )",
+      "dataType": "string"
+    },
+    "Top Bar Spacer": {
+      "table": "DataTable",
+      "formatString": "0",
+      "expression": "0"
+    },
+    "Category Bar Label": {
+      "table": "DataTable",
+      "dataType": "string",
+      "expression": "SELECTEDVALUE ( 'DataTable'[Category] )"
+    },
+    "X Axis Max Resolution time": {
+      "table": "DataTable",
+      "formatString": "0",
+      "expression": "VAR _hi = MAX ( 'DataTable'[Resolution Time (Days) Bin] ) VAR _p = PERCENTILE.INC ( 'DataTable'[Resolution Time (Days) Bin], 0.99 ) VAR _t = [SLA Days] RETURN MIN ( _hi, MAX ( _p, 2 * _t ) ) + 0.5"
+    }
+  },
+  "slice": {
+    "Channel": {
+      "columns": [
+        "Interaction Type",
+        "SLA Days",
+        "Channel Sort"
+      ],
+      "measures": []
+    },
+    "DataTable": {
+      "columns": [
+        "Interaction ID",
+        "Interaction Type",
+        "Date Received",
+        "Date Resolved",
+        "Category",
+        "Resolution Time (Days)",
+        "SLA Threshold (Days)",
+        "Within SLA",
+        "Driver",
+        "Channel Group",
+        "Resolution Time (Days) Bin"
+      ],
+      "measures": [
+        "Interactions",
+        "Interactions PY",
+        "Interactions vs PY",
+        "Share of Interactions %",
+        "Interactions Within SLA",
+        "SLA Breaches",
+        "SLA Compliance %",
+        "SLA Compliance PY",
+        "SLA Compliance vs PY (pts)",
+        "SLA Days",
+        "Avg Resolution Days",
+        "SLA Breaches PY",
+        "SLA Breaches vs PY %",
+        "Category tickets title",
+        "Avg Resolution Days PY",
+        "Avg Resolution Days vs PY %",
+        "SLA Compliance vs PY (pts) colour",
+        "SLA Breaches vs PY % colour",
+        "Avg Resolution Days vs PY % colour",
+        "Interactions Share Rest",
+        "Interactions Share Title",
+        "Interactions Change Text",
+        "Interactions Change Font",
+        "Interactions Change Fill",
+        "Y Axis Max Quarter",
+        "Resolution time Bar Colour",
+        "Resolution time Subtitle",
+        "Y Axis Max Resolution time",
+        "Interactions vs PY colour",
+        "Top Bar Spacer",
+        "Category Bar Label",
+        "X Axis Max Resolution time"
+      ]
+    },
+    "Date": {
+      "columns": [
+        "Date",
+        "Year",
+        "Quarter",
+        "Month",
+        "Month Number"
+      ],
+      "measures": []
+    }
+  },
+  "contractHash": "9bff44e428f85199",
+  "plannedColumns": {
+    "DataTable": {
+      "Channel Group": {
+        "dataType": "string",
+        "expression": "VAR _t = 'DataTable'[Interaction Type] VAR _n = CALCULATE ( COUNTROWS ( 'DataTable' ), ALLEXCEPT ( 'DataTable', 'DataTable'[Interaction Type] ) ) VAR _rank = COUNTROWS ( FILTER ( ALL ( 'DataTable'[Interaction Type] ), CALCULATE ( COUNTROWS ( 'DataTable' ), ALLEXCEPT ( 'DataTable', 'DataTable'[Interaction Type] ) ) > _n ) ) + 1 RETURN IF ( _rank <= 4, _t, \"Other\" )  // the four busiest channels, the rest as Other"
+      },
+      "Resolution Time (Days) Bin": {
+        "dataType": "int64",
+        "expression": "ROUNDUP ( 'DataTable'[Resolution Time (Days)], 0 )  // whole-unit bins for the histogram"
+      }
+    }
+  }
+}

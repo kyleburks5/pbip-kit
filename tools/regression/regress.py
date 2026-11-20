@@ -1,4 +1,7 @@
-"""Regression suite: golden builds of the Rep 4 parity, Rep 5 parity (two pages) and Rep 8 layouts.
+"""Regression suite: golden builds of the Rep 4 parity, Rep 5 parity (two pages), Rep 8 and panel style layouts.
+
+The panel-style case (v1.12) runs `pbik layout panels` on its spec before the build, so a change to the generator
+or the build that moves the panel style look shows as a difference.
 
     python tools/regression/regress.py                 run every case; exit 1 if any output changed
     python tools/regression/regress.py --case rep8     one case
@@ -117,6 +120,10 @@ def run_case(case, update=False, keep=False, root=None):
         shutil.copy(work / "design" / "specs" / f"{case['name']}.layout.json", lay)
         for other in (work / "design" / "specs").glob("*.layout.json"):
             other.unlink()
+        if case.get("panels"):                   # a generated page: the generator runs first, so its drift shows too
+            gen = pbik("layout", "panels", work / case["panels"], "--root", work, "--layout", lay, "--no-png")
+            if gen.returncode:
+                return [f"pbik layout panels failed ({gen.returncode}): {gen.stdout}{gen.stderr}"]
         empty = tmp / "no-templates"
         empty.mkdir()
         args = ["build", work / rep_name, lay, "--tokens", work / "design" / "tokens.json", "--templates", empty]

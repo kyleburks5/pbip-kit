@@ -1,0 +1,87 @@
+table Date
+	lineageTag: eb9a4bc1-c0c1-53e4-e4b0-42a79113b815
+
+	column Date
+		dataType: dateTime
+		lineageTag: 30cf4bdd-3d3b-3888-77c5-8d85051d01bd
+		summarizeBy: none
+		formatString: m/d/yyyy
+		sourceColumn: [Date]
+
+	column Year
+		dataType: int64
+		lineageTag: c40fea76-8f68-c07d-4f57-9341db81c10c
+		summarizeBy: sum
+		sourceColumn: [Year]
+
+	column Quarter
+		dataType: string
+		lineageTag: 013e4ccd-6d97-e4cc-754f-9e6ea9900fbf
+		summarizeBy: none
+		sourceColumn: [Quarter]
+
+	column Month
+		dataType: string
+		lineageTag: 6898af6b-7eab-3500-a3e6-314da3595cee
+		summarizeBy: none
+		sourceColumn: [Month]
+		sortByColumn: 'Month Number'
+
+	column 'Month Number'
+		dataType: int64
+		lineageTag: c48ccce2-05ae-fd75-53ae-4b9ed70ef9c5
+		summarizeBy: sum
+		sourceColumn: [Month Number]
+
+	partition Date = calculated
+		mode: import
+		source =
+				DATATABLE (
+					"Date", DATETIME,
+					"Year", INTEGER,
+					"Quarter", STRING,
+					"Month", STRING,
+					"Month Number", INTEGER,
+					{
+						{ "2023-01-01", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-02", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-03", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-04", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-05", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-06", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-07", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-08", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-09", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-10", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-11", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-12", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-13", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-14", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-15", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-16", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-17", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-18", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-19", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-20", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-21", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-22", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-23", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-24", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-25", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-26", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-27", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-28", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-29", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-30", 2023, "Q1", "Jan", 1 },
+						{ "2023-01-31", 2023, "Q1", "Jan", 1 },
+						{ "2023-02-01", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-02", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-03", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-04", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-05", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-06", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-07", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-08", 2023, "Q1", "Feb", 2 },
+						{ "2023-02-09", 2023, "Q1", "Feb", 2 }
+					}
+				)

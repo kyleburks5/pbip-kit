@@ -2,7 +2,8 @@
 
 Every table is a calculated table (inline DATATABLE). Values are deterministic: each column draws from
 random.Random(sha1(seed/table/column)). Dimension keys are unique, fact keys draw from them, a date key covers
-generate.json `dateRange`; hints (`rows`, `fact`, `trend`, `seasonality`, `monthEnd`) shape the rest.
+generate.json `dateRange`; hints (`rows`, `rowsPerYear`, `fact`, `trend`, `seasonality`, `monthEnd`, `values`: a column's labels) shape the
+rest; a fact table gets generate.json `rowsPerYear` (default 6,000) rows for each year of the date range.
 """
 import datetime as dt, hashlib, json, pathlib, random, re, uuid
 
@@ -119,6 +120,200 @@ def relations(c, sl):
     return keys_to, keys_from
 
 
+FACT_ROWS_PER_YEAR = 6000                         # thousands a year, like a real desk: histograms and quarters take shape
+LIT_TYPE = {"INTEGER": "int64", "STRING": "string", "DOUBLE": "double", "CURRENCY": "decimal", "DATETIME": "dateTime",
+            "BOOLEAN": "boolean"}
+DAYS_RE = re.compile(r"days|hours|duration|\btime\b", re.I)
+THRESH_RE = re.compile(r"\b(sla|target|threshold|goal|limit|quota)\b", re.I)
+FLAG_RE = re.compile(r"^(within|on[ -]time|in sla|met|is|has|was)\b", re.I)
+
+
+def _split_top(text, sep=","):
+    out, depth, cur, quote = [], 0, "", False
+    for ch in text:
+        if ch == '"':
+            quote = not quote
+        if not quote:
+            if ch in "({[":
+                depth += 1
+            elif ch in ")}]":
+                depth -= 1
+            elif ch == sep and depth == 0:
+                out.append(cur.strip())
+                cur = ""
+                continue
+        cur += ch
+    if cur.strip():
+        out.append(cur.strip())
+    return out
+
+
+def _literal(x):
+    x = x.strip()
+    if x.startswith('"') and x.endswith('"'):
+        return x[1:-1].replace('""', '"')
+    m = re.fullmatch(r"NAMEOF\s*\(\s*(.+?)\s*\)", x, re.I)
+    if m:
+        return m.group(1)
+    if re.fullmatch(r"-?\d+", x):
+        return int(x)
+    if re.fullmatch(r"-?\d*\.\d+", x):
+        return float(x)
+    if re.fullmatch(r"TRUE\s*(\(\s*\))?", x, re.I):
+        return True
+    if re.fullmatch(r"FALSE\s*(\(\s*\))?", x, re.I):
+        return False
+    return None
+
+
+def literal_rows(c, t):
+    """The rows a calculated table writes in its own DAX (DATATABLE ( ... ) or a { ( ... ) } table constructor, as an
+    option list or a field parameter has): (column types, {columns, rows}), else None. These are labels in the model's
+    code, not data, so the made-up model keeps them as they are (v1.12): a picker shows Revenue / Profit, not
+    Metric 1 / Metric 2, and a fact table's keys match its option table."""
+    tb = c["tables"].get(t) or {}
+    expr = re.sub(r"(//|--)[^\n]*", "", tb.get("expression") or "").strip()
+    cols = [x for x, v in (tb.get("columns") or {}).items() if not v.get("expression")]
+    m = re.fullmatch(r"DATATABLE\s*\((.*)\)", expr, re.S | re.I)
+    if m:
+        parts = _split_top(m.group(1))
+        body = parts[-1] if parts and parts[-1].startswith("{") else None
+        decl = parts[:-1] if body else parts
+        if not body or len(decl) % 2:
+            return None
+        names = [_literal(decl[i]) for i in range(0, len(decl), 2)]
+        if not all(isinstance(n, str) for n in names):
+            return None
+        types = {n: LIT_TYPE.get(decl[i + 1].strip().upper(), "string") for n, i in zip(names, range(0, len(decl), 2))}
+        rows = [[_literal(v) for v in _split_top(r.strip()[1:-1])] for r in _split_top(body.strip()[1:-1])]
+        if not rows or any(len(r) != len(names) for r in rows):
+            return None
+        return types, {"columns": names, "rows": rows}
+    if expr.startswith("{") and expr.endswith("}"):
+        rows = [[_literal(v) for v in _split_top(r.strip()[1:-1])] for r in _split_top(expr[1:-1])
+                if r.strip().startswith("(")]
+        if not rows or len({len(r) for r in rows}) != 1 or any(v is None for r in rows for v in r):
+            return None
+        k = len(rows[0])
+        # a field parameter: (label, NAMEOF ( field ), order); the columns by their role, not their listed order
+        label = next((x for x in cols if not re.search(r"fields|order|sort", x, re.I)), None)
+        fields = next((x for x in cols if re.search(r"fields", x, re.I)), None)
+        order = next((x for x in cols if re.search(r"order|sort", x, re.I)), None)
+        if k == 3 and label and fields and order:
+            return ({label: "string", fields: "string", order: "int64"},
+                    {"columns": [label, fields, order], "rows": rows})
+        if k == len(cols):
+            types = {x: ("int64" if isinstance(rows[0][i], int) and not isinstance(rows[0][i], bool) else
+                         "double" if isinstance(rows[0][i], float) else
+                         "boolean" if isinstance(rows[0][i], bool) else "string") for i, x in enumerate(cols)}
+            return types, {"columns": cols, "rows": rows}
+    return None
+
+
+def calculated_tables(c, g):
+    """In memory, for the made-up model only (the approved contract is unchanged): option tables keep the rows their
+    DAX writes (literal_rows), and a calculated date table (CALENDAR, a date template) on the one side of a
+    relationship from a date column gets date types (its key a date, Year / Month Number numbers), so it fills from
+    the date range like any date table. Returns plain lines."""
+    notes = []
+    sl = g.get("slice", {})
+    for t in sl:
+        tb = c["tables"].get(t) or {}
+        if tb.get("source") != "calculated" or tb.get("rows"):
+            continue
+        lit = literal_rows(c, t)
+        if lit:
+            types, rows = lit
+            for x, ty in types.items():
+                if x in tb["columns"]:
+                    tb["columns"][x]["type"] = ty
+            tb["rows"] = rows
+            notes.append(f"{t}: its {len(rows['rows'])} label(s) kept as the model writes them")
+    for r in c["relationships"]:
+        (ft, fc), (tt, tc) = split_field(r["from"]), split_field(r["to"])
+        tb = c["tables"].get(tt) or {}
+        if tt not in sl or tb.get("source") != "calculated" or tb.get("rows"):
+            continue
+        if (c["tables"].get(ft, {}).get("columns", {}).get(fc) or {}).get("type") != "dateTime":
+            continue
+        for x, col in tb["columns"].items():
+            if col.get("expression") or col.get("type") not in (None, "string"):
+                continue
+            if N.key(x) == N.key(tc):
+                col["type"] = "dateTime"
+            elif isinstance(date_part(x, dt.date(2024, 1, 1)), int) and not re.search(r"name|label", x, re.I):
+                col["type"] = "int64"
+        notes.append(f"{tt}: a date table, filled from the date range")
+    return notes
+
+
+ID_RE = re.compile(r"(\bid|\bkey|\bnumber|\bno\.?)$", re.I)
+END_RE = re.compile(r"resolv|clos|end|finish|complet|ship|deliver", re.I)
+START_RE = re.compile(r"receiv|open|start|creat|order|log|raise|submit", re.I)
+
+
+def consistent_rows(vals, types, keys, fkeys, n, r):
+    """v1.12: a made-up row that reads like a real one: an ID column counts up (unique), an end date (resolved,
+    closed) falls after its start date (received, opened) by the row's duration, and a "within" yes / no column says
+    whether the row's duration is inside its threshold (SLA days)."""
+    for x, ty in types.items():
+        if ID_RE.search(x) and x not in keys and x not in fkeys and ty in ("int64", "string") and x in vals                 and date_part(x, dt.date(2024, 1, 1)) is None:     # Month Number is a date part, not an ID
+            vals[x] = [100000 + k for k in range(n)] if ty == "int64" else [f"{x} {100000 + k}" for k in range(n)]
+    dur = next((x for x, ty in types.items() if ty in ("double", "decimal", "int64") and DAYS_RE.search(x)
+                and not THRESH_RE.search(x) and x in vals), None)
+    lim = next((x for x, ty in types.items() if ty in ("double", "decimal", "int64") and THRESH_RE.search(x) and x in vals), None)
+    start = next((x for x, ty in types.items() if ty == "dateTime" and START_RE.search(x) and x in vals), None)
+    end = next((x for x, ty in types.items() if ty == "dateTime" and END_RE.search(x) and x != start and x in vals
+                and x not in fkeys), None)
+    if start and end:
+        for k in range(n):
+            a = vals[start][k]
+            if hasattr(a, "toordinal"):
+                days = vals[dur][k] if dur else r.uniform(0.5, 10)
+                vals[end][k] = a + dt.timedelta(days=int(round(days + 0.49)))
+    if dur and lim:
+        for x, ty in types.items():
+            if FLAG_RE.search(x) and x in vals and x not in fkeys:
+                vals[x] = [("Yes" if vals[dur][k] <= vals[lim][k] else "No") if ty == "string"
+                           else vals[dur][k] <= vals[lim][k] for k in range(n)]
+
+
+def shaped_rows(vals, types, hint, n, r):
+    """generate.json hints that make made-up rows read like the subject (v1.12), each from a column already made:
+    `derive` {col: {from, map, default}} (a shot's type from its area); `rates` {col: {by, values, default}} (a 0/1
+    outcome at the rate of the row's member: rim 0.62, threes 0.35); `points` {x, y, zone, space} (coordinates inside
+    the row's area of a kit space, by the space's own rule, so the court and the data agree)."""
+    for col, d in (hint.get("derive") or {}).items():
+        src = vals.get(d.get("from"))
+        if src is not None and col in vals:
+            vals[col] = [d.get("map", {}).get(str(v), d.get("default", v)) for v in src]
+    for col, d in (hint.get("rates") or {}).items():
+        by = vals.get(d.get("by"))
+        if by is not None and col in vals:
+            rate = lambda v: float(d.get("values", {}).get(str(v), d.get("default", 0.45)))
+            yes, no = (True, False) if types.get(col) == "boolean" else (1, 0)
+            vals[col] = [yes if r.random() < rate(v) else no for v in by]
+    pt = hint.get("points") or {}
+    if pt.get("space") == "court" and pt.get("zone") in vals and pt.get("x") in vals and pt.get("y") in vals:
+        import sys
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / "design" / "scripts"))
+        import space_svg as SP
+        xs, ys = [], []
+        boxes = {k: (min(x for x, _ in p_), max(x for x, _ in p_), min(y for _, y in p_), max(y for _, y in p_))
+                 for k, p_ in SP.court_zone_shapes().items()}
+        hx, hy = SP.COURT["W"] / 2, SP.COURT["hoop_y"]
+        for z in vals[pt["zone"]]:
+            x0, x1, y0, y1 = boxes.get(z, (0, 50, 0, 47))
+            y1 = min(y1, hy + 30) if z in ("three-top", "wing3-left", "wing3-right") else y1   # threes from near the arc
+            for _ in range(2000):                      # a point inside the area (its box first), by the space's own rule
+                dx, dy = round(r.uniform(x0, x1) - hx, 2), round(r.uniform(y0, y1) - hy, 2)
+                if SP.court_zone(dx, dy) == z:       # the rounded point, as the model stores it
+                    break
+            xs.append(round(dx, 2))
+            ys.append(round(dy, 2))
+        vals[pt["x"]], vals[pt["y"]] = xs, ys
+
+
 def generate_values(c, g):
     """{table: {column: [values]}} for the slice, deterministic for the seed."""
     sl, seed, hints = g["slice"], g.get("seed", 1), g.get("hints", {})
@@ -144,30 +339,61 @@ def generate_values(c, g):
                 days = [d for d in days if d == month_end(d)]
             vals[date_key], n = days, len(days)
         else:
-            n = int(hint.get("rows") or (500 if (hint.get("fact") or t in facts) else 8))
+            if hint.get("rows"):
+                n = int(hint["rows"])
+            elif hint.get("fact") or t in facts:      # a fact table: rows per year of the date range (v1.12)
+                a_, b_ = date_range(g)
+                years = max(1, round(((b_ - a_).days + 1) / 365.25))
+                n = int(hint.get("rowsPerYear") or g.get("rowsPerYear") or FACT_ROWS_PER_YEAR) * years
+            else:
+                n = 8
         for x in cols:
             if x in vals:
                 continue
             r, typ = rng(seed, t, x), types[x]
-            if days and date_part(x, days[0]) is not None:
+            if (hint.get("values") or {}).get(x) and not ((t, x) in keys_from):   # the column's own values first
+                pool = list(hint["values"][x])
+                vals[x] = [r.choice(pool) for _ in range(n)]
+            elif days and date_part(x, days[0]) is not None:
                 vals[x] = [date_part(x, d) for d in days]
             elif (t, x) in keys_from and keys_from[(t, x)][0] in out:
                 pool = out[keys_from[(t, x)][0]].get(keys_from[(t, x)][1]) or [None]
-                vals[x] = fact_keys(r, g, hint, pool, n, x) if typ == "dateTime" else [r.choice(pool) for _ in range(n)]
+                if typ == "dateTime":
+                    vals[x] = fact_keys(r, g, hint, pool, n, x)
+                elif (hint.get("weights") or {}).get(x):  # the mix the hint gives (shots by area)
+                    wd = hint["weights"][x]
+                    w = [float(wd.get(str(k), 0.0)) for k in pool]
+                    vals[x] = r.choices(pool, weights=w if sum(w) else None, k=n)
+                    w = None
+                else:                                  # uneven, like real data: the first keys busier (seeded order)
+                    order = sorted(range(len(pool)), key=lambda i: rng(seed, t, x, "w", str(pool[i])).random())
+                    w = [0.0] * len(pool)
+                    for rank, i in enumerate(order):
+                        w[i] = 1 / (rank + 1) ** 0.8
+                    if w is not None:
+                        vals[x] = r.choices(pool, weights=w, k=n)
             elif x in keys_to.get(t, ()):
                 vals[x] = list(range(1, n + 1)) if typ in ("int64", "double", "decimal") else \
                     [f"{x} {k}" for k in range(1, n + 1)]
             elif typ == "dateTime":
                 vals[x] = fact_dates(r, g, hint, n, x)
+            elif typ == "int64" and THRESH_RE.search(x):
+                vals[x] = [r.choice((3, 5, 5, 7, 8, 10)) for _ in range(n)]       # an SLA or target: a few set values
             elif typ == "int64":
                 vals[x] = [r.randint(1, 20) for _ in range(n)]
+            elif typ in ("double", "decimal") and DAYS_RE.search(x):
+                vals[x] = [float(round(min(r.lognormvariate(1.25, 0.7), 60))) for _ in range(n)]   # durations: whole days, right-skewed
             elif typ in ("double", "decimal"):
                 vals[x] = [round(r.uniform(10, 1000), 2) for _ in range(n)]
             elif typ == "boolean":
                 vals[x] = [r.random() < 0.5 for _ in range(n)]
+            elif FLAG_RE.search(x):
+                vals[x] = ["Yes" if r.random() < 0.8 else "No" for _ in range(n)]      # a yes / no column
             else:
                 pool = [f"{x} {k}" for k in range(1, min(n, 6) + 1)]
                 vals[x] = [pool[k] if k < len(pool) else r.choice(pool) for k in range(n)]
+        consistent_rows(vals, types, keys_to.get(t, ()), {x for (ft, x) in keys_from if ft == t}, n, rng(seed, t, "rows"))
+        shaped_rows(vals, types, hint, n, rng(seed, t, "shaped"))
         for x in cols:                                       # sort-by columns follow their column's order
             sb = N.find(cols, tcols[x].get("sortBy") or "")
             if sb and not (days and date_part(sb, days[0]) is not None):
@@ -204,6 +430,13 @@ def dax_value(v, typ):
     return '"' + str(v).replace('"', '""') + '"'
 
 
+def tmdl_value(v):
+    """A TMDL property value: one holding a double quote (an arrow format "▲ "0.0%) goes in double quotes with its
+    quotes doubled, or Desktop refuses the model (InvalidValueFormat, test 3 of the batch studies, v1.12)."""
+    v = str(v)
+    return '"' + v.replace('"', '""') + '"' if '"' in v else v
+
+
 def measure_lines(m, src, planned):
     body = (src or {}).get("expression", "BLANK ()").strip().splitlines()
     L = [f"\tmeasure {q(m)} = " + (body[0] if len(body) == 1 else "")]
@@ -213,7 +446,7 @@ def measure_lines(m, src, planned):
     if not fmt and not (src or {}).get("dataType") and not re.search(r"%|share|rate|ratio|vs\b|colou?r$", m, re.I):
         fmt = "#,0.00" if re.search(r"\bavg\b|average|mean", m, re.I) else "#,0"   # thousands separators (fix 8)
     if fmt:
-        L.append(f"\t\tformatString: {thousands(fmt)}")
+        L.append(f"\t\tformatString: {tmdl_value(thousands(fmt))}")
     L.append(f"\t\tlineageTag: {tag('measure', m)}")
     if planned:
         L += ["", "\t\tannotation PBIK_Planned = 1"]
@@ -231,6 +464,10 @@ def table_tmdl(c, g, t, vals):
         L += [f"\tcolumn {q(x)}" + (f" = {col['expression']}" if col.get("expression") else ""),
               f"\t\tdataType: {typ if typ in DAX_TYPE else 'string'}", f"\t\tlineageTag: {tag(t, x)}",
               f"\t\tsummarizeBy: {'sum' if typ in ('int64', 'double', 'decimal') and x not in keys else 'none'}"]
+        if typ == "dateTime" and not col.get("formatString"):
+            L.append("\t\tformatString: m/d/yyyy")           # v1.12: dates as 4/21/2025, not with 12:00:00 AM
+        elif col.get("formatString"):
+            L.append(f"\t\tformatString: {tmdl_value(col['formatString'])}")
         if not col.get("expression"):
             L.append(f"\t\tsourceColumn: [{x}]")
         if col.get("sortBy"):
@@ -331,7 +568,7 @@ def generate(root, name, out_folder=None, notes=None):
     chash = content_hash(c)                       # before month_sorts sets sort-by columns in memory
     from .synth import with_planned_columns
     with_planned_columns(c, g)                    # the plan's calculated columns (top N + Other, bands)
-    said = month_sorts(c, g)
+    said = calculated_tables(c, g) + month_sorts(c, g)
     if notes is not None:
         notes.extend(said)
     d = folder / "definition"
@@ -341,7 +578,8 @@ def generate(root, name, out_folder=None, notes=None):
     write_text(d / "database.tmdl", "database\n\tcompatibilityLevel: 1606\n")
     tables = sorted(g["slice"])
     write_text(d / "model.tmdl", "model Model\n\tculture: en-US\n\tdefaultPowerBIDataSourceVersion: powerBI_V3\n\n"
-               f"annotation {DC.SYNTH_MARK} = {chash}\n\n" + "".join(f"ref table {q(t)}\n" for t in tables))
+               f"annotation {DC.SYNTH_MARK} = {chash}\n\nannotation {PLAN_MARK} = {plan_stamp(g)}\n\n"
+               + "".join(f"ref table {q(t)}\n" for t in tables))
     written = set()
     for t in tables:
         f = d / "tables" / f"{t}.tmdl"
@@ -366,6 +604,50 @@ def generate(root, name, out_folder=None, notes=None):
     return folder
 
 
+PLAN_MARK = "PBIK_SynthPlan"
+GEN_VERSION = 12                                  # raise when the made-up rows change
+
+
+def plan_stamp(g):
+    """What the made-up model was made from (the slice, planned measures and columns, seed, hints, dates)."""
+    keys = ("slice", "plannedMeasures", "plannedColumns", "seed", "hints", "dateRange", "contractHash", "prepared")
+    body = {k: g.get(k) for k in keys} | {"generator": GEN_VERSION}     # a kit change to the made-up rows remakes it
+    return hashlib.sha1(json.dumps(body, sort_keys=True, default=str).encode()).hexdigest()[:16]
+
+
+def ensure(root, name, layout_path, notes=None):
+    """Before a build on the made-up model (v1.12): slice from the layout and write <name>.SemanticModel when it is
+    missing or was made from another plan (new fields, planned measures or columns), then verify it. Returns "made",
+    "updated", "current", or None when the project has no approved contract or the folder is the person's own model
+    (never touched). Raises ContractError when the plan names a field the model doesn't have."""
+    from . import synth as S
+    root = pathlib.Path(root)
+    try:
+        S.load_contract(root)
+    except ContractError as e:
+        if (specs(root) / "contract.json").exists() and (root / f"{name}.SemanticModel").exists():
+            if notes is not None:            # a contract changed since its approval: the model stays as it was, said
+                notes.append(f"the made-up model was not remade: {e}")
+            return "stale"
+        return None
+    folder = root / f"{name}.SemanticModel"
+    if folder.exists() and not DC.is_synthetic(folder):
+        return None
+    g, missing = S.slice_(root, layout_path)
+    if missing:
+        raise ContractError("the plan uses field(s) the model doesn't have: " + ", ".join(missing))
+    f = folder / "definition" / "model.tmdl"
+    stamp = plan_stamp(read_json(specs(root) / "generate.json", {}))
+    if f.exists() and f"{PLAN_MARK} = {stamp}" in f.read_text(encoding="utf-8"):
+        return "current"
+    was = folder.exists()
+    generate(root, name, notes=notes)
+    errs, _ = verify(root, folder)
+    if errs:
+        raise ContractError("the made-up model doesn't match the contract: " + "; ".join(errs[:3]))
+    return "updated" if was else "made"
+
+
 def norm_dax(x):
     return re.sub(r"\s+", " ", (x or "").strip())
 
@@ -376,6 +658,7 @@ def verify(root, model_folder):
     g = read_json(specs(root) / "generate.json", {})
     from .synth import with_planned_columns
     with_planned_columns(c, g)
+    calculated_tables(c, g)                       # the same in-memory types generate used
     m = tmdl.load(model_folder)
     errs, notes = [], []
     if not DC.is_synthetic(model_folder):

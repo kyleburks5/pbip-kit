@@ -363,6 +363,12 @@ def _main(argv=None):
                                        "lines, coloured comparisons, header band)")
     lpo.add_argument("--root", default=".")
     lpo.add_argument("--layout")
+    lpa = la.add_parser("panels", help="the panel style layout: one panel per member of a small dimension (2-6), "
+                                       "from a spec (design/specs/panels.json; docs/patterns/panel-style-layout.md)")
+    lpa.add_argument("spec", nargs="?", default="design/specs/panels.json")
+    lpa.add_argument("--root", default=".")
+    lpa.add_argument("--layout")
+    lpa.add_argument("--no-png", action="store_true", help="keep the icons as SVG (no Edge render)")
 
     sc_ = sub.add_parser("score", help="the polish score (10 items; target 7 before showing colleagues)")
     sc_.add_argument("report", nargs="?")
@@ -541,6 +547,22 @@ def _main(argv=None):
             harvest(args.report, args.out, args.page or "Patterns")
     elif c == "build":
         from .build import build
+        from . import synthgen as SG_, synth as S_
+        try:                                            # the made-up model first, made or updated from this plan (v1.12)
+            said_ = []
+            name_ = pathlib.Path(args.report).name
+            name_ = name_[:-len(".Report")] if name_.endswith(".Report") else name_
+            how_ = SG_.ensure(".", name_, args.layout, notes=said_)
+            if how_ in ("made", "updated"):
+                print(f"{'made' if how_ == 'made' else 'updated'} the made-up model {name_}.SemanticModel from the plan")
+                for x in said_:
+                    print(f"  {x}")
+            elif how_ == "stale":                       # v1.12: never a silent skip
+                for x in said_:
+                    print(f"note: {x}")
+        except S_.ContractError as e:
+            print(f"pbik: the made-up model: {e}", file=sys.stderr)
+            return 2
         build(args.report, args.layout, prune=args.prune, reset=args.reset, map_path=args.map,
               reset_ids={x.strip() for x in (args.reset_ids or '').split(',') if x.strip()},
               tokens_path=args.tokens, templates=args.templates, no_custom_visuals=args.no_custom_visuals,
@@ -838,6 +860,15 @@ def _main(argv=None):
         except PL.PlanError as e:
             print(f"pbik: {e}", file=sys.stderr)
             return 2
+    elif c == "layout" and args.sub == "panels":
+        from . import panelstyle as PS
+        try:
+            for line in PS.run(args.root, args.spec, args.layout, render_png=not args.no_png):
+                print(line)
+        except PS.PanelError as e:
+            print(f"pbik: {e}", file=sys.stderr)
+            return 2
+        print("next: I'll run the polish and show you the plan picture")
     elif c == "layout" and args.sub == "polish":
         from . import polish as PO
         said, why_not = PO.run(args.root, args.layout)

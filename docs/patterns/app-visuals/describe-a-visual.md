@@ -28,6 +28,12 @@ kit picks the pattern and the route. These words help when you want to be exact.
 
 | You say | Pattern | What you get |
 | --- | --- | --- |
+| "use my panel style layout, one panel per channel" (or per line of business, care setting, region) | [panel style layout](../panel-style-layout.md) | a dark header band and one full-height panel per member: share bar, big number with a change chip, quarterly mini columns, a histogram against the threshold, top 5 bars (`pbik layout panels`) |
+| "how long it takes, against the SLA", "bars inside the limit in colour" | [threshold histogram](../threshold-histogram.md) | bars within the threshold coloured, beyond it grey, a dashed "avg" line |
+| "names above the bars", "top 5 with room for the names" | [label-above bars](../label-above-bars.md) | slim full-width bars, the name above, the value at the end |
+
+| You say | Pattern | What you get |
+| --- | --- | --- |
 | "show it on a picture of the court / body / clinic floor / route", "where on the floor plan", "which part of the body" | [spatial canvas](../spatial-canvas.md) | the space drawn by the kit (generic shapes, no logos), points on it, areas coloured, ranked row |
 | "click an area to filter the page", "pick a room and the rest follows" | clickable areas (spatial canvas, [map](map.md)) | a real page filter on the area's field |
 | "use our own areas" (a GeoJSON, a list of rooms with sizes, depot locations) | spatial canvas, custom shapes | your shapes, with the same click and colour rules |

@@ -1,0 +1,36 @@
+table Channel
+	lineageTag: 879f0b1b-ef59-eeeb-f78c-fd3a22f6f807
+
+	column 'Interaction Type'
+		dataType: string
+		lineageTag: 96cb999d-3a33-1be5-9574-2a5d535ebf8c
+		summarizeBy: none
+		sourceColumn: [Interaction Type]
+		sortByColumn: 'Channel Sort'
+
+	column 'SLA Days'
+		dataType: int64
+		lineageTag: 61f0eb0a-ad3e-aede-d1b9-c798e6a5e71a
+		summarizeBy: sum
+		sourceColumn: [SLA Days]
+
+	column 'Channel Sort'
+		dataType: int64
+		lineageTag: 8a52de27-1529-be3f-348c-948652663fc0
+		summarizeBy: sum
+		sourceColumn: [Channel Sort]
+
+	partition Channel = calculated
+		mode: import
+		source =
+				DATATABLE (
+					"Interaction Type", STRING,
+					"SLA Days", INTEGER,
+					"Channel Sort", INTEGER,
+					{
+						{ "Calls", 5, 1 },
+						{ "Chats", 3, 2 },
+						{ "Emails", 5, 3 },
+						{ "Escalations", 7, 4 }
+					}
+				)

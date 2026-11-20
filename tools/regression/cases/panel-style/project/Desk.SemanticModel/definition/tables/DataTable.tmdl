@@ -1,0 +1,303 @@
+table DataTable
+	lineageTag: 4fd9953e-9269-4481-637b-74fd765b441c
+
+	column 'Interaction ID'
+		dataType: int64
+		lineageTag: cc4f3972-aaa2-05f1-eec8-2cb430e4fbf9
+		summarizeBy: sum
+		sourceColumn: [Interaction ID]
+
+	column 'Interaction Type'
+		dataType: string
+		lineageTag: fcdffd4c-f2f4-a104-e16e-e01d7d1ba12c
+		summarizeBy: none
+		sourceColumn: [Interaction Type]
+
+	column 'Date Received'
+		dataType: dateTime
+		lineageTag: c3b8e7de-f972-6e4b-5930-098113d5bcf2
+		summarizeBy: none
+		formatString: m/d/yyyy
+		sourceColumn: [Date Received]
+
+	column 'Date Resolved'
+		dataType: dateTime
+		lineageTag: ca309a85-d74d-85ca-bde6-f352ae59ac41
+		summarizeBy: none
+		formatString: m/d/yyyy
+		sourceColumn: [Date Resolved]
+
+	column Category
+		dataType: string
+		lineageTag: 08379814-16c7-7845-ace7-e6da22b2fc60
+		summarizeBy: none
+		sourceColumn: [Category]
+
+	column 'Resolution Time (Days)'
+		dataType: double
+		lineageTag: f8b87a5f-7ca2-d8ce-1351-1086f75107ba
+		summarizeBy: sum
+		sourceColumn: [Resolution Time (Days)]
+
+	column 'SLA Threshold (Days)'
+		dataType: int64
+		lineageTag: 954718b0-16db-b444-6141-3e5a8047ae61
+		summarizeBy: sum
+		sourceColumn: [SLA Threshold (Days)]
+
+	column 'Within SLA'
+		dataType: string
+		lineageTag: 50ba87e0-499e-b141-d5a9-944a25bd401b
+		summarizeBy: none
+		sourceColumn: [Within SLA]
+
+	column Driver
+		dataType: string
+		lineageTag: 6cda3276-12b4-0826-9910-dbc359747ef9
+		summarizeBy: none
+		sourceColumn: [Driver]
+
+	column 'Channel Group' = VAR _t = 'DataTable'[Interaction Type] VAR _n = CALCULATE ( COUNTROWS ( 'DataTable' ), ALLEXCEPT ( 'DataTable', 'DataTable'[Interaction Type] ) ) VAR _rank = COUNTROWS ( FILTER ( ALL ( 'DataTable'[Interaction Type] ), CALCULATE ( COUNTROWS ( 'DataTable' ), ALLEXCEPT ( 'DataTable', 'DataTable'[Interaction Type] ) ) > _n ) ) + 1 RETURN IF ( _rank <= 4, _t, "Other" )  // the four busiest channels, the rest as Other
+		dataType: string
+		lineageTag: 65d4b27b-fe83-464f-3c08-a9969246d1a9
+		summarizeBy: none
+
+	column 'Resolution Time (Days) Bin' = ROUNDUP ( 'DataTable'[Resolution Time (Days)], 0 )  // whole-unit bins for the histogram
+		dataType: int64
+		lineageTag: 1938395d-8528-341c-fb63-6a318a106e18
+		summarizeBy: sum
+
+	measure Interactions = COUNTROWS ( 'DataTable' )
+		formatString: #,##0
+		lineageTag: 45bc04e5-0bce-a49d-955f-5e303e5c1093
+
+	measure 'Interactions PY' = CALCULATE ( [Interactions], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,##0
+		lineageTag: b4c7dce5-0a51-de5a-a27e-f82887a14ee4
+
+	measure 'Interactions vs PY' = 
+			VAR _py = [Interactions PY]
+			RETURN
+			IF ( NOT ISBLANK ( _py ), [Interactions] - _py )
+		formatString: +#,##0;-#,##0;0
+		lineageTag: fa20dbb1-e28f-1b5a-622f-59631ed8aa89
+
+	measure 'Share of Interactions %' = DIVIDE ( [Interactions], CALCULATE ( [Interactions], REMOVEFILTERS ( 'Channel' ) ) )
+		formatString: 0.0%
+		lineageTag: 8db9e4e7-6560-49fb-13fb-91a6ac1a33a9
+
+	measure 'Interactions Within SLA' = 
+			IF (
+			ISBLANK ( [Interactions] ),
+			BLANK (),
+			SUMX (
+			VALUES ( 'Channel'[SLA Days] ),
+			VAR _days = 'Channel'[SLA Days]
+			RETURN
+			CALCULATE ( COUNTROWS ( 'DataTable' ), 'DataTable'[Resolution Time (Days)] <= _days )
+			) + 0
+			)
+		formatString: #,##0
+		lineageTag: b1a4809a-a01a-1efe-0fce-faaf7ce5f2aa
+
+	measure 'SLA Breaches' = 
+			VAR _n = [Interactions]
+			RETURN
+			IF ( NOT ISBLANK ( _n ), _n - [Interactions Within SLA] )
+		formatString: #,##0
+		lineageTag: 257b0329-dfc5-06d9-7ab5-56d5de67281c
+
+	measure 'SLA Compliance %' = DIVIDE ( [Interactions Within SLA], [Interactions] )
+		formatString: 0.0%
+		lineageTag: b9dad1d3-7b96-76bb-ffb4-bfdcf42d7dfe
+
+	measure 'SLA Compliance PY' = CALCULATE ( [SLA Compliance %], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0.0%
+		lineageTag: 35aa331d-cf74-7938-4690-0cad10984544
+
+	measure 'SLA Compliance vs PY (pts)' = 
+			VAR _py = [SLA Compliance PY]
+			VAR _cy = [SLA Compliance %]
+			RETURN
+			IF ( NOT ISBLANK ( _py ) && NOT ISBLANK ( _cy ), ( _cy - _py ) * 100 )
+		formatString: +#,0.0;-#,0.0;#,0.0
+		lineageTag: 126757ce-c73c-4fb9-444c-9756a25d952e
+
+	measure 'SLA Days' = SELECTEDVALUE ( 'Channel'[SLA Days] )
+		formatString: #,0
+		lineageTag: 58cf1af4-6a52-247a-1f5d-541dd14b5501
+
+	measure 'Avg Resolution Days' = AVERAGE ( 'DataTable'[Resolution Time (Days)] )
+		formatString: #,0.00
+		lineageTag: 353c1c90-3949-8e63-61c0-32a31c6b7597
+
+	measure 'SLA Breaches PY' = CALCULATE ( [SLA Breaches], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,0
+		lineageTag: 3784bf4d-d1c6-4ea2-d4fb-becef5114965
+
+		annotation PBIK_Planned = 1
+
+	measure 'SLA Breaches vs PY %' = DIVIDE ( [SLA Breaches] - [SLA Breaches PY], [SLA Breaches PY] )
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: a2c45abc-b374-83a1-cea2-339117199a10
+
+		annotation PBIK_Planned = 1
+
+	measure 'Category tickets title' = VAR _c = SELECTEDVALUE ( 'DataTable'[Category], "All categories" ) VAR _t = [Interactions] RETURN "Tickets in " & _c & ": " & FORMAT ( _t, "#,0" ) & IF ( _t = 1, " ticket, ", " tickets, " ) & FORMAT ( [SLA Compliance %], "0%" ) & " within SLA"
+		lineageTag: 8798bd4f-0099-e1de-953d-af78b5ad4921
+
+		annotation PBIK_Planned = 1
+
+	measure 'Avg Resolution Days PY' = CALCULATE ( [Avg Resolution Days], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,0.00
+		lineageTag: 1e491280-f86b-1689-98cf-3d47b963f98b
+
+		annotation PBIK_Planned = 1
+
+	measure 'Avg Resolution Days vs PY %' = VAR _py = [Avg Resolution Days PY] RETURN IF ( NOT ISBLANK ( _py ), DIVIDE ( [Avg Resolution Days] - _py, _py ) )
+		formatString: +0.0%;-0.0%;0.0%
+		lineageTag: a8d7d57a-605b-a796-5fd8-8787eec1bfe1
+
+		annotation PBIK_Planned = 1
+
+	measure 'SLA Compliance vs PY (pts) colour' = IF ( ISBLANK ( [SLA Compliance vs PY (pts)] ), BLANK (), IF ( [SLA Compliance vs PY (pts)] >= 0, "#13795B", "#B3261E" ) )
+		lineageTag: f3e82e37-c939-e1c9-24ee-628916d582d8
+
+		annotation PBIK_Planned = 1
+
+	measure 'SLA Breaches vs PY % colour' = IF ( ISBLANK ( [SLA Breaches vs PY %] ), BLANK (), IF ( [SLA Breaches vs PY %] <= 0, "#13795B", "#B3261E" ) )
+		lineageTag: cf8ce394-7053-53a9-04e5-c58596e8fb35
+
+		annotation PBIK_Planned = 1
+
+	measure 'Avg Resolution Days vs PY % colour' = IF ( ISBLANK ( [Avg Resolution Days vs PY %] ), BLANK (), IF ( [Avg Resolution Days vs PY %] <= 0, "#13795B", "#B3261E" ) )
+		lineageTag: 0d228725-ff1b-e602-a982-b0ec86db46f5
+
+		annotation PBIK_Planned = 1
+
+	measure 'Interactions Share Rest' = IF ( ISBLANK ( [Share of Interactions %] ), BLANK (), 1 - [Share of Interactions %] )
+		formatString: 0.0%
+		lineageTag: 15d9e5c9-95de-80e0-573d-b71f7c933484
+
+		annotation PBIK_Planned = 1
+
+	measure 'Interactions Share Title' = IF ( ISBLANK ( [Share of Interactions %] ), "–", FORMAT ( [Share of Interactions %], "0.0%" ) & " of all interactions" )
+		lineageTag: d60dcc9a-59cc-9b46-a156-7140b174c31d
+
+		annotation PBIK_Planned = 1
+
+	measure 'Interactions Change Text' = VAR _N = [Interactions] VAR _PY = [Interactions PY] VAR _D = _N - _PY VAR _P = DIVIDE ( _D, _PY ) VAR _Y = SELECTEDVALUE ( 'Date'[Year] ) VAR _Vs = IF ( ISBLANK ( _Y ), "vs last year", "vs " & ( _Y - 1 ) ) VAR _No = IF ( ISBLANK ( _Y ), "No last year", "No " & ( _Y - 1 ) & " data" ) VAR _Sign = IF ( _D > 0, "+", IF ( _D < 0, "−", "" ) ) RETURN IF ( ISBLANK ( _N ), "–", IF ( ISBLANK ( _PY ), _No, IF ( _D > 0, "▲ ", IF ( _D < 0, "▼ ", "■ " ) ) & _Sign & FORMAT ( ABS ( _D ), "#,0" ) & " · " & _Sign & FORMAT ( ABS ( _P ), "0.0%" ) & " " & _Vs ) )
+		lineageTag: 2c973847-729b-2065-6e54-89d19bcab1d2
+
+		annotation PBIK_Planned = 1
+
+	measure 'Interactions Change Font' = VAR _D = [Interactions] - [Interactions PY] VAR _Up = IF ( SELECTEDVALUE ( 'Channel'[Interaction Type] ) IN { "Escalations" }, -1, 1 ) RETURN IF ( ISBLANK ( [Interactions PY] ) || _D = 0, "#4A5568", IF ( _D * _Up > 0, "#13795B", "#B3261E" ) )
+		lineageTag: d4318152-2648-94ce-c7eb-7876ae985ffc
+
+		annotation PBIK_Planned = 1
+
+	measure 'Interactions Change Fill' = VAR _D = [Interactions] - [Interactions PY] VAR _Up = IF ( SELECTEDVALUE ( 'Channel'[Interaction Type] ) IN { "Escalations" }, -1, 1 ) RETURN IF ( ISBLANK ( [Interactions PY] ) || _D = 0, "#EDF0F5", IF ( _D * _Up > 0, "#E4F4EE", "#FCEAE8" ) )
+		lineageTag: 0d6965f8-77d6-92f1-080f-d0a3f4523447
+
+		annotation PBIK_Planned = 1
+
+	measure 'Y Axis Max Quarter' = MAXX ( VALUES ( 'Date'[Quarter] ), [Interactions] ) * 1.3
+		formatString: #,0
+		lineageTag: b99857ca-ece9-e90e-f4a0-0e3cebd069c3
+
+		annotation PBIK_Planned = 1
+
+	measure 'Resolution time Bar Colour' = VAR _X = SELECTEDVALUE ( 'DataTable'[Resolution Time (Days) Bin] ) VAR _T = [SLA Days] RETURN IF ( ISBLANK ( _X ) || ISBLANK ( _T ) || _X > _T, "#C5CCD8", SWITCH ( SELECTEDVALUE ( 'Channel'[Interaction Type] ), "Calls", "#3A63D8", "Chats", "#1E9C77", "Emails", "#1A93B8", "Escalations", "#E25751", "#C5CCD8" ) )
+		lineageTag: 8a3d1813-565e-fc89-11df-e73e5df364e5
+
+		annotation PBIK_Planned = 1
+
+	measure 'Resolution time Subtitle' = IF ( ISBLANK ( [Interactions] ), "–", FORMAT ( [Interactions Within SLA], "#,0" ) & " within SLA (" & FORMAT ( [SLA Compliance %], "0.0%" ) & ") · SLA " & [SLA Days] & " days · avg " & FORMAT ( [Avg Resolution Days], "0.00" ) & " days" )
+		lineageTag: a3f2f61a-21df-f3fe-33e3-9b9e7e6d5d5e
+
+		annotation PBIK_Planned = 1
+
+	measure 'Y Axis Max Resolution time' = MAXX ( VALUES ( 'DataTable'[Resolution Time (Days) Bin] ), [Interactions] ) * 1.3
+		formatString: #,0
+		lineageTag: f8ae7c57-eaf0-402a-db13-f50858b8514e
+
+		annotation PBIK_Planned = 1
+
+	measure 'Interactions vs PY colour' = IF ( ISBLANK ( [Interactions vs PY] ), BLANK (), IF ( [Interactions vs PY] >= 0, "#13795B", "#B3261E" ) )
+		lineageTag: 122be7b5-741e-ddd3-36d2-8284e52ee491
+
+		annotation PBIK_Planned = 1
+
+	measure 'Top Bar Spacer' = 0
+		formatString: #,0
+		lineageTag: 172fc682-99b7-2920-0a10-abb48c156a84
+
+		annotation PBIK_Planned = 1
+
+	measure 'Category Bar Label' = SELECTEDVALUE ( 'DataTable'[Category] )
+		lineageTag: 9940dce5-7205-88ab-d56d-aa4efc765e5b
+
+		annotation PBIK_Planned = 1
+
+	measure 'X Axis Max Resolution time' = VAR _hi = MAX ( 'DataTable'[Resolution Time (Days) Bin] ) VAR _p = PERCENTILE.INC ( 'DataTable'[Resolution Time (Days) Bin], 0.99 ) VAR _t = [SLA Days] RETURN MIN ( _hi, MAX ( _p, 2 * _t ) ) + 0.5
+		formatString: #,0
+		lineageTag: 10c0cda8-b3b7-3d48-1a24-895db4e267a7
+
+		annotation PBIK_Planned = 1
+
+	partition DataTable = calculated
+		mode: import
+		source =
+				DATATABLE (
+					"Interaction ID", INTEGER,
+					"Interaction Type", STRING,
+					"Date Received", DATETIME,
+					"Date Resolved", DATETIME,
+					"Category", STRING,
+					"Resolution Time (Days)", DOUBLE,
+					"SLA Threshold (Days)", INTEGER,
+					"Within SLA", STRING,
+					"Driver", STRING,
+					{
+						{ 100000, "Emails", "2024-12-11", "2024-12-14", "Category 1", 3.0, 8, "Yes", "Driver 1" },
+						{ 100001, "Emails", "2025-04-02", "2025-04-09", "Category 2", 7.0, 5, "No", "Driver 2" },
+						{ 100002, "Chats", "2023-03-07", "2023-03-10", "Category 3", 3.0, 5, "Yes", "Driver 3" },
+						{ 100003, "Escalations", "2024-04-10", "2024-04-15", "Category 4", 5.0, 8, "Yes", "Driver 4" },
+						{ 100004, "Calls", "2023-09-18", "2023-09-30", "Category 5", 12.0, 8, "No", "Driver 5" },
+						{ 100005, "Emails", "2024-09-11", "2024-09-17", "Category 6", 6.0, 5, "No", "Driver 6" },
+						{ 100006, "Emails", "2023-07-12", "2023-07-13", "Category 6", 1.0, 5, "Yes", "Driver 1" },
+						{ 100007, "Escalations", "2024-07-17", "2024-07-21", "Category 1", 4.0, 8, "Yes", "Driver 6" },
+						{ 100008, "Escalations", "2025-03-26", "2025-04-04", "Category 5", 9.0, 5, "No", "Driver 4" },
+						{ 100009, "Emails", "2024-10-13", "2024-10-17", "Category 5", 4.0, 10, "Yes", "Driver 5" },
+						{ 100010, "Emails", "2023-02-23", "2023-02-27", "Category 1", 4.0, 5, "Yes", "Driver 2" },
+						{ 100011, "Calls", "2024-11-30", "2024-12-04", "Category 2", 4.0, 3, "No", "Driver 2" },
+						{ 100012, "Chats", "2025-07-06", "2025-07-07", "Category 3", 1.0, 3, "Yes", "Driver 3" },
+						{ 100013, "Chats", "2025-12-11", "2025-12-13", "Category 3", 2.0, 10, "Yes", "Driver 3" },
+						{ 100014, "Escalations", "2023-06-12", "2023-06-14", "Category 4", 2.0, 7, "Yes", "Driver 1" },
+						{ 100015, "Emails", "2024-10-01", "2024-10-03", "Category 1", 2.0, 10, "Yes", "Driver 6" },
+						{ 100016, "Chats", "2025-02-18", "2025-02-28", "Category 1", 10.0, 5, "No", "Driver 4" },
+						{ 100017, "Escalations", "2023-11-09", "2023-11-16", "Category 5", 7.0, 3, "No", "Driver 6" },
+						{ 100018, "Chats", "2024-05-12", "2024-05-15", "Category 4", 3.0, 8, "Yes", "Driver 3" },
+						{ 100019, "Emails", "2024-04-20", "2024-04-28", "Category 3", 8.0, 8, "Yes", "Driver 3" },
+						{ 100020, "Chats", "2024-07-05", "2024-07-07", "Category 3", 2.0, 8, "Yes", "Driver 5" },
+						{ 100021, "Emails", "2025-06-02", "2025-06-04", "Category 6", 2.0, 8, "Yes", "Driver 4" },
+						{ 100022, "Calls", "2023-03-09", "2023-03-21", "Category 6", 12.0, 3, "No", "Driver 3" },
+						{ 100023, "Emails", "2024-04-30", "2024-05-03", "Category 1", 3.0, 3, "Yes", "Driver 2" },
+						{ 100024, "Emails", "2023-09-03", "2023-09-07", "Category 4", 4.0, 7, "Yes", "Driver 3" },
+						{ 100025, "Escalations", "2025-11-30", "2025-12-05", "Category 3", 5.0, 3, "No", "Driver 5" },
+						{ 100026, "Calls", "2024-12-02", "2024-12-07", "Category 2", 5.0, 5, "Yes", "Driver 3" },
+						{ 100027, "Emails", "2025-09-03", "2025-09-04", "Category 4", 1.0, 5, "Yes", "Driver 6" },
+						{ 100028, "Chats", "2023-11-20", "2023-11-29", "Category 2", 9.0, 3, "No", "Driver 1" },
+						{ 100029, "Emails", "2025-07-10", "2025-07-13", "Category 6", 3.0, 5, "Yes", "Driver 4" },
+						{ 100030, "Escalations", "2023-04-28", "2023-05-08", "Category 5", 10.0, 8, "No", "Driver 5" },
+						{ 100031, "Emails", "2025-04-09", "2025-04-12", "Category 3", 3.0, 5, "Yes", "Driver 3" },
+						{ 100032, "Emails", "2025-01-19", "2025-01-22", "Category 2", 3.0, 7, "Yes", "Driver 2" },
+						{ 100033, "Emails", "2023-08-31", "2023-09-06", "Category 4", 6.0, 3, "No", "Driver 1" },
+						{ 100034, "Emails", "2025-05-16", "2025-05-19", "Category 6", 3.0, 5, "Yes", "Driver 5" },
+						{ 100035, "Emails", "2023-12-07", "2023-12-12", "Category 5", 5.0, 5, "Yes", "Driver 2" },
+						{ 100036, "Emails", "2024-09-14", "2024-09-19", "Category 1", 5.0, 7, "Yes", "Driver 6" },
+						{ 100037, "Emails", "2025-01-10", "2025-01-14", "Category 6", 4.0, 5, "Yes", "Driver 4" },
+						{ 100038, "Escalations", "2023-01-31", "2023-02-07", "Category 3", 7.0, 8, "Yes", "Driver 4" },
+						{ 100039, "Calls", "2025-05-12", "2025-05-18", "Category 4", 6.0, 10, "Yes", "Driver 5" }
+					}
+				)

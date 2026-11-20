@@ -189,7 +189,7 @@ theme = {
             # No detailFontColor here: the per-card good/bad/neutral color must not be shadowed by a theme color.
             # Rep 2: caption-size reference line in the 176px callouts; the pill never wraps mid-text.
             # The change chip sits on the card's own colour: Desktop's default chip is light, unreadable on a dark
-            # card (v1.11.2, Rep test 1 in Desktop). A per-card background measure still wins.
+            # card (v1.12, Rep test 1 in Desktop). A per-card background measure still wins.
             "referenceLabelDetail": [{"$id": "default", "show": True, "detailFontFamily": FONT,
                                       "detailFontSize": P["caption"], "textWrap": False,
                                       "detailBackgroundColor": solid(C["card"])}],

@@ -6,8 +6,8 @@ Out of line, per visual (shapes, text boxes and images count for the column edge
   rail-panel, may touch one page edge with its inner edge on the grid);
 - a data visual's top or bottom off the 8 px baseline;
 - a bottom 1-8 px off the bottom of the other visuals that start on the same row (a bigger difference is a choice).
-A visual inside a shape that is itself on the grid (a panel, the header band; not a rail, whose contents stay on the
-grid) lines up with that shape, not the columns: it is left out, and a
+A visual inside a shape that is itself on the grid (a panel, the header band) lines up with that shape, not the
+columns: it is left out; one inside a rail lines up with the rail's 32 px inset instead (v1.12), and a
 row-mate with the same bottom keeps it (so a row of cards stays one height).
 
 The snap moves an edge to the nearest column edge (rounded to whole pixels, so the gaps stay the gutter), a top and a
@@ -67,6 +67,7 @@ def issues(layout):
              if isinstance(sp, dict) and (sp.get("tooltip") or (sp.get("width") or width) < width)}   # have no grid
     vis = [v for v in (layout or {}).get("visuals", []) if v.get("type") != "group" and v.get("page") not in small
            and all(isinstance(v.get(k), (int, float)) and not isinstance(v.get(k), bool) for k in ("x", "y", "w", "h"))]
+    rails = [v for v in vis if v.get("type") in ("shape", "basicShape") and v.get("pattern") == "rail-panel"]
     shapes = [v for v in vis if v.get("type") in ("shape", "basicShape") and v.get("pattern") != "rail-panel"
               and (v["x"] == 0 or min(abs(v["x"] - e) for e in lefts) <= 1)
               and (v["x"] + v["w"] >= width or min(abs(v["x"] + v["w"] - e) for e in rights) <= 1)]
@@ -74,7 +75,19 @@ def issues(layout):
     for v in vis:
         if v.get("type") not in DECOR and (_inside(v, shapes) or placed_by_hand(v)):
             fixed.setdefault((v.get("page"), line8(v["y"])), set()).add(v["y"] + v["h"])
-    vis = [v for v in vis if not _inside(v, shapes)]
+    for v in [v for v in vis if v not in rails and _inside(v, rails) and not _inside(v, shapes)]:
+        r = next(r for r in rails if _inside(v, [r]))   # v1.12: in a rail, the rail's 32 px inset is the grid
+        inset_l, inset_r = r["x"] + 32, r["x"] + r["w"] - 32
+        col_l = v["x"] == 0 or abs(_near(v["x"], lefts)[1]) <= 1           # on a column edge is fine too (Study 1)
+        col_r = v["x"] + v["w"] >= width or abs(_near(v["x"] + v["w"], rights)[1]) <= 1
+        if not col_l and v["x"] != r["x"] and abs(v["x"] - inset_l) > 1:
+            out.append({"id": v["id"], "what": "left", "at": v["x"], "want": inset_l, "off": v["x"] - inset_l,
+                        "text": f"{v['id']} left edge {_fmt(v['x'])} is off the rail's inset {inset_l}"})
+        if not col_r and abs(v["x"] + v["w"] - inset_r) > 1 and abs(v["x"] + v["w"] - (r["x"] + r["w"])) > 1:
+            out.append({"id": v["id"], "what": "right", "at": v["x"] + v["w"], "want": inset_r,
+                        "off": v["x"] + v["w"] - inset_r,
+                        "text": f"{v['id']} right edge {_fmt(v['x'] + v['w'])} is off the rail's inset {round(inset_r)}"})
+    vis = [v for v in vis if not _inside(v, shapes) and not (v not in rails and _inside(v, rails))]
     for v in vis:
         x, y, w, h = v["x"], v["y"], v["w"], v["h"]
         if x != 0:

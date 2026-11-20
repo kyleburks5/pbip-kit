@@ -49,7 +49,7 @@
    }
   },
   {
-   "probe": "document.querySelector(\"path.kit-zone[aria-label^='Corner three right']\").getAttribute('aria-label')"
+   "probe": "document.querySelector(\"path.kit-zone[aria-label^='Corner 3 R']\").getAttribute('aria-label')"
   }
  ]
 }

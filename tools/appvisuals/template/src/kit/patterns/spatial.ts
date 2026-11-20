@@ -42,6 +42,8 @@ export interface Space {
     zoneOf(p: Pt): Zone | null;
     /** Data coordinates -> space units (default: the same units). */
     toSpace(x: number, y: number): Pt;
+    /** Zone colour fades out between r0 and r1 from (x, y) (a court: the long threes, so empty space doesn't dominate). */
+    fade?: { x: number; y: number; r0: number; r1: number };
 }
 
 const f = (v: number) => Math.round(v * 100) / 100;
@@ -220,10 +222,10 @@ export function court(scale = 1): Space {
     const W = 50, H = 47, hoop = { x: 25, y: 5.25 }, three = 23.75, cornerX = 22, ra = 4, laneW = 16, ftY = 19;
     const meet = hoop.y + Math.sqrt(three * three - cornerX * cornerX);
     const names = [
-        { id: "rim", name: "At the rim" }, { id: "paint", name: "Paint" },
-        { id: "mid-left", name: "Mid-range left" }, { id: "mid-center", name: "Mid-range centre" }, { id: "mid-right", name: "Mid-range right" },
-        { id: "corner3-left", name: "Corner three left" }, { id: "corner3-right", name: "Corner three right" },
-        { id: "wing3-left", name: "Three left wing" }, { id: "three-top", name: "Three top" }, { id: "wing3-right", name: "Three right wing" }
+        { id: "rim", name: "Rim" }, { id: "paint", name: "Paint" },
+        { id: "mid-left", name: "Mid L" }, { id: "mid-center", name: "Mid C" }, { id: "mid-right", name: "Mid R" },
+        { id: "corner3-left", name: "Corner 3 L" }, { id: "corner3-right", name: "Corner 3 R" },
+        { id: "wing3-left", name: "Wing 3 L" }, { id: "three-top", name: "Top 3" }, { id: "wing3-right", name: "Wing 3 R" }
     ];
     const rule = (x: number, y: number): string | null => {
         if (x < 0 || x > W || y < 0 || y > H) {
@@ -250,19 +252,44 @@ export function court(scale = 1): Space {
         return `mid-${side}`;
     };
     const a0 = Math.atan2(meet - hoop.y, -cornerX) * 180 / Math.PI, a1 = Math.atan2(meet - hoop.y, cornerX) * 180 / Math.PI;
-    const arc = arcPoints(hoop, three, a0, a1, 48).reverse();
+    const arc = arcPoints(hoop, three, a0, a1, 96);      // left to right (reversed, it drew a line across the court)
     const lines = [
         rectPath({ x: 0, y: 0, w: W, h: H }),
         rectPath({ x: hoop.x - laneW / 2, y: 0, w: laneW, h: ftY }),
         circlePath({ x: hoop.x, y: ftY }, 6),
         circlePath(hoop, 0.75),
         `M${hoop.x - 3},4h6`,
-        `M${f(hoop.x - ra)},${hoop.y}` + arcPoints(hoop, ra, 180, 0, 16).map(p => `L${f(p.x)},${f(p.y)}`).join(""),
+        `M${f(hoop.x - ra)},4` + arcPoints(hoop, ra, 180, 0, 32).map(p => `L${f(p.x)},${f(p.y)}`).join("") + `L${f(hoop.x + ra)},4`,
         `M${W / 2 - cornerX},0V${f(meet)}` + arc.map(p => `L${f(p.x)},${f(p.y)}`).join("") + `V0`,
         `M${W / 2 - 6},${H}` + arcPoints({ x: W / 2, y: H }, 6, 180, 360, 16).map(p => `L${f(p.x)},${f(p.y)}`).join("")
     ].join("");
-    return fromRule("court", "Court", W, H, names, rule, lines, rectPath({ x: 0, y: 0, w: W, h: H }),
-        (x, y) => ({ x: hoop.x + x * scale, y: hoop.y + y * scale }));
+    // the areas as exact vector shapes (v1.12: smooth edges, no traced steps); counting still uses the rule
+    const tc = Math.atan2(meet - hoop.y, cornerX) * 180 / Math.PI;
+    const A = (d0: number, d1: number) => arcPoints(hoop, three, d0, d1, Math.max(2, Math.round(Math.abs(d1 - d0) * 2)));
+    const ray = (deg: number, y: number): Pt => ({ x: hoop.x + (y - hoop.y) / Math.tan(deg * Math.PI / 180), y });
+    const half = laneW / 2, rim = arcPoints(hoop, ra, -90, 270, 180);
+    const shapes: Record<string, Pt[]> = {
+        "rim": rim,
+        "paint": [{ x: hoop.x, y: 0 }, { x: hoop.x - half, y: 0 }, { x: hoop.x - half, y: ftY }, { x: hoop.x + half, y: ftY },
+            { x: hoop.x + half, y: 0 }, { x: hoop.x, y: 0 }, ...rim],      // the rim ring turns the other way: a hole
+        "corner3-left": [{ x: 0, y: 0 }, { x: hoop.x - cornerX, y: 0 }, { x: hoop.x - cornerX, y: meet }, { x: 0, y: meet }],
+        "corner3-right": [{ x: hoop.x + cornerX, y: 0 }, { x: W, y: 0 }, { x: W, y: meet }, { x: hoop.x + cornerX, y: meet }],
+        "mid-right": [{ x: hoop.x + half, y: 0 }, { x: hoop.x + cornerX, y: 0 }, ...A(tc, 60), ray(60, ftY), { x: hoop.x + half, y: ftY }],
+        "mid-center": [...A(60, 120), ray(120, ftY), ray(60, ftY)],
+        "mid-left": [{ x: hoop.x - half, y: ftY }, ray(120, ftY), ...A(120, 180 - tc), { x: hoop.x - cornerX, y: 0 }, { x: hoop.x - half, y: 0 }],
+        "wing3-right": [{ x: hoop.x + cornerX, y: meet }, { x: W, y: meet }, { x: W, y: H }, ray(60, H), ...A(60, tc)],
+        "three-top": [...A(60, 120), ray(120, H), ray(60, H)],
+        "wing3-left": [...A(120, 180 - tc), { x: 0, y: meet }, { x: 0, y: H }, ray(120, H)]
+    };
+    const zones: Zone[] = names.map(n => {
+        const pts = shapes[n.id];
+        return { id: n.id, name: n.name, d: polyPath(pts), outline: polyPath(pts), centroid: centroidOf(pts), box: boxOf(pts),
+            contains: (p: Pt) => rule(p.x, p.y) === n.id };
+    });
+    const byId = new Map(zones.map(z => [z.id, z]));
+    return { ...space("court", "Court", W, H, lines, zones, rectPath({ x: 0, y: 0, w: W, h: H }),
+        (x, y) => ({ x: hoop.x + x * scale, y: hoop.y + y * scale }), p => byId.get(rule(p.x, p.y)) || null),
+        fade: { x: hoop.x, y: hoop.y, r0: 27, r1: 31 } };
 }
 
 /** A generic pitch in metres (105 x 68, landscape), zones by third (own, middle, final) and channel (left, centre, right). */

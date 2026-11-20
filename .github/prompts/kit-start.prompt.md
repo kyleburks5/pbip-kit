@@ -102,7 +102,12 @@ do (their files say how), with a check after each step and one fix and recheck w
   when they ask.
 - The kit does these itself, without asking: months sort by month number (the made-up model gets the sort-by column;
   a live model: say why not and give the Desktop clicks), number columns' headers right-aligned, thousands
-  separators in the made-up model's number formats.
+  separators in the made-up model's number formats. `pbik build` makes or updates the made-up model from the plan
+  first (new fields, planned measures and columns; never the person's own model), keeping the labels an option table
+  writes in its DAX (pickers, field parameters) and filling a calculated date table from the date range; say "made"
+  or "updated" in the result when it does. Polish (before the plan picture) adds a Back button to each drill-through
+  header, gives side-by-side pickers one row count, compares a card that has only a target with last year (the
+  target as a plain line under it), and keeps an option table's labels on its picker.
 - Two renderers: the plan picture is the fast preview; after the build, `pbik plan compare` puts the real Desktop
   screenshot beside the approved preview and lists what differs (positions, kinds, titles; never the example
   numbers). Fix what differs, or say why it must.

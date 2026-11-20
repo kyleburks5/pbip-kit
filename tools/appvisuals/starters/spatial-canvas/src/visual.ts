@@ -1,7 +1,7 @@
 /*
  *  Spatial canvas (kit proof visual): a picture of a space with data on top (docs/patterns/spatial-canvas.md).
  *  One Space definition (kit/patterns/spatial.ts) draws the background, places every point and decides its zone.
- *  Views: Points (every row, filled = success, hollow = not), Zones (each zone coloured against its group's own range
+ *  Views: Dots (every row, filled = success, hollow = not), Zones (each zone coloured against its group's own range
  *  or a benchmark, faded or hidden below the small-sample threshold), Ranked (the zones slide out of the space into a
  *  row, best first). Clicking a zone filters the page on the Zone field; details sit in a docked readout beside the
  *  space, never over it; while nothing is picked the readout shows the standout zone.
@@ -147,7 +147,7 @@ export class Visual implements IVisual {
         this.dv = dv;
         this.data = records(dv, this.host);
         if (fetchMore(dv, this.host, this.data.records.length, 30000)) {
-            stateMessage(this.layers.html, "Loading more rows", this.data.records.length.toLocaleString(), "down");
+            stateMessage(this.layers.html, `Loading more ${this.noun()}`, this.data.records.length.toLocaleString(), "down");
             return;
         }
         this.rule = readSampleRule(dv?.metadata?.objects);
@@ -266,7 +266,35 @@ export class Visual implements IVisual {
         if (!Number.isFinite(v)) {
             return "-";
         }
-        return this.data.roles.has("Outcome") ? `${Math.round(v * 100)}%` : `${Math.round(v * 100)}% of rows`;
+        return this.data.roles.has("Outcome") ? `${Math.round(v * 100)}%` : `${Math.round(v * 100)}% of ${this.noun()}`;
+    }
+
+    // ------------------------------------------------------------------ words: the model's own nouns (v1.12)
+    /** "shots" from the Item field's name (Shot ID), else "rows". */
+    private noun(): string {
+        const n = (this.data.names.Item || "").replace(/\s*(id|key|number|no\.?|code)$/i, "").trim().toLowerCase();
+        return n ? (n.endsWith("s") ? n : `${n}s`) : "rows";
+    }
+    /** ["made", "missed"] from the Outcome field's name, else ["success", "not"]. */
+    private outcomeWords(): [string, string] {
+        const n = (this.data.names.Outcome || "").trim().toLowerCase();
+        const pairs: Record<string, string> = { made: "missed", won: "lost", win: "loss", scored: "missed", hit: "missed",
+            approved: "declined", passed: "failed", success: "failure", converted: "not converted", completed: "not completed",
+            "on time": "late", "within sla": "breached", resolved: "unresolved" };
+        if (!n) {
+            return ["success", "not"];
+        }
+        const k = Object.keys(pairs).find(p => n === p || n.endsWith(p));
+        return k ? [k, pairs[k]] : [n, `not ${n}`];
+    }
+    /** "the league" from the Benchmark field's name (League FG % by Zone), else "the benchmark". */
+    private benchWord(): string {
+        const n = (this.data.names.Benchmark || "").toLowerCase();
+        const k = ["league", "average", "target", "plan", "budget", "norm", "national", "region"].find(w => n.includes(w));
+        return k ? `the ${k}` : "the benchmark";
+    }
+    private cap(s: string): string {
+        return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
     // ------------------------------------------------------------------ colours
@@ -274,7 +302,7 @@ export class Visual implements IVisual {
         const s = this.s.colors;
         const cold = s.cold.value.value || this.theme.palette[1] || this.theme.secondary;
         const hot = s.hot.value.value || this.theme.accent;
-        const mid = this.theme.panel;
+        const mid = interpolateRgb(this.theme.background, this.theme.foreground)(0.38);   // a visible mid grey
         const c = t < 0.5 ? interpolateRgb(cold, mid)(t * 2) : interpolateRgb(mid, hot)((t - 0.5) * 2);
         return interpolateRgb(mid, c)(Math.max(0, Math.min(1, confidence)));     // a thin sample fades to neutral
     }
@@ -296,13 +324,41 @@ export class Visual implements IVisual {
         return { fill: this.scale(this.position(z, bands), v.confidence), alpha: 0.35 + 0.5 * z.n / Math.max(1, maxN), note: v.note, shown: true };
     }
 
+    private fadeMask = "";
+    /** The fade mask (space units): full colour inside r0, none beyond r1. */
+    private fadeId(): string {
+        const f = this.space.fade;
+        if (!this.fadeMask) {
+            this.fadeMask = `kit-fade-${Math.random().toString(36).slice(2, 8)}`;
+        }
+        let defs = this.bg.select<SVGDefsElement>("defs");
+        if (defs.empty()) {
+            defs = this.bg.insert("defs", ":first-child");
+        }
+        defs.selectAll("*").remove();
+        const g = defs.append("radialGradient").attr("id", `${this.fadeMask}-g`).attr("gradientUnits", "userSpaceOnUse")
+            .attr("cx", f.x).attr("cy", f.y).attr("r", f.r1);
+        g.append("stop").attr("offset", f.r0 / f.r1).attr("stop-color", "#fff");
+        g.append("stop").attr("offset", 1).attr("stop-color", "#000");
+        defs.append("mask").attr("id", this.fadeMask).attr("maskUnits", "userSpaceOnUse")
+            .attr("x", -1e4).attr("y", -1e4).attr("width", 2e4).attr("height", 2e4)
+            .append("rect").attr("x", -1e4).attr("y", -1e4).attr("width", 2e4).attr("height", 2e4)
+            .attr("fill", `url(#${this.fadeMask}-g)`);
+        return this.fadeMask;
+    }
+
     private standoutZone(): ZoneStat | null {
         if (!this.s.space.standout.value || !this.stats.length || !this.rule) {
             return null;
         }
         const maxN = Math.max(1, ...this.stats.map(z => z.n));
         const bands = this.bands();
-        const items = this.stats.filter(z => z.n > 0 && sample(z.n, this.rule).show).map(z => {
+        const shown = this.stats.filter(z => z.n > 0 && sample(z.n, this.rule).show);
+        if (shown.some(z => z.bench != null)) {          // "hot" = above the benchmark: the hottest, as the table ranks it
+            const best = shown.filter(z => z.bench != null).sort((a, b) => (b.rate - b.bench) - (a.rate - a.bench))[0];
+            return best || null;
+        }
+        const items = shown.map(z => {
             const edge = this.position(z, bands) - 0.5;
             return { key: z.zone.id, n: z.n, score: (z.n / maxN) * (1 + Math.max(0, edge) * 5), aboveBenchmark: edge > 0, z };
         });
@@ -356,6 +412,7 @@ export class Visual implements IVisual {
             .attr("aria-pressed", d => (this.picked.has(d.zone.id) ? "true" : "false"))
             .attr("aria-label", d => this.zoneLabel(d, looks.get(d.zone.id).note))
             .attr("fill", d => (zoneView ? looks.get(d.zone.id).fill : this.theme.panel))
+            .attr("mask", this.space.fade && !ranked ? `url(#${this.fadeId()})` : null)
             .attr("fill-opacity", d => {
                 if (ranked && !slots.has(d.zone.id)) {
                     return 0;
@@ -407,7 +464,7 @@ export class Visual implements IVisual {
             }
             const z = this.space.zoneOf(p);
             const inPick = !anyPick || (z && this.picked.has(z.id));
-            const base = this.view === "dots" ? 0.85 : 0.22;          // under the zones, the points stay quiet
+            const base = this.view === "dots" ? 0.55 : 0.22;          // dots: see-through, so density shows          // under the zones, the points stay quiet
             marks.push({
                 key: rec.key, x: fit.x + p.x * fit.k, y: fit.y + p.y * fit.k, r: ranked ? 0 : this.view === "dots" ? r : r * 0.75,
                 color: fg, alpha: ranked ? 0 : inPick ? base : base * this.theme.dim,
@@ -438,9 +495,9 @@ export class Visual implements IVisual {
             return `${z.zone.name}: no data`;
         }
         if (!sample(z.n, this.rule).show) {
-            return `${z.zone.name}: ${note} rows`;
+            return `${z.zone.name}: ${note} ${this.noun()}`;
         }
-        return `${z.zone.name}: ${count(z.n, "row")}, ${this.fmtRate(z.rate)}${note ? ` (${note})` : ""}`;
+        return `${z.zone.name}: ${count(z.n, this.noun())}, ${this.fmtRate(z.rate)}${note ? ` (${note})` : ""}`;
     }
 
     private drawZoneLabels(fit: Tf, slots: Map<string, { slot: { x: number; y: number; w: number; h: number }; rank: number }> | null, looks: Map<string, Look>): void {
@@ -452,8 +509,8 @@ export class Visual implements IVisual {
         const t = this.labelsG.selectAll<SVGTextElement, ZoneStat>("text").data(data, d => d.zone.id).join("text")
             .attr("text-anchor", "middle").attr("font-size", px).attr("font-family", this.theme.font)
             .attr("font-variant-numeric", "tabular-nums")
-            .attr("paint-order", "stroke").attr("stroke-width", 3).attr("stroke-linejoin", "round")
-            .attr("stroke", d => (slots ? "none" : this.theme.background)).attr("stroke-opacity", 0.8)
+            .attr("paint-order", "stroke").attr("stroke-width", 4.5).attr("stroke-linejoin", "round")
+            .attr("stroke", d => (slots ? "none" : this.theme.background)).attr("stroke-opacity", 0.92)
             .classed("kit-label", true)
             .attr("fill", d => {
                 if (slots) {
@@ -480,8 +537,24 @@ export class Visual implements IVisual {
         const top = this.layers.html.select<HTMLDivElement>(".kit-top");
         top.selectAll("*").remove();
         if (s.pills.value) {
-            pills(top, VIEWS.map(v => ({ value: v, label: v === "dots" ? "Points" : v === "zones" ? "Zones" : "Ranked", icon: v === "ranked" ? "columns" : v === "dots" ? "scatter" : "grid" })),
+            pills(top, VIEWS.map(v => ({ value: v, label: v === "dots" ? "Dots" : v === "zones" ? "Zones" : "Ranked", icon: v === "ranked" ? "columns" : v === "dots" ? "scatter" : "grid" })),
                 this.view, v => this.setView(v), "Views");
+        }
+        if (this.view !== "dots") {                          // the zone scale: cold -> usual -> hot (v1.12)
+            const benched = this.stats.some(z => z.bench != null);
+            const leg = top.append("div").attr("class", "kit-legend").attr("aria-hidden", "true")
+                .style("display", "inline-flex").style("align-items", "center").style("gap", "6px")
+                .style("font-size", "11px").style("margin-left", "12px").style("opacity", "0.85");
+            leg.append("span").text("Colder");
+            leg.append("span").style("display", "inline-block").style("width", "72px").style("height", "8px").style("border-radius", "4px")
+                .style("background", `linear-gradient(90deg, ${this.scale(0, 1)}, ${this.scale(0.5, 1)}, ${this.scale(1, 1)})`);
+            leg.append("span").text(benched ? `Hotter than ${this.benchWord()}` : "Hotter than usual");
+        } else {                                             // dots: made filled, missed hollow
+            const leg = top.append("div").attr("class", "kit-legend").attr("aria-hidden", "true")
+                .style("display", "inline-flex").style("align-items", "center").style("gap", "6px")
+                .style("font-size", "11px").style("margin-left", "12px").style("opacity", "0.85");
+            const [yes, no] = this.outcomeWords();
+            leg.append("span").text(`● ${yes}   ○ ${no}`);
         }
         clearChip(top, this.picked.size, "Clear", () => this.clearPicks());
         this.headlineEl.style.display = s.headline.value ? "" : "none";
@@ -499,8 +572,8 @@ export class Visual implements IVisual {
             const rates = all.map(z => z.rate), ns = all.map(z => z.n);
             const ok = (z: ZoneStat) => sample(z.n, this.rule).show;
             this.headlineEl.textContent = biggestGap({ a: a.zone.name, b: b.zone.name }, [
-                { label: "success rate", better: "high", format: v => `${Math.round(v * 100)} points`, a: ok(a) ? a.rate : null, b: ok(b) ? b.rate : null, norm: [Math.min(...rates), Math.max(...rates)] },
-                { label: "volume", better: "high", format: v => count(Math.round(v), "row"), a: ok(a) ? a.n : null, b: ok(b) ? b.n : null, norm: [Math.min(...ns), Math.max(...ns)] }
+                { label: `${this.outcomeWords()[0]} rate`, better: "high", format: v => `${Math.round(v * 100)} points`, a: ok(a) ? a.rate : null, b: ok(b) ? b.rate : null, norm: [Math.min(...rates), Math.max(...rates)] },
+                { label: "volume", better: "high", format: v => count(Math.round(v), this.noun()), a: ok(a) ? a.n : null, b: ok(b) ? b.n : null, norm: [Math.min(...ns), Math.max(...ns)] }
             ]) || `${a.zone.name} and ${b.zone.name} are level.`;
             return;
         }
@@ -510,8 +583,11 @@ export class Visual implements IVisual {
         }
         const so = this.standoutZone();
         const total = this.stats.reduce((a, z) => a + z.n, 0);
-        this.headlineEl.textContent = so ? `${so.zone.name} stands out: ${this.fmtRate(so.rate)} on ${count(so.n, "row")} of ${total.toLocaleString()}.`
-            : total ? `${count(total, "row")} across ${count(this.stats.filter(z => z.n).length, "zone")}.` : "No rows in this view.";
+        const nn = this.noun();
+        const hot = so && so.bench != null ? `${so.zone.name} is the hottest against ${this.benchWord()}: ${this.fmtRate(so.rate)}, ` +
+            `${Math.round((so.rate - so.bench) * 100) >= 0 ? "+" : ""}${Math.round((so.rate - so.bench) * 100)} points, on ${count(so.n, nn)}.` : null;
+        this.headlineEl.textContent = hot || (so ? `${so.zone.name} stands out: ${this.fmtRate(so.rate)} on ${count(so.n, nn)} of ${total.toLocaleString()}.`
+            : total ? `${count(total, nn)} across ${count(this.stats.filter(z => z.n).length, "zone")}.` : `No ${nn} in this view.`);
     }
 
     private drawReadout(): void {
@@ -529,16 +605,16 @@ export class Visual implements IVisual {
         }
         const v = sample(z.n, this.rule);
         if (so) {
-            el.append("div").classed("kit-readout-note", true).text("Standout");
+            el.append("div").classed("kit-readout-note", true).text(so.bench != null ? `Hottest against ${this.benchWord()}` : "Standout");
         }
         el.append("div").classed("kit-readout-title", true).text(z.zone.name);
         const row = (k: string, val: string) => { const r = el.append("div").classed("kit-readout-row", true); r.append("span").text(k); r.append("span").text(val); };
-        row("Rows", countText(z.n, this.rule));
+        row(this.cap(this.noun()), countText(z.n, this.rule));
         if (v.show) {
-            row(this.data.roles.has("Outcome") ? "Success rate" : "Share", this.fmtRate(z.rate));
+            row(this.data.roles.has("Outcome") ? `${this.cap(this.outcomeWords()[0])} rate` : "Share", this.fmtRate(z.rate));
             if (z.bench != null) {
                 const d = Math.round((z.rate - z.bench) * 100);
-                row("vs benchmark", `${d > 0 ? "+" : ""}${d} points`);
+                row(`vs ${this.benchWord().replace(/^the /, "")}`, `${d > 0 ? "+" : ""}${d} points`);
             } else {
                 const band = this.bands().get(z.group);
                 if (band && this.data.roles.has("Outcome")) {
@@ -547,7 +623,7 @@ export class Visual implements IVisual {
             }
         }
         if (v.note) {
-            el.append("div").classed("kit-readout-note", true).text(v.show ? `Limited sample: fewer than ${this.rule.minSample} rows, shown faded.` : `Not shown: ${v.note} rows.`);
+            el.append("div").classed("kit-readout-note", true).text(v.show ? `Limited sample: fewer than ${this.rule.minSample} ${this.noun()}, shown faded.` : `Not shown: ${v.note} ${this.noun()}.`);
         }
     }
 

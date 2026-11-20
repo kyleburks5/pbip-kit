@@ -251,6 +251,8 @@ def refresh(folders, path=None, include_all=False, name=None, desktop=None, toda
 CONFIRMED_WRITES = {
     "cardVisual referenceLabelTitle.titleContentType": "walkthrough 2026-11-14, Desktop 2.159.1231 (custom titles shown)",
     "cardVisual referenceLabelTitle.titleText": "walkthrough 2026-11-14, Desktop 2.159.1231 (custom titles shown)",
+    "tableEx values.fontColor as color:fillRule": "batch study test 3, 2026-11-19, Desktop 2.159.1231 (a diverging "
+                                                  "gradient on a table's text colour drew as planned)",
 }
 
 
@@ -262,7 +264,8 @@ KIT_REQUIRED = {
 
 
 def confirmed(why):
-    return any(why.startswith(k + " never seen") for k in {**CONFIRMED_WRITES, **KIT_REQUIRED})
+    return any(why.startswith(k + " never seen") or (" as " in k and why.startswith(k + ":"))
+               for k in {**CONFIRMED_WRITES, **KIT_REQUIRED})
 
 
 def check_entry(cat, visual_type, where, obj, prop, val, sel):

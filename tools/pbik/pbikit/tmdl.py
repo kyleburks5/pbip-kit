@@ -81,6 +81,14 @@ class Model:
             yield from t.measures.values()
 
 
+def unquote_value(v):
+    """A TMDL value in double quotes ("x ""y"" z") as its text (x "y" z); anything else as it is."""
+    v = v.strip()
+    if len(v) >= 2 and v[0] == '"' and v[-1] == '"':
+        return v[1:-1].replace('""', '"')
+    return v
+
+
 def unquote(name):
     name = name.strip()
     if len(name) >= 2 and name[0] == "'" and name[-1] == "'":
@@ -219,7 +227,7 @@ def _parse(model, f):
             continue
         if isinstance(obj, Measure):
             if key == "formatString":
-                obj.format_string = val
+                obj.format_string = unquote_value(val)
             elif key == "dataCategory":
                 obj.data_category = val
             elif key == "dataType":

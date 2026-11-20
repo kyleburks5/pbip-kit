@@ -474,7 +474,7 @@ def _expr_refs(ix, expr, slice_):
 def with_planned_columns(c, g):
     """generate.json `plannedColumns` {table: {column: {expression, dataType}}}: calculated columns the plan adds to the
     made-up model (a "top 4 + Other" group, a band), merged into the contract in memory only (the approval hash is taken
-    before). The table must be in the model; a name the model already has is an error (v1.11.2)."""
+    before). The table must be in the model; a name the model already has is an error (v1.12)."""
     for t, cols in (g.get("plannedColumns") or {}).items():
         if t not in c["tables"]:
             raise ContractError(f"plannedColumns names table {t!r}, which the model doesn't have")
@@ -484,7 +484,7 @@ def with_planned_columns(c, g):
             if not spec.get("expression"):
                 raise ContractError(f"plannedColumns {t}[{name}] needs an expression (DAX)")
             c["tables"][t]["columns"][name] = {"type": spec.get("dataType", "string"), "expression": spec["expression"],
-                                              "planned": True}
+                                              "planned": True, **({"sortBy": spec["sortBy"]} if spec.get("sortBy") else {})}
     return c
 
 
@@ -492,7 +492,7 @@ def slice_contract(c, layout, planned=None):
     """{table: {columns, measures}}: the fields layout.json uses, the measures they need, keys and sort-by columns.
     Also returns names layout.json uses that are in neither the contract nor the planned measures."""
     bad = sorted({p.get("table") for p in (planned or {}).values() if p.get("table") and p["table"] not in c["tables"]})
-    if bad:                                          # a planned measure's home table must be in the model (v1.11.2)
+    if bad:                                          # a planned measure's home table must be in the model (v1.12)
         raise ContractError(f"planned measures name table(s) the model doesn't have: {', '.join(bad)}; give them a table "
                             f"the model has (layout.json measureTable, e.g. {next(iter(c['tables']), '?')})")
     ix, out, missing, todo = Index(c, planned), {}, [], []

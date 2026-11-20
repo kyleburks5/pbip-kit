@@ -329,6 +329,16 @@ Gaps 1 and 20 shipped in batch 1; every other gap is listed below, in the order 
 | 35 | Open | App visuals, measured in Desktop: a click still has one frame of 110-135 ms (Power BI's own page redraw shares the thread); every move is under 5% frozen frames. Try lighter first frames (emphasis-only redraw on a click) and measure with the frame meter |
 | 36 | Open | App visuals: export to PDF / PowerPoint of a page with a kit visual (private visuals aren't expected to export; `exported` pages build native or Deneb), the first Desktop capture of a page that isn't in front, phone layout in the Power BI app |
 | 37 | Done, confirmed in Desktop | v1.11.1 (2026-11-18): screen changes in kit visuals morph shared parts by key with no blank frame and no entrance replay (kit/morph.ts; the region panel); harness checks for blank frames and replays |
+| 38 | Done, confirmed in Desktop | v1.12 (pbik 0.24.0, 2026-11-19), batch studies: the made-up model made before the first build (`pbik build` runs it, says when a changed contract leaves it as it was), the plan picture from the model's own DAX and Desktop's defaults, the panel style layout (`pbik layout panels`, preset, threshold histogram, label above bars), polish rules (pickers, target lines, drill cards, pill colours on dark themes, sort-by scope, label collisions), kit visuals: a column in a value well summed, colours typed as colours. Tests 1-3 checked in Desktop by the maintainer |
+
+## Release roadmap (2026-11-19)
+
+| Version | Theme | What it covers |
+| --- | --- | --- |
+| v1.12.0 | Batch studies (released) | Row 38 above |
+| v1.13 | Team capability | The kit used by a team: shared projects, hand-offs and review between people |
+| v1.14 | Fabric skills | Fabric and Power BI Service steps through the installed Fabric skills (publish, refresh, workspaces) |
+| v1.15 | Wireframe overhaul | The plan picture draws every part as it will look: UDF cards (U-7), kit visuals with their route tags, Deneb |
 
 ## UDF toolbelt: Desktop checks (Study 2, UDF KPI card library, 2026-11-15)
 
@@ -343,7 +353,7 @@ Orders model (public), 15 cards on one page, saved once in Desktop and compared 
 | U-4 | 2.155 and 2.159: is the UDF preview switch still there, or are UDFs on by default? | **2.159 confirmed** 2026-11-16: no preview switch, UDFs on by default (2.159.1231.0, checked by the maintainer); 2.155 still verify in Desktop | `pbik udf desktop` says "on by default" for 2.159; `FIRST_UDF_DESKTOP` 2.147 is from the study, not the kit's sources |
 | U-5 | Both harvested templates (`cardVisual.svg-kpi-card`, `advancedSlicerVisual.svg-kpi-card-buttons`) after a Desktop save | **card form confirmed** 2026-11-16: the save changed nothing but final newlines (with the image settings of row 32); the button form still open (2026-11-17): it needs a model with a date table to build one; its template was checked for the two button-slicer faults found that day (a leftover sync group, an unresolved token) and has neither | every `udfCard` build |
 | U-6 | A model at compatibility level 1702 publishes to the service | verify in Desktop (open: not published, by choice). Desktop kept level 1702 and the functions on save | `pbik udf install` raises the level to 1702 |
-| U-7 | The plan picture and the wireframe draw a UDF card as it will look | open: both draw a plain placeholder card, so the person approves a placeholder; needs a UDF card renderer (wireframe overhaul) | `udfCard` in the plan picture |
+| U-7 | The plan picture and the wireframe draw a UDF card as it will look | open: both draw a plain placeholder card, so the person approves a placeholder; needs a UDF card renderer (wireframe overhaul, v1.15) | `udfCard` in the plan picture |
 
 Also seen in Desktop on 2026-11-16: an inlined card returns the same image as the function call (Card2: 840, then
 764 characters after K-11, exact); `hidden: true` projections for calc mode are kept on save. Not yet seen: the button

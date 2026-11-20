@@ -317,7 +317,7 @@ def desktop_screenshot(report_dir, page, out, w, h):
 
 def own_marks_only(root, report_dir):
     """True when Desktop's unsaved marks are proven to be only its own from opening or the kit's reload (the same proof
-    `pbik desktop reload` uses: pbikit.desktop.why_not_close); any doubt is False (v1.11.2, Rep test 1)."""
+    `pbik desktop reload` uses: pbikit.desktop.why_not_close); any doubt is False (v1.12, Rep test 1)."""
     try:
         import json as _j, sys as _s
         _s.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "tools" / "pbik"))

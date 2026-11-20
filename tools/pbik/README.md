@@ -1,4 +1,4 @@
-# pbik 0.23.0
+# pbik 0.24.0
 
 pbip-kit's own command line tool for PBIR reports and TMDL models. Python standard library only; `jsonschema` is
 optional (schema checks).
@@ -521,6 +521,16 @@ pack, the data class, the approved plan's hash and the last polish score. `statu
 starts with ("Sales: you're past the plan picture; next is the colours (quick build, data restricted)"), and in a
 guided build adds "Pause here" after a stage it stops at. In the kit folder it lists every project, the last one used
 first.
+
+### `layout panels [design/specs/panels.json] [--root .] [--layout F] [--no-png]` (v1.12)
+
+Writes the panel style layout (docs/patterns/panel-style-layout.md) from a short spec: the header band and one
+full-height panel per member (2 to 6), each with its icon, share line and bar, big number with a change chip,
+quarterly mini columns, threshold histogram and top N with the label above each bar. Stable IDs by name (a rerun
+keeps them, retires the page's other visuals unless `keep` lists them), the planned measures it needs, the preset's
+colours and sizes in tokens.json and kit-drawn icons in design/images/ (`--no-png` keeps them as SVG). Run
+`pbik layout polish` after it. `pbik build` makes or updates the made-up model first when the plan changed (it says
+when a changed contract leaves the model as it was: a person approves contracts).
 
 ### `start detect | inputs | starters`, `layout from-report <X.Report> [--out]`
 

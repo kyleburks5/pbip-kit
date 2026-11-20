@@ -1,0 +1,23 @@
+{
+  "_note": "Regression case panel-style: the base layout; tools/regression/regress.py runs `pbik layout panels` on design/specs/panels.json first, then builds.",
+  "measureTable": "DataTable",
+  "grid": {
+    "canvas": [
+      1920,
+      1080
+    ],
+    "margin": 32,
+    "columns": 12,
+    "gutter": 24,
+    "column": 132.67
+  },
+  "pages": {
+    "P1": {
+      "displayName": "Service desk",
+      "background": "background",
+      "active": true
+    }
+  },
+  "retired": [],
+  "visuals": []
+}

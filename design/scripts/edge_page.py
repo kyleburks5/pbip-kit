@@ -80,7 +80,7 @@ def dom(page, delay_ms=200, timeout=None, hash_=""):
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="edge_page-"))
     try:
         subprocess.Popen([EDGE, "--headless=new", "--disable-gpu", "--no-first-run", "--hide-scrollbars",
-                          "--run-all-compositor-stages-before-draw",   # every tile painted before the shot (v1.11.2)
+                          "--run-all-compositor-stages-before-draw",   # every tile painted before the shot (v1.12)
                           f"--user-data-dir={tmp / 'profile'}", "--window-size=1920,1200", url + hash_],
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if not got.wait(WAIT if timeout is None else timeout):
@@ -103,7 +103,7 @@ def screenshot(page, out, width=1920, height=1080, hash_="", budget_ms=8000, tim
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="edge_page-"))
     try:
         subprocess.Popen([EDGE, "--headless=new", "--disable-gpu", "--no-first-run", "--hide-scrollbars",
-                          "--run-all-compositor-stages-before-draw",   # every tile painted before the shot (v1.11.2)
+                          "--run-all-compositor-stages-before-draw",   # every tile painted before the shot (v1.12)
                           f"--user-data-dir={tmp / 'profile'}", f"--window-size={width},{height}",
                           f"--virtual-time-budget={budget_ms}", f"--screenshot={out}", url + hash_],
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

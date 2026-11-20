@@ -25,7 +25,7 @@ def is_kpi(folder, d, layout_entry=None):
 def is_panel(folder, layout_entry=None):
     """A shared panel shape (pattern `panel`): layout.json `pattern: "panel"`, or a folder name with "panel"."""
     if layout_entry and layout_entry.get("pattern") is not None:
-        return layout_entry.get("pattern") == "panel"
+        return layout_entry.get("pattern") in ("panel", "panel-style", "panel-style-layout")     # a panel style layout's panel too
     return "panel" in folder.split("_", 1)[-1].lower()
 
 
@@ -75,6 +75,7 @@ def check_page(page, visuals, page_w, margin=32, layout=None):
                       "kpi": is_kpi(folder, d, lay.get(vid))})
     for s in items:
         s["panel"] = s["type"] in SHAPES and is_panel(s["folder"], lay.get(s["folder"].split("_", 1)[0]))
+        s["panelStyle"] = s["panel"] and (lay.get(s["folder"].split("_", 1)[0]) or {}).get("pattern") in ("panel-style", "panel-style-layout")
     cards = [x for x in items if x["kpi"]]
     on_panel = {}
     for c in cards:
@@ -102,6 +103,8 @@ def check_page(page, visuals, page_w, margin=32, layout=None):
             out.append(f"{page}/{c['folder']}: KPI card has its container background off; put background, radius, "
                        "border and shadow on the card itself, or place it on a shared panel (C-10)")
     for pf, (s, pcards) in on_panel.items():
+        if s.get("panelStyle"):                 # a panel style panel: its card shares a row with the period columns
+            continue
         sx, sy, sw, sh, _ = s["box"]
         ins = {"left": min(c["box"][0] for c in pcards) - sx,
                "right": sx + sw - max(c["box"][0] + c["box"][2] for c in pcards),
@@ -111,8 +114,8 @@ def check_page(page, visuals, page_w, margin=32, layout=None):
                        f"({', '.join(f'{k} {v:g}' for k, v in ins.items())}); keep one padding on every side (C-10 panel)")
     content_l, content_r = margin, page_w - margin
     for row in rows_of(cards):
-        if len(row) < 2:
-            continue
+        if len(row) < 2 or all((c.get("on") or {}).get("panelStyle") for c in row):
+            continue                            # one card per panel style panel: panels, not a KPI row
         name = f"{page}: KPI row at y {row[0]['box'][1]:g}"
         panel = row[0].get("on")
         if panel and all(c.get("on") is panel for c in row):

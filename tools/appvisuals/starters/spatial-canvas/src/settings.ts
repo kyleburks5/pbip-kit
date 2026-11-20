@@ -35,7 +35,7 @@ export class SpaceCard extends Card {
     shape = new formattingSettings.ItemDropdown({ name: "shape", displayName: "Space", items: items(SHAPES, SHAPE_LABELS), value: { value: "court", displayName: SHAPE_LABELS[0] } });
     scale = new formattingSettings.NumUpDown({ name: "scale", displayName: "Data units per space unit", value: 1 });
     custom = new formattingSettings.TextInput({ name: "custom", displayName: "Custom shapes (GeoJSON or {zones})", value: "", placeholder: "{\"zones\": [...]}" });
-    start = new formattingSettings.ItemDropdown({ name: "start", displayName: "Start view", items: items(VIEWS, ["Points", "Zones", "Ranked"]), value: { value: "zones", displayName: "Zones" } });
+    start = new formattingSettings.ItemDropdown({ name: "start", displayName: "Start view", items: items(VIEWS, ["Dots", "Zones", "Ranked"]), value: { value: "zones", displayName: "Zones" } });
     pills = new formattingSettings.ToggleSwitch({ name: "pills", displayName: "View pills", value: true });
     headline = new formattingSettings.ToggleSwitch({ name: "headline", displayName: "Headline", value: true });
     readout = new formattingSettings.ToggleSwitch({ name: "readout", displayName: "Docked readout", value: true });

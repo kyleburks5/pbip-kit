@@ -304,7 +304,7 @@ def build_tokens(base, colors, mode, source, preset=None, ref=None, changes=(), 
                              "their roles so layouts written for the clean palette re-skin unchanged."),
                    **colors}
     # groups get neutral colours: brand, second, the preset's extras, then the darker roles; the good and bad colours
-    # mean something, so a group never gets red early (v1.11.2, Rep test 1 feedback)
+    # mean something, so a group never gets red early (v1.12, Rep test 1 feedback)
     series = ["brand", "second"] + [f"series{i + 1}" for i in range(extras)] + \
         ["primary" if K.contrast(colors["primary"], colors["card"]) >= 3 else "text", "brandLight", "secondLight", "badMark"]
     if ((preset or {}).get("emphasis") or {}).get("rule") == "one-accent":

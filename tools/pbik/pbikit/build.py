@@ -523,6 +523,7 @@ def apply_query(ctx, v, d):
     vis = d.setdefault("visual", {})
     if "bindings" in v:
         qs = {}
+        sums = custom_measure_roles(ctx, v)
         for role, items in v["bindings"].items():
             projs = []
             fparams = []
@@ -547,6 +548,8 @@ def apply_query(ctx, v, d):
                     projs.extend(fp_projs)
                     continue
                 f = ctx.field(spec["field"])
+                if role in sums and "Column" in f:      # a column in a custom visual's value well: Sum of it
+                    f = {"Aggregation": {"Expression": f, "Function": 0}}
                 if "Percentile" in f or (f.get("Aggregation") or {}).get("Function", 0) >= 6:
                     ctx.unverified.add("aggregations")          # roadmap gap 9
                 q = qref(f)
@@ -983,6 +986,8 @@ def apply_cf(ctx, vid, v, d):
             stops = {"min": {"color": colour_expr(ctx.colour(c["min"]))}}
             if c.get("mid"):
                 stops["mid"] = {"color": colour_expr(ctx.colour(c["mid"]))}
+                if c.get("midValue") is not None:       # a diverging scale: the middle colour at this value (0)
+                    stops["mid"]["value"] = {"Literal": {"Value": f"{c['midValue']}D"}}
             stops["max"] = {"color": colour_expr(ctx.colour(c["max"]))}
             stops["nullColoringStrategy"] = {"strategy": s(c.get("nulls", "asZero"))["expr"]}
             rule = {"linearGradient3" if c.get("mid") else "linearGradient2": stops}
@@ -1256,7 +1261,36 @@ def apply_members(ctx, vid, v, d):
             ctx.unverified.add("members")
 
 
+def custom_caps(ctx, v):
+    """A kit custom visual's capabilities.json ({} for a native visual or when it can't be read)."""
+    if not v.get("custom"):                       # (the type is the guid by now; `custom` names the kit visual)
+        return {}
+    try:
+        from . import appvisual as AV
+        return json.loads((AV.src_dir(v["custom"], getattr(ctx, "project", None) or ".") / "capabilities.json")
+                          .read_text(encoding="utf-8"))
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
+def custom_measure_roles(ctx, v):
+    """The roles a kit custom visual declares as Measure: a bare column there must be summed, as Desktop binds it when
+    a column is dragged to a value well, or the visual gets no values (v1.12, test 3: the court showed "No data yet")."""
+    return {r["name"] for r in (custom_caps(ctx, v).get("dataRoles") or []) if r.get("kind") == "Measure"}
+
+
+def custom_fill_props(ctx, v):
+    """{(object, property)} a kit custom visual types as a colour (capabilities.json `fill`): a token name there is a
+    colour, never text (v1.12: 'cold' written as text broke Desktop's render, "reading 'color' of undefined")."""
+    caps = custom_caps(ctx, v)
+    if not caps:
+        return set()
+    return {(o, p) for o, od in (caps.get("objects") or {}).items() for p, pd in (od.get("properties") or {}).items()
+            if isinstance(pd, dict) and "fill" in (pd.get("type") or {})}
+
+
 def apply_props(ctx, vid, v, d):
+    fills = custom_fill_props(ctx, v)
     for key, val in (v.get("props") or {}).items():
         where = "objects"
         if key.startswith("container:"):
@@ -1275,6 +1309,9 @@ def apply_props(ctx, vid, v, d):
             selector = {"id": "default"}      # where Desktop keeps it; "@none" forces no selector
         if sel == "none":
             selector = None
+        if (obj, prop) in fills and isinstance(val, str):    # a custom visual's colour: resolve the token
+            set_prop(ctx, vid, d, where, obj, selector, prop, solid(ctx.colour(val)))
+            continue
         set_prop(ctx, vid, d, where, obj, selector, prop, prop_value(ctx, prop, val))
 
 

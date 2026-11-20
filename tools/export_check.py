@@ -2,6 +2,7 @@
 
     python tools/export_check.py              tracked files, unpushed commits and their messages, unpushed tags
     python tools/export_check.py --names "A B" extra names to look for (git user.name and the login are always used)
+    python tools/export_check.py --root <repo>  the same rules on another repository (the examples)
 
 Looks for personal paths (C:\\Users\\<name>, /Users/<name>, /home/<name>), user names, email addresses, secrets
 (keys, tokens, passwords, connection secrets), report project files (projects/, each its own repository), real
@@ -165,9 +166,17 @@ def run(extra_names=(), allow_path=ALLOW, out=print):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--names", default="", help="extra names (space- or comma-separated) to look for")
+    ap.add_argument("--root", help="another repository to check with the same rules (its export_allow.txt at its root "
+                                   "or in tools/; v1.12: the examples repository)")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(errors="replace")
-    found = run([x for x in re.split(r"[,\s]+", a.names) if x])
+    allow = ALLOW
+    if a.root:
+        global KIT
+        KIT = pathlib.Path(a.root).resolve()
+        allow = next((f for f in (KIT / "export_allow.txt", KIT / "tools" / "export_allow.txt") if f.exists()),
+                     KIT / "export_allow.txt")
+    found = run([x for x in re.split(r"[,\s]+", a.names) if x], allow_path=allow)
     return 1 if any(found.values()) else 0
 
 

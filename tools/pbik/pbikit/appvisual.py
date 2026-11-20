@@ -383,7 +383,7 @@ def register(report, name, project="."):
     changed = []
     for f, obj in ((cv / "package.json", pkg), (cv / "resources" / f"{guid}.pbiviz.json", meta)):
         text = _crlf_json(obj)
-        if not f.exists() or f.read_text(encoding="utf-8") != text:
+        if not f.exists() or f.read_bytes().decode("utf-8") != text:     # as written (CRLF): no rewrite each build
             f.write_text(text, encoding="utf-8", newline="")
             changed.append(f)
     rf = rep / "definition" / "report.json"

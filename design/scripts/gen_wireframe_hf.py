@@ -401,7 +401,10 @@ def chart_spec(R, v):
                    "font": fnt("totals.fontFamily", 600)},
         "cat": {"color": R.colour(get("categoryAxis.labelColor"), muted), "font": fnt("categoryAxis.fontFamily"),
                 "size": pt_px(R.number(get("categoryAxis.fontSize"), default=9)),
-                "type": get("categoryAxis.axisType")},
+                "type": get("categoryAxis.axisType"), "pad": R.number(get("categoryAxis.innerPadding")),
+                "title": get("categoryAxis.titleText") if get("categoryAxis.showAxisTitle") is True else None,
+                "titleColor": R.colour(get("categoryAxis.titleColor"), muted),
+                "titleSize": pt_px(R.number(get("categoryAxis.titleFontSize"), default=9))},
         "val": {"color": R.colour(get("valueAxis.labelColor"), muted), "units": R.number(get("valueAxis.labelDisplayUnits")),
                 "size": pt_px(R.number(get("valueAxis.fontSize"), default=9)),
                 "grid": get("valueAxis.gridlineShow", True) is not False,
@@ -450,6 +453,64 @@ def labels_of(v):
     return out
 
 
+def mix_hex(a, b, t):
+    pa, pb = [int(a[i:i + 2], 16) for i in (1, 3, 5)], [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(x + (y - x) * t):02X}" for x, y in zip(pa, pb))
+
+
+def court_spec(R, v):
+    """The court as the spatial canvas draws it (v1.12): each zone's exact shape, the lines as their own layer, the
+    zone names, and the diverging colours (cold -> the panel -> hot) the visual takes from its props."""
+    try:
+        import space_svg as SP
+    except ImportError:
+        return None
+    if str(prop(v, "space.shape") or "court") != "court":
+        return None
+    W, H, lines, _ = SP.court()
+    shapes = SP.court_zone_shapes()
+    def centroid(p):
+        a = cx = cy = 0.0
+        for (x0, y0), (x1, y1) in zip(p, p[1:] + p[:1]):
+            k = x0 * y1 - x1 * y0
+            a, cx, cy = a + k, cx + (x0 + x1) * k, cy + (y0 + y1) * k
+        return (cx / (3 * a), cy / (3 * a)) if abs(a) > 1e-9 else p[0]
+    cen = {z: centroid(p) for z, p in shapes.items()}
+    cen["paint"] = (25, 14.5)                                 # the paint's middle, below the rim
+    cen["rim"] = (25, 5.6)
+    return {"W": W, "H": H, "lines": "".join(lines), "zones": {z: SP.path(p, True) for z, p in shapes.items()},
+            "names": SP.ZONE_NAMES, "centroids": cen,
+            "cold": R.colour(prop(v, "colors.cold") or "cold", "#5B9BE6"),
+            "hot": R.colour(prop(v, "colors.hot") or "hot", "#F2A541"),
+            "mid": R.colour("card", "#1E2738"), "line": R.colour("textMuted", "#9AA8BD"),
+            "neutral": mix_hex(R.colour("background", "#0B1220"), R.colour("text", "#E6ECF5"), 0.38),   # a visible mid grey
+            "fade": {"x": 25, "y": 5.25, "r0": 27, "r1": 31},
+            "text": R.colour("text", "#E6ECF5"), "start": str(prop(v, "space.start") or "zones")}
+
+
+def space_picture(R, v):
+    """A data URI of the spatial canvas's space (design/scripts/space_svg.py), its areas tinted hot or cold by a
+    made-up rate per area (the zones view the visual opens on), or None for a space it doesn't draw."""
+    import base64, random as _r
+    try:
+        import space_svg as SP
+    except ImportError:
+        return None
+    shape = str(prop(v, "space.shape") or "court")
+    if shape not in SP.SPACES:
+        return None
+    line = R.colour("textMuted", "#5B6474")
+    hot, cold = R.colour("bad", "#C1403A"), R.colour("brand", "#2B67D3")
+    text, _ = SP.svg(shape, line, px=20, zones=shape == "court")
+    def tint(m):
+        z = m.group(2)
+        x = _r.Random("zone/" + z).uniform(-1, 1)
+        return f'{m.group(1)}fill="{hot if x > 0 else cold}" fill-opacity="{0.12 + 0.4 * abs(x):.2f}"{m.group(3)}{z}</title>'
+    text = re.sub(r'(<path d="[^"]*" )fill="[^"]*" fill-opacity="[\d.]+"( shape-rendering="crispEdges"><title>)([^<]*)</title>',
+                  lambda m: tint(type("M", (), {"group": lambda self, i: {1: m.group(1), 2: m.group(3), 3: m.group(2)}[i]})()), text)
+    return "data:image/svg+xml;base64," + base64.b64encode(text.encode("utf-8")).decode()
+
+
 def spec_for(R, v, layout, member_of):
     t = v["type"]
     s = {"id": v["id"], "name": v.get("name", ""), "type": t, "page": v["page"],
@@ -484,6 +545,9 @@ def spec_for(R, v, layout, member_of):
     if v.get("type") == "custom":               # a kit custom visual (v1.11): animated / app-like, IT approval at work
         base = "Kit visual"
         method = "kit-visual"
+        if v.get("pattern") == "spatial-canvas":   # v1.12: the space drawn as the visual opens (its zones view)
+            s["court"] = court_spec(R, v)
+            s["space"] = None if s["court"] else space_picture(R, v)
     s["tag"] = base if s.get("render") == "htmlContent" else (METHOD_TAG[method].format(base) if method in METHOD_TAG
                                                              else base)
     s["method"] = "html" if s.get("render") == "htmlContent" else method
@@ -501,7 +565,11 @@ def spec_for(R, v, layout, member_of):
                       "outline": R.colour(st.get("outline")), "radius": R.number(st.get("radius", 0), "container", 0)}
     if t == "actionButton":
         fam, wt = R.font(prop(v, "text.fontFamily"))
-        s["button"] = {"text": prop(v, "text.text") if prop(v, "text.show") is not False else "",
+        label = prop(v, "text.text") or (v["text"] if isinstance(v.get("text"), str) else
+                                          " ".join(r.get("text", "") if isinstance(r, dict) else str(r)
+                                                   for p in (v.get("text") or []) for r in
+                                                   ((p.get("runs") or []) if isinstance(p, dict) else [p])))    # layout `text`, as pbik build writes it
+        s["button"] = {"text": label if prop(v, "text.show") is not False else "",
                        "color": R.colour(prop(v, "text.fontColor"), R.C.get("text", "#252423")),
                        "size": pt_px(R.number(prop(v, "text.fontSize"), default=11)), "family": fam, "weight": wt,
                        "align": prop(v, "text.horizontalAlignment") or "center",
@@ -579,7 +647,7 @@ def spec_for(R, v, layout, member_of):
                      "tile": R.colour(prop(v, "fillCustom.fillColor")) if prop(v, "fillCustom.show") is not False else None,
                      "accent": R.colour(prop(v, "accentBar.color")) if prop(v, "accentBar.show") else None,
                      "radius": R.number(prop(v, "shapeCustomRectangle.rectangleRoundedCurve"), "container", 0),
-                     "refs": [{"title": l.get("title"), "value": l.get("value"), "detail": l.get("detail")}
+                     "refs": [{"title": None if rl.get("titleOff") else l.get("title"), "value": l.get("value"), "detail": l.get("detail")}
                               for l in rl.get("labels", [])],
                      "refSize": pt_px(R.number(rl.get("valueSize", "caption"), default=10)),
                      "refColor": R.colour(rl.get("valueColor", "textMuted"), "#605E5C"),
@@ -973,7 +1041,13 @@ function dataLabel(s, d, x, i, v) {
   const show = by[x.name] ?? by[x.measure] ?? by[''] ?? L.show;
   if (!show || d.sample) return '';
   const m = labelOf(d, x, i); if (m !== undefined) return m == null ? '' : String(m);
-  return v == null ? '' : unitFmt(v, x.format, L.units, L.precision);
+  if (v == null) return '';
+  if (L.units === 0) {                                // Auto: Desktop's compact labels (2.3K, 1.2M) by the biggest value
+    const big = Math.max(...(x.values || [v]).map(a => Math.abs(a || 0)));
+    const u = big >= 1e9 ? 1e9 : big >= 1e6 ? 1e6 : big >= 1e3 ? 1e3 : 1;
+    if (u > 1) return (v / u).toFixed(L.precision ?? 1) + {1000: 'K', 1000000: 'M', 1000000000: 'bn'}[u];
+  }
+  return unitFmt(v, x.format, L.units, L.precision);
 }
 function labelStyle(s, x) { const L = (s.chart || {}).labels || {}, c = L.colorBy || {}, f = L.font || {};
   return {fill: c[x.name] || c[x.measure] || L.color || txt, 'font-size': L.size || 12, 'font-family': f.family || FONT, 'font-weight': f.weight || 400}; }
@@ -998,7 +1072,7 @@ function refLines(s, d, g, f) {
   (d.refLines || []).forEach((rl, k) => {
     if (rl.value == null || d.sample) return;
     const st = (s.refStyle || [])[k] || {color: txt, dash: true, dataLabel: true}, v = +rl.value;
-    const lab = !st.dataLabel ? '' : st.labelText === 'Name' ? (rl.label || '') : st.labelText === 'Value' ? f.fmt(v) : [rl.label, f.fmt(v)].filter(Boolean).join(' ');
+    const lab = !st.dataLabel ? '' : st.labelText === 'Name' ? (rl.label || '') : st.labelText === 'Value' ? f.fmt(v) : (rl.label ? rl.label + ': ' : '') + (rl.decimals != null ? Number(v).toFixed(rl.decimals) : f.fmt(v));
     const ln = {stroke: st.color, 'stroke-width': st.width || 1, 'stroke-dasharray': st.dash ? '4 3' : ''};
     if (rl.axis === 'category' || rl.axis === 'x') {
       const nums = f.cats.map(Number); if (nums.some(isNaN) || !nums.length) return;
@@ -1008,6 +1082,7 @@ function refLines(s, d, g, f) {
       else { const x = f.padL + pos; add(g, 'line', {x1: x, x2: x, y1: f.padT, y2: f.padT + f.H, ...ln}); if (lab) add(g, 'text', {x: x + 4, y: f.padT + 10, 'font-size': 11, fill: st.color}, lab); }
     } else {
       const pos = f.sc(v);
+      if (f.lo != null && (v < f.lo || v > f.hi)) return;   // outside the axis: Desktop doesn't widen the axis for it
       if (f.horizontal) { const x = f.padL + pos; add(g, 'line', {x1: x, x2: x, y1: f.padT, y2: f.padT + f.H, ...ln}); if (lab) add(g, 'text', {x: x - 4, y: f.padT + 10, 'font-size': 11, fill: st.color, 'text-anchor': 'end'}, lab); }
       else { const y = f.padT + f.H - pos; add(g, 'line', {x1: f.padL, x2: f.padL + f.W, y1: y, y2: y, ...ln}); if (lab) add(g, 'text', {x: f.padL + f.W - 4, y: y - 4, 'font-size': 11, fill: st.color, 'text-anchor': 'end'}, lab); }
     }
@@ -1041,7 +1116,7 @@ R.cardVisual = (s, el, w, h) => {
   const cols = Math.max(1, Math.min(c.cols || n, n)), al = c.align === 'left' || c.align === 'right' ? c.align : 'center';
   const lal = c.labelAlign === 'left' || c.labelAlign === 'right' ? c.labelAlign : 'center', shown = [];
   const tiles = names.map((nm, k) => {
-    const v = d.sample ? '–' : unitFmt(row[nG + k], d.formats[k], c.units, c.precision); shown.push(v);
+    const v = d.sample ? '–' : (d.preview && k === 0 && !s.pattern) ? d.preview : unitFmt(row[nG + k], d.formats[k], c.units, c.precision); shown.push(v);
     const lab = c.label ? `<div style="font-family:'${c.labelFamily}';font-weight:${c.labelWeight};font-size:${c.labelSize}px;color:${c.labelColor};text-align:${lal};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nm)}</div>` : '';
     const val = c.value ? `<div style="font-family:'${c.family}';font-weight:${c.weight};font-size:${c.valueSize}px;color:${c.valueColor};line-height:1.15;text-align:${al};${c.wrap ? 'white-space:normal' : 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis'}">${esc(v)}</div>` : '';
     return `<div style="min-width:0">${c.labelPos === 'aboveValue' ? lab + val : val + lab}</div>`; });
@@ -1049,9 +1124,9 @@ R.cardVisual = (s, el, w, h) => {
   const refs = (c.refs || []).map((r, k) => { const det = (d.refDetails || [])[k];
     const dc = det && det.good != null ? (det.good ? (C.good || '#197982') : (C.bad || '#B94642')) : c.refColor;
     return `<span>${esc([r.title, (d.refs || [])[k] ?? (d.sample ? '–' : '')].filter(Boolean).join(' '))}</span>` +
-      (det ? ` <span style="color:${dc};font-weight:600">${esc(det.text)}</span>` : ''); }).join(' ');
+      (det ? ` <span style="color:${dc};font-weight:600${det.chip ? ';background:' + (det.good == null ? (C.neutralTint || '#EDF0F5') : det.good ? (C.goodTint || '#E4F4EE') : (C.badTint || '#FCEAE8')) + ';padding:1px 6px;border-radius:4px' : ''}">${esc(det.text)}</span>` : ''); }).map(x => `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${x}</div>`).join('');
   el.insertAdjacentHTML('beforeend', `<div style="display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));gap:4px 16px;width:100%">${tiles.join('')}</div>` +
-    (refs ? `<div style="font-size:${c.refSize}px;color:${c.refColor};margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:${al}">${refs}</div>` : '') +
+    (refs ? `<div style="font-size:${c.refSize}px;color:${c.refColor};margin-top:4px;max-width:100%;text-align:${al}">${refs}</div>` : '') +
     (c.image ? `<div class="nodata">image from data</div>` : ''));
   el.dataset.main = c.value && !d.sample ? shown.join(' | ') : '';
 };
@@ -1086,7 +1161,8 @@ function axisChart(s, el, w, h, horizontal, mode, dIn, secRoom) {
     if (mode === 'stack' || mode === 'pct') { let p = 0, q = 0; ss.forEach(x => { const v = x.values[i] || 0; v >= 0 ? p += v : q += v; }); max = Math.max(max, p); min = Math.min(min, q); tot[i] = p + q; }
     else ss.forEach(x => { max = Math.max(max, x.values[i] || 0); min = Math.min(min, x.values[i] || 0); });
   });
-  const rg = mode === 'pct' ? ticks(0, 1, 4, 0, 1) : valueRange(min, max, ch, d, false, true), lo = rg.lo, span = (rg.hi - lo) || 1;
+  const scalar = String((CA || {}).type || '') === 'Scalar';
+  const rg = mode === 'pct' ? ticks(0, 1, 4, 0, 1) : scalar ? (() => { const e = Math.pow(10, Math.floor(Math.log10((max || 1) / 3))), st = [1, 2, 5, 10].map(k => k * e).find(k => k >= (max || 1) / 3.2); return ticks(0, Math.ceil(max / st) * st, Math.ceil(max / st)); })() : valueRange(min, max, ch, d, false, true), lo = rg.lo, span = (rg.hi - lo) || 1;
   const step = rg.ticks.length > 1 ? rg.ticks[1] - rg.ticks[0] : 1;
   const vf = v => mode === 'pct' ? fmt(v, '0%') : tickFmt(v, (ss[0] || {}).format, VA.units, step);
   // category labels: all of them, turned 45 degrees when they don't fit side by side, thinned only when too dense
@@ -1096,7 +1172,8 @@ function axisChart(s, el, w, h, horizontal, mode, dIn, secRoom) {
   const outside = (LB.show && !inside) || (TT.show && mode === 'stack');
   const longest = Math.max(0, ...cats.map(c => tw(c, cpx)));
   const padL = lg.left + (horizontal ? (catAx && !above ? Math.min(w * .32, longest + 10) : 4) : (valAx ? Math.max(...rg.ticks.map(v => tw(vf(v), vpx))) + 8 : 6));
-  const padB = lg.bottom + (horizontal ? (valAx ? vpx + 6 : 4) : (catAx ? (rot ? cw * .72 + cpx : cpx + 8) : 4));
+  const ctitle = !horizontal && catAx && CA.title && !d.sample ? (CA.titleSize || 12) + 6 : 0;    // the axis title under it
+  const padB = lg.bottom + ctitle + (horizontal ? (valAx ? vpx + 6 : 4) : (catAx ? (rot ? cw * .72 + cpx : cpx + 8) : 4));
   const padT = lg.top + (!horizontal && outside ? 18 : 6), padR = lg.right + (horizontal && outside ? 48 : 8) + (secRoom || 0);
   const W = Math.max(w - padL - padR, 4), H = Math.max(h - padT - padB, 4), n = Math.max(cats.length, 1);
   const sc = v => (Math.min(Math.max(v, lo), rg.hi) - lo) / span * (horizontal ? W : H);
@@ -1105,7 +1182,8 @@ function axisChart(s, el, w, h, horizontal, mode, dIn, secRoom) {
                       if (valAx && !d.sample) add(g, 'text', {x: padL + p, y: h - lg.bottom - 4, 'font-size': vpx, fill: VA.color || muted, 'text-anchor': 'middle'}, vf(v)); }
     else { if (VA.grid !== false) add(g, 'line', {x1: padL, x2: padL + W, y1: padT + H - p, y2: padT + H - p, stroke: VA.gridColor || grid});
            if (valAx && !d.sample) add(g, 'text', {x: padL - 6, y: padT + H - p + 4, 'font-size': vpx, fill: VA.color || muted, 'text-anchor': 'end'}, vf(v)); } });
-  const band = (horizontal ? H : W) / n, inner = band * (above ? .42 : .7), bw = (mode === 'cluster') ? inner / Math.max(ss.length, 1) : inner;
+  const padF = CA.pad != null && horizontal ? Math.max(0.1, 1 - CA.pad / 100) * .4 : 1;   // inner padding: Desktop's slim bars
+  const band = (horizontal ? H : W) / n, inner = band * (above ? .42 * (CA.pad != null ? .5 : 1) : .7 * padF), bw = (mode === 'cluster') ? inner / Math.max(ss.length, 1) : inner;
   const lpx = LB.size || 12, base = sc(0);
   cats.forEach((c, i) => {
     let ttl = 0; if (mode === 'pct') ss.forEach(x => ttl += Math.abs(x.values[i] || 0));
@@ -1143,9 +1221,11 @@ function axisChart(s, el, w, h, horizontal, mode, dIn, secRoom) {
     if (!catAx) return;
     if (horizontal) add(g, 'text', {...ct, x: padL - 6, y: padT + band * i + band / 2 + cpx * .35, 'text-anchor': 'end'}, label(d, sh));
     else if (rot) { const x = padL + band * i + band / 2, y = padT + H + cpx; add(g, 'text', {...ct, x, y, 'text-anchor': 'end', transform: `rotate(-45 ${x} ${y})`}, label(d, sh.slice(0, 10))); }
-    else if (cw <= band - 4 || i % Math.ceil(n / Math.max(1, Math.floor(W / (cw + 8)))) === 0) add(g, 'text', {...ct, x: padL + band * i + band / 2, y: h - lg.bottom - 6, 'text-anchor': 'middle'}, label(d, sh.slice(0, 10)));
+    else if (scalar && !isNaN(+c)) { const st = [1, 2, 5, 10, 20, 50].find(k => n / k <= 4) || 100; if (+c % st === 0) add(g, 'text', {...ct, x: padL + band * i + band / 2, y: h - lg.bottom - 6 - ctitle, 'text-anchor': 'middle'}, String(c)); }
+    else if (cw <= band - 4 || i % Math.ceil(n / Math.max(1, Math.floor(W / (cw + 8)))) === 0) add(g, 'text', {...ct, x: padL + band * i + band / 2, y: h - lg.bottom - 6 - ctitle, 'text-anchor': 'middle'}, label(d, sh.slice(0, 10)));
   });
-  const geo = {g, padL, padT, W, H, band, n, cats, horizontal, sc, fmt: vf};
+  if (ctitle) add(g, 'text', {x: padL + W / 2, y: h - lg.bottom - 4, 'font-size': CA.titleSize || 12, fill: CA.titleColor || muted, 'text-anchor': 'middle', 'font-weight': 600}, CA.title);
+  const geo = {g, padL, padT, W, H, band, n, cats, horizontal, sc, fmt: vf, lo: rg.lo, hi: rg.hi};
   refLines(s, d, g, geo);
   return geo;
 }
@@ -1187,10 +1267,10 @@ function lineChart(s, el, w, h, area) {
     add(g, 'text', {...labelStyle(s, e.x_), x: e.x, y: e.y, 'text-anchor': side ? 'start' : 'end'}, e.t); }));
   const cf = CA.font || {}, ct = {'font-size': cpx, fill: CA.color || muted, 'font-family': cf.family || FONT, 'font-weight': cf.weight || 400, 'text-anchor': 'middle'};
   if (catAx) cats.forEach((c, i) => { if (n <= 14 || i % Math.ceil(n / 12) === 0) add(g, 'text', {...ct, x: X(i), y: h - lg.bottom - 6}, label(d, String(c ?? '').slice(0, 10))); });
-  refLines(s, d, g, {padL, padT, W, H, band: W / Math.max(n, 1), n, cats, horizontal: false, sc: v => (v - lo) / span * H, fmt: vf});
+  refLines(s, d, g, {padL, padT, W, H, band: W / Math.max(n, 1), n, cats, horizontal: false, lo, hi: rg.hi, sc: v => (v - lo) / span * H, fmt: vf});
 }
 R.lineChart = (s, el, w, h) => lineChart(s, el, w, h, false);
-// scatter: example points (never data) in the series colours, axes with titles, reference lines (v1.11.2: Rep test 1)
+// scatter: example points (never data) in the series colours, axes with titles, reference lines (v1.12: Rep test 1)
 R.scatterChart = (s, el, w, h) => {
   const g = svg(w, h); el.appendChild(g);
   const names = ((s.fields || []).filter(f => /legend|series/i.test(f.role || '')).length ? ['Group A', 'Group B', 'Group C'] : ['Items']);
@@ -1278,7 +1358,7 @@ function tableGrid(s, el, w, h, matrix) {
     `<tr>${head.map((x, k) => `<th class="${k < (matrix ? 1 : nG) ? 'l' : ''}" style="${cellCss(G.colHead) || 'color:' + muted + ';font-weight:600'};border-bottom:1px solid ${grid}">${esc(x)}</th>`).join('')}</tr>`;
   rows.slice(0, 40).forEach((r, j) => { h2 += `<tr>${r.map((x, k) => { const vk = k - (matrix ? 1 : nG);
       const on = t_ => vk >= 0 && (!t_ || t_ === head[k]);         // a cf colour on its target column only
-      const fc = d.fonts && on(d.fontTarget) ? d.fonts[j] : null, bc = d.backs && on(d.backTarget) ? d.backs[j] : null;
+      const fc = d.fontsBy && vk >= 0 && d.fontsBy[head[k]] ? d.fontsBy[head[k]][j] : (d.fonts && !d.fontsBy && on(d.fontTarget) ? d.fonts[j] : null), bc = d.backs && on(d.backTarget) ? d.backs[j] : null;
       const body = d.sample ? (vk < 0 ? '—' : '') : isImg(x) ? `<img alt="" src="${esc(svgSrc(x))}" style="height:${(G.values || {}).size * 1.6 || 20}px;max-width:100%;vertical-align:middle">` : esc(vk < 0 ? x : fmt(x, d.formats[vk]));
       return `<td class="${vk < 0 ? 'l' : ''}" style="padding:${pad}px 8px;border-bottom:${G.h ?? 1}px solid ${G.hColor || C.neutralTint || '#F3F2F1'}${fc ? ';color:' + fc : ''}${bc ? ';background:' + bc : ''}">${body}</td>`; }).join('')}</tr>`; });
   el.insertAdjacentHTML('beforeend', h2 + '</table></div>');
@@ -1300,9 +1380,9 @@ function matrixGrid(s, el, w, h) {
   const V = G.values || {}, CH = G.colHead || {}, RH = G.rowHead || {};
   const width = rw && vw ? `width:${rw + vw * colsK.length + (G.v || 0) * (colsK.length + 2)}px` : 'width:100%';
   let t = `<div style="position:absolute;inset:0;overflow:hidden"><table style="border-collapse:separate;border-spacing:${G.v || 0}px ${G.h || 0}px;table-layout:fixed;${width};margin:-${G.h || 0}px -${G.v || 0}px">` +
-    `<colgroup><col style="width:${rw ? rw + 'px' : '14%'}">${colsK.map(() => `<col${vw ? ` style="width:${vw}px"` : ''}>`).join('')}</colgroup>` +
+    `<colgroup><col style="width:${rw ? rw + 'px' : Math.max(...rowsK.map(r => tw(String(r), (RH.size || 12))), tw(String(d.groups[ri]), (CH.size || 12))) + 2 * pad + 14 + 'px'}">${colsK.map(() => `<col${vw ? ` style="width:${vw}px"` : ''}>`).join('')}</colgroup>` +
     `<tr><th style="${cellCss(CH)};text-align:left;padding:${pad}px 6px;white-space:nowrap;overflow:hidden">${esc(d.groups[ri])}</th>` +
-    colsK.map(c => `<th style="${cellCss(CH)};text-align:${CH.align || 'right'};padding:${pad}px 6px;white-space:nowrap;overflow:hidden">${esc(c)}</th>`).join('') + '</tr>';
+    colsK.map(c => `<th style="${cellCss(CH)};text-align:${CH.align || 'right'};padding:${pad}px 6px;white-space:normal;overflow-wrap:anywhere;vertical-align:bottom">${esc(c)}</th>`).join('') + '</tr>';
   for (const r of rowsK) {
     t += `<tr><th style="${cellCss(RH)};text-align:left;padding:${pad}px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r)}</th>`;
     for (const c of colsK) { const j = at[r + K + c], v = j == null ? null : d.rows[j][nG];
@@ -1313,7 +1393,8 @@ function matrixGrid(s, el, w, h) {
 }
 R.tableEx = (s, el, w, h) => tableGrid(s, el, w, h, false);
 R.pivotTable = matrixGrid;
-function members(s, n) { const it = s.slicer.items; if (Array.isArray(it)) return it.map(String);   // the layout's own labels first
+function members(s, n) { const it = s.slicer.items, dd = D[s.id]; if (dd && Array.isArray(dd.items)) return dd.items.map(String);   // the model's own option labels (kept)
+  if (Array.isArray(it)) return it.map(String);   // then the layout's own labels
   const d = D[s.id]; if (d) return d.rows.map(r => String(r[0]));
   return Array.isArray(it) ? it.map(String) : Array.from({length: typeof it === 'number' ? it : (n || 4)}, (_, i) => 'Item ' + (i + 1)); }
 // rail + panel pickers: image list (a round picture and the name per row), image cards (a picture over the name)
@@ -1375,6 +1456,33 @@ function imgCss(el, im) { Object.assign(el.style, {backgroundImage: `url("${S.im
 R.image = (s, el) => { const im = s.img;
   if (im && im.src && S.images[im.src]) return imgCss(el, im);
   el.insertAdjacentHTML('beforeend', `<div class="placeholder" style="border-style:solid">🖼 image${im ? '<br><small>not found: ' + esc(im.name) + '</small>' : ''}</div>`); };
+function mixHex(a, b, t) { const p = x => [1, 3, 5].map(i => parseInt(x.slice(i, i + 2), 16)), A = p(a), B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+function courtCanvas(s, el, w, h) {                  // the spatial canvas's court: zones on a diverging scale, lines on top
+  const c = s.court, d = D[s.id] || {}, Z = d.zones || {}, span = d.span || 0.1;
+  const N = c.neutral || c.mid;                      // neutral: a visible mid grey, never the court colour
+  const tone = z => { const e = Z[z]; if (!e || e.rate == null) return N; const k = e.bench != null ? (e.rate - e.bench) / span : 0;
+    const t = Math.max(-1, Math.min(1, k)); return t < 0 ? mixHex(N, c.cold, -t) : mixHex(N, c.hot, t); };
+  const top = 40, side = 0, avail = h - top - 8, k = Math.min((w - side) / c.W, avail / c.H), cw = c.W * k, chh = c.H * k, x0 = (w - cw) / 2;
+  const pill = (t, on) => `<span style="padding:4px 12px;border-radius:999px;font-size:12px;${on ? `background:${c.text};color:${c.mid}` : `color:${c.text}`}">${t}</span>`;
+  const legend = `<span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:${c.text};opacity:.85;margin-left:12px">Colder<span style="display:inline-block;width:72px;height:8px;border-radius:4px;background:linear-gradient(90deg,${c.cold},${c.neutral || c.mid},${c.hot})"></span>Hotter than the league</span>`;
+  el.insertAdjacentHTML('beforeend', `<div style="position:absolute;left:0;top:4px;display:flex;align-items:center"><span style="display:inline-flex;gap:2px;border:1px solid ${c.line};border-radius:999px;padding:2px">${pill('Dots', c.start === 'dots')}${pill('Zones', c.start !== 'dots')}${pill('Ranked', false)}</span>${legend}</div>`);
+  const zones = Object.entries(c.zones).map(([z, p]) => `<path d="${p}" fill="${tone(z)}"><title>${esc(c.names[z] || z)}</title></path>`).join('');
+  const labels = Object.entries(c.centroids).map(([z, [x, y]]) => { const e = Z[z]; if (!e || e.rate == null) return '';
+    const fill = tone(z), lum = h_ => { const v = [1, 3, 5].map(i => parseInt(h_.slice(i, i + 2), 16) / 255).map(u => u <= 0.03928 ? u / 12.92 : Math.pow((u + 0.055) / 1.055, 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+    const cr = (a_, b_) => (Math.max(lum(a_), lum(b_)) + 0.05) / (Math.min(lum(a_), lum(b_)) + 0.05);
+    const ink = cr(fill, c.text) >= cr(fill, '#0B1220') ? c.text : '#0B1220';      // the better of light or dark text on its fill
+    if (true) {                                   // always a small backdrop: court lines cross the labels
+      const nm = c.names[z] || z, wd = Math.max(nm.length, 6) * 0.7 + 0.8;
+      return `<rect x="${x - wd / 2}" y="${y - 1.25}" width="${wd}" height="3.2" rx="0.6" fill="${c.mid}" fill-opacity="0.92"/>` +
+        `<text x="${x}" y="${y}" font-size="1.25" text-anchor="middle" fill="${c.text}"><tspan x="${x}" font-weight="600">${esc(nm)}</tspan><tspan x="${x}" dy="1.5">${Math.round(e.rate * 1000) / 10}%</tspan></text>`; }
+    return `<text x="${x}" y="${y}" font-size="1.25" text-anchor="middle" fill="${ink}"><tspan x="${x}" font-weight="600">${esc(c.names[z] || z)}</tspan><tspan x="${x}" dy="1.5">${Math.round(e.rate * 1000) / 10}%</tspan></text>`; }).join('');
+  const fd = c.fade, mid_ = 'fade-' + s.id;
+  const mask = fd ? `<defs><radialGradient id="${mid_}-g" gradientUnits="userSpaceOnUse" cx="${fd.x}" cy="${fd.y}" r="${fd.r1}"><stop offset="${fd.r0 / fd.r1}" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient><mask id="${mid_}" maskUnits="userSpaceOnUse" x="0" y="0" width="${c.W}" height="${c.H}"><rect width="${c.W}" height="${c.H}" fill="url(#${mid_}-g)"/></mask></defs>` : '';
+  el.insertAdjacentHTML('beforeend', `<svg style="position:absolute;left:${x0}px;top:${top}px;width:${cw}px;height:${chh}px" viewBox="0 0 ${c.W} ${c.H}">${mask}<g${fd ? ` mask="url(#${mid_})"` : ''}>${zones}</g><g><path d="${c.lines}" fill="none" stroke="${c.line}" stroke-width="0.14" stroke-linejoin="round" stroke-linecap="round"/></g><g>${labels}</g></svg>`);
+}
+R.custom = (s, el, w, h) => { if (s.court) return courtCanvas(s, el, w, h); if (!s.space) return R._unknown(s, el, w, h);    // a spatial canvas: its space, zones tinted
+  el.insertAdjacentHTML('beforeend', `<img alt="" src="${s.space}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain">`); };
 R._unknown = (s, el) => el.insertAdjacentHTML('beforeend', `<div class="placeholder"><div><b>${esc(s.tag)}</b><br>${esc(s.fields.map(f => f.label).join(', '))}<br><small>no wireframe renderer for this type</small></div></div>`);
 
 // ---- pattern renderers (docs/patterns/): layout.json `pattern` picks one over the visual type's renderer
@@ -1488,6 +1596,16 @@ P['freshness-line'] = (s, el, w, h) => {
   add(g, 'line', {x1: x, x2: x, y1: 4, y2: h - 22, stroke: muted, 'stroke-dasharray': '4 3'});
   add(g, 'text', {x: x - 4, y: 14, 'font-size': 10, fill: muted, 'text-anchor': 'end'}, 'data to');
 };
+P['label-above-bars'] = (s, el, w, h) => {
+  const d = dataOf(s, 5); if (d.sample || !d.rows.length) return (R[s.type] || R._unknown)(s, el, w, h);
+  const nG = d.groups.length, vi = d.values.length - 1, rows = d.rows, max = Math.max(...rows.map(r => r[nG + vi] || 0)) || 1;
+  const g = svg(w, h); el.appendChild(g); const step = h / Math.max(rows.length, 1), bh = Math.max(4, Math.min(7, step * .14));
+  const col = color(s, d.values[vi], 0), L = (s.chart || {}).labels || {}, lp = L.size || 13;
+  rows.forEach((r, i) => { const y = i * step, v = r[nG + vi] || 0, bw = (w - 44) * v / max;
+    add(g, 'text', {x: 6, y: y + step * .5 - 2, 'font-size': 14, fill: txt}, String(r[0]));
+    add(g, 'rect', {x: 0, y: y + step * .5 + 2, width: Math.max(bw, 2), height: bh, fill: col});
+    add(g, 'text', {x: bw + 6, y: y + step * .5 + 2 + bh, 'font-size': lp, fill: txt}, unitFmt(v, d.formats[vi], 1, 0)); });
+};
 P['exception-list'] = (s, el, w, h) => {
   const d = D[s.id];
   if (d) { if (!d.rows.length) { el.insertAdjacentHTML('beforeend', `<div class="placeholder" style="border:0;background:none">No exceptions</div>`); return; }
@@ -1506,7 +1624,7 @@ P['direct-labels'] = (s, el, w, h) => {
   const longest = Math.max(...ss.map(x => String(x.name).length)), g = svg(w, h); el.appendChild(g);
   const f = frame(w, h, 40, 22, 8, Math.min(longest * 7 + 14, w * .3));
   let lo = Infinity, hi = -Infinity; ss.forEach(x => x.values.forEach(v => { if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }));
-  const rg = valueRange(lo, hi, null, d, false, lo >= 0), span = (rg.hi - rg.lo) || 1;
+  const rg = valueRange(lo, hi, s.chart, d, false, /area/i.test(s.type) && lo >= 0), span = (rg.hi - rg.lo) || 1;
   const n = Math.max(...ss.map(x => x.values.length)), X = i => f.padL + (n > 1 ? f.W * i / (n - 1) : f.W / 2), Y = v => f.padT + f.H - ((v ?? rg.lo) - rg.lo) / span * f.H;
   gridLines(g, f);
   const cats = (series(d).cats || []).map(c => String(c ?? '').slice(0, 3));
@@ -1516,7 +1634,7 @@ P['direct-labels'] = (s, el, w, h) => {
   const ends = [];
   ss.forEach((x, k) => { const c = color(s, x.name, k); add(g, 'polyline', {points: x.values.map((v, i) => `${X(i)},${Y(v)}`).join(' '), fill: 'none', stroke: c, 'stroke-width': 3});
     let i = x.values.length - 1; while (i > 0 && x.values[i] == null) i--; ends.push({y: Y(x.values[i]), x: X(i), c, name: x.name}); });
-  refLines(s, d, g, {padL: f.padL, padT: f.padT, W: f.W, H: f.H, band: f.W / Math.max(n, 1), n, cats, horizontal: false,
+  refLines(s, d, g, {padL: f.padL, padT: f.padT, W: f.W, H: f.H, band: f.W / Math.max(n, 1), n, cats, horizontal: false, lo: rg.lo, hi: rg.hi,
     sc: v => (v - rg.lo) / span * f.H, fmt: v => tickFmt(v, (ss[0] || {}).format, null, span / 4)});   // the SLA, a target
   ends.sort((a, b) => a.y - b.y).forEach((e, k, a) => { if (k && e.y - a[k - 1].y < 20) e.y = a[k - 1].y + 20;   // room between line-end labels
     add(g, 'text', {x: e.x + 6, y: e.y + 4, 'font-size': 12, 'font-weight': 600, fill: e.c}, String(e.name)); });

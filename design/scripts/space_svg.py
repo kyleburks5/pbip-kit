@@ -40,9 +40,9 @@ def court_zone(dx, dy):
     return "mid-" + side
 
 
-ZONE_NAMES = {"rim": "At the rim", "paint": "Paint", "mid-left": "Mid-range left", "mid-center": "Mid-range centre",
-              "mid-right": "Mid-range right", "corner3-left": "Corner three left", "corner3-right": "Corner three right",
-              "wing3-left": "Three left wing", "three-top": "Three top", "wing3-right": "Three right wing"}
+ZONE_NAMES = {"rim": "Rim", "paint": "Paint", "mid-left": "Mid L", "mid-center": "Mid C", "mid-right": "Mid R",
+              "corner3-left": "Corner 3 L", "corner3-right": "Corner 3 R", "wing3-left": "Wing 3 L", "three-top": "Top 3",
+              "wing3-right": "Wing 3 R"}                 # short and distinct (v1.12)
 
 
 def arc(cx, cy, r, a0, a1, n=48):
@@ -64,9 +64,9 @@ def court():
     meet = hy + math.sqrt(c["three"] ** 2 - c["corner_x"] ** 2)
     a0 = math.degrees(math.atan2(meet - hy, -c["corner_x"]))
     a1 = math.degrees(math.atan2(meet - hy, c["corner_x"]))
-    three = [(hx - c["corner_x"], 0), (hx - c["corner_x"], meet)] + arc(hx, hy, c["three"], a0, a1)[::-1] + [(hx + c["corner_x"], meet), (hx + c["corner_x"], 0)]
+    three = [(hx - c["corner_x"], 0), (hx - c["corner_x"], meet)] + arc(hx, hy, c["three"], a0, a1) + [(hx + c["corner_x"], meet), (hx + c["corner_x"], 0)]
     lines = [path([(0, 0), (W, 0), (W, H), (0, H)], True), path([(hx - 8, 0), (hx + 8, 0), (hx + 8, c["ft_y"]), (hx - 8, c["ft_y"])], True),
-             circle(hx, c["ft_y"], 6), circle(hx, hy, 0.75), path([(hx - 3, 4), (hx + 3, 4)]), path(arc(hx, hy, c["ra"], 180, 0, 24)),
+             circle(hx, c["ft_y"], 6), circle(hx, hy, 0.75), path([(hx - 3, 4), (hx + 3, 4)]), path([(hx - c["ra"], 4)] + arc(hx, hy, c["ra"], 180, 0, 24) + [(hx + c["ra"], 4)]),
              path(three), path(arc(hx, H, 6, 180, 360, 24))]
     # data range for a native scatter (feet from the hoop): x across, y out from the hoop
     # a scatter's y axis grows upwards and the image's baseline is at the top: plot -Y (a measure) on [-(H - hy), hy]
@@ -99,27 +99,47 @@ def floor():
 SPACES = {"court": court, "pitch": pitch, "body": body, "floor": floor}
 
 
-def svg(space, stroke, px=20, zones=False, fill=None):
+def court_zone_shapes():
+    """{zone: [(x, y), ...]}: each court area as an exact polygon (arcs sampled every half degree) in court feet, the
+    same areas court_zone() decides (v1.12: smooth edges, no traced steps). The paint goes round the rim circle
+    through a zero-width slit, so one polygon holds it with nonzero fill."""
+    c = COURT
+    hx, hy, R, cx, lane, ft = c["W"] / 2, c["hoop_y"], c["three"], c["corner_x"], c["lane"] / 2, c["ft_y"]
+    meet = hy + math.sqrt(R ** 2 - cx ** 2)
+    tc = math.degrees(math.atan2(meet - hy, cx))                    # where the arc meets the corner lines
+    A = lambda a0, a1: arc(hx, hy, R, a0, a1, max(2, int(abs(a1 - a0) * 2)))
+    ray = lambda a, y: (hx + (y - hy) / math.tan(math.radians(a)), y)   # the 60 / 120 degree split at height y
+    W, H = c["W"], c["H"]
+    rim = arc(hx, hy, c["ra"], -90, 270, 180)
+    return {
+        "rim": rim,
+        "paint": [(hx, 0), (hx - lane, 0), (hx - lane, ft), (hx + lane, ft), (hx + lane, 0), (hx, 0)] + rim,   # inner ring turns the other way: a hole under nonzero fill
+        "corner3-left": [(0, 0), (hx - cx, 0), (hx - cx, meet), (0, meet)],
+        "corner3-right": [(hx + cx, 0), (W, 0), (W, meet), (hx + cx, meet)],
+        "mid-right": [(hx + lane, 0), (hx + cx, 0)] + A(tc, 60) + [ray(60, ft), (hx + lane, ft)],
+        "mid-center": A(60, 120) + [ray(120, ft), ray(60, ft)],
+        "mid-left": [(hx - lane, ft), ray(120, ft)] + A(120, 180 - tc) + [(hx - cx, 0), (hx - lane, 0)],
+        "wing3-right": [(hx + cx, meet), (W, meet), (W, H), ray(60, H)] + A(60, tc),
+        "three-top": A(60, 120) + [ray(120, H), ray(60, H)],
+        "wing3-left": A(120, 180 - tc) + [(0, meet), (0, H), ray(120, H)],
+    }
+
+
+def svg(space, stroke, px=20, zones=False, fill=None, colors=None, edge=None):
+    """The space as SVG: the zones (court) as their own layer, filled (`colors`: {zone: hex}, else `fill` faint) with
+    a very faint or no edge, and the space's lines on top as a separate layer (solid, light)."""
     W, H, lines, rng = SPACES[space]()
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W * px:.0f}" height="{H * px:.0f}" viewBox="0 0 {W} {H}">']
-    if zones and space == "court":            # areas traced from the rule, for a wireframe or a static picture
-        step = 0.25
-        for z in ZONE_NAMES:
-            runs = []
-            for j in range(int(H / step)):
-                y = j * step + step / 2
-                i = 0
-                while i < int(W / step):
-                    if court_zone(i * step + step / 2 - W / 2, y - COURT["hoop_y"]) == z:
-                        k = i
-                        while k < int(W / step) and court_zone(k * step + step / 2 - W / 2, y - COURT["hoop_y"]) == z:
-                            k += 1
-                        runs.append(f"M{i * step:.2f},{j * step:.2f}h{(k - i) * step:.2f}v{step}h{-(k - i) * step:.2f}Z")
-                        i = k
-                    else:
-                        i += 1
-            out.append(f'<path d="{"".join(runs)}" fill="{fill or stroke}" fill-opacity="0.12" shape-rendering="crispEdges"><title>{ZONE_NAMES[z]}</title></path>')
-    out.append(f'<path d="{"".join(lines)}" fill="none" stroke="{stroke}" stroke-width="{1.5 / px * 2:.3f}" stroke-linejoin="round"/>')
+    if zones and space == "court":
+        out.append('<g class="zones">')
+        for z, pts in court_zone_shapes().items():
+            col = (colors or {}).get(z) or fill or stroke
+            op = 0.9 if colors else 0.12
+            st = f' stroke="{edge}" stroke-width="{0.6 / px * 2:.3f}" stroke-opacity="0.35"' if edge else ""
+            out.append(f'<path d="{path(pts, True)}" fill="{col}" fill-opacity="{op}"{st}><title>{ZONE_NAMES[z]}</title></path>')
+        out.append("</g>")
+    out.append(f'<g class="lines"><path d="{"".join(lines)}" fill="none" stroke="{stroke}" stroke-width="{1.5 / px * 2:.3f}" '
+               'stroke-linejoin="round" stroke-linecap="round"/></g>')
     out.append("</svg>")
     return "\n".join(out), rng
 

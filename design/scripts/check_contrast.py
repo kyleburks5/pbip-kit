@@ -40,7 +40,8 @@ function bgOf(el, page) {
   return base;
 }
 var out = [], pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
-function visible(el) { var s = getComputedStyle(el), r = el.getBoundingClientRect(); return s.visibility !== 'hidden' && s.display !== 'none' && parseFloat(s.opacity) > 0.05 && r.width > 0 && r.height > 0; }
+function clipped(el, r) { for (var p = el.parentElement; p; p = p.parentElement) { var o = getComputedStyle(p).overflow; if (o === 'visible') continue; var q = p.getBoundingClientRect(); if (r.bottom <= q.top + 1 || r.top >= q.bottom - 1 || r.right <= q.left + 1 || r.left >= q.right - 1 || r.top + r.height / 2 > q.bottom) return true; } return false; }
+function visible(el) { var s = getComputedStyle(el), r = el.getBoundingClientRect(); return s.visibility !== 'hidden' && s.display !== 'none' && parseFloat(s.opacity) > 0.05 && r.width > 0 && r.height > 0 && !clipped(el, r); }
 function own(el) { if (el instanceof SVGElement) return el.tagName === 'text' || el.tagName === 'tspan' ? el.textContent.trim() : '';
   return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').trim(); }
 function check(page, scope, pass) {

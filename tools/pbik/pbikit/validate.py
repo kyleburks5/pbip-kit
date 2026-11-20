@@ -446,8 +446,9 @@ def decorative_names(layout):
     """Visual names layout.json marks `decorative: true` (roadmap gap 21), or None without a layout."""
     if not layout:
         return None
-    lay = load(layout)
-    return {f"{v['id']}_{v['name']}" for v in lay.get("visuals", []) if v.get("decorative")}
+    from .score import flat_layout
+    lay = flat_layout(load(layout))
+    return {f"{v['id']}_{v.get('name')}" for v in lay.get("visuals", []) if v.get("decorative")}
 
 
 def check_annotations(fd, rep, pages):
@@ -725,6 +726,12 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
              use_a11y=True, project=None):
     rep = Report(report_path)
     rep.project = project
+    if layout and isinstance(load(layout).get("pages"), list):    # a layout from before pbik (Reps 1-4): pbik's form
+        import tempfile
+        from .score import flat_layout
+        tf = pathlib.Path(tempfile.mkdtemp()) / "layout.json"
+        tf.write_text(json.dumps(flat_layout(load(layout))), encoding="utf-8")
+        layout = str(tf)
     fd = Findings()
     model = rep.model()
     ext = rep.extensions()
@@ -936,7 +943,8 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
         for bid in sorted(set(books) - listed):
             fd.warn("bookmarks.json", f"bookmark {bid} has a file but isn't listed, so Desktop won't show it")
     if layout:
-        lay = load(layout)
+        from .score import flat_layout
+        lay = flat_layout(load(layout))          # a layout from before pbik too (pages a list)
         lids = {v["id"] for v in lay.get("visuals", []) if (v.get("build") or {}).get("method") != "page-background"}
         lay_pages = {p.get("displayName") for p in lay.get("pages", {}).values()}
         on_lay_pages = {vid for vid, wheres in ids.items() if any(w.split("/", 1)[0] in lay_pages for w in wheres)}
@@ -957,6 +965,16 @@ def validate(report_path, layout=None, strict_schema=False, port=None, catalog=N
     check_card_images(fd, rep, pages)
     check_kit_filters_slicers(fd, rep, pages)
     check_exported_pages(fd, rep, pages, load(layout) if layout else None)
+    if layout:                                    # a list's "N items with ..." title counts with the list's own rule
+        from . import polish as PO
+        lay_, ex_ = load(layout), PO.project_expressions(root)
+        tok_ = {}
+        try:
+            tok_ = json.loads((root / "design" / "tokens.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            pass
+        for line in PO.count_titles(lay_, ex_) + PO.comparison_colours(lay_, ex_) + PO.exception_columns(lay_) +                 PO.label_collisions(lay_, tok_):
+            fd.warn("layout", line)
     check_annotations(fd, rep, pages)
     check_limits(fd, rep, pages)
     check_resources(fd, rep)

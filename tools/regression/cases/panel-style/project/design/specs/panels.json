@@ -1,0 +1,46 @@
+{
+  "page": "P1",
+  "dimension": "Channel[Interaction Type]",
+  "members": [
+    "Calls",
+    "Chats",
+    "Emails",
+    "Escalations"
+  ],
+  "memberMeta": {
+    "Escalations": {
+      "lowerIsBetter": true
+    }
+  },
+  "header": {
+    "title": "IT Service Ticket Overview",
+    "definition": "Calls, chats, emails and escalations · counted by date received · within SLA = resolved in no more than the channel's SLA days",
+    "icon": "headset",
+    "year": "Date[Year]",
+    "yearDefault": 2025
+  },
+  "count": "[Interactions]",
+  "countLabel": "Interactions",
+  "countNoun": "interactions",
+  "countLY": "[Interactions PY]",
+  "share": "[Share of Interactions %]",
+  "period": "Date[Quarter]",
+  "distribution": {
+    "column": "DataTable[Resolution Time (Days)]",
+    "threshold": "[SLA Days]",
+    "average": "[Avg Resolution Days]",
+    "within": "[Interactions Within SLA]",
+    "rate": "[SLA Compliance %]",
+    "title": "Resolution time",
+    "axis": "Days to resolve",
+    "unit": "days",
+    "thresholdName": "SLA"
+  },
+  "top": {
+    "field": "DataTable[Category]",
+    "n": 5,
+    "title": "Top 5 categories"
+  },
+  "date": "'Date'[Date]",
+  "measureTable": "DataTable"
+}

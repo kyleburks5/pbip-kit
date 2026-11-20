@@ -59,7 +59,7 @@
    }
   },
   {
-   "pill": "Points"
+   "pill": "Dots"
   },
   {
    "settle": true
@@ -97,7 +97,7 @@
    "settle": true
   },
   {
-   "clickSelector": "path.kit-zone[aria-label^='At the rim']"
+   "clickSelector": "path.kit-zone[aria-label^='Rim']"
   },
   {
    "wait": 1500
@@ -112,7 +112,7 @@
       "rim"
      ]
     },
-    "text": "At the rim:"
+    "text": "Rim:"
    }
   },
   {
@@ -134,7 +134,7 @@
    }
   },
   {
-   "clickSelector": "path.kit-zone[aria-label^='Three top']",
+   "clickSelector": "path.kit-zone[aria-label^='Top 3']",
    "ctrl": true
   },
   {
@@ -142,7 +142,7 @@
   },
   {
    "expect": {
-    "text": "Three top",
+    "text": "Top 3",
     "state": {
      "picked": [
       "rim",

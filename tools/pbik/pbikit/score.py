@@ -51,11 +51,15 @@ def overlaps(layout):
                 continue
             if (a["x"] < b["x"] + b["w"] and b["x"] < a["x"] + a["w"] and a["y"] < b["y"] + b["h"]
                     and b["y"] < a["y"] + a["h"]):
+                strip = min(a["y"] + a["h"], b["y"] + b["h"]) - max(a["y"], b["y"])
+                bare = lambda v: isinstance(v.get("container"), dict) and v["container"].get("background") is False  # noqa
+                if strip <= 12 and bare(a) and bare(b):
+                    continue          # two visuals with no background touching by their padding: nothing overlaps (v1.12)
                 bad.append(f"{a['id']}/{b['id']}")
     per_page = {}
     partners = {v.get("comparison") for v in vs if v.get("comparison")}     # a KPI card's own chart: one tile with it
     for v in vs:
-        if v.get("type") in PICKERS:                     # pickers are the page's controls, not data to read (v1.11.2)
+        if v.get("type") in PICKERS:                     # pickers are the page's controls, not data to read (v1.12)
             continue
         if v.get("bindings") and not _image_card(v) and v["id"] not in partners:   # card + image card: one tile (v1.11)
             per_page[v["page"]] = per_page.get(v["page"], 0) + 1
@@ -130,11 +134,26 @@ def lost_since_approval(report, layout, approved):
     return out
 
 
+def flat_layout(layout):
+    """A layout from before pbik (pages a list, each with its own visuals: Reps 1-4) in pbik's form (pages by id,
+    visuals in one list), so an old rep can be scored (v1.12, Part D: Rep 4's score stopped on the list)."""
+    if not isinstance((layout or {}).get("pages"), list):
+        return layout
+    pages, vis = {}, list(layout.get("visuals") or [])
+    for p in layout["pages"]:
+        if isinstance(p, dict):
+            pid = p.get("id") or p.get("name")
+            pages[pid] = {k: x for k, x in p.items() if k != "visuals"}
+            vis += [{**v, "page": v.get("page", pid)} for v in p.get("visuals") or [] if isinstance(v, dict)]
+    return {**layout, "pages": pages, "visuals": vis}
+
+
 def compute(report, layout, agent=None, validate_fn=None, approved=None):
     """{item: (passed True/False/None, why)}. `agent`: {1: True, 3: False, 7: "how it was tested"} from the agent's
     own checks. Item 7 (interactions) passes only with how it was tested; "pass" alone stays "not checked" (fix 16).
     Item 1 fails whatever the agent says when something in the approved plan was lost."""
     agent = agent or {}
+    layout = flat_layout(layout)
     res = {}
     for n in AGENT:
         res[n] = (agent.get(n), "" if n in agent else "not checked")
@@ -339,9 +358,13 @@ def polish_checks(report, layout):
         if v.get("type") != "cardVisual" or any(c.get("type") == "image" for c in v.get("cf", []))                 or v.get("pattern") in TEXT_PATTERNS:   # a sentence, not a number (v1.11 app-visual patterns)
             continue
         data = (v.get("bindings") or {}).get("Data") or []
+        if len(data) == 1 and str((planned.get(_name(data[0])) or {}).get("dataType", "")).lower() in ("string", "text"):
+            continue                                       # a sentence card (a share line), not a number (v1.12)
         align = _prop(v, "value.horizontalAlignment") or _style(theme, "cardVisual", "value", "horizontalAlignment",
                                                                 "center")
-        if len(data) == 1 and v.get("w", 0) >= 300 and str(align).lower() == "left":
+        rl_ = v.get("referenceLabels") if isinstance(v.get("referenceLabels"), dict) else {}
+        if len(data) == 1 and v.get("w", 0) >= 300 and str(align).lower() == "left" and not rl_.get("labels"):
+            # a left-aligned value with its comparison line under it is the house style (v1.12); a bare number isn't
             bad.append(f"{v['id']} leaves its right side empty")
         rl = v.get("referenceLabels") if isinstance(v.get("referenceLabels"), dict) else {}
         for lab in rl.get("labels", []) or []:
@@ -373,14 +396,17 @@ def polish_checks(report, layout):
                     if home:
                         fmt = model.tables[home[0]].measures[name].format_string
                 fmt = fmt or (planned.get(name) or {}).get("formatString")
-                if model and model.measure_home(name) or name in planned:
+                home = model.measure_home(name) if model else None
+                text = (home and model.tables[home[0]].measures[name].is_text()) or                     str((planned.get(name) or {}).get("dataType", "")).lower() in ("string", "text")
+                if (home or name in planned) and not text:      # a text measure has no number format (v1.12)
                     if not fmt or not ("," in fmt or "%" in fmt or "\"" in fmt):
                         bad.append(f"{name} has no thousands separator")
         if v.get("type") in ("tableEx", "pivotTable"):
             vals = (v.get("bindings") or {}).get("Values", [])
             cmp_cols = [_name(x) for x in vals if CMP.search(_name(x))]
             coloured = {_name(c.get("target") or c.get("field", "")) for c in v.get("cf", [])
-                        if c.get("type") in ("rules", "measure")}
+                        if c.get("type") in ("rules", "measure") or      # a diverging gradient around a middle
+                        (c.get("type") == "gradient" and c.get("mid") and c.get("midValue") is not None)}   # (v1.12)
             for c in cmp_cols:
                 if c not in coloured:
                     bad.append(f"{v['id']} {c} isn't coloured by direction")
@@ -436,6 +462,11 @@ def polish_checks(report, layout):
         pv = [v for v in vis if v.get("page") == page]
         band = next((v for v in pv if v.get("type") in ("shape", "basicShape") and v.get("y", 99) <= 0
                      and v.get("w", 0) >= 1800), None)
+        if not band:                                   # a full-height rail at the left frames the page the same way
+            band = next((v for v in pv if v.get("type") in ("shape", "basicShape") and v.get("x", 99) <= 0
+                         and v.get("h", 0) >= 900 and v.get("pattern") == "rail-panel"), None)   # (v1.12, test 3)
+            if band:
+                band = {**band, "h": 0}                # the pickers in a rail aren't on a band
         if not band:
             bad.append(f"{page} has no header band")
             continue
@@ -474,6 +505,10 @@ def year_chosen(layout, page):
             if any(YEARISH.search(f) for xs in (v.get("bindings") or {}).values() for f in fields(xs)):
                 return True
     pages = layout.get("pages", {}) or {}
+    if isinstance(pages.get(page), dict) and pages[page].get("drillthrough"):     # a drill keeps the source page's
+        if any(year_chosen(layout, k) for k, sp in pages.items()               # filters: its year comes along (v1.12)
+               if k != page and not (isinstance(sp, dict) and sp.get("drillthrough"))):
+            return True
     flt = list((pages.get(page) or {}).get("filters", []) or []) + list(
         ((layout.get("report") or {}).get("filters")) or [])
     return any(YEARISH.search(str(f.get("field", "")) if isinstance(f, dict) else str(f)) for f in flt)
